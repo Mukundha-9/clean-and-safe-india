@@ -3916,13 +3916,11 @@
     if (quota.isLimitReached) {
       showToast(`Daily Limit: You have reached your maximum of ${quota.limit} reports for today across all departments. Resets at midnight.`, 'error', '⚠️');
     }
-    const modal = document.getElementById('reportIssueModal');
-    if (modal) modal.classList.add('active');
+    window.openModal('reportIssueModal');
   };
 
   window.openFoodInspectionModal = function() {
-    const modal = document.getElementById('foodInspectionModal');
-    if (modal) modal.classList.add('active');
+    window.openModal('foodInspectionModal');
   };
 
   window.openFoodRectifyModal = function(issueId) {
@@ -3933,13 +3931,25 @@
       titleEl.innerHTML = `<strong>Rectifying Complaint #${issue.id}:</strong> ${issue.title} (📍 ${issue.location})`;
     }
 
-    const modal = document.getElementById('foodRectifyModal');
-    if (modal) modal.classList.add('active');
+    window.openModal('foodRectifyModal');
+  };
+
+  window.openModal = function(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
   };
 
   window.closeModal = function(id) {
     const modal = document.getElementById(id);
-    if (modal) modal.classList.remove('active');
+    if (modal) {
+      modal.classList.remove('active');
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
   };
 
   window.viewIssueDetail = function(issueId) {
@@ -4229,7 +4239,7 @@
       </div>
     `;
 
-    modal.classList.add('active');
+    window.openModal('issueDetailModal');
   };
 
   window.openCommentsModal = function(issueId) {
@@ -4266,8 +4276,7 @@
     const titleEl = document.getElementById('resolveModalIssueTitle');
     if (titleEl) titleEl.textContent = `Resolving: #${issue.id} - ${issue.title}`;
 
-    const modal = document.getElementById('resolveIssueModal');
-    if (modal) modal.classList.add('active');
+    window.openModal('resolveIssueModal');
   };
 
   window.toggleUpvote = function(issueId) {
@@ -4367,7 +4376,7 @@
       `;
     }
 
-    modal.classList.add('active');
+    window.openModal('citizenCertModal');
   };
 
   // =========================================================================

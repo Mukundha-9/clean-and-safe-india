@@ -1849,7 +1849,16 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- Cache Invalidation Script -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(r => r.update());
+      });
+    }
+  </script>
+
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=9.5.0"></script>
+  <script src="js/bundle.js?v=9.6.0"></script>
 </body>
 </html>
