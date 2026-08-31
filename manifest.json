@@ -1,0 +1,88 @@
+{
+  "name": "Clean & Safe India \u2014 Smart Civic Connect",
+  "short_name": "SmartCivic",
+  "description": "Next-Gen AI & IoT Urban Governance Platform for Clean & Safe India. Report hazards, track 48h SLA resolution live, and manage municipal operations.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#060911",
+  "theme_color": "#060911",
+  "orientation": "portrait-primary",
+  "lang": "en-IN",
+  "categories": [
+    "government",
+    "utilities",
+    "productivity",
+    "social"
+  ],
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/maskable-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Report Civic Hazard",
+      "short_name": "Report",
+      "description": "Quickly submit a civic complaint with photo & GPS",
+      "url": "./index.html?action=report",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Municipal 48h SLA Triage",
+      "short_name": "Municipal",
+      "description": "Open Municipal Command Center & SCADA",
+      "url": "./index.html?dept=municipal",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Food Safety Officer",
+      "short_name": "Food Safety",
+      "description": "Access FSO hygiene inspection registry",
+      "url": "./index.html?dept=food",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "AI WhatsApp Copilot",
+      "short_name": "AI Support",
+      "description": "Chat with 24/7 Smart Citizen Helpdesk",
+      "url": "./index.html?action=support",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

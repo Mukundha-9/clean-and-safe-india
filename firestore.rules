@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check auth
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Issues & Complaints Collection
+    match /issues/{issueId} {
+      // Anyone can read civic complaints
+      allow read: if true;
+      // Authenticated users can create issues
+      allow create: if isAuthenticated();
+      // Upvotes, comments or officer resolution
+      allow update: if isAuthenticated();
+      // Only admins/officers can delete
+      allow delete: if isAuthenticated() && request.auth.token.role in ['ward_officer', 'admin'];
+    }
+
+    // Certified Vendors Collection
+    match /vendors/{vendorId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.auth.token.role in ['food_officer', 'admin'];
+    }
+
+    // User Wallets & Rewards
+    match /wallets/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+  }
+}

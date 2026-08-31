@@ -1,0 +1,225 @@
+/* ==========================================================================
+   Smart Civic Connect - Municipal Command Center & Dark SCADA Operations
+   Includes: GPS Fleet Live Tracking & Ultrasonic IoT Smart Bin Telemetry
+   ========================================================================== */
+
+:root {
+  --command-bg: #090e1a;
+  --command-surface: #0f172a;
+  --command-border: #1e293b;
+  --command-text: #f8fafc;
+  --command-text-muted: #94a3b8;
+}
+
+/* Metric Stats Grid */
+.cmd-metric-card {
+  background: linear-gradient(135deg, #0d1527 0%, #080d1a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all var(--transition-fast);
+}
+
+.cmd-metric-card:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.25);
+  transform: translateY(-2px);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.cmd-metric-num {
+  font-size: 2.5rem;
+  font-weight: 900;
+  font-family: var(--font-mono);
+  color: #38bdf8;
+  margin: 0.4rem 0;
+  line-height: 1;
+  text-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+}
+
+.cmd-metric-sub {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+/* Resource Allocation Matrix */
+.resource-alloc-box {
+  background: #0d1527;
+  border: 1px solid #1e293b;
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.resource-icon-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.resource-info h4 {
+  font-size: 0.95rem;
+  color: white;
+  margin-bottom: 2px;
+}
+
+.resource-info p {
+  font-size: 0.8rem;
+  color: var(--command-text-muted);
+}
+
+/* Command Center Data Table */
+.cmd-table-container {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid #1e293b;
+  background: #090e1a;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.cmd-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.cmd-table th {
+  background: #0f172a;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #1e293b;
+}
+
+.cmd-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  vertical-align: middle;
+}
+
+.cmd-table tr:hover td {
+  background: rgba(56, 189, 248, 0.04);
+}
+
+/* SLA Status Bars */
+.sla-progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sla-progress-bar {
+  height: 6px;
+  background: #1e293b;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.sla-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.sla-safe { background: #10b981; box-shadow: 0 0 8px #10b981; }
+.sla-warning { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+.sla-danger { background: #f43f5e; box-shadow: 0 0 8px #f43f5e; }
+
+.sla-text {
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.text-success { color: #34d399; }
+.text-warning { color: #fcd34d; }
+.text-danger { color: #fda4af; }
+
+/* Ultrasonic Smart Waste Bin Telemetry */
+.smart-bin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.smart-bin-card {
+  background: #0d1527;
+  border: 1px solid #1e293b;
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.smart-bin-card.critical-fill {
+  border-color: #f43f5e;
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.25);
+}
+
+.bin-fill-ring-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bin-fill-percent {
+  font-size: 2.2rem;
+  font-family: var(--font-mono);
+  font-weight: 900;
+  color: #38bdf8;
+}
+
+.bin-fill-percent.critical {
+  color: #f43f5e;
+  text-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
+}
+
+/* GPS Live Fleet Vehicles */
+.fleet-badge-strip {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.fleet-pill {
+  background: #0d1527;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: white;
+  white-space: nowrap;
+}

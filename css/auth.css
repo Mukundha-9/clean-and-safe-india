@@ -1,0 +1,354 @@
+/* ==========================================================================
+   Smart Civic Connect - Enterprise Authentication & Portal Gate CSS
+   Theme: High-Tech Civic Governance with Official Project Logo
+   ========================================================================== */
+
+.auth-hero-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  background: radial-gradient(circle at 10% 15%, rgba(16, 185, 129, 0.18), transparent 40%),
+              radial-gradient(circle at 90% 25%, rgba(37, 99, 235, 0.18), transparent 40%),
+              radial-gradient(circle at 50% 85%, rgba(245, 158, 11, 0.12), transparent 45%),
+              #070b14;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  position: relative;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Background Animated Grid Overlay */
+.auth-hero-wrapper::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Logo & Emblem Presentation */
+.auth-emblem-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+}
+
+.auth-logo-wrapper {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-logo-glow {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #10b981, #2563eb, #f59e0b, #10b981);
+  filter: blur(14px);
+  opacity: 0.65;
+  animation: rotateGlow 8s linear infinite;
+}
+
+@keyframes rotateGlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.auth-logo-img {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #020617;
+  padding: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  z-index: 2;
+}
+
+.auth-brand-text h1 {
+  font-size: 1.85rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: white;
+  margin-bottom: 0.25rem;
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.auth-brand-text p {
+  color: #38bdf8;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* Master Glassmorphism Auth Card */
+.auth-card {
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-xl);
+  max-width: 520px;
+  width: 100%;
+  padding: 2.25rem 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 50px rgba(16, 185, 129, 0.08);
+  position: relative;
+  z-index: 10;
+}
+
+/* 3-Department Selector Tabs */
+.auth-dept-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: rgba(2, 6, 23, 0.7);
+  padding: 5px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.auth-tab-btn {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all var(--transition-fast);
+}
+
+.auth-tab-btn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.auth-tab-btn.active[data-dept="citizen"] {
+  background: #059669;
+  color: white;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+}
+
+.auth-tab-btn.active[data-dept="municipal"] {
+  background: #2563eb;
+  color: white;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+}
+
+.auth-tab-btn.active[data-dept="food"] {
+  background: #d97706;
+  color: white;
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.4);
+}
+
+/* Header Info */
+.auth-header-info {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.auth-header-info h2 {
+  color: white;
+  font-size: 1.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.auth-header-info p {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+/* Form Input Groups */
+.auth-form-group {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.auth-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  display: flex;
+  justify-content: space-between;
+}
+
+.auth-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-input-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 1.1rem;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 2.75rem;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid #334155;
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+  background: rgba(30, 41, 59, 1);
+}
+
+.auth-input::placeholder {
+  color: #64748b;
+}
+
+.auth-btn-submit {
+  width: 100%;
+  padding: 0.9rem;
+  font-size: 1rem;
+  font-weight: 800;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition: all var(--transition-fast);
+  color: white;
+  letter-spacing: 0.3px;
+}
+
+.auth-btn-submit.btn-dept-citizen { background: #10b981; }
+.auth-btn-submit.btn-dept-citizen:hover { background: #059669; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45); transform: translateY(-1px); }
+
+.auth-btn-submit.btn-dept-municipal { background: #2563eb; }
+.auth-btn-submit.btn-dept-municipal:hover { background: #1d4ed8; box-shadow: 0 4px 16px rgba(37, 99, 235, 0.45); transform: translateY(-1px); }
+
+.auth-btn-submit.btn-dept-food { background: #f59e0b; }
+.auth-btn-submit.btn-dept-food:hover { background: #d97706; box-shadow: 0 4px 16px rgba(245, 158, 11, 0.45); transform: translateY(-1px); }
+
+/* Official Demo Credentials Container */
+.demo-creds-box {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.65);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.demo-creds-text {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.demo-creds-text strong {
+  color: #e2e8f0;
+  font-family: var(--font-mono);
+}
+
+.btn-fill-demo {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  font-size: 0.78rem;
+  font-weight: 800;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.btn-fill-demo:hover {
+  background: rgba(56, 189, 248, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Security Footer Badge */
+.auth-security-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+/* Topbar Logo in Dashboards */
+.topbar-logo-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #10b981;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.topbar-municipal .topbar-logo-img {
+  border-color: #2563eb;
+}
+
+.topbar-food .topbar-logo-img {
+  border-color: #f59e0b;
+}
+
+/* Government Badge */
+.gov-auth-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.8rem;
+}
+
+.gov-verified-icon {
+  color: #10b981;
+  font-weight: 900;
+}
