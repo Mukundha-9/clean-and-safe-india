@@ -3953,100 +3953,112 @@
   };
 
   window.viewIssueDetail = function(issueId) {
-    const issue = db.getIssueById(issueId);
-    if (!issue) return;
-    activeIssueIdForModal = issueId;
+    try {
+      const issue = db.getIssueById(issueId);
+      if (!issue) return;
+      activeIssueIdForModal = issueId;
 
-    const modal = document.getElementById('issueDetailModal');
-    const content = document.getElementById('issueDetailContent');
-    if (!modal || !content) return;
+      const modal = document.getElementById('issueDetailModal');
+      const content = document.getElementById('issueDetailContent');
+      if (!modal || !content) return;
 
-    const isResolved = issue.status === 'resolved';
-    const isEscalated = issue.status === 'escalated' || issue.isSlaBreached;
-    const reportedTimeStr = formatReportDateTime(issue.timestamp);
-    const resolvedTs = isResolved ? getRealisticResolvedTimestamp(issue) : null;
-    const resolvedTimeStr = isResolved ? formatReportDateTime(resolvedTs) : null;
-    const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, resolvedTs, issue) : null;
+      const status = issue.status || 'pending';
+      const severity = (issue.severity || 'medium').toUpperCase();
+      const isResolved = status === 'resolved';
+      const isEscalated = status === 'escalated' || Boolean(issue.isSlaBreached);
+      const reportedTimeStr = formatReportDateTime(issue.timestamp || Date.now());
+      const resolvedTs = isResolved ? getRealisticResolvedTimestamp(issue) : null;
+      const resolvedTimeStr = isResolved ? formatReportDateTime(resolvedTs) : null;
+      const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, resolvedTs, issue) : '2h 30m Turnaround';
+      const deadlineTimestamp = issue.slaDeadline || ((issue.timestamp || Date.now()) + 48 * 3600 * 1000);
+      const deadlineTimeStr = formatReportDateTime(deadlineTimestamp);
 
-    const verifiedOfficer = issue.verifiedByOfficer || 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)';
-    const verifiedTimeStr = formatReportDateTime(issue.verifiedTimestamp || (issue.timestamp + 18 * 60 * 1000));
-    const assignedWorker = issue.assignedWorker || 'Municipal Rapid Squad';
-    const assignedTimeStr = formatReportDateTime(issue.assignedTimestamp || (issue.timestamp + 45 * 60 * 1000));
-    const workerStatus = issue.workerStatus || (isResolved ? 'Completed & Verified On-Site' : isEscalated ? 'Delayed (>48h) — Auto-Forwarded' : 'Active On-Site Cleaning & Hazard Removal');
+      const verifiedOfficer = issue.verifiedByOfficer || 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)';
+      const verifiedTimeStr = formatReportDateTime(issue.verifiedTimestamp || ((issue.timestamp || Date.now()) + 18 * 60 * 1000));
+      const assignedWorker = issue.assignedWorker || 'Municipal Rapid Squad';
+      const assignedTimeStr = formatReportDateTime(issue.assignedTimestamp || ((issue.timestamp || Date.now()) + 45 * 60 * 1000));
+      const workerStatus = issue.workerStatus || (isResolved ? 'Completed & Verified On-Site' : isEscalated ? 'Delayed (>48h) — Auto-Forwarded' : 'Active On-Site Cleaning & Hazard Removal');
+      const recommendedResource = issue.recommendedResource || 'Hydraulic Tipper & Sanitization Squad';
+      const deptIcon = issue.deptIcon || '🏢';
+      const deptName = issue.deptName || 'Sanitation & Civic Works';
+      const issueTitle = issue.title || 'Civic Grievance';
+      const issueLocation = issue.location || 'Surampalem, Andhra Pradesh';
+      const imgBefore = issue.imageBefore || 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80';
+      const imgAfter = issue.imageAfter || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80';
 
-    content.innerHTML = `
-      <div>
-        <!-- Top Status & SLA Banner -->
-        <div class="tracker-header-card">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
-            <div>
-              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
-                <span class="cat-badge">${issue.deptIcon} ${issue.deptName}</span>
-                <span class="badge badge-${issue.status}">${issue.status.replace('_', ' ').toUpperCase()}</span>
-                <span class="badge sev-${issue.severity}">${issue.severity.toUpperCase()}</span>
+      content.innerHTML = `
+        <div>
+          <!-- Top Status & SLA Banner -->
+          <div class="tracker-header-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                  <span class="cat-badge">${deptIcon} ${deptName}</span>
+                  <span class="badge badge-${status}">${status.replace('_', ' ').toUpperCase()}</span>
+                  <span class="badge sev-${(issue.severity || 'medium').toLowerCase()}">${severity}</span>
+                </div>
+                <h2 style="font-size: 1.35rem; color: white; margin: 0.2rem 0 0.4rem;">${issueTitle}</h2>
+                <div style="font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 0.4rem;">
+                  <span>📍</span> <span>${issueLocation}</span>
+                </div>
               </div>
-              <h2 style="font-size: 1.35rem; color: white; margin: 0.2rem 0 0.4rem;">${issue.title}</h2>
-              <div style="font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 0.4rem;">
-                <span>📍</span> <span>${issue.location}</span>
+              <div style="text-align: right;">
+                <div style="font-family: var(--font-mono); font-size: 1.05rem; color: #38bdf8; font-weight: 800;">${issue.id || 'ISS-2026'}</div>
+                <div style="margin-top: 0.5rem;">
+                  ${isResolved ? `
+                    <div class="sla-live-badge sla-resolved">
+                      <span>✅</span> RESOLVED WITHIN 48H SLA (${turnaroundStr})
+                    </div>
+                  ` : isEscalated ? `
+                    <div class="sla-live-badge sla-breached">
+                      <span>🚨</span> 48H SLA BREACHED — FORWARDED TO MUNICIPAL COMMISSIONER
+                    </div>
+                  ` : `
+                    <div class="sla-live-badge sla-active">
+                      <span class="gps-pulse-dot" style="background: #38bdf8; box-shadow: 0 0 8px #38bdf8;"></span>
+                      <span class="sla-live-ticker" data-deadline="${deadlineTimestamp}">⏱️ 48H SLA ACTIVE: ${issue.slaHoursLeft || 36}H LEFT (Due ${deadlineTimeStr})</span>
+                    </div>
+                  `}
+                </div>
               </div>
             </div>
-            <div style="text-align: right;">
-              <div style="font-family: var(--font-mono); font-size: 1.05rem; color: #38bdf8; font-weight: 800;">${issue.id}</div>
-              <div style="margin-top: 0.5rem;">
-                ${isResolved ? `
-                  <div class="sla-live-badge sla-resolved">
-                    <span>✅</span> RESOLVED WITHIN 48H SLA (${turnaroundStr})
-                  </div>
-                ` : isEscalated ? `
-                  <div class="sla-live-badge sla-breached">
-                    <span>🚨</span> 48H SLA BREACHED — FORWARDED TO MUNICIPAL COMMISSIONER
-                  </div>
-                ` : `
-                  <div class="sla-live-badge sla-active">
-                    <span class="gps-pulse-dot" style="background: #38bdf8; box-shadow: 0 0 8px #38bdf8;"></span>
-                    <span class="sla-live-ticker" data-deadline="${issue.slaDeadline || (issue.timestamp + 48 * 3600 * 1000)}">⏱️ 48H SLA ACTIVE: ${issue.slaHoursLeft}H LEFT (Due ${deadlineTimeStr})</span>
-                  </div>
-                `}
+
+            <!-- Metadata Grid with Exact Timestamps -->
+            <div class="tracker-meta-grid">
+              <div class="tracker-meta-item">
+                📅 Reported Date & Time:
+                <strong>${reportedTimeStr}</strong>
+              </div>
+              <div class="tracker-meta-item">
+                ⏳ 48-Hour Resolution Deadline:
+                <strong>${deadlineTimeStr}</strong>
+              </div>
+              <div class="tracker-meta-item">
+                ${isResolved ? '✅ Verified Resolution Date & Time:' : '⏱️ Status Countdown:'}
+                <strong style="color: ${isResolved ? '#34d399' : isEscalated ? '#f87171' : '#38bdf8'};">
+                  ${isResolved ? `${resolvedTimeStr} (${turnaroundStr})` : isEscalated ? '🚨 Auto-Escalated to Commissioner' : `${issue.slaHoursLeft || 36} Hours Remaining`}
+                </strong>
+              </div>
+              <div class="tracker-meta-item">
+                🪙 Civic Incentive Standing:
+                <strong style="color: #facc15;">+50 Civic Credits (Gold Streak)</strong>
               </div>
             </div>
           </div>
 
-          <!-- Metadata Grid with Exact Timestamps -->
-          <div class="tracker-meta-grid">
-            <div class="tracker-meta-item">
-              📅 Reported Date & Time:
-              <strong>${reportedTimeStr}</strong>
+          <!-- Before & After Photographic Evidence -->
+          <div style="margin-bottom: 1.5rem;">
+            <div style="font-size: 0.85rem; font-weight: 800; color: #38bdf8; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">
+              <span>📸</span> GEOTAGGED PHOTOGRAPHIC AUDIT RECORD
             </div>
-            <div class="tracker-meta-item">
-              ⏳ 48-Hour Resolution Deadline:
-              <strong>${deadlineTimeStr}</strong>
-            </div>
-            <div class="tracker-meta-item">
-              ${isResolved ? '✅ Verified Resolution Date & Time:' : '⏱️ Status Countdown:'}
-              <strong style="color: ${isResolved ? '#34d399' : isEscalated ? '#f87171' : '#38bdf8'};">
-                ${isResolved ? `${resolvedTimeStr} (${turnaroundStr})` : isEscalated ? '🚨 Auto-Escalated to Commissioner' : `${issue.slaHoursLeft} Hours Remaining`}
-              </strong>
-            </div>
-            <div class="tracker-meta-item">
-              🪙 Civic Incentive Standing:
-              <strong style="color: #facc15;">+50 Civic Credits (Gold Streak)</strong>
-            </div>
-          </div>
-        </div>
-
-        <!-- Before & After Photographic Evidence -->
-        <div style="margin-bottom: 1.5rem;">
-          <div style="font-size: 0.85rem; font-weight: 800; color: #38bdf8; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">
-            <span>📸</span> GEOTAGGED PHOTOGRAPHIC AUDIT RECORD
-          </div>
-          <div style="display: grid; grid-template-columns: ${isResolved ? 'repeat(2, 1fr)' : '1fr'}; gap: 1rem;">
-            <div style="border-radius: var(--radius-lg); overflow: hidden; max-height: 230px; border: 1px solid var(--border); position: relative;">
-              <img src="${issue.imageBefore}" style="width: 100%; height: 100%; object-fit: cover;" alt="Before">
-              <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #f43f5e; font-weight: 800; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(244, 63, 94, 0.4);">
-                1. REPORTED HAZARD (PROOF ATTACHED • ${reportedTimeStr})
-              </span>
-            </div>
-            ${isResolved ? `
+            <div style="display: grid; grid-template-columns: ${isResolved ? 'repeat(2, 1fr)' : '1fr'}; gap: 1rem;">
+              <div style="border-radius: var(--radius-lg); overflow: hidden; max-height: 230px; border: 1px solid var(--border); position: relative;">
+                <img src="${imgBefore}" style="width: 100%; height: 100%; object-fit: cover;" alt="Before">
+                <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #f43f5e; font-weight: 800; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(244, 63, 94, 0.4);">
+                  1. REPORTED HAZARD (PROOF ATTACHED • ${reportedTimeStr})
+                </span>
+              </div>
+              ${isResolved ? `
               <div style="border-radius: var(--radius-lg); overflow: hidden; max-height: 230px; border: 1px solid #10b981; position: relative;">
                 <img src="${issue.imageAfter || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80'}" style="width: 100%; height: 100%; object-fit: cover;" alt="After">
                 <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #34d399; font-weight: 800; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.4);">
@@ -4240,6 +4252,9 @@
     `;
 
     window.openModal('issueDetailModal');
+    } catch (err) {
+      console.error('viewIssueDetail error:', err);
+    }
   };
 
   window.openCommentsModal = function(issueId) {
