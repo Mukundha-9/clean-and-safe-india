@@ -1454,6 +1454,30 @@
       return issue;
     }
 
+    addComment(issueId, text, author) {
+      const issue = this.getIssueById(issueId);
+      if (!issue) return null;
+      if (!issue.comments) issue.comments = [];
+      const newComment = {
+        author: author || (auth.getUser() ? auth.getUser().name : 'Citizen Resident'),
+        text: (text || '').trim(),
+        time: 'Just now'
+      };
+      issue.comments.push(newComment);
+      this.saveToStorage('clean_safe_issues_v9', this.issues);
+      this.notify();
+      broadcastRealtimeEvent('COMMENT_ADDED', { issueId, comment: newComment });
+
+      // Async persist comment to backend
+      fetch('/api/issues/' + issueId + '/comment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newComment)
+      }).catch(e => console.log('Comment offline sync:', e));
+
+      return newComment;
+    }
+
     logFoodViolation(data) {
       const fineAmount = parseInt(data.fineAmount, 10) || 500;
       const vendorId = 'FSSAI-' + (data.state === 'Andhra Pradesh' ? 'AP' : 'IND') + '-2026-V' + Math.floor(10 + Math.random() * 90);
@@ -2172,20 +2196,20 @@
             `}
           </div>
 
-          <div class="issue-card-footer" onclick="event.stopPropagation()">
-            <button class="btn-track-issue" onclick="window.viewIssueDetail('${issue.id}')">
+          <div class="issue-card-footer">
+            <button type="button" class="btn-track-issue" onclick="event.stopPropagation(); window.viewIssueDetail('${issue.id}');">
               <span>📦</span>
               <span>Track Live Status</span>
             </button>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <button class="upvote-btn" onclick="window.toggleUpvote('${issue.id}')" title="Upvote issue priority">
+              <button type="button" class="upvote-btn" onclick="event.stopPropagation(); window.toggleUpvote('${issue.id}');" title="Upvote issue priority">
                 <span>👍</span>
                 <span>${issue.upvotes || 0}</span>
               </button>
-              <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.25rem;">
+              <button type="button" class="comment-btn" onclick="event.stopPropagation(); window.openCommentsModal('${issue.id}');" title="View discussion and remarks" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #cbd5e1; border-radius: 20px; padding: 4px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.78rem; transition: all 0.2s;">
                 <span>💬</span>
                 <span>${(issue.comments || []).length}</span>
-              </div>
+              </button>
             </div>
           </div>
         </div>
@@ -4169,11 +4193,69 @@
               </div>
             `}
           </div>
+
+          <!-- Community Comments & Live Citizen Discussion -->
+          <div style="margin-top: 1.5rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+              <h4 style="color: white; font-size: 1.05rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <span>💬</span> Community Discussion & Officer Remarks (${(issue.comments || []).length})
+              </h4>
+            </div>
+
+            <!-- Existing Comments List -->
+            <div class="comments-list" style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 240px; overflow-y: auto; margin-bottom: 1rem; padding-right: 4px;">
+              ${(issue.comments && issue.comments.length > 0) ? issue.comments.map(c => `
+                <div style="background: rgba(255, 255, 255, 0.04); border-left: 3px solid #38bdf8; border-radius: 6px; padding: 0.6rem 0.85rem; font-size: 0.82rem;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                    <strong style="color: #38bdf8;">${c.author || 'Civic Guardian'}</strong>
+                    <span style="font-size: 0.72rem; color: #94a3b8;">${c.time || 'Recently'}</span>
+                  </div>
+                  <div style="color: #e2e8f0; line-height: 1.45;">${c.text}</div>
+                </div>
+              `).join('') : `
+                <div style="text-align: center; color: #64748b; font-size: 0.82rem; padding: 1rem;">No remarks yet. Be the first citizen to leave a comment!</div>
+              `}
+            </div>
+
+            <!-- Add Comment Input Box -->
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <input type="text" id="issueCommentInput" class="form-input" placeholder="Add an official remark, update, or question..." style="flex: 1; font-size: 0.85rem; padding: 0.6rem 0.85rem;" onkeydown="if(event.key === 'Enter'){ window.submitComment('${issue.id}'); }">
+              <button type="button" class="btn btn-sm btn-primary" onclick="window.submitComment('${issue.id}')" style="white-space: nowrap; padding: 0.6rem 1rem;">
+                <span>🚀</span> Post
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     `;
 
     modal.classList.add('active');
+  };
+
+  window.openCommentsModal = function(issueId) {
+    window.viewIssueDetail(issueId);
+    setTimeout(() => {
+      const commentInput = document.getElementById('issueCommentInput');
+      if (commentInput) {
+        commentInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        commentInput.focus();
+      }
+    }, 150);
+  };
+
+  window.submitComment = function(issueId) {
+    const input = document.getElementById('issueCommentInput');
+    if (!input || !input.value.trim()) {
+      showToast('Please type a comment before posting.', 'error', '⚠️');
+      return;
+    }
+    const text = input.value.trim();
+    const author = auth.getUser() ? auth.getUser().name : 'Citizen Resident';
+    db.addComment(issueId, text, author);
+    input.value = '';
+    showToast('Comment posted to grievance log!', 'reward', '💬');
+    window.viewIssueDetail(issueId);
+    renderCitizenDashboard();
   };
 
   window.openResolveModal = function(issueId) {
