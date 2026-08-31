@@ -3,7 +3,7 @@
    Provides Offline Support, Asset Caching, Push Notifications & Background Sync
    ========================================================================== */
 
-const CACHE_NAME = 'clean-safe-india-v3.0.0';
+const CACHE_NAME = 'clean-safe-india-v4.0.0';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -15,7 +15,6 @@ const STATIC_ASSETS = [
   './css/command-center.css',
   './css/electricity.css',
   './css/iot-simulation.css',
-  './js/bundle.js?v=8.0.0',
   './assets/logo.png',
   './assets/icon-192.png',
   './assets/icon-512.png',
@@ -47,8 +46,8 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event: Network-First with Cache Fallback for instant updates
 self.addEventListener('fetch', (event) => {
-  // Never intercept or cache API endpoints
-  if (event.request.url.includes('/api/')) return;
+  // Never intercept or cache API endpoints or JS bundles
+  if (event.request.url.includes('/api/') || event.request.url.includes('bundle.js')) return;
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
