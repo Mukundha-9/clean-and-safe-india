@@ -3474,8 +3474,7 @@
   };
 
   window.openCitizenCertificateModal = function() {
-    const modal = document.getElementById('citizenCertModal');
-    if (modal) modal.classList.add('active');
+    window.openModal('citizenCertModal');
   };
 
   // =========================================================================
@@ -4478,7 +4477,7 @@
       `;
     }
 
-    window.openModal('citizenCertModal');
+    window.openModal('certificateModal');
   };
 
   // =========================================================================
