@@ -2718,7 +2718,7 @@
     if (!isAuth) {
       const authView = document.getElementById('authGatewayView');
       if (authView) authView.classList.add('active');
-      if (chatbotBtn) chatbotBtn.style.display = 'none';
+      if (chatbotBtn) chatbotBtn.style.display = 'flex';
 
       // Prefill last remembered email for user convenience
       const lastEmail = localStorage.getItem('CIVIC_LAST_EMAIL');
@@ -2877,7 +2877,28 @@
     }
   }
 
-  async function handleChatbotMessage(forcedText) {
+  window.toggleChatbot = function(forceOpen) {
+    const cWindow = document.getElementById('chatbotWindow');
+    if (!cWindow) return;
+    if (forceOpen === true) {
+      cWindow.classList.add('active');
+    } else if (forceOpen === false) {
+      cWindow.classList.remove('active');
+    } else {
+      cWindow.classList.toggle('active');
+    }
+    const input = document.getElementById('chatbotInput');
+    if (cWindow.classList.contains('active') && input) {
+      setTimeout(() => input.focus(), 150);
+    }
+  };
+
+  window.handleChatbotMessage = async function(forcedText) {
+    const cWindow = document.getElementById('chatbotWindow');
+    if (cWindow && !cWindow.classList.contains('active')) {
+      cWindow.classList.add('active');
+    }
+
     const input = document.getElementById('chatbotInput');
     const msgContainer = document.getElementById('chatbotMessages');
     if (!msgContainer) return;
@@ -2911,7 +2932,7 @@
       return q.includes(cleanId) || (numPart.length >= 3 && q.includes(numPart));
     });
 
-    if (ticketMatch || q.includes('team') || q.includes('who created') || q.includes('developer')) {
+    if (ticketMatch || q.includes('team') || q.includes('who created') || q.includes('developer') || q.includes('author') || q.includes('mentor')) {
       typingBubble.innerHTML = generateDynamicBotReply(userText);
       msgContainer.scrollTop = msgContainer.scrollHeight;
       return;
@@ -2928,7 +2949,9 @@
       typingBubble.innerHTML = generateDynamicBotReply(userText);
     }
     msgContainer.scrollTop = msgContainer.scrollHeight;
-  }
+  };
+
+  window.askChatbot = window.handleChatbotMessage;
 
   function generateDynamicBotReply(rawQuery) {
     const q = rawQuery.toLowerCase();
@@ -4853,27 +4876,13 @@
       });
     }
 
-    // Chatbot Toggle & Messages
-    const cTrigger = document.getElementById('chatbotTrigger');
-    const cWindow = document.getElementById('chatbotWindow');
-    const cClose = document.getElementById('chatbotClose');
-    const cSendBtn = document.getElementById('chatbotSendBtn');
+    // Chatbot Input Enter Key Binding
     const cInput = document.getElementById('chatbotInput');
-
-    if (cTrigger && cWindow) {
-      cTrigger.addEventListener('click', () => cWindow.classList.toggle('active'));
-    }
-    if (cClose && cWindow) {
-      cClose.addEventListener('click', () => cWindow.classList.remove('active'));
-    }
-    if (cSendBtn) {
-      cSendBtn.addEventListener('click', () => handleChatbotMessage());
-    }
     if (cInput) {
       cInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
-          handleChatbotMessage();
+          window.handleChatbotMessage();
         }
       });
     }

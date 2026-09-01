@@ -3,7 +3,7 @@
    Provides Offline Support, Asset Caching, Push Notifications & Background Sync
    ========================================================================== */
 
-const CACHE_NAME = 'clean-safe-india-v10.0.0';
+const CACHE_NAME = 'clean-safe-india-v11.0.0';
 const STATIC_ASSETS = [
   './',
   './index.html',

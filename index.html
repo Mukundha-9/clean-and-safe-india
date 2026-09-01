@@ -1862,7 +1862,7 @@
   </div>
 
   <!-- Floating Department-Adaptive AI Assistant Chatbot (Only visible when logged in) -->
-  <button class="chatbot-trigger" id="chatbotTrigger" title="SmartCity AI Assistant Helpdesk" onclick="window.toggleChatbot()">
+  <button class="chatbot-trigger" id="chatbotTrigger" title="SmartCity AI Assistant Helpdesk" onclick="window.toggleChatbot(true)">
     <span id="chatbotTriggerIcon">🤖</span>
   </button>
 
@@ -1875,7 +1875,7 @@
           <div style="font-size: 0.72rem; color: #d1fae5;" id="chatbotHeaderSubtitle">24/7 Public Service Helpdesk</div>
         </div>
       </div>
-      <button style="background: none; border: none; color: white; font-size: 1.1rem; cursor: pointer;" id="chatbotClose">✕</button>
+      <button style="background: none; border: none; color: white; font-size: 1.1rem; cursor: pointer;" id="chatbotClose" onclick="window.toggleChatbot(false)">✕</button>
     </div>
 
     <!-- Department-Specific Quick Action Chips -->
@@ -1890,7 +1890,7 @@
 
     <div class="chatbot-input-bar">
       <input type="text" id="chatbotInput" class="form-input" placeholder="Type question, rule, or Ticket ID..." style="font-size: 0.85rem; padding: 0.5rem 0.75rem;">
-      <button class="btn btn-primary btn-sm" id="chatbotSendBtn">Send</button>
+      <button class="btn btn-primary btn-sm" id="chatbotSendBtn" onclick="window.handleChatbotMessage()">Send</button>
     </div>
   </div>
 
@@ -2007,6 +2007,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=12.0.0"></script>
+  <script src="js/bundle.js?v=13.0.0"></script>
 </body>
 </html>
