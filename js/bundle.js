@@ -476,6 +476,53 @@
       ]
     },
     {
+      id: 'ISS-2026-00128',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      street: 'Gandhi Statue Main Road',
+      department: 'sanitation',
+      deptName: 'Sanitation & Waste Management',
+      deptIcon: '🏢',
+      title: '🚨 SLA Breached: Massive Solid Waste & Garbage Dump Overflow',
+      description: 'Over 3 tons of rotten municipal garbage overflowing onto main pedestrian road. Exceeded mandatory 48-Hour SLA period without field clearance. Automatically escalated to Municipal Commissioner Dr. Mahesh Babu & Zonal Health Directorate.',
+      location: 'Ward 12 (Market Zone), Gandhi Statue Main Road, Surampalem',
+      category: 'garbage',
+      categoryName: 'Uncollected Municipal Solid Waste & Garbage Dump',
+      categoryIcon: '🗑️',
+      severity: 'bulk',
+      severityLabel: 'SLA BREACHED (>48H)',
+      status: 'escalated',
+      timestamp: Date.now() - 3600000 * 62,
+      slaDeadline: Date.now() - 3600000 * 14,
+      resolvedTimestamp: null,
+      slaHoursLeft: 0,
+      isSlaBreached: true,
+      escalatedTo: 'Zonal Municipal Commissioner (Dr. Mahesh Babu) & Higher Health Directorate',
+      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedTimestamp: Date.now() - 3600000 * 61.5,
+      assignedWorker: 'Sanitation Rapid Fleet 3 (Lead: P. Ramesh)',
+      assignedTimestamp: Date.now() - 3600000 * 60,
+      workerStatus: 'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Desk for Urgent Action',
+      lat: 17.0012,
+      lng: 81.8048,
+      reportedBy: 'KRISH',
+      userId: 'user-101',
+      upvotes: 84,
+      upvotedBy: ['user-101'],
+      imageBefore: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
+      imageAfter: null,
+      recommendedResource: 'Heavy Hydraulic Compactor & 10-Ton Tipper Fleet',
+      rewardIssued: false,
+      fineLevied: 0,
+      comments: [
+        { author: 'System SLA Monitor', text: '⏱️ 48-Hour SLA Breached! Grievance unaddressed after 48h limit.', time: '14h ago' },
+        { author: 'Auto-Escalation Gateway', text: '🚨 Escalated to Higher Authority: Zonal Municipal Commissioner (Dr. Mahesh Babu) & Urban Health Directorate.', time: '14h ago' },
+        { author: 'Municipal Commissioner Red Desk', text: 'Ticket received with Critical Priority 1. Direct disciplinary summons and immediate heavy squad deployed.', time: '12h ago' },
+        { author: 'KRISH (Citizen)', text: 'Garbage dump is emitting toxic odor and blocking school children. Thank you for forwarding to the Commissioner.', time: '4h ago' }
+      ]
+    },
+    {
       id: 'ISS-2026-00127',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
@@ -1195,13 +1242,33 @@
       rectificationDeadline: 'Immediate Commercial Closure',
       mq135GasPpm: '520 PPM (Severe Spoilage)',
       officerDirectives: 'Immediate confiscation of unchilled seafood stocks. Deep sanitation audit mandatory prior to reopening.'
-    }
+    },
+    {
+      id: 'FSSAI-AP-2026-V04',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      name: 'Aditya Highway Dhaba & Fast Food',
+      owner: 'R. Koteswara Rao',
+      location: 'Gandhi Statue Main Road, Surampalem',
+      hygieneGrade: 'F',
+      score: '24/100',
+      validTill: 'SEIZED & SUSPENDED',
+      inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
+      status: 'CRITICAL UNHYGIENIC VIOLATION',
+      isViolated: true,
+      violationClause: 'Section 59: Rotten Meat Storage, Reheated Stale Oil (TPM >36%) & Drain Adjacent Prep',
+      penaltyImposed: '₹5,000.00',
+      rectificationDeadline: 'Immediate Suspension & Seizure',
+      mq135GasPpm: '580 PPM (Severe Toxic Ammonia Spoilage)',
+      officerDirectives: 'Complete commercial closure order served. Kitchen sealed under FSSAI Section 38. Confiscation of contaminated food inventory.'
+    },
   ];
 
   class DatabaseManager {
     constructor() {
-      this.issues = this.loadFromStorage('clean_safe_issues_v9', INITIAL_ISSUES);
-      this.vendors = this.loadFromStorage('clean_safe_vendors_v9', INITIAL_VENDORS);
+      this.issues = this.loadFromStorage('clean_safe_issues_v10', INITIAL_ISSUES);
+      this.vendors = this.loadFromStorage('clean_safe_vendors_v10', INITIAL_VENDORS);
       this.finesCollected = this.loadFromStorage('clean_safe_fines_v9', 2500);
       this.listeners = [];
       this.initBackend();
@@ -1214,7 +1281,7 @@
           const data = await res.json();
           if (data.issues && data.issues.length > 0) {
             this.issues = data.issues;
-            this.saveToStorage('clean_safe_issues_v9', this.issues);
+            this.saveToStorage('clean_safe_issues_v10', this.issues);
             this.notify();
           }
         }
@@ -1228,7 +1295,7 @@
           const vData = await vRes.json();
           if (vData.vendors && vData.vendors.length > 0) {
             this.vendors = vData.vendors;
-            this.saveToStorage('clean_safe_vendors_v9', this.vendors);
+            this.saveToStorage('clean_safe_vendors_v10', this.vendors);
             this.notify();
           }
         }
@@ -1348,7 +1415,7 @@
       };
 
       this.issues.unshift(newIssue);
-      this.saveToStorage('clean_safe_issues_v9', this.issues);
+      this.saveToStorage('clean_safe_issues_v10', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_CREATED', newIssue);
 
@@ -1378,7 +1445,7 @@
         time: 'Just now'
       });
 
-      this.saveToStorage('clean_safe_issues_v9', this.issues);
+      this.saveToStorage('clean_safe_issues_v10', this.issues);
 
       // Award +50 Civic Credits and update user session
       const history = this.loadFromStorage('clean_safe_credits_history_v9', []);
@@ -1439,8 +1506,8 @@
         }
       }
 
-      this.saveToStorage('clean_safe_issues_v9', this.issues);
-      this.saveToStorage('clean_safe_vendors_v9', this.vendors);
+      this.saveToStorage('clean_safe_issues_v10', this.issues);
+      this.saveToStorage('clean_safe_vendors_v10', this.vendors);
       this.notify();
       broadcastRealtimeEvent('FOOD_RECTIFIED', issue);
 
@@ -1464,7 +1531,7 @@
         time: 'Just now'
       };
       issue.comments.push(newComment);
-      this.saveToStorage('clean_safe_issues_v9', this.issues);
+      this.saveToStorage('clean_safe_issues_v10', this.issues);
       this.notify();
       broadcastRealtimeEvent('COMMENT_ADDED', { issueId, comment: newComment });
 
@@ -1532,7 +1599,7 @@
         fineLevied: fineAmount
       });
 
-      this.saveToStorage('clean_safe_vendors_v9', this.vendors);
+      this.saveToStorage('clean_safe_vendors_v10', this.vendors);
       this.saveToStorage('clean_safe_fines_v9', this.finesCollected);
       this.notify();
       broadcastRealtimeEvent('FOOD_VIOLATION_LOGGED', { issue: newIssue, vendor: newVendor });
@@ -1568,7 +1635,7 @@
         issue.upvotes = (issue.upvotes || 0) + 1;
       }
 
-      this.saveToStorage('clean_safe_issues_v9', this.issues);
+      this.saveToStorage('clean_safe_issues_v10', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_UPVOTED', issue);
       return issue;
@@ -1847,7 +1914,7 @@
       const existing = db.issues.find(i => i.id === issue.id);
       if (!existing) {
         db.issues.unshift(issue);
-        db.saveToStorage('clean_safe_issues_v9', db.issues);
+        db.saveToStorage('clean_safe_issues_v10', db.issues);
         db.notify();
       }
       showToast(`🚨 New Complaint #${issue.id} reported in ${issue.ward || 'Ward'}!`, 'info', '📢');
@@ -1863,7 +1930,7 @@
       } else {
         db.issues.unshift(updated);
       }
-      db.saveToStorage('clean_safe_issues_v9', db.issues);
+      db.saveToStorage('clean_safe_issues_v10', db.issues);
       db.notify();
       showToast(`✅ Complaint #${updated.id} resolved by field team!`, 'reward', '🎉');
       playNotificationSound('chime');
@@ -1876,7 +1943,7 @@
         const vExisting = db.vendors.find(x => x.id === v.id);
         if (!vExisting) {
           db.vendors.unshift(v);
-          db.saveToStorage('clean_safe_vendors_v9', db.vendors);
+          db.saveToStorage('clean_safe_vendors_v10', db.vendors);
         }
       }
       db.notify();

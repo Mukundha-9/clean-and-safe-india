@@ -269,6 +269,27 @@ def seed_initial_data(conn):
             0, 2500, 17.0040, 81.8020, 'FSSAI-AP-2026-V09', 'Swagath Grand Fast Food', 360
         ),
         (
+            'ISS-2026-00128', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Gandhi Statue Main Road',
+            'sanitation', 'Sanitation & Waste Management', '🏢',
+            '🚨 SLA Breached: Massive Solid Waste & Garbage Dump Overflow',
+            'Over 3 tons of rotten municipal garbage overflowing onto main pedestrian road. Exceeded mandatory 48-Hour SLA period without field clearance. Automatically escalated to Municipal Commissioner Dr. Mahesh Babu & Zonal Health Directorate.',
+            'Surampalem • Ward 12 (Market Zone), Gandhi Statue Main Road',
+            'garbage_overflow', 'Garbage Overflow', '🗑️', 'bulk', 'SLA BREACHED (>48H)', 'escalated',
+            now - (62 * 3600 * 1000), now - (14 * 3600 * 1000), 0, None, 1,
+            'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80', None,
+            'KRISH (Civic Guardian)', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (61.5 * 3600 * 1000),
+            'Sanitation Rapid Fleet 3 (Lead: P. Ramesh)', now - (60 * 3600 * 1000),
+            'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Desk for Urgent Action',
+            'Heavy Hydraulic Compactor & 10-Ton Tipper Fleet', 84, json.dumps(['user-101']),
+            json.dumps([
+                {'author': 'System SLA Monitor', 'text': '⏱️ 48-Hour SLA Breached! Grievance unaddressed after 48h limit.', 'time': '14h ago'},
+                {'author': 'Auto-Escalation Gateway', 'text': '🚨 Escalated to Higher Authority: Zonal Municipal Commissioner (Dr. Mahesh Babu) & Urban Health Directorate.', 'time': '14h ago'},
+                {'author': 'Municipal Commissioner Red Desk', 'text': 'Ticket received with Critical Priority 1. Direct disciplinary summons and immediate heavy squad deployed.', 'time': '12h ago'},
+                {'author': 'KRISH (Citizen)', 'text': 'Garbage dump is emitting toxic odor and blocking school children. Thank you for forwarding to the Commissioner.', 'time': '4h ago'}
+            ]),
+            0, 0, 17.0012, 81.8048, None, None, None
+        ),
+        (
             'ISS-2026-00122', 'Andhra Pradesh', 'Surampalem', 'Ward 11 (Lake View Zone)', 'Lake View Road',
             'sanitation', 'Sanitation & Waste Management', '🏢',
             'Water Pipeline Leakage & Pothole Formed',
@@ -301,6 +322,14 @@ def seed_initial_data(conn):
             'Annapurna Tiffin Centre', 'K. Satyanarayana', 'College Road, Ward 14, Surampalem',
             'A+', '94/100', '31 Dec 2026', 'Dr. Lakshmi Prasad (FSO)', 'VERIFIED & CERTIFIED',
             0, None, None, None, '180 PPM (Safe)', 'All hygiene standards, water potability & hairnet compliance cleared.'
+        ),
+        (
+            'FSSAI-AP-2026-V04', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)',
+            'Aditya Highway Dhaba & Fast Food', 'R. Koteswara Rao', 'Gandhi Statue Main Road, Surampalem',
+            'F', '24/100', 'SEIZED & SUSPENDED', 'Dr. Lakshmi Prasad (FSO)', 'CRITICAL UNHYGIENIC VIOLATION',
+            1, 'Section 59: Rotten Meat Storage, Reheated Stale Oil (TPM >36%) & Drain Adjacent Prep',
+            '₹5,000.00', 'Immediate Suspension & Seizure', '580 PPM (Severe Toxic Ammonia Spoilage)',
+            'Complete commercial closure order served. Kitchen sealed under FSSAI Section 38. Confiscation of contaminated food inventory.'
         ),
         (
             'FSSAI-AP-2026-V09', 'Andhra Pradesh', 'Surampalem', 'Ward 14 (Campus Food Zone)',
