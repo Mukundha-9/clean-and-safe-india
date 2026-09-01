@@ -977,29 +977,45 @@
 
 /* Floating AI Chatbot */
 .chatbot-trigger {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #10b981 0%, #0284c7 100%);
-  color: white;
-  border: none;
-  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
-  font-size: 1.8rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1500;
-  transition: all var(--transition-fast);
+  position: fixed !important;
+  bottom: 24px !important;
+  right: 24px !important;
+  width: 62px !important;
+  height: 62px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #10b981 0%, #0284c7 50%, #7c3aed 100%) !important;
+  color: white !important;
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6), 0 0 25px rgba(124, 58, 237, 0.5) !important;
+  font-size: 1.9rem !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 99999 !important;
+  transition: all 0.25s ease !important;
 }
 
 .chatbot-trigger:hover {
-  transform: scale(1.08);
-  box-shadow: 0 10px 40px rgba(56, 189, 248, 0.7);
+  transform: scale(1.1) rotate(5deg) !important;
+  box-shadow: 0 10px 40px rgba(56, 189, 248, 0.8), 0 0 35px rgba(168, 85, 247, 0.7) !important;
 }
+
+.ai-scan-banner {
+  background: rgba(124, 58, 237, 0.18);
+  border: 1px solid #a855f7;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  color: #c084fc;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-weight: 700;
+  animation: aiPulse 1.5s infinite ease-in-out;
+}
+
 
 .chatbot-window {
   position: fixed;

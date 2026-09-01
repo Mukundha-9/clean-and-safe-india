@@ -3256,6 +3256,18 @@
     `;
   }
 
+    window.toggleChatbot = function(forceOpen) {
+    const cWindow = document.getElementById('chatbotWindow');
+    if (!cWindow) return;
+    if (forceOpen === true) {
+      cWindow.classList.add('active');
+    } else if (forceOpen === false) {
+      cWindow.classList.remove('active');
+    } else {
+      cWindow.classList.toggle('active');
+    }
+  };
+
   window.askChatbot = function(promptText) {
     handleChatbotMessage(promptText);
   };
@@ -3427,7 +3439,7 @@
     }
   };
 
-  // Image Upload / Camera File Selection Handler
+  // Image Upload / Camera File Selection Handler with Real-Time AI Auto-Scan
   window.handleImageUpload = function(inputEl) {
     if (!inputEl || !inputEl.files || !inputEl.files[0]) return;
     const file = inputEl.files[0];
@@ -3436,12 +3448,13 @@
     reader.onload = function(e) {
       selectedReportImageBase64 = e.target.result;
       displaySelectedImage(selectedReportImageBase64, file.name);
-      showToast(`📸 Photo "${file.name}" attached & geotagged!`, 'reward', '📸');
+      showToast(`📸 Photo "${file.name}" attached! Scanning with Gemini AI...`, 'reward', '⚡');
+      window.autoRunAiDetectionOnImage(selectedReportImageBase64);
     };
     reader.readAsDataURL(file);
   };
 
-  // Clickable Verified Sample Photo Presets
+  // Clickable Verified Sample Photo Presets with Real-Time AI Auto-Scan
   window.selectSamplePhoto = function(type) {
     const samples = {
       garbage: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
@@ -3452,7 +3465,69 @@
 
     selectedReportImageBase64 = samples[type] || samples.garbage;
     displaySelectedImage(selectedReportImageBase64, `${type}_evidence.jpg`);
-    showToast('📸 Verified incident photo attached!', 'reward', '📸');
+    showToast('📸 Photo attached! Scanning with Gemini AI...', 'reward', '⚡');
+    window.autoRunAiDetectionOnImage(selectedReportImageBase64);
+  };
+
+  // Real-Time Automated AI Auto-Triage & Duplicate Detector
+  window.autoRunAiDetectionOnImage = async function(imgSrc) {
+    if (!imgSrc) return;
+
+    const banner = document.getElementById('reportAiScanBanner');
+    if (banner) {
+      banner.style.display = 'flex';
+      banner.innerHTML = '<span>⚡ Real-Time Gemini AI Scanning Hazard & Checking Duplicates...</span>';
+    }
+
+    try {
+      const selectedWard = (document.getElementById('modalReportWard') ? document.getElementById('modalReportWard').value : '');
+      
+      // 1. Real-Time Duplicate & Crop Detection
+      const dupRes = await AiEngine.checkDuplicate(imgSrc, selectedWard);
+      if (dupRes && dupRes.isDuplicate && dupRes.matchedIssue) {
+        currentAiDuplicateMatch = dupRes.matchedIssue;
+        renderAiDuplicateModal(dupRes, imgSrc);
+        window.openModal('aiDuplicateModal');
+        if (banner) banner.innerHTML = '<span>🚨 Duplicate Match Found with #' + dupRes.matchedIssue.id + '</span>';
+        return;
+      }
+
+      // 2. Real-Time Multimodal Hazard Auto-Triage
+      const aiData = await AiEngine.analyzeHazard(imgSrc);
+      if (aiData) {
+        const titleInput = document.getElementById('reportTitle');
+        const descInput = document.getElementById('reportDesc');
+        const deptSelect = document.getElementById('modalReportDept');
+        const catSelect = document.getElementById('modalReportCategory');
+
+        if (titleInput) {
+          titleInput.value = aiData.title || 'Civic Waste Hazard';
+          titleInput.style.borderColor = '#10b981';
+        }
+        if (descInput) {
+          descInput.value = aiData.description || 'Observed municipal hazard requiring squad dispatch.';
+          descInput.style.borderColor = '#10b981';
+        }
+        if (deptSelect && aiData.department) {
+          deptSelect.value = aiData.department;
+          window.handleModalDeptChange(aiData.department);
+        }
+        if (catSelect && aiData.category) {
+          catSelect.value = aiData.category;
+        }
+
+        if (banner) {
+          banner.innerHTML = `<span>✨ Gemini AI Auto-Filled: <strong>${aiData.categoryName || 'Hazard'}</strong> (${aiData.estimatedTonnage || 'Bulk'})</span>`;
+          banner.style.background = 'rgba(16, 185, 129, 0.2)';
+          banner.style.borderColor = '#10b981';
+          banner.style.color = '#34d399';
+        }
+        showToast(`✨ Real-Time AI Auto-Filled: ${aiData.title}`, 'success', '🧠');
+      }
+    } catch (err) {
+      console.error(err);
+      if (banner) banner.style.display = 'none';
+    }
   };
 
   function displaySelectedImage(imageUrl, label) {

@@ -106,7 +106,7 @@
   <div id="authGatewayView" class="master-dashboard-view active auth-hero-wrapper" style="position: relative;">
     <!-- Top Right App Download / Install Pill -->
     <div class="pwa-install-element" id="pwaAuthTopInstallBtn" style="position: absolute; top: 1.25rem; right: 1.5rem; z-index: 100;">
-      <button class="btn btn-outline btn-sm btn-ai-status" onclick="window.openAiSettingsModal()" style="border-color: #a855f7; color: #c084fc;" title="AI Settings & Status"><span>✨</span> AI Active</button>
+      <button class="btn btn-outline btn-sm btn-ai-status" onclick="window.openAiSettingsModal()" style="border-color: #a855f7; color: #c084fc;" title="AI Settings & Status"><span>🤖</span> AI Helpdesk</button>
         <button class="btn btn-outline btn-sm btn-install-pwa" onclick="window.triggerPWAInstall()" style="border-color: #10b981; color: #34d399; background: rgba(6, 11, 20, 0.85); backdrop-filter: blur(10px); padding: 0.5rem 1.1rem; box-shadow: 0 0 20px rgba(16, 185, 129, 0.35); font-size: 0.85rem;" title="Download & Install Smart Civic App">
         <span>📲</span> <strong>Download / Install App</strong>
       </button>
@@ -320,7 +320,7 @@
 
       <!-- User Actions & Logout -->
       <div style="display: flex; align-items: center; gap: 0.75rem;">
-        <button class="btn btn-outline btn-sm btn-ai-status" onclick="window.openAiSettingsModal()" style="border-color: #a855f7; color: #c084fc;" title="AI Settings & Status"><span>✨</span> AI Active</button>
+        <button class="btn btn-outline btn-sm btn-ai-status" onclick="window.openAiSettingsModal()" style="border-color: #a855f7; color: #c084fc;" title="AI Settings & Status"><span>🤖</span> AI Helpdesk</button>
         <button class="btn btn-outline btn-sm btn-install-pwa pwa-install-element" id="pwaInstallBtn_citizen" onclick="window.triggerPWAInstall()" style="border-color: #10b981; color: #34d399;" title="Install Smart Civic App on Phone or PC">
           <span>📲</span> Install App
         </button>
@@ -701,7 +701,7 @@
 
       <!-- User Actions & Logout -->
       <div style="display: flex; align-items: center; gap: 0.75rem;">
-        <button class="btn btn-outline btn-sm btn-ai-status" onclick="window.openAiSettingsModal()" style="border-color: #a855f7; color: #c084fc;" title="AI Settings & Status"><span>✨</span> AI Active</button>
+        <button class="btn btn-outline btn-sm btn-ai-status" onclick="window.openAiSettingsModal()" style="border-color: #a855f7; color: #c084fc;" title="AI Settings & Status"><span>🤖</span> AI Helpdesk</button>
         <button class="btn btn-outline btn-sm btn-install-pwa pwa-install-element" id="pwaInstallBtn_mun" onclick="window.triggerPWAInstall()" style="border-color: #38bdf8; color: #38bdf8;" title="Install Smart Civic App on Phone or PC">
           <span>📲</span> Install App
         </button>
@@ -1391,6 +1391,7 @@
             <!-- Live Image Preview Card -->
             <div class="image-preview-card" id="reportImagePreviewCard">
               <img src="" id="reportPreviewThumbnail" class="image-preview-thumbnail" alt="Selected Evidence">
+              <div id="reportAiScanBanner" class="ai-scan-banner" style="display: none;"></div>
               <div class="image-watermark-overlay">
                 <div class="watermark-meta">
                   <div id="previewGpsWatermark">📍 GPS: 17.0010° N, 81.8045° E (±4m)</div>
@@ -1861,7 +1862,7 @@
   </div>
 
   <!-- Floating Department-Adaptive AI Assistant Chatbot (Only visible when logged in) -->
-  <button class="chatbot-trigger" id="chatbotTrigger" title="AI Assistant" style="display: none;">
+  <button class="chatbot-trigger" id="chatbotTrigger" title="SmartCity AI Assistant Helpdesk" onclick="window.toggleChatbot()">
     <span id="chatbotTriggerIcon">🤖</span>
   </button>
 
@@ -2006,6 +2007,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=11.0.0"></script>
+  <script src="js/bundle.js?v=12.0.0"></script>
 </body>
 </html>
