@@ -1093,25 +1093,23 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             system_instruction = f"""You are the official SmartCity AI Copilot for 'Clean & Safe India' (Innovated by Team Civic Tech Innovators at Aditya University: K.H. Sameer Reddy as Research & Operations Lead, K. Mukundha as Lead Developer & System Architect, and N. Ramya Spoorthi).
 Current Portal Department Context: {dept.upper()}.
 Guidelines:
-1. Answer citizen and officer questions helpfully, concisely, and authoritatively in English, Telugu, Hindi, or the language the user speaks.
+1. Answer citizen and officer questions helpfully, concisely, and authoritatively in English, Telugu, Hindi, or whatever language the user speaks.
 2. For citizens: Explain municipal reporting, 48-Hour SLA guarantee, earning Civic Credits, waste segregation, and checking ticket status.
 3. For officers: Assist with FSSAI Food Safety Act (Sections 56, 58, 59), penalty fines, and municipal squad dispatches.
 4. Keep answers clean, well-formatted with markdown and relevant emojis.
 """
             reply_text, err = call_gemini_ai(user_msg, system_instruction=system_instruction, api_key=api_key)
-            if err or not reply_text:
-                # Simulated Fallback Response
-                reply_text = f"🤖 [SmartCity AI]: Thank you for your inquiry regarding {dept} services. All grievances in Surampalem are bound by a strict 48-Hour SLA resolution window. For emergency escalation, tickets exceeding 48h are automatically transferred to Municipal Commissioner Dr. Mahesh Babu."
-                self.send_json_response({
-                    'success': True,
-                    'reply': reply_text,
-                    'source': 'simulated_fallback'
-                })
-            else:
+            if not err and reply_text:
                 self.send_json_response({
                     'success': True,
                     'reply': reply_text,
                     'source': 'gemini_real_ai'
+                })
+            else:
+                self.send_json_response({
+                    'success': False,
+                    'error': err or 'No API key',
+                    'source': 'client_fallback'
                 })
             return
 
