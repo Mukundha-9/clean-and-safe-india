@@ -2499,12 +2499,12 @@
       vendors = vendors.filter(v => (v.city || 'Surampalem') === selectedCity);
     }
     if (selectedWard !== 'all') {
-      foodIssues = foodIssues.filter(i => (i.ward || 'Ward 12') === selectedWard || (i.location && i.location.includes(selectedWard.split(' ')[0])));
-      vendors = vendors.filter(v => (v.ward || 'Ward 12') === selectedWard || (v.address && v.address.includes(selectedWard.split(' ')[0])));
+      foodIssues = foodIssues.filter(i => (i.ward || '') === selectedWard || (i.location && i.location.includes(selectedWard.split(' ')[0])));
+      vendors = vendors.filter(v => (v.ward || '') === selectedWard || (v.location && v.location.includes(selectedWard.split(' ')[0])) || (v.address && v.address.includes(selectedWard.split(' ')[0])));
     }
     if (selectedStreet !== 'all') {
       foodIssues = foodIssues.filter(i => (i.street || '') === selectedStreet || (i.location && i.location.includes(selectedStreet)));
-      vendors = vendors.filter(v => (v.street || '') === selectedStreet || (v.address && v.address.includes(selectedStreet)));
+      vendors = vendors.filter(v => (v.street || '') === selectedStreet || (v.location && v.location.includes(selectedStreet)) || (v.address && v.address.includes(selectedStreet)));
     }
 
     // Metric Summary Counters
@@ -2580,42 +2580,58 @@
       if (vendorFilter === 'certified') filteredVendors = filteredVendors.filter(v => !v.isViolated);
       else if (vendorFilter === 'violation') filteredVendors = filteredVendors.filter(v => v.isViolated);
 
-      vendorGrid.innerHTML = filteredVendors.map(vendor => {
-        const isViolated = vendor.isViolated;
-        return `
-          <div class="card" style="border: 1px solid ${isViolated ? '#ef4444' : '#10b981'}; background: ${isViolated ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-card)'};">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-              <div>
-                <span class="badge ${isViolated ? 'badge-escalated' : 'badge-resolved'}">
-                  ${isViolated ? '🔴 STATUTORY VIOLATION NOTICE' : '🟢 VERIFIED & CERTIFIED'}
-                </span>
-                <h3 style="margin-top: 0.5rem; font-size: 1.15rem; color: white;">${vendor.name}</h3>
-                <p style="font-size: 0.85rem; color: var(--text-muted);">Proprietor: ${vendor.owner} • 📍 ${vendor.location}</p>
-              </div>
-              <div style="text-align: center; background: ${isViolated ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)'}; border: 2px solid ${isViolated ? '#ef4444' : '#10b981'}; border-radius: var(--radius-md); padding: 4px 10px;">
-                <div style="font-size: 1.25rem; font-weight: 900; color: ${isViolated ? '#f87171' : '#34d399'};">${vendor.hygieneGrade}</div>
-                <div style="font-size: 0.65rem; font-weight: 700; color: ${isViolated ? '#ef4444' : '#10b981'};">${isViolated ? 'VIOLATION' : 'HYGIENE'}</div>
-              </div>
-            </div>
-
-            ${isViolated ? `
-              <div style="background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.4); padding: 0.6rem; border-radius: 6px; font-size: 0.8rem; color: #fecdd3; margin-bottom: 0.75rem;">
-                <div>⚖️ <strong>Clause:</strong> ${vendor.violationClause || 'Section 56: Stale Oil Violation'}</div>
-                <div>💳 <strong>Penalty:</strong> ${vendor.penaltyImposed || '₹2,000.00'} • <strong>Deadline:</strong> ${vendor.rectificationDeadline || '48h'}</div>
-              </div>
-            ` : `
-              <div style="background: rgba(16, 185, 129, 0.08); border: 1px dashed rgba(16, 185, 129, 0.3); padding: 0.6rem; border-radius: 6px; font-size: 0.8rem; color: #a7f3d0; margin-bottom: 0.75rem;">
-                <div>🏆 <strong>Audit Score:</strong> ${vendor.score} • <strong>Validity:</strong> ${vendor.validTill}</div>
-                <div>🛡️ <strong>Inspected By:</strong> ${vendor.inspectedBy}</div>
-              </div>
-            `}
-
-            <button class="btn btn-sm ${isViolated ? 'btn-outline' : 'btn-saffron'}" style="width: 100%; border-color: ${isViolated ? '#ef4444' : 'transparent'}; color: ${isViolated ? '#fca5a5' : 'white'};" onclick="window.viewDigitalCertificate('${vendor.id}')">
-              ${isViolated ? '⚠️ View Official Statutory Violation Notice' : '📜 View National Hygiene Certificate'}
+      if (filteredVendors.length === 0) {
+        vendorGrid.innerHTML = `
+          <div class="card" style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: #94a3b8; border: 1px dashed var(--border);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📜</div>
+            <h4 style="color: white; margin-bottom: 0.35rem; font-size: 1.1rem;">No Food Establishments Found</h4>
+            <p style="font-size: 0.85rem; margin-bottom: 1.25rem;">No vendors currently match the selected ward or category filter.</p>
+            <button class="btn btn-sm btn-outline" onclick="window.handleVendorFilter('all', document.querySelector('.vendor-filter-chip[data-filter=all]'))">
+              Show All Establishments
             </button>
           </div>
         `;
-      }).join('');
+      } else {
+        vendorGrid.innerHTML = filteredVendors.map(vendor => {
+          const isViolated = vendor.isViolated;
+          return `
+            <div class="card" style="border: 1px solid ${isViolated ? '#ef4444' : '#10b981'}; background: ${isViolated ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-card)'};">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; gap: 0.5rem;">
+                <div>
+                  <span class="badge ${isViolated ? 'badge-escalated' : 'badge-resolved'}">
+                    ${isViolated ? '🔴 STATUTORY VIOLATION NOTICE' : '🟢 VERIFIED & CERTIFIED'}
+                  </span>
+                  <h3 style="margin-top: 0.5rem; font-size: 1.15rem; color: white;">${vendor.name}</h3>
+                  <p style="font-size: 0.85rem; color: var(--text-muted);">Proprietor: ${vendor.owner} • 📍 ${vendor.location}</p>
+                </div>
+                <div style="text-align: center; background: ${isViolated ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)'}; border: 2px solid ${isViolated ? '#ef4444' : '#10b981'}; border-radius: var(--radius-md); padding: 4px 10px; min-width: 60px;">
+                  <div style="font-size: 1.25rem; font-weight: 900; color: ${isViolated ? '#f87171' : '#34d399'};">${vendor.hygieneGrade || 'A+'}</div>
+                  <div style="font-size: 0.65rem; font-weight: 700; color: ${isViolated ? '#ef4444' : '#10b981'};">${isViolated ? 'VIOLATION' : 'HYGIENE'}</div>
+                </div>
+              </div>
+
+              ${isViolated ? `
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.4); padding: 0.65rem 0.85rem; border-radius: 6px; font-size: 0.82rem; color: #fecdd3; margin-bottom: 0.85rem; line-height: 1.5;">
+                  <div>⚖️ <strong>Clause:</strong> ${vendor.violationClause || 'Section 56: Stale Oil Violation'}</div>
+                  <div>💳 <strong>Penalty Imposed:</strong> <span style="font-family: var(--font-mono); font-weight: 800; color: #facc15;">${vendor.penaltyImposed || '₹2,000.00'}</span></div>
+                  <div>⏳ <strong>Rectification Deadline:</strong> <span style="font-weight: 700; color: white;">${vendor.rectificationDeadline || '48 Hours'}</span></div>
+                  <div>🥩 <strong>MQ-135 Gas Risk:</strong> ${vendor.mq135GasPpm || '370 PPM'}</div>
+                </div>
+              ` : `
+                <div style="background: rgba(16, 185, 129, 0.08); border: 1px dashed rgba(16, 185, 129, 0.3); padding: 0.65rem 0.85rem; border-radius: 6px; font-size: 0.82rem; color: #a7f3d0; margin-bottom: 0.85rem; line-height: 1.5;">
+                  <div>🏆 <strong>Hygiene Audit Score:</strong> <strong style="color: #34d399;">${vendor.score || '94/100'}</strong></div>
+                  <div>📅 <strong>Certificate Validity:</strong> ${vendor.validTill || '31 Dec 2026'}</div>
+                  <div>🛡️ <strong>Inspected By:</strong> ${vendor.inspectedBy || 'Dr. Lakshmi Prasad (FSO)'}</div>
+                </div>
+              `}
+
+              <button class="btn btn-sm ${isViolated ? 'btn-outline' : 'btn-saffron'}" style="width: 100%; border-color: ${isViolated ? '#ef4444' : 'transparent'}; color: ${isViolated ? '#fca5a5' : 'white'};" onclick="window.viewDigitalCertificate('${vendor.id}')">
+                ${isViolated ? '⚠️ View Official Statutory Violation Notice' : '📜 View National Hygiene Certificate'}
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
     }
   }
 
@@ -3880,6 +3896,10 @@
   };
 
   window.switchFoodSubTab = function(tabName) {
+    if (tabName === 'registry') tabName = 'vendors';
+    if (tabName === 'iotgas') tabName = 'gassensor';
+    if (tabName === 'guidelines') tabName = 'policies';
+
     document.querySelectorAll('.food-subview').forEach(v => v.style.display = 'none');
     document.querySelectorAll('.food-nav-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.mobile-nav-food .mobile-nav-tab').forEach(b => b.classList.remove('active'));
