@@ -149,6 +149,24 @@
         <p id="authCardHeaderDesc">Report civic issues, track 48h SLA & earn citizen credits</p>
       </div>
 
+            <!-- ⚡ 1-Click Instant Demo Login Bar -->
+      <div style="margin: 0.85rem 0 1.15rem; padding: 0.75rem; background: rgba(255,255,255,0.03); border: 1px dashed rgba(56, 189, 248, 0.4); border-radius: 12px; text-align: center;">
+        <div style="font-size: 0.75rem; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
+          <span>⚡</span> 1-Click Instant Demo Login (No Password Needed)
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem;">
+          <button type="button" class="btn btn-sm" onclick="window.quickLogin('citizen')" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-weight: 700; font-size: 0.76rem; padding: 0.55rem 0.25rem; border-radius: 8px; cursor: pointer; transition: all 0.2s;" title="Direct Login as Citizen KRISH">
+            📱 Citizen
+          </button>
+          <button type="button" class="btn btn-sm" onclick="window.quickLogin('municipal')" style="background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700; font-size: 0.76rem; padding: 0.55rem 0.25rem; border-radius: 8px; cursor: pointer; transition: all 0.2s;" title="Direct Login as Municipal Admin K. Mukundha">
+            🏛️ Municipal
+          </button>
+          <button type="button" class="btn btn-sm" onclick="window.quickLogin('food')" style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; color: #facc15; font-weight: 700; font-size: 0.76rem; padding: 0.55rem 0.25rem; border-radius: 8px; cursor: pointer; transition: all 0.2s;" title="Direct Login as Food Safety Inspector Dr. Lakshmi Prasad">
+            🍲 Food Safety
+          </button>
+        </div>
+      </div>
+
       <!-- Citizen Sub-Mode Toggle (Sign In vs Register with OTP) -->
       <div id="citizenAuthSubModeToggle" style="display: flex; gap: 6px; background: rgba(2, 6, 23, 0.7); padding: 4px; border-radius: 10px; margin-bottom: 1.25rem; border: 1px solid rgba(255, 255, 255, 0.08);">
         <button type="button" class="auth-submode-btn active" id="citizenSubModeSignInBtn" onclick="window.switchCitizenAuthSubMode('signin')" style="flex: 1; padding: 0.55rem; font-size: 0.8rem; font-weight: 700; border: none; border-radius: 8px; background: #10b981; color: #060911; cursor: pointer; transition: all 0.2s;">
@@ -2007,6 +2025,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=14.0.0"></script>
+  <script src="js/bundle.js?v=15.0.0"></script>
 </body>
 </html>

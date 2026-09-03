@@ -4031,6 +4031,68 @@
     if (demoPassEl) demoPassEl.textContent = deptAcc.password;
   };
 
+  
+  // =========================================================================
+  // 1-CLICK QUICK LOGIN & URL PARAMETER ROUTING
+  // =========================================================================
+  window.quickLogin = async function(dept) {
+    const targetDept = dept || 'citizen';
+    const acc = SYSTEM_ACCOUNTS[targetDept] || SYSTEM_ACCOUNTS.citizen;
+    showToast(`Logging in to ${acc.deptTitle}...`, 'info', '⚡');
+    
+    try {
+      await auth.login(targetDept, acc.email, acc.password);
+      showToast(`Welcome, ${acc.name}!`, 'reward', '🎉');
+      checkAuthAndRoute();
+    } catch (e) {
+      console.warn('Quick login fallback:', e);
+      const sessionData = {
+        token: 'CIVIC_JWT_' + Date.now(),
+        department: targetDept,
+        user: acc,
+        loginTime: new Date().toISOString()
+      };
+      auth.saveSession(sessionData);
+      showToast(`Welcome, ${acc.name}!`, 'reward', '🎉');
+      checkAuthAndRoute();
+    }
+  };
+
+  function checkUrlPortalParams() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const hash = (window.location.hash || '').replace('#', '').toLowerCase();
+      const portal = params.get('portal') || params.get('dept') || params.get('role') || hash;
+      const tab = params.get('tab');
+      const action = params.get('action');
+
+      if (portal && (portal === 'citizen' || portal === 'municipal' || portal === 'food')) {
+        const acc = SYSTEM_ACCOUNTS[portal];
+        const sessionData = {
+          token: 'CIVIC_JWT_' + Date.now(),
+          department: portal,
+          user: acc,
+          loginTime: new Date().toISOString()
+        };
+        auth.saveSession(sessionData);
+
+        if (tab) {
+          setTimeout(() => {
+            if (portal === 'citizen') window.switchCitizenSubTab(tab);
+            else if (portal === 'municipal') window.switchMunicipalSubTab(tab);
+            else if (portal === 'food') window.switchFoodSubTab(tab);
+          }, 250);
+        }
+
+        if (action === 'report') {
+          setTimeout(() => window.openModal('reportModal'), 400);
+        }
+      }
+    } catch (e) {
+      console.warn('URL param route error:', e);
+    }
+  }
+
   window.fillDemoCredentials = function() {
     const deptAcc = SYSTEM_ACCOUNTS[activeAuthDept];
     const emailInput = document.getElementById('authEmailInput');
@@ -4609,6 +4671,7 @@
   // 11. SINGLE CLEAN INITIALIZATION & EVENT BINDINGS
   // =========================================================================
   document.addEventListener('DOMContentLoaded', () => {
+    checkUrlPortalParams();
     checkAuthAndRoute();
 
     // WhatsApp Input Keydown (Enter to send)
