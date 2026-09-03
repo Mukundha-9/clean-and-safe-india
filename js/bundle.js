@@ -2718,7 +2718,7 @@
     if (!isAuth) {
       const authView = document.getElementById('authGatewayView');
       if (authView) authView.classList.add('active');
-      if (chatbotBtn) chatbotBtn.style.display = 'flex';
+      if (chatbotBtn) chatbotBtn.style.display = 'none';
 
       // Prefill last remembered email for user convenience
       const lastEmail = localStorage.getItem('CIVIC_LAST_EMAIL');
@@ -2877,28 +2877,7 @@
     }
   }
 
-  window.toggleChatbot = function(forceOpen) {
-    const cWindow = document.getElementById('chatbotWindow');
-    if (!cWindow) return;
-    if (forceOpen === true) {
-      cWindow.classList.add('active');
-    } else if (forceOpen === false) {
-      cWindow.classList.remove('active');
-    } else {
-      cWindow.classList.toggle('active');
-    }
-    const input = document.getElementById('chatbotInput');
-    if (cWindow.classList.contains('active') && input) {
-      setTimeout(() => input.focus(), 150);
-    }
-  };
-
-  window.handleChatbotMessage = async function(forcedText) {
-    const cWindow = document.getElementById('chatbotWindow');
-    if (cWindow && !cWindow.classList.contains('active')) {
-      cWindow.classList.add('active');
-    }
-
+  function handleChatbotMessage(forcedText) {
     const input = document.getElementById('chatbotInput');
     const msgContainer = document.getElementById('chatbotMessages');
     if (!msgContainer) return;
@@ -2914,44 +2893,15 @@
     if (input) input.value = '';
     msgContainer.scrollTop = msgContainer.scrollHeight;
 
-    // Show Typing Indicator
-    const typingBubble = document.createElement('div');
-    typingBubble.className = 'chat-bubble bot';
-    typingBubble.innerHTML = '<span style="font-size: 0.8rem; color: #a855f7;">✨ Gemini AI is thinking...</span>';
-    msgContainer.appendChild(typingBubble);
-    msgContainer.scrollTop = msgContainer.scrollHeight;
-
-    const dept = auth.getDepartment() || 'citizen';
-    
-    // Check local ticket match first for instant live tracking
-    const issues = db.getAllIssues();
-    const q = userText.toLowerCase();
-    const ticketMatch = issues.find(i => {
-      const cleanId = i.id.toLowerCase();
-      const numPart = cleanId.split('-').pop();
-      return q.includes(cleanId) || (numPart.length >= 3 && q.includes(numPart));
-    });
-
-    if (ticketMatch || q.includes('team') || q.includes('who created') || q.includes('developer') || q.includes('author') || q.includes('mentor')) {
-      typingBubble.innerHTML = generateDynamicBotReply(userText);
+    // Generate Dynamic Contextual AI Bot Response
+    setTimeout(() => {
+      const botBubble = document.createElement('div');
+      botBubble.className = 'chat-bubble bot';
+      botBubble.innerHTML = generateDynamicBotReply(userText);
+      msgContainer.appendChild(botBubble);
       msgContainer.scrollTop = msgContainer.scrollHeight;
-      return;
-    }
-
-    try {
-      const aiReply = await AiEngine.chat(userText, dept);
-      if (aiReply) {
-        typingBubble.innerHTML = aiReply.replace(/\n/g, '<br>');
-      } else {
-        typingBubble.innerHTML = generateDynamicBotReply(userText);
-      }
-    } catch (e) {
-      typingBubble.innerHTML = generateDynamicBotReply(userText);
-    }
-    msgContainer.scrollTop = msgContainer.scrollHeight;
-  };
-
-  window.askChatbot = window.handleChatbotMessage;
+    }, 350);
+  }
 
   function generateDynamicBotReply(rawQuery) {
     const q = rawQuery.toLowerCase();
@@ -3279,18 +3229,6 @@
     `;
   }
 
-    window.toggleChatbot = function(forceOpen) {
-    const cWindow = document.getElementById('chatbotWindow');
-    if (!cWindow) return;
-    if (forceOpen === true) {
-      cWindow.classList.add('active');
-    } else if (forceOpen === false) {
-      cWindow.classList.remove('active');
-    } else {
-      cWindow.classList.toggle('active');
-    }
-  };
-
   window.askChatbot = function(promptText) {
     handleChatbotMessage(promptText);
   };
@@ -3462,7 +3400,7 @@
     }
   };
 
-  // Image Upload / Camera File Selection Handler with Real-Time AI Auto-Scan
+  // Image Upload / Camera File Selection Handler
   window.handleImageUpload = function(inputEl) {
     if (!inputEl || !inputEl.files || !inputEl.files[0]) return;
     const file = inputEl.files[0];
@@ -3471,13 +3409,12 @@
     reader.onload = function(e) {
       selectedReportImageBase64 = e.target.result;
       displaySelectedImage(selectedReportImageBase64, file.name);
-      showToast(`📸 Photo "${file.name}" attached! Scanning with Gemini AI...`, 'reward', '⚡');
-      window.autoRunAiDetectionOnImage(selectedReportImageBase64);
+      showToast(`📸 Photo "${file.name}" attached & geotagged!`, 'reward', '📸');
     };
     reader.readAsDataURL(file);
   };
 
-  // Clickable Verified Sample Photo Presets with Real-Time AI Auto-Scan
+  // Clickable Verified Sample Photo Presets
   window.selectSamplePhoto = function(type) {
     const samples = {
       garbage: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
@@ -3488,69 +3425,7 @@
 
     selectedReportImageBase64 = samples[type] || samples.garbage;
     displaySelectedImage(selectedReportImageBase64, `${type}_evidence.jpg`);
-    showToast('📸 Photo attached! Scanning with Gemini AI...', 'reward', '⚡');
-    window.autoRunAiDetectionOnImage(selectedReportImageBase64);
-  };
-
-  // Real-Time Automated AI Auto-Triage & Duplicate Detector
-  window.autoRunAiDetectionOnImage = async function(imgSrc) {
-    if (!imgSrc) return;
-
-    const banner = document.getElementById('reportAiScanBanner');
-    if (banner) {
-      banner.style.display = 'flex';
-      banner.innerHTML = '<span>⚡ Real-Time Gemini AI Scanning Hazard & Checking Duplicates...</span>';
-    }
-
-    try {
-      const selectedWard = (document.getElementById('modalReportWard') ? document.getElementById('modalReportWard').value : '');
-      
-      // 1. Real-Time Duplicate & Crop Detection
-      const dupRes = await AiEngine.checkDuplicate(imgSrc, selectedWard);
-      if (dupRes && dupRes.isDuplicate && dupRes.matchedIssue) {
-        currentAiDuplicateMatch = dupRes.matchedIssue;
-        renderAiDuplicateModal(dupRes, imgSrc);
-        window.openModal('aiDuplicateModal');
-        if (banner) banner.innerHTML = '<span>🚨 Duplicate Match Found with #' + dupRes.matchedIssue.id + '</span>';
-        return;
-      }
-
-      // 2. Real-Time Multimodal Hazard Auto-Triage
-      const aiData = await AiEngine.analyzeHazard(imgSrc);
-      if (aiData) {
-        const titleInput = document.getElementById('reportTitle');
-        const descInput = document.getElementById('reportDesc');
-        const deptSelect = document.getElementById('modalReportDept');
-        const catSelect = document.getElementById('modalReportCategory');
-
-        if (titleInput) {
-          titleInput.value = aiData.title || 'Civic Waste Hazard';
-          titleInput.style.borderColor = '#10b981';
-        }
-        if (descInput) {
-          descInput.value = aiData.description || 'Observed municipal hazard requiring squad dispatch.';
-          descInput.style.borderColor = '#10b981';
-        }
-        if (deptSelect && aiData.department) {
-          deptSelect.value = aiData.department;
-          window.handleModalDeptChange(aiData.department);
-        }
-        if (catSelect && aiData.category) {
-          catSelect.value = aiData.category;
-        }
-
-        if (banner) {
-          banner.innerHTML = `<span>✨ Gemini AI Auto-Filled: <strong>${aiData.categoryName || 'Hazard'}</strong> (${aiData.estimatedTonnage || 'Bulk'})</span>`;
-          banner.style.background = 'rgba(16, 185, 129, 0.2)';
-          banner.style.borderColor = '#10b981';
-          banner.style.color = '#34d399';
-        }
-        showToast(`✨ Real-Time AI Auto-Filled: ${aiData.title}`, 'success', '🧠');
-      }
-    } catch (err) {
-      console.error(err);
-      if (banner) banner.style.display = 'none';
-    }
+    showToast('📸 Verified incident photo attached!', 'reward', '📸');
   };
 
   function displaySelectedImage(imageUrl, label) {
@@ -4030,68 +3905,6 @@
     if (demoEmailEl) demoEmailEl.textContent = deptAcc.email;
     if (demoPassEl) demoPassEl.textContent = deptAcc.password;
   };
-
-  
-  // =========================================================================
-  // 1-CLICK QUICK LOGIN & URL PARAMETER ROUTING
-  // =========================================================================
-  window.quickLogin = async function(dept) {
-    const targetDept = dept || 'citizen';
-    const acc = SYSTEM_ACCOUNTS[targetDept] || SYSTEM_ACCOUNTS.citizen;
-    showToast(`Logging in to ${acc.deptTitle}...`, 'info', '⚡');
-    
-    try {
-      await auth.login(targetDept, acc.email, acc.password);
-      showToast(`Welcome, ${acc.name}!`, 'reward', '🎉');
-      checkAuthAndRoute();
-    } catch (e) {
-      console.warn('Quick login fallback:', e);
-      const sessionData = {
-        token: 'CIVIC_JWT_' + Date.now(),
-        department: targetDept,
-        user: acc,
-        loginTime: new Date().toISOString()
-      };
-      auth.saveSession(sessionData);
-      showToast(`Welcome, ${acc.name}!`, 'reward', '🎉');
-      checkAuthAndRoute();
-    }
-  };
-
-  function checkUrlPortalParams() {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const hash = (window.location.hash || '').replace('#', '').toLowerCase();
-      const portal = params.get('portal') || params.get('dept') || params.get('role') || hash;
-      const tab = params.get('tab');
-      const action = params.get('action');
-
-      if (portal && (portal === 'citizen' || portal === 'municipal' || portal === 'food')) {
-        const acc = SYSTEM_ACCOUNTS[portal];
-        const sessionData = {
-          token: 'CIVIC_JWT_' + Date.now(),
-          department: portal,
-          user: acc,
-          loginTime: new Date().toISOString()
-        };
-        auth.saveSession(sessionData);
-
-        if (tab) {
-          setTimeout(() => {
-            if (portal === 'citizen') window.switchCitizenSubTab(tab);
-            else if (portal === 'municipal') window.switchMunicipalSubTab(tab);
-            else if (portal === 'food') window.switchFoodSubTab(tab);
-          }, 250);
-        }
-
-        if (action === 'report') {
-          setTimeout(() => window.openModal('reportModal'), 400);
-        }
-      }
-    } catch (e) {
-      console.warn('URL param route error:', e);
-    }
-  }
 
   window.fillDemoCredentials = function() {
     const deptAcc = SYSTEM_ACCOUNTS[activeAuthDept];
@@ -4671,7 +4484,6 @@
   // 11. SINGLE CLEAN INITIALIZATION & EVENT BINDINGS
   // =========================================================================
   document.addEventListener('DOMContentLoaded', () => {
-    checkUrlPortalParams();
     checkAuthAndRoute();
 
     // WhatsApp Input Keydown (Enter to send)
@@ -4939,13 +4751,27 @@
       });
     }
 
-    // Chatbot Input Enter Key Binding
+    // Chatbot Toggle & Messages
+    const cTrigger = document.getElementById('chatbotTrigger');
+    const cWindow = document.getElementById('chatbotWindow');
+    const cClose = document.getElementById('chatbotClose');
+    const cSendBtn = document.getElementById('chatbotSendBtn');
     const cInput = document.getElementById('chatbotInput');
+
+    if (cTrigger && cWindow) {
+      cTrigger.addEventListener('click', () => cWindow.classList.toggle('active'));
+    }
+    if (cClose && cWindow) {
+      cClose.addEventListener('click', () => cWindow.classList.remove('active'));
+    }
+    if (cSendBtn) {
+      cSendBtn.addEventListener('click', () => handleChatbotMessage());
+    }
     if (cInput) {
       cInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
-          window.handleChatbotMessage();
+          handleChatbotMessage();
         }
       });
     }
@@ -4995,651 +4821,3 @@
   });
 
 })();
-
-
-  // =========================================================================
-  // 12. SMARTCITY REAL AI & COMPUTER VISION ENGINE (GEMINI 2.5/3.7 FLASH)
-  // =========================================================================
-  const AiEngine = {
-    getApiKey: () => localStorage.getItem('clean_safe_gemini_key') || '',
-    setApiKey: (key) => localStorage.setItem('clean_safe_gemini_key', (key || '').trim()),
-
-    // Real Client-Side 64-Bit Pixel Difference Hash (dHash)
-    computeImageHash: async function(imageSrc) {
-      return new Promise((resolve) => {
-        if (!imageSrc) return resolve('');
-        const img = new Image();
-        img.crossOrigin = 'Anonymous';
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            canvas.width = 9;
-            canvas.height = 8;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, 9, 8);
-            const imgData = ctx.getImageData(0, 0, 9, 8).data;
-            const gray = [];
-            for (let i = 0; i < imgData.length; i += 4) {
-              gray.push(Math.floor(0.299 * imgData[i] + 0.587 * imgData[i + 1] + 0.114 * imgData[i + 2]));
-            }
-            let hash = '';
-            for (let r = 0; r < 8; r++) {
-              for (let c = 0; c < 8; c++) {
-                hash += (gray[r * 9 + c] > gray[r * 9 + c + 1] ? '1' : '0');
-              }
-            }
-            resolve(hash);
-          } catch (e) {
-            let h = 0;
-            for (let i = 0; i < imageSrc.length; i++) {
-              h = ((h << 5) - h) + imageSrc.charCodeAt(i);
-              h |= 0;
-            }
-            resolve(Math.abs(h).toString(2).padStart(64, '0'));
-          }
-        };
-        img.onerror = () => {
-          let h = 0;
-          for (let i = 0; i < imageSrc.length; i++) {
-            h = ((h << 5) - h) + imageSrc.charCodeAt(i);
-            h |= 0;
-          }
-          resolve(Math.abs(h).toString(2).padStart(64, '0'));
-        };
-        img.src = imageSrc;
-      });
-    },
-
-    // Real Pixel Color & Chromaticity Analysis for Hazard Auto-Triage
-    analyzeImagePixels: async function(imageSrc) {
-      return new Promise((resolve) => {
-        if (!imageSrc) return resolve({ category: 'garbage', dominantTone: 'mixed' });
-        const img = new Image();
-        img.crossOrigin = 'Anonymous';
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            canvas.width = 32;
-            canvas.height = 32;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, 32, 32);
-            const data = ctx.getImageData(0, 0, 32, 32).data;
-            let rTotal = 0, gTotal = 0, bTotal = 0;
-            const pixels = data.length / 4;
-
-            for (let i = 0; i < data.length; i += 4) {
-              rTotal += data[i];
-              gTotal += data[i + 1];
-              bTotal += data[i + 2];
-            }
-            const avgR = rTotal / pixels;
-            const avgG = gTotal / pixels;
-            const avgB = bTotal / pixels;
-
-            // Detect category from real pixel chroma
-            if (avgR > 140 && avgG > 120 && avgB < 100) {
-              resolve({ category: 'electricity', dept: 'electricity', title: '11KV Transformer Arc & Wire Spark Hazard', desc: 'Dangerous electrical flashover discharge detected with sparking risk at distribution junction pole.' });
-            } else if (avgR < 110 && avgG < 110 && avgB < 110) {
-              resolve({ category: 'pothole', dept: 'sanitation', title: 'Deep Asphalt Road Crater & Pothole Damage', desc: 'Severe road surface disintegration obstructing traffic and creating pedestrian hazard.' });
-            } else if (avgR > 130 && avgG < 110 && avgB < 100) {
-              resolve({ category: 'food', dept: 'food_safety', title: 'Food Spoilage & Open Drain Sanitation Violation', desc: 'Uncovered food storage near contaminated moisture channel violating FSSAI hygiene standards.' });
-            } else {
-              resolve({ category: 'garbage', dept: 'sanitation', title: 'Overflowing Municipal Solid Waste & Garbage Heap', desc: 'Heavy volume uncollected mixed residential debris obstructing pedestrian roadway. 48h SLA required.' });
-            }
-          } catch (e) {
-            resolve({ category: 'garbage', dept: 'sanitation', title: 'Overflowing Municipal Solid Waste & Garbage Heap', desc: 'Heavy volume uncollected mixed residential debris obstructing pedestrian roadway.' });
-          }
-        };
-        img.onerror = () => resolve({ category: 'garbage', dept: 'sanitation', title: 'Overflowing Municipal Solid Waste & Garbage Heap', desc: 'Heavy volume uncollected mixed residential debris obstructing pedestrian roadway.' });
-        img.src = imageSrc;
-      });
-    },
-
-    // Real Computer Vision Gas PPM & Microbial Oxidation Estimator
-    estimateVisualGasPpm: async function(imageSrc, sensorPpm) {
-      return new Promise((resolve) => {
-        const sPpm = sensorPpm || 185;
-        const img = new Image();
-        img.crossOrigin = 'Anonymous';
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            canvas.width = 32;
-            canvas.height = 32;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, 32, 32);
-            const data = ctx.getImageData(0, 0, 32, 32).data;
-            let rTotal = 0, gTotal = 0, bTotal = 0;
-            for (let i = 0; i < data.length; i += 4) {
-              rTotal += data[i];
-              gTotal += data[i + 1];
-              bTotal += data[i + 2];
-            }
-            const avgR = rTotal / (data.length / 4);
-            const avgG = gTotal / (data.length / 4);
-            const avgB = bTotal / (data.length / 4);
-
-            // Compute oxidation and volatile decomposition index from chromatic shift
-            const oxidationIndex = Math.max(0.1, Math.min(1.0, (avgR * 1.2 + avgG * 0.8) / (avgB * 2.2 + 1)));
-            let calculatedPpm = Math.floor(150 + oxidationIndex * 380);
-            
-            // Adjust based on sensor correlation
-            if (sPpm > 350) calculatedPpm = Math.max(calculatedPpm, sPpm + Math.floor((Math.random() * 20) - 10));
-            else if (sPpm < 200) calculatedPpm = Math.min(calculatedPpm, sPpm + Math.floor((Math.random() * 15) - 5));
-
-            const isHigh = calculatedPpm > 350;
-            const isMedium = calculatedPpm > 220;
-            const delta = Math.abs(calculatedPpm - sPpm);
-            const matchConf = Math.max(82.0, Math.min(99.4, 100.0 - (delta / 6.0)));
-
-            resolve({
-              success: true,
-              visualEstimatedPpm: calculatedPpm,
-              hardwareSensorPpm: sPpm,
-              crossValidationConfidence: matchConf,
-              spoilageLevel: isHigh ? 'Critical Decomposition Hazard' : isMedium ? 'Elevated Spoilage Risk' : 'Safe & Fresh Environment',
-              discolorationAnalysis: isHigh ? 'Visible surface myoglobin oxidation, bacterial proteolysis slime sheen & lipid rancidity (TPM >34%).' : isMedium ? 'Mild volatile gas emission with elevated surface moisture breakdown.' : 'Normal fresh cellular integrity with zero rancidity.',
-              volatileGasesDetected: isHigh ? 'Ammonia (NH₃), Volatile Amines, Hydrogen Sulfide & Methane' : isMedium ? 'Elevated Volatile Organic Humidity' : 'Atmospheric Baseline (CO₂ / Ambient Air)',
-              fssaiStatutorySection: isHigh ? 'Section 59: Severe Unsafe Food & Contamination' : isMedium ? 'Section 56: Sub-Standard Stale Cooking Medium' : 'Compliant (Schedule 4 FSSAI)',
-              recommendedPenalty: isHigh ? '₹5,000.00 & Commercial Seizure' : isMedium ? '₹2,000.00 & 48h Rectification Mandate' : '₹0.00 (Certified Grade A+)',
-              officerActionDirectives: isHigh ? 'Immediate confiscation of unpreserved inventory. Commercial closure order served under Section 38.' : 'Install oil filtration log and replace rancid batch within 48h.' : 'Maintain current temperature control and hairnet compliance.'
-            });
-          } catch (e) {
-            resolve({
-              success: true,
-              visualEstimatedPpm: sPpm > 350 ? 580 : sPpm > 220 ? 370 : 180,
-              hardwareSensorPpm: sPpm,
-              crossValidationConfidence: 98.2,
-              spoilageLevel: sPpm > 350 ? 'Critical Decomposition Hazard' : 'Safe & Fresh Environment',
-              discolorationAnalysis: 'Real-time pixel analysis completed.',
-              volatileGasesDetected: sPpm > 350 ? 'Ammonia (NH₃) & Volatile Amines' : 'Atmospheric Baseline',
-              fssaiStatutorySection: sPpm > 350 ? 'Section 59' : 'Compliant',
-              recommendedPenalty: sPpm > 350 ? '₹5,000.00' : '₹0.00',
-              officerActionDirectives: sPpm > 350 ? 'Confiscation of spoiled batch.' : 'Compliant.'
-            });
-          }
-        };
-        img.onerror = () => {
-          resolve({
-            success: true,
-            visualEstimatedPpm: sPpm,
-            hardwareSensorPpm: sPpm,
-            crossValidationConfidence: 97.5,
-            spoilageLevel: sPpm > 350 ? 'Critical Decomposition Hazard' : 'Safe & Fresh',
-            discolorationAnalysis: 'Pixel analysis completed.',
-            volatileGasesDetected: 'Ammonia / VOCs',
-            fssaiStatutorySection: sPpm > 350 ? 'Section 59' : 'Compliant',
-            recommendedPenalty: sPpm > 350 ? '₹5,000.00' : '₹0.00',
-            officerActionDirectives: 'Inspection logged.'
-          });
-        };
-        img.src = imageSrc;
-      });
-    },
-
-    // Check for duplicate / cropped re-upload
-    checkDuplicate: async function(imageData, ward) {
-      try {
-        const hash = await this.computeImageHash(imageData);
-        const issues = db.getAllIssues();
-        
-        let bestMatch = null;
-        let highestSim = 0;
-
-        for (const issue of issues) {
-          if (!issue.imageBefore) continue;
-          
-          if (issue.imageBefore === imageData || imageData.includes(issue.imageBefore.split('?')[0])) {
-            bestMatch = issue;
-            highestSim = 98.8;
-            break;
-          }
-          
-          if (imageData.includes('photo-1605600659908-0ef719419d41') && issue.id === 'ISS-2026-00123') {
-            bestMatch = issue;
-            highestSim = 96.4;
-            break;
-          }
-        }
-
-        if (highestSim >= 80.0 && bestMatch) {
-          return {
-            success: true,
-            isDuplicate: true,
-            similarityScore: highestSim,
-            matchType: highestSim > 95 ? 'EXACT_DUPLICATE' : 'CROPPED_OR_EDITED',
-            matchedIssue: bestMatch
-          };
-        }
-
-        const res = await fetch('/api/ai/vision/duplicate-check', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Gemini-Key': this.getApiKey() },
-          body: jsonSafeStringify({ image: imageData, imageHash: hash, ward: ward || '' })
-        });
-        if (res.ok) return await res.json();
-      } catch (e) {
-        console.warn('[AI Duplicate Check Error]', e);
-      }
-      return { success: true, isDuplicate: false, similarityScore: 14.2 };
-    },
-
-    // Multimodal Hazard Auto-Triage & Auto-Fill
-    analyzeHazard: async function(imageData) {
-      try {
-        if (this.getApiKey()) {
-          const res = await fetch('/api/ai/vision/analyze-hazard', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Gemini-Key': this.getApiKey() },
-            body: jsonSafeStringify({ image: imageData })
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.source === 'gemini_real_ai') return data;
-          }
-        }
-
-        const pixelData = await this.analyzeImagePixels(imageData);
-        return {
-          success: true,
-          category: pixelData.category || 'garbage',
-          categoryName: pixelData.category === 'electricity' ? 'Damaged Transformer / Sparking Wire' : pixelData.category === 'pothole' ? 'Pothole & Severe Road Damage' : pixelData.category === 'food' ? 'Food Hygiene & Spoilage Violation' : 'Municipal Solid Waste & Garbage Overflow',
-          title: pixelData.title || 'High-Volume Municipal Hazard',
-          description: pixelData.desc || 'Observed hazardous accumulation obstructing pedestrian roadway. 48h SLA required.',
-          department: pixelData.dept || 'sanitation',
-          severity: 'bulk',
-          estimatedTonnage: pixelData.category === 'electricity' ? 'N/A (High Voltage)' : '~2.8 Tons',
-          recommendedMachinery: pixelData.category === 'electricity' ? 'Insulated Lineman Bucket Van (AP-05-EB)' : '10-Ton Hydraulic Compactor & Heavy Squad 4',
-          suggestedSlaHours: 48,
-          confidenceScore: 98.4
-        };
-      } catch (e) {
-        console.warn('[AI Hazard Auto-Triage Error]', e);
-      }
-      return {
-        success: true,
-        category: 'garbage',
-        categoryName: 'Municipal Solid Waste & Garbage Overflow',
-        title: 'High-Volume Solid Waste & Mixed Debris Pile',
-        description: 'Heavy accumulation of uncollected residential and organic waste obstructing pedestrian walkway.',
-        department: 'sanitation',
-        severity: 'bulk',
-        estimatedTonnage: '~2.8 Tons',
-        recommendedMachinery: '10-Ton Hydraulic Compactor & Heavy Squad 4',
-        suggestedSlaHours: 48,
-        confidenceScore: 98.2
-      };
-    },
-
-    // Visual Gas PPM Spoilage Estimator
-    estimateVisualPpm: async function(imageData, sensorPpm, foodType) {
-      return await this.estimateVisualGasPpm(imageData, sensorPpm);
-    },
-
-    // Conversational Chatbot Stream
-    chat: async function(message, department) {
-      try {
-        const res = await fetch('/api/ai/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Gemini-Key': this.getApiKey() },
-          body: jsonSafeStringify({ message: message, department: department || 'citizen' })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.source === 'gemini_real_ai') {
-            return data.reply;
-          }
-        }
-      } catch (e) {
-        console.warn('[AI Chat Error]', e);
-      }
-      return null;
-    }
-  };
-
-  // Helper safe JSON stringify
-  function jsonSafeStringify(obj) {
-    try {
-      return JSON.stringify(obj);
-    } catch (e) {
-      return '{}';
-    }
-  }
-
-  // -------------------------------------------------------------------------
-  // AI AUTO-TRIAGE & DUPLICATE DETECTION TRIGGERS
-  // -------------------------------------------------------------------------
-  let currentAiDuplicateMatch = null;
-  let currentSelectedFoodAiPhoto = null;
-
-  window.triggerAiAutoTriage = async function() {
-    const btn = document.getElementById('btnAiAutoTriage');
-    const previewImg = document.getElementById('reportPreviewThumbnail');
-    let imgSrc = previewImg ? previewImg.src : '';
-
-    if (!imgSrc || imgSrc.length < 5 || imgSrc === window.location.href) {
-      // Default to standard garbage sample if no image selected yet
-      window.selectSamplePhoto('garbage');
-      imgSrc = document.getElementById('reportPreviewThumbnail').src;
-    }
-
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = '<span>⚡</span> Analyzing with Gemini AI...';
-    }
-
-    try {
-      const selectedWard = (document.getElementById('modalReportWard') ? document.getElementById('modalReportWard').value : '');
-      
-      // 1. Run Duplicate & Crop Detection Check
-      const dupRes = await AiEngine.checkDuplicate(imgSrc, selectedWard);
-      if (dupRes && dupRes.isDuplicate && dupRes.matchedIssue) {
-        currentAiDuplicateMatch = dupRes.matchedIssue;
-        renderAiDuplicateModal(dupRes, imgSrc);
-        window.openModal('aiDuplicateModal');
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = '<span>🧠</span> Auto-Fill with AI';
-        }
-        return;
-      }
-
-      // 2. Run Multimodal Hazard Auto-Triage
-      const aiData = await AiEngine.analyzeHazard(imgSrc);
-      if (aiData) {
-        // Auto-Fill Form Fields
-        const titleInput = document.getElementById('reportTitle');
-        const descInput = document.getElementById('reportDesc');
-        const deptSelect = document.getElementById('modalReportDept');
-        const catSelect = document.getElementById('modalReportCategory');
-
-        if (titleInput) titleInput.value = aiData.title || 'Civic Waste Hazard';
-        if (descInput) descInput.value = aiData.description || 'Observed municipal hazard requiring squad dispatch.';
-        if (deptSelect && aiData.department) {
-          deptSelect.value = aiData.department;
-          window.handleModalDeptChange(aiData.department);
-        }
-        if (catSelect && aiData.category) {
-          catSelect.value = aiData.category;
-        }
-
-        showToast(`✨ Gemini AI Analyzed: ${aiData.categoryName || 'Hazard'} (${aiData.estimatedTonnage || 'Bulk'})`, 'success', '🧠');
-      }
-    } catch (e) {
-      console.error(e);
-      showToast('AI analysis completed with civic domain heuristics.', 'info', '✨');
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = '<span>🧠</span> Auto-Fill with AI';
-      }
-    }
-  };
-
-  function renderAiDuplicateModal(dupRes, userImg) {
-    const body = document.getElementById('aiDuplicateModalBody');
-    if (!body) return;
-
-    const match = dupRes.matchedIssue;
-    const sim = dupRes.similarityScore || 96.4;
-    const matchType = dupRes.matchType || 'EXACT_DUPLICATE';
-
-    body.innerHTML = `
-      <div style="background: rgba(245, 158, 11, 0.1); border: 1px dashed #f59e0b; border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <span style="font-weight: 800; color: #facc15; font-size: 0.95rem;">
-            🚨 ${matchType === 'CROPPED_OR_EDITED' ? 'Cropped / Modified Image Detected' : 'Identical Duplicate Grievance Found'}
-          </span>
-          <span class="badge badge-escalated" style="font-size: 0.8rem;">${sim.toFixed(1)}% AI Match</span>
-        </div>
-        <div class="ai-match-meter">
-          <div class="ai-match-meter-fill" style="width: ${sim}%;"></div>
-        </div>
-        <p style="font-size: 0.8rem; color: #cbd5e1; margin: 4px 0 0;">
-          Our AI Computer Vision system identified that this incident has already been reported. To prevent duplicate truck dispatch and keep queues fast, your submission will boost this ticket's priority!
-        </p>
-      </div>
-
-      <div class="grid-2" style="gap: 1rem; margin-bottom: 1rem;">
-        <!-- Left: Uploaded Photo -->
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem;">
-          <div style="font-size: 0.75rem; font-weight: 700; color: #94a3b8; margin-bottom: 4px;">YOUR UPLOADED EVIDENCE:</div>
-          <div style="height: 140px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border);">
-            <img src="${userImg}" style="width: 100%; height: 100%; object-fit: cover;" alt="Your Upload">
-          </div>
-          <div style="font-size: 0.78rem; color: #cbd5e1; margin-top: 6px;">📍 Live GPS Geotagged</div>
-        </div>
-
-        <!-- Right: Matched Existing Ticket -->
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem;">
-          <div style="font-size: 0.75rem; font-weight: 700; color: #f59e0b; margin-bottom: 4px;">MATCHING EXISTING TICKET: ${match.id}</div>
-          <div style="height: 140px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border);">
-            <img src="${match.imageBefore}" style="width: 100%; height: 100%; object-fit: cover;" alt="Existing Ticket">
-          </div>
-          <div style="font-size: 0.78rem; color: white; font-weight: 700; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${match.title}</div>
-          <div style="font-size: 0.72rem; color: #94a3b8;">Reported by ${match.reportedBy || 'Citizen'} • Status: <span style="color: #38bdf8;">${match.status.toUpperCase()}</span></div>
-        </div>
-      </div>
-    `;
-  }
-
-  window.mergeAndUpvoteParentTicket = function() {
-    if (currentAiDuplicateMatch) {
-      db.toggleUpvote(currentAiDuplicateMatch.id);
-      db.addCivicCredits(10);
-      window.closeModal('aiDuplicateModal');
-      window.closeModal('reportModal');
-      showToast(`🔗 Merged with #${currentAiDuplicateMatch.id}! Priority boosted & +10 Civic Credits awarded.`, 'reward', '🎉');
-      renderCitizenDashboard();
-    }
-  };
-
-  window.proceedAsDistinctIssue = function() {
-    window.closeModal('aiDuplicateModal');
-    showToast('Proceeding as separate distinct hazard.', 'info', '⚠️');
-  };
-
-  // -------------------------------------------------------------------------
-  // AI IOT VISUAL GAS PPM & SPOILAGE ESTIMATOR
-  // -------------------------------------------------------------------------
-  window.handleAiFoodPhotoUpload = function(input) {
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        currentSelectedFoodAiPhoto = e.target.result;
-        const prev = document.getElementById('aiFoodPhotoPreview');
-        const holder = document.getElementById('aiFoodPhotoPlaceholder');
-        const container = document.getElementById('aiFoodPhotoPreviewContainer');
-        if (prev) prev.src = currentSelectedFoodAiPhoto;
-        if (holder) holder.style.display = 'none';
-        if (container) container.style.display = 'block';
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  };
-
-  window.testFoodPpmSample = function(type) {
-    const samples = {
-      'spoiled_meat': {
-        url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&auto=format&fit=crop&q=80',
-        ppm: 580
-      },
-      'rancid_oil': {
-        url: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
-        ppm: 370
-      },
-      'fresh_curry': {
-        url: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=80',
-        ppm: 180
-      }
-    };
-    const s = samples[type] || samples.spoiled_meat;
-    currentSelectedFoodAiPhoto = s.url;
-    const prev = document.getElementById('aiFoodPhotoPreview');
-    const holder = document.getElementById('aiFoodPhotoPlaceholder');
-    const container = document.getElementById('aiFoodPhotoPreviewContainer');
-    const slider = document.getElementById('iotGasSlider');
-    const gasVal = document.querySelector('.iotGasValue');
-
-    if (prev) prev.src = currentSelectedFoodAiPhoto;
-    if (holder) holder.style.display = 'none';
-    if (container) container.style.display = 'block';
-    if (slider) slider.value = s.ppm;
-    if (gasVal) gasVal.textContent = `${s.ppm} PPM`;
-
-    window.runAiVisualPpmAnalysis();
-  };
-
-  window.runAiVisualPpmAnalysis = async function() {
-    const btn = document.getElementById('aiRunPpmAnalysisBtn');
-    const resultsCard = document.getElementById('aiFoodPpmResultsCard');
-    const slider = document.getElementById('iotGasSlider');
-    const currentSensorPpm = slider ? parseInt(slider.value, 10) : 185;
-
-    if (!currentSelectedFoodAiPhoto) {
-      window.testFoodPpmSample('spoiled_meat');
-      return;
-    }
-
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = '<span>⚡</span> AI Cross-Verifying Sensor & Vision...';
-    }
-
-    try {
-      const res = await AiEngine.estimateVisualPpm(currentSelectedFoodAiPhoto, currentSensorPpm, 'Commercial Food Establishment');
-      if (res && resultsCard) {
-        const isCritical = res.visualEstimatedPpm > 350;
-        const isElevated = res.visualEstimatedPpm > 220;
-
-        resultsCard.style.display = 'block';
-        resultsCard.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-            <div>
-              <span class="badge ${isCritical ? 'badge-escalated' : isElevated ? 'badge-pending' : 'badge-resolved'}">
-                ${isCritical ? '🚨 CRITICAL SPOILAGE HAZARD' : isElevated ? '⚠️ ELEVATED VOLATILE GASES' : '🟢 VERIFIED FRESH ATMOSPHERE'}
-              </span>
-              <h3 style="color: white; font-size: 1.15rem; margin-top: 0.4rem;">AI Vision & IoT Sensor Corroboration</h3>
-            </div>
-            <div style="text-align: right;">
-              <div style="font-size: 1.4rem; font-weight: 900; color: ${isCritical ? '#f87171' : isElevated ? '#f59e0b' : '#34d399'}; font-family: var(--font-mono);">
-                ${res.visualEstimatedPpm} PPM
-              </div>
-              <div style="font-size: 0.72rem; color: #94a3b8;">AI Visual Predicted PPM</div>
-            </div>
-          </div>
-
-          <div class="grid-3" style="gap: 0.75rem; margin-bottom: 1rem;">
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem;">
-              <div style="font-size: 0.72rem; color: #94a3b8;">MQ-135 Hardware Telemetry:</div>
-              <div style="font-size: 1.1rem; font-weight: 800; color: white;">${res.hardwareSensorPpm} PPM</div>
-            </div>
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem;">
-              <div style="font-size: 0.72rem; color: #94a3b8;">Vision-Sensor Correlation:</div>
-              <div style="font-size: 1.1rem; font-weight: 800; color: #34d399;">${res.crossValidationConfidence.toFixed(1)}% Match</div>
-            </div>
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem;">
-              <div style="font-size: 0.72rem; color: #94a3b8;">Statutory Action:</div>
-              <div style="font-size: 1.1rem; font-weight: 800; color: ${isCritical ? '#f87171' : isElevated ? '#f59e0b' : '#34d399'};">${res.fssaiStatutorySection}</div>
-            </div>
-          </div>
-
-          <div style="background: rgba(255,255,255,0.02); border: 1px dashed var(--border); border-radius: 6px; padding: 0.85rem; font-size: 0.82rem; color: #cbd5e1; margin-bottom: 1rem; line-height: 1.5;">
-            <div>🔬 <strong>Microbial Analysis:</strong> ${res.discolorationAnalysis}</div>
-            <div>💨 <strong>Detected Gases:</strong> ${res.volatileGasesDetected}</div>
-            <div>⚖️ <strong>Recommended Penalty:</strong> <strong style="color: #facc15;">${res.recommendedPenalty}</strong></div>
-            <div>🛡️ <strong>Officer Directives:</strong> ${res.officerActionDirectives}</div>
-          </div>
-
-          ${isCritical || isElevated ? `
-            <button class="btn btn-sm btn-saffron" style="width: 100%; border-color: #ef4444; background: #ef4444;" onclick="window.autoDraftFssaiNotice(${res.visualEstimatedPpm}, '${res.fssaiStatutorySection}')">
-              ⚠️ Auto-Draft Official FSSAI Statutory Violation Notice (${res.visualEstimatedPpm} PPM)
-            </button>
-          ` : `
-            <div style="text-align: center; color: #34d399; font-size: 0.82rem; font-weight: 700;">
-              ✓ Hygiene Standards Fully Cleared & Validated
-            </div>
-          `}
-        `;
-        showToast(`✨ AI Visual Telemetry: ${res.visualEstimatedPpm} PPM (${res.crossValidationConfidence.toFixed(1)}% Match)`, 'success', '🥩');
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = '✨ Analyze Spoilage & Verify Gas PPM';
-      }
-    }
-  };
-
-  window.autoDraftFssaiNotice = function(ppm, section) {
-    window.openFoodInspectionModal();
-    const gasInput = document.getElementById('foodGasReading');
-    const remarksInput = document.getElementById('foodInspectionRemarks');
-    const fineInput = document.getElementById('foodFineImposed');
-
-    if (gasInput) gasInput.value = `${ppm} PPM (AI Cross-Verified)`;
-    if (remarksInput) remarksInput.value = `AI Vision & MQ-135 Corroborated Spoilage (${ppm} PPM). Statutory violation under ${section}. Contaminated stocks confiscated.`;
-    if (fineInput) fineInput.value = ppm > 350 ? '5000' : '2000';
-    showToast('FSSAI Statutory Violation Notice auto-drafted from AI Telemetry!', 'info', '⚖️');
-  };
-
-  // -------------------------------------------------------------------------
-  // AI SETTINGS & KEY MANAGEMENT
-  // -------------------------------------------------------------------------
-  window.openAiSettingsModal = function() {
-    const input = document.getElementById('customGeminiApiKeyInput');
-    if (input) input.value = AiEngine.getApiKey();
-    window.openModal('aiSettingsModal');
-  };
-
-  window.toggleApiKeyVisibility = function() {
-    const input = document.getElementById('customGeminiApiKeyInput');
-    if (input) input.type = input.type === 'password' ? 'text' : 'password';
-  };
-
-  window.saveGeminiApiKeySetting = function() {
-    const input = document.getElementById('customGeminiApiKeyInput');
-    const key = input ? input.value.trim() : '';
-    AiEngine.setApiKey(key);
-    window.closeModal('aiSettingsModal');
-    showToast(key ? '✅ Custom Google Gemini API Key Saved!' : 'Operating on SmartCity Built-In Civic AI Engine.', 'success', '✨');
-  };
-
-  window.testGeminiApiConnection = async function() {
-    const btn = document.getElementById('testApiKeyBtn');
-    const input = document.getElementById('customGeminiApiKeyInput');
-    const key = input ? input.value.trim() : AiEngine.getApiKey();
-
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = 'Testing...';
-    }
-
-    try {
-      const res = await fetch('/api/ai/test-key', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: jsonSafeStringify({ apiKey: key })
-      });
-      const data = await res.json();
-      if (data.isRealAiActive) {
-        showToast('🟢 Google Gemini 2.5 Flash Connected Successfully!', 'success', '🚀');
-        const badge = document.getElementById('aiLiveStatusBadge');
-        if (badge) {
-          badge.textContent = '🟢 Real Gemini AI Active';
-          badge.style.background = 'rgba(16, 185, 129, 0.2)';
-        }
-      } else {
-        showToast(data.message || 'Civic Simulated AI Engine is Active.', 'info', '🔵');
-      }
-    } catch (e) {
-      showToast('SmartCity Civic AI Engine is active.', 'info', '🔵');
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = '⚡ Test Connection';
-      }
-    }
-  };
