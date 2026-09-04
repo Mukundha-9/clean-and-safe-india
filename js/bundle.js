@@ -415,87 +415,117 @@
           console.warn('[Civic AI] Backend AI unreachable, executing deterministic local intelligence fallback:', netErr);
         }
 
-        // 2. Deterministic Local Intelligence Fallback (Guaranteed 100% Offline / Standalone Capability)
+        // 2. Deterministic Local Intelligence Fallback (Rule-based Civic AI Decision Support)
         const q = text.toLowerCase();
+        let sensitivity = 'General Area';
+        if (q.includes('college') || q.includes('school') || q.includes('university') || q.includes('campus') || q.includes('student') || q.includes('classroom') || q.includes('hostel')) {
+          sensitivity = 'Educational Zone';
+        } else if (q.includes('hospital') || q.includes('clinic') || q.includes('dispensary') || q.includes('patient') || q.includes('doctor') || q.includes('ambulance')) {
+          sensitivity = 'Hospital & Medical Zone';
+        } else if (q.includes('market') || q.includes('bazaar') || q.includes('shop') || q.includes('vendor') || q.includes('stall') || q.includes('commercial') || q.includes('supermarket')) {
+          sensitivity = 'Commercial Market Zone';
+        } else if (q.includes('highway') || q.includes('flyover') || q.includes('junction') || q.includes('cross') || q.includes('main road') || q.includes('traffic') || q.includes('expressway') || q.includes('road')) {
+          sensitivity = 'Public Road / Transit Corridor';
+        } else if (q.includes('colony') || q.includes('apartment') || q.includes('house') || q.includes('nagar') || q.includes('residential') || q.includes('society') || q.includes('street')) {
+          sensitivity = 'Residential Zone';
+        } else if (q.includes('substation') || q.includes('feeder') || q.includes('water tank') || q.includes('pump') || q.includes('transformer') || q.includes('grid')) {
+          sensitivity = 'Critical Infrastructure';
+        }
+
         let dept = 'sanitation';
-        let deptName = 'Sanitation & Waste Management';
+        let deptName = 'Sanitation';
         let deptIcon = '🏢';
         let cat = 'garbage_overflow';
         let catName = 'Garbage Overflow';
         let catIcon = '🗑️';
-        let suggestedTitle = 'Garbage Overflow Hazard';
+        let suggestedTitle = 'Garbage Overflow Report';
 
-        let sensitivity = 'General Area';
-        if (q.includes('college') || q.includes('school') || q.includes('university') || q.includes('campus') || q.includes('student')) {
-          sensitivity = 'Educational Zone';
-        } else if (q.includes('hospital') || q.includes('clinic') || q.includes('patient') || q.includes('doctor')) {
-          sensitivity = 'Hospital & Medical Zone';
-        } else if (q.includes('market') || q.includes('bazaar') || q.includes('shop') || q.includes('vendor') || q.includes('commercial')) {
-          sensitivity = 'Commercial Market Zone';
-        } else if (q.includes('highway') || q.includes('flyover') || q.includes('junction') || q.includes('main road') || q.includes('traffic') || q.includes('road')) {
-          sensitivity = 'Public Road / Transit Corridor';
-        } else if (q.includes('colony') || q.includes('apartment') || q.includes('house') || q.includes('society') || q.includes('street')) {
-          sensitivity = 'Residential Zone';
-        }
-
-        if (q.includes('spark') || q.includes('wire') || q.includes('transformer') || q.includes('shock') || q.includes('electric') || q.includes('cable') || q.includes('power') || q.includes('outage')) {
+        if (q.includes('spark') || q.includes('wire') || q.includes('transformer') || q.includes('shock') || q.includes('electric') || q.includes('current') || q.includes('cable') || q.includes('pole') || q.includes('power') || q.includes('outage') || q.includes('voltage') || q.includes('blackout') || q.includes('short circuit')) {
           dept = 'electricity';
-          deptName = 'Smart Electricity Department';
+          deptName = 'Electricity';
           deptIcon = '⚡';
-          if (q.includes('outage') || q.includes('blackout') || q.includes('no power') || q.includes('power out') || q.includes('power has been out') || q.includes('power is out') || q.includes('power cut') || q.includes('cut')) {
+          if (q.includes('outage') || q.includes('blackout') || q.includes('no power') || q.includes('power out') || q.includes('power has been out') || q.includes('power is out') || q.includes('power cut') || q.includes('cut') || q.includes('tripped') || q.includes('no current') || q.includes('current cut') || q.includes('load shedding')) {
             cat = 'power_outage';
-            catName = 'Power Outage / Line Tripped';
+            catName = 'Power Outage';
             catIcon = '🔌';
             suggestedTitle = 'Unscheduled Power Outage';
           } else {
             cat = 'sparking_wire';
-            catName = 'Sparking Cable / Electrical Hazard';
+            catName = 'Sparking Wire';
             catIcon = '⚡';
-            suggestedTitle = 'Sparking Wire / Electrical Hazard';
+            suggestedTitle = 'Sparking Wire Hazard';
           }
-        } else if (q.includes('pothole') || q.includes('crater') || q.includes('asphalt') || q.includes('tar') || q.includes('broken road') || q.includes('accident')) {
-          dept = 'sanitation';
-          deptName = 'Sanitation & Urban Roads';
-          deptIcon = '🏢';
-          cat = 'pothole';
-          catName = 'Pothole & Road Deterioration';
-          catIcon = '🕳️';
-          suggestedTitle = 'Dangerous Pothole & Road Damage';
-        } else if (q.includes('water') || q.includes('pipe') || q.includes('leak') || q.includes('burst') || q.includes('drain') || q.includes('sewage') || q.includes('flood') || q.includes('waterlogging')) {
-          dept = 'sanitation';
-          deptName = 'Sanitation & Urban Drainage';
-          deptIcon = '🏢';
-          if (q.includes('drain') || q.includes('sewage') || q.includes('clog') || q.includes('silt') || q.includes('gutter') || q.includes('waterlogging')) {
-            cat = 'drain_blockage';
-            catName = 'Drainage Blockage & Waterlogging';
-            catIcon = '🌊';
-            suggestedTitle = 'Clogged Drain & Standing Water';
+        } else if (q.includes('pothole') || q.includes('crater') || q.includes('asphalt') || q.includes('tar') || q.includes('road damage') || q.includes('broken road') || q.includes('footpath') || q.includes('pavement') || q.includes('paver') || q.includes('curb')) {
+          dept = 'roads';
+          deptName = 'Infrastructure / Roads';
+          deptIcon = '🛣️';
+          if (q.includes('footpath') || q.includes('pavement') || q.includes('paver') || q.includes('curb') || q.includes('pedestrian')) {
+            cat = 'broken_footpath';
+            catName = 'Broken Footpath';
+            catIcon = '🚶';
+            suggestedTitle = 'Broken Footpath Hazard';
+          } else if (q.includes('pothole') || q.includes('crater')) {
+            cat = 'pothole';
+            catName = 'Pothole';
+            catIcon = '🕳️';
+            suggestedTitle = 'Dangerous Pothole';
           } else {
-            cat = 'water_leakage';
-            catName = 'Water Pipeline Leakage';
-            catIcon = '🚰';
-            suggestedTitle = 'Water Pipeline Leakage';
+            cat = 'road_damage';
+            catName = 'Road Damage';
+            catIcon = '🚧';
+            suggestedTitle = 'Road Damage';
           }
-        } else if (q.includes('food') || q.includes('hotel') || q.includes('restaurant') || q.includes('dhaba') || q.includes('oil') || q.includes('stale') || q.includes('rotten') || q.includes('spoilage')) {
+        } else if (q.includes('water leak') || q.includes('leakage') || q.includes('burst pipe') || q.includes('pipe burst') || q.includes('drinking water') || q.includes('pipeline leak') || q.includes('water pipe') || q.includes('wasting water')) {
+          dept = 'water_supply';
+          deptName = 'Water Supply';
+          deptIcon = '💧';
+          cat = 'water_leakage';
+          catName = 'Water Leakage';
+          catIcon = '🚰';
+          suggestedTitle = 'Water Pipeline Leakage';
+        } else if (q.includes('drain') || q.includes('sewage') || q.includes('clog') || q.includes('silt') || q.includes('gutter') || q.includes('drainage') || q.includes('drain blockage') || q.includes('manhole') || q.includes('waterlogging')) {
+          dept = 'sanitation';
+          deptName = 'Sanitation';
+          deptIcon = '🏢';
+          cat = 'drain_blockage';
+          catName = 'Drain Blockage';
+          catIcon = '🌊';
+          suggestedTitle = 'Drainage Blockage';
+        } else if (q.includes('food') || q.includes('hotel') || q.includes('restaurant') || q.includes('dhaba') || q.includes('stall') || q.includes('oil') || q.includes('stale') || q.includes('rotten') || q.includes('spoilage') || q.includes('unhygienic') || q.includes('fssai') || q.includes('tiffin') || q.includes('hygiene')) {
           dept = 'food_safety';
-          deptName = 'Food Safety & Hygiene';
+          deptName = 'Food Safety';
           deptIcon = '🍲';
           cat = 'food_hygiene';
-          catName = 'Food Hygiene Violation';
+          catName = 'Food Hygiene';
           catIcon = '🍱';
-          suggestedTitle = 'Unsanitary Food Preparation / Spoilage';
+          suggestedTitle = 'Food Hygiene Violation';
+        } else {
+          dept = 'sanitation';
+          deptName = 'Sanitation';
+          deptIcon = '🏢';
+          cat = 'garbage_overflow';
+          catName = 'Garbage Overflow';
+          catIcon = '🗑️';
+          suggestedTitle = 'Garbage Overflow Report';
         }
 
         let urgency = 62;
-        if (dept === 'electricity') urgency = (cat === 'sparking_wire' ? 88 : 75);
-        else if (cat === 'pothole' && (q.includes('accident') || q.includes('danger') || q.includes('injury') || q.includes('causing'))) urgency = 82;
+        if (cat === 'sparking_wire') urgency = 88;
+        else if (cat === 'power_outage') urgency = 75;
+        else if (cat === 'pothole') urgency = (q.includes('accident') || q.includes('danger') || q.includes('injury') || q.includes('damage') || q.includes('causing') || q.includes('deep') || q.includes('dangerous')) ? 82 : 75;
+        else if (cat === 'road_damage') urgency = 76;
+        else if (cat === 'broken_footpath') urgency = 68;
         else if (cat === 'garbage_overflow') urgency = 70;
+        else if (cat === 'drain_blockage') urgency = 72;
+        else if (cat === 'water_leakage') urgency = 74;
         else if (cat === 'food_hygiene') urgency = 78;
 
-        if (q.includes('3 days') || q.includes('three days') || q.includes('week') || q.includes('days')) urgency += 10;
-        if (q.includes('since morning') || q.includes('hours') || q.includes('today')) urgency += 5;
-        if (sensitivity === 'Educational Zone' || sensitivity === 'Hospital & Medical Zone') urgency += 8;
+        if (q.includes('3 days') || q.includes('three days') || q.includes('week') || q.includes('weeks') || q.includes('several days') || q.includes('days') || q.includes('long time') || q.includes('daily')) urgency += 10;
+        else if (q.includes('since morning') || q.includes('hours') || q.includes('today')) urgency += 5;
+
+        if (sensitivity === 'Educational Zone' || sensitivity === 'Hospital & Medical Zone' || sensitivity === 'Critical Infrastructure') urgency += 8;
         else if (sensitivity === 'Commercial Market Zone' || sensitivity === 'Public Road / Transit Corridor') urgency += 5;
+
         urgency = Math.min(98, Math.max(25, urgency));
 
         const suggestedSla = urgency >= 82 ? 12.0 : (urgency >= 70 ? 24.0 : 48.0);
@@ -505,22 +535,19 @@
 
         const reasons = [];
         if (sensitivity !== 'General Area') reasons.push(`identified ${sensitivity.toLowerCase()}`);
-        if (q.includes('3 days') || q.includes('three days') || q.includes('days')) reasons.push('multi-day hazard persistence');
-        if (q.includes('smell') || q.includes('stench') || q.includes('bad smell')) reasons.push('public health odor nuisance');
-        if (q.includes('accident') || q.includes('injury') || q.includes('shock')) reasons.push('active risk to pedestrian and vehicular safety');
+        if (q.includes('3 days') || q.includes('three days') || q.includes('week') || q.includes('days')) reasons.push('multi-day hazard persistence');
+        if (q.includes('smell') || q.includes('stench') || q.includes('odor') || q.includes('bad smell')) reasons.push('public health odor nuisance');
+        if (q.includes('accident') || q.includes('injury') || q.includes('accidents') || q.includes('danger') || q.includes('dangerous') || q.includes('shock') || q.includes('spark')) reasons.push('active risk to pedestrian and vehicular safety');
 
         const reasoning = reasons.length > 0
           ? `Complaint mentions ${catName.toLowerCase()} in a ${sensitivity.toLowerCase()} (${reasons.join(', ')}), elevating urgency to ${urgency}/100.`
           : `Complaint classified under ${deptName} as ${catName} based on observable civic keywords.`;
 
-        // Multi-factor Risk Score from CivicAiEngine.RiskScoring
-        const riskCalc = CivicAiEngine.RiskScoring.calculateRiskScore({
-          severity: severity === 'Critical' ? 9 : (severity === 'High' ? 8 : 5),
-          populationSensitivity: sensitivity === 'Educational Zone' || sensitivity === 'Hospital & Medical Zone' ? 9 : 7,
-          recurrence: 6,
-          slaUrgency: 7,
-          evidenceConfidence: confidence
-        });
+        const popFactor = (sensitivity === 'Educational Zone' || sensitivity === 'Hospital & Medical Zone') ? 9 : ((sensitivity === 'Commercial Market Zone' || sensitivity === 'Public Road / Transit Corridor') ? 8 : 6);
+        const sevFactor = (severity === 'Critical' || severity === 'High') ? 9 : 6;
+        const rawRisk = (sevFactor * 2.5) + (popFactor * 2.0) + (7 * 2.0) + (8 * 2.0) + (confidence * 15.0);
+        const civicRiskScore = Math.min(100, Math.max(15, Math.round(rawRisk)));
+        const riskLevel = civicRiskScore >= 81 ? 'Critical' : (civicRiskScore >= 61 ? 'High' : (civicRiskScore >= 31 ? 'Medium' : 'Low'));
 
         return {
           success: true,
@@ -537,11 +564,11 @@
           aiLocationSensitivity: sensitivity,
           aiConfidence: confidence,
           aiReasoning: reasoning,
-          aiRiskScore: riskCalc.riskScore,
-          aiRiskLevel: riskCalc.riskLevel,
+          aiRiskScore: civicRiskScore,
+          aiRiskLevel: riskLevel,
           suggestedTitle: suggestedTitle,
           isAdvisoryOnly: true,
-          analysisSource: 'AI-assisted demo analysis'
+          analysisSource: 'Deterministic AI-assisted civic classification'
         };
       }
     },
@@ -899,6 +926,7 @@
   const INITIAL_ISSUES = [
     // --- ANDHRA PRADESH ---
     {
+      isDemo: true,
       id: 'ISS-2026-00123',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
@@ -943,6 +971,7 @@
       ]
     },
     {
+      isDemo: true,
       id: 'ISS-2026-00124',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
@@ -986,6 +1015,7 @@
       ]
     },
     {
+      isDemo: true,
       id: 'ISS-2026-00128',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
@@ -1033,6 +1063,7 @@
       ]
     },
     {
+      isDemo: true,
       id: 'ISS-2026-00127',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
@@ -1078,6 +1109,7 @@
       ]
     },
     {
+      isDemo: true,
       id: 'ISS-2026-00125',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
@@ -1124,6 +1156,7 @@
       ]
     },
     {
+      isDemo: true,
       id: 'ISS-2026-00128',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
@@ -1170,6 +1203,7 @@
       ]
     },
     {
+      isDemo: true,
       id: 'ISS-2026-00120',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
@@ -1287,6 +1321,7 @@
 
     // --- TELANGANA ---
     {
+      isDemo: true,
       id: 'ISS-2026-00126',
       state: 'Telangana',
       city: 'Hyderabad',
@@ -2732,17 +2767,62 @@
     const resolvedTs = isResolved ? getRealisticResolvedTimestamp(issue) : null;
     const resolvedTimeStr = isResolved ? formatReportDateTime(resolvedTs) : null;
     const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, resolvedTs, issue) : null;
-    const aiRisk = (issue.aiRiskScore !== undefined && issue.aiRiskScore !== null && issue.aiRiskScore !== '') 
-      ? Number(issue.aiRiskScore) 
-      : (issue.severity === 'critical' ? 88 : (issue.severity === 'bulk' || issue.severity === 'high' ? 74 : (issue.severity === 'medium' ? 52 : 28)));
-    const aiConf = issue.aiConfidence ? Math.round(Number(issue.aiConfidence) * (Number(issue.aiConfidence) <= 1 ? 100 : 1)) : 92;
-    const aiSla = issue.aiSuggestedSLA || (aiRisk >= 75 ? 12 : (aiRisk >= 50 ? 24 : 48));
 
     const slaText = isResolved 
-      ? `✅ Resolved (${turnaroundStr})` 
+      ? `✓ Resolved (${turnaroundStr})` 
       : isEscalated 
-        ? `🚨 SLA Breached (>48h)` 
+        ? `⚠️ SLA Breached (>48h)` 
         : `<span class="sla-live-ticker" data-deadline="${deadlineTimestamp}">⏱️ ${issue.slaHoursLeft}h SLA left</span>`;
+
+    // Genuine AI metadata check (Do NOT fabricate AI data for historical records)
+    const isAiAnalyzed = Boolean(issue.aiRiskScore && (issue.citizenConfirmedAI !== undefined || issue.aiSuggestedDepartment));
+    const isDemoRecord = Boolean(issue.isDemo || (!isAiAnalyzed && issue.id && String(issue.id).startsWith('ISS-2026-0012')));
+
+    let aiSnippetHTML = '';
+    let aiMetaBadgeHTML = '';
+
+    if (isAiAnalyzed) {
+      const risk = Number(issue.aiRiskScore) || 50;
+      const conf = issue.aiConfidence ? Math.round(Number(issue.aiConfidence) * (Number(issue.aiConfidence) <= 1 ? 100 : 1)) : 90;
+      const sla = issue.aiSuggestedSLA || 24;
+
+      aiMetaBadgeHTML = `
+        <span class="badge" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); font-size: 0.72rem; font-family: var(--font-mono); font-weight: 700;" title="Deterministic Civic AI Risk Assessment">
+          🤖 AI Risk: ${risk}/100
+        </span>`;
+
+      aiSnippetHTML = `
+        <div style="background: rgba(56, 189, 248, 0.05); border: 1px dashed rgba(56, 189, 248, 0.3); border-radius: var(--radius-sm); padding: 0.45rem 0.65rem; margin-bottom: 0.75rem; font-size: 0.74rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
+          <div style="display: flex; align-items: center; gap: 0.4rem; color: #cbd5e1;">
+            <span>🤖</span>
+            <span><strong>Target SLA:</strong> <span style="color: #38bdf8; font-weight: 700;">${sla}h</span></span>
+          </div>
+          <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #34d399; font-size: 0.68rem; padding: 0.15rem 0.45rem; border: 1px solid rgba(16, 185, 129, 0.35);">
+            ${conf}% Conf. (Rule-Based)
+          </span>
+        </div>`;
+    } else if (isDemoRecord) {
+      aiMetaBadgeHTML = `
+        <span class="badge" style="background: rgba(148, 163, 184, 0.12); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); font-size: 0.7rem;" title="Baseline demonstration profile">
+          Demo AI Profile
+        </span>`;
+
+      aiSnippetHTML = `
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-sm); padding: 0.4rem 0.65rem; margin-bottom: 0.75rem; font-size: 0.73rem; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
+          <span>🤖 Demo AI Profile: Standard 48h SLA</span>
+          <span style="font-size: 0.68rem; color: #64748b;">Baseline Data</span>
+        </div>`;
+    } else {
+      aiMetaBadgeHTML = `
+        <span class="badge" style="background: rgba(255, 255, 255, 0.04); color: #64748b; border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.68rem;" title="Legacy complaint logged prior to AI governance layer">
+          AI Analysis: Not Available
+        </span>`;
+
+      aiSnippetHTML = `
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-sm); padding: 0.35rem 0.65rem; margin-bottom: 0.75rem; font-size: 0.72rem; color: #64748b;">
+          ℹ️ AI Analysis: Not Available (Legacy Report)
+        </div>`;
+    }
 
     return `
       <div class="issue-card" onclick="window.viewIssueDetail('${issue.id}')">
@@ -2756,12 +2836,10 @@
         <div class="issue-card-body">
           <div class="issue-meta-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
             <div style="display: flex; align-items: center; gap: 0.4rem;">
-              <span class="cat-badge">${issue.deptIcon} ${issue.deptName}</span>
-              <span class="badge sev-${issue.severity}">${issue.severity.toUpperCase()}</span>
+              <span class="cat-badge">${issue.deptIcon || '🏢'} ${issue.deptName || 'Civic'}</span>
+              <span class="badge sev-${issue.severity}">${(issue.severity || 'medium').toUpperCase()}</span>
             </div>
-            <span class="badge" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); font-size: 0.72rem; font-family: var(--font-mono); font-weight: 700;" title="Civic AI Risk Assessment (Phase 1 & 2)">
-              🤖 AI Risk: ${aiRisk}/100
-            </span>
+            ${aiMetaBadgeHTML}
           </div>
           <h3 class="issue-title">${issue.title}</h3>
           <p class="issue-desc">${issue.description}</p>
@@ -2771,37 +2849,28 @@
             <span>${issue.location}</span>
           </div>
 
-          <!-- Civic AI Governance Assessment Snippet -->
-          <div style="background: rgba(56, 189, 248, 0.05); border: 1px dashed rgba(56, 189, 248, 0.3); border-radius: var(--radius-sm); padding: 0.45rem 0.65rem; margin-bottom: 0.75rem; font-size: 0.74rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
-            <div style="display: flex; align-items: center; gap: 0.4rem; color: #cbd5e1;">
-              <span>🤖</span>
-              <span><strong>AI Target SLA:</strong> <span style="color: #38bdf8; font-weight: 700;">${aiSla}h</span></span>
-            </div>
-            <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #34d399; font-size: 0.68rem; padding: 0.15rem 0.45rem; border: 1px solid rgba(16, 185, 129, 0.35);">
-              ${aiConf}% Conf. (Advisory)
-            </span>
-          </div>
+          ${aiSnippetHTML}
 
           <!-- Exact Date & Time Tracking Grid -->
           <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.76rem; color: #cbd5e1; margin-bottom: 0.85rem; line-height: 1.45;">
             <div>📅 <strong>Reported:</strong> ${reportedTimeStr}</div>
             ${isResolved ? `
-              <div style="color: #34d399;">✅ <strong>Resolved:</strong> ${resolvedTimeStr} (${turnaroundStr})</div>
+              <div style="color: #34d399;">✓ <strong>Resolved:</strong> ${resolvedTimeStr} (${turnaroundStr})</div>
             ` : isEscalated ? `
-              <div style="color: #f87171; font-weight: 700;">🚨 <strong>SLA Breached:</strong> Forwarded to Zonal Commissioner</div>
+              <div style="color: #f87171; font-weight: 700;">⚠️ <strong>SLA Breached:</strong> Forwarded to Zonal Commissioner</div>
             ` : `
-              <div style="color: #38bdf8;">⏳ <strong>48h Deadline:</strong> ${deadlineTimeStr}</div>
+              <div style="color: #38bdf8;">⏱️ <strong>48h Deadline:</strong> ${deadlineTimeStr}</div>
             `}
           </div>
 
           <div class="issue-card-footer">
             <button type="button" class="btn-track-issue" onclick="event.stopPropagation(); window.viewIssueDetail('${issue.id}');">
-              <span>📦</span>
+              <span>🔍</span>
               <span>Track Live Status</span>
             </button>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
               <button type="button" class="upvote-btn" onclick="event.stopPropagation(); window.toggleUpvote('${issue.id}');" title="Upvote issue priority">
-                <span>👍</span>
+                <span>▲</span>
                 <span>${issue.upvotes || 0}</span>
               </button>
               <button type="button" class="comment-btn" onclick="event.stopPropagation(); window.openCommentsModal('${issue.id}');" title="View discussion and remarks" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #cbd5e1; border-radius: 20px; padding: 4px 10px; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.78rem; transition: all 0.2s;">
@@ -4697,42 +4766,79 @@
           </div>
         </div>
 
-        <!-- Phase 1 & 2 Civic AI Engine — Transparent Governance Audit & Risk Profile -->
-        <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: var(--radius-md); padding: 1.15rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
-            <div style="font-weight: 800; font-size: 0.92rem; color: #38bdf8; display: flex; align-items: center; gap: 0.45rem;">
-              <span>🤖</span> CIVIC AI ENGINE — GOVERNANCE AUDIT & RISK PROFILE
-            </div>
-            <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">Human-in-the-Loop Verified</span>
-          </div>
+        <!-- Phase 2 Civic AI Engine — Transparent Governance Audit & Risk Profile -->
+          ${(() => {
+            const isAi = Boolean(issue.aiRiskScore && (issue.citizenConfirmedAI !== undefined || issue.aiSuggestedDepartment));
+            if (!isAi) {
+              return `
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 0.85rem 1rem; margin-bottom: 1.5rem; font-size: 0.8rem; color: #94a3b8; display: flex; align-items: center; gap: 0.6rem;">
+                  <span>ℹ️</span>
+                  <span><strong>AI Governance Audit:</strong> Not Available for this record (Logged prior to AI Governance deployment or via legacy channel).</span>
+                </div>`;
+            }
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; font-size: 0.8rem; margin-bottom: 0.85rem;">
-            <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-              <div style="color: #94a3b8; font-size: 0.72rem;">AI Risk Score:</div>
-              <div style="font-family: var(--font-mono); font-weight: 800; font-size: 1.15rem; color: ${(issue.aiRiskScore || (issue.severity === 'critical' ? 88 : (issue.severity === 'bulk' || issue.severity === 'high' ? 74 : 52))) >= 75 ? '#f87171' : '#38bdf8'};">
-                ${issue.aiRiskScore || (issue.severity === 'critical' ? 88 : (issue.severity === 'bulk' || issue.severity === 'high' ? 74 : 52))} / 100
-              </div>
-            </div>
-            <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-              <div style="color: #94a3b8; font-size: 0.72rem;">Suggested Department:</div>
-              <div style="font-weight: 700; color: white;">${issue.aiSuggestedDepartment || deptName}</div>
-            </div>
-            <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-              <div style="color: #94a3b8; font-size: 0.72rem;">AI Target SLA:</div>
-              <div style="font-weight: 700; color: #34d399;">${issue.aiSuggestedSLA || ((issue.aiRiskScore || 50) >= 75 ? 12 : 24)} Hours</div>
-            </div>
-            <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-              <div style="color: #94a3b8; font-size: 0.72rem;">Confidence Level:</div>
-              <div style="font-weight: 700; color: #38bdf8;">${issue.aiConfidence ? Math.round(Number(issue.aiConfidence) * (Number(issue.aiConfidence) <= 1 ? 100 : 1)) : 92}%</div>
-            </div>
-          </div>
+            const risk = Number(issue.aiRiskScore) || 50;
+            const riskColor = risk >= 75 ? '#f87171' : (risk >= 50 ? '#fb923c' : '#34d399');
+            const conf = issue.aiConfidence ? Math.round(Number(issue.aiConfidence) * (Number(issue.aiConfidence) <= 1 ? 100 : 1)) : 90;
+            const sla = issue.aiSuggestedSLA || 24;
+            const isAccepted = (issue.citizenConfirmedAI === 1 || issue.citizenConfirmedAI === true || issue.citizenConfirmedAI === 'true');
+            const overrideReason = issue.aiOverrideReason || (isAccepted ? '' : 'Citizen manually modified department or severity');
 
-          <div style="background: rgba(56, 189, 248, 0.06); padding: 0.65rem 0.85rem; border-left: 3px solid #38bdf8; border-radius: 4px; font-size: 0.8rem; color: #cbd5e1; line-height: 1.45;">
-            <strong>Observable Reasoning:</strong> ${issue.aiReasoning || 'Public safety and urban health impact assessed via keyword NLP and geospatial weighting. Prioritized under standard 48-hour municipal turnaround.'}
-          </div>
-        </div>
+            return `
+              <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: var(--radius-md); padding: 1.15rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                  <div style="font-weight: 800; font-size: 0.92rem; color: #38bdf8; display: flex; align-items: center; gap: 0.45rem;">
+                    <span>🤖</span> CIVIC AI ENGINE — GOVERNANCE AUDIT & RISK PROFILE
+                  </div>
+                  <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">Deterministic Decision Support</span>
+                </div>
 
-        <!-- 5-Stage Live Order-Style Tracking Stepper -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; font-size: 0.8rem; margin-bottom: 0.85rem;">
+                  <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                    <div style="color: #94a3b8; font-size: 0.72rem;">AI Risk Score:</div>
+                    <div style="font-family: var(--font-mono); font-weight: 800; font-size: 1.15rem; color: ${riskColor};">${risk} / 100</div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                    <div style="color: #94a3b8; font-size: 0.72rem;">Suggested Department:</div>
+                    <div style="font-weight: 700; color: white;">${issue.aiSuggestedDepartment || deptName}</div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                    <div style="color: #94a3b8; font-size: 0.72rem;">Suggested Category:</div>
+                    <div style="font-weight: 700; color: white;">${issue.aiSuggestedCategory || issue.category || 'N/A'}</div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                    <div style="color: #94a3b8; font-size: 0.72rem;">AI Suggested SLA:</div>
+                    <div style="font-weight: 700; color: #34d399;">${sla} Hours</div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                    <div style="color: #94a3b8; font-size: 0.72rem;">Rule Confidence:</div>
+                    <div style="font-weight: 700; color: #38bdf8;">${conf}%</div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                    <div style="color: #94a3b8; font-size: 0.72rem;">Citizen Confirmation:</div>
+                    <div style="font-weight: 700; color: ${isAccepted ? '#34d399' : '#f59e0b'};">
+                      ${isAccepted ? '✅ Confirmed AI Suggestion' : '✏️ Overridden by Citizen'}
+                    </div>
+                  </div>
+                </div>
+
+                ${!isAccepted && overrideReason ? `
+                  <div style="margin-bottom: 0.75rem; padding: 0.5rem 0.75rem; background: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 0.78rem; color: #fde68a;">
+                    <strong>Citizen Override Reason:</strong> ${overrideReason}
+                  </div>
+                ` : ''}
+
+                <div style="background: rgba(56, 189, 248, 0.06); padding: 0.65rem 0.85rem; border-left: 3px solid #38bdf8; border-radius: 4px; font-size: 0.8rem; color: #cbd5e1; line-height: 1.45; margin-bottom: 0.75rem;">
+                  <strong>Observable Reasoning:</strong> ${issue.aiReasoning || 'Identified hazard via keyword pattern matching. Prioritized under standard municipal SLA.'}
+                </div>
+
+                <div style="font-size: 0.72rem; color: #94a3b8; font-style: italic;">
+                  ⚖️ <strong>Advisory Decision Support:</strong> Human-in-the-loop governance is enforced. Municipal officers independently verify all AI classifications prior to field crew assignment.
+                </div>
+              </div>`;
+          })()}
+
+          <!-- 5-Stage Live Order-Style Tracking Stepper -->
         <div>
           <div style="font-size: 0.95rem; font-weight: 800; color: white; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; align-items: center; gap: 0.5rem;">
