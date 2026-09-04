@@ -1,6 +1,7 @@
 """Clean & Safe India - Real-Time Backend Server (Python 3.14)"""
 import os
 import sys
+import re
 import json
 import time
 import sqlite3
@@ -269,7 +270,12 @@ def init_database():
         ('aiConfidence', 'REAL DEFAULT 0.0'),
         ('aiReasoning', 'TEXT'),
         ('aiSuggestedSLA', 'REAL'),
-        ('slaBreachProb', 'REAL DEFAULT 0.0')
+        ('slaBreachProb', 'REAL DEFAULT 0.0'),
+        ('aiSuggestedDepartment', 'TEXT'),
+        ('aiSuggestedCategory', 'TEXT'),
+        ('aiSuggestedSeverity', 'TEXT'),
+        ('citizenConfirmedAI', 'INTEGER DEFAULT 1'),
+        ('aiOverrideReason', 'TEXT')
     ]
     for col_name, col_type in new_issue_cols:
         if col_name not in existing_issue_cols:
@@ -828,7 +834,18 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'lng': body.get('lng', 81.8045),
                 'vendorId': body.get('vendorId'),
                 'vendorName': body.get('vendorName'),
-                'mq135GasPpm': body.get('mq135GasPpm')
+                'mq135GasPpm': body.get('mq135GasPpm'),
+                'clusterId': body.get('clusterId'),
+                'aiRiskScore': body.get('aiRiskScore', 50),
+                'aiConfidence': body.get('aiConfidence', 0.0),
+                'aiReasoning': body.get('aiReasoning', ''),
+                'aiSuggestedSLA': body.get('aiSuggestedSLA', 48.0),
+                'slaBreachProb': body.get('slaBreachProb', 0.1),
+                'aiSuggestedDepartment': body.get('aiSuggestedDepartment', body.get('department', 'sanitation')),
+                'aiSuggestedCategory': body.get('aiSuggestedCategory', body.get('category')),
+                'aiSuggestedSeverity': body.get('aiSuggestedSeverity', body.get('severity')),
+                'citizenConfirmedAI': int(body.get('citizenConfirmedAI', 1)),
+                'aiOverrideReason': body.get('aiOverrideReason', '')
             }
 
             cols = ', '.join(new_issue.keys())
@@ -1163,37 +1180,199 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
         # ---------------------------------------------------------------------
         if path == '/api/ai/complaint-intelligence':
             text = (body.get('text') or '').strip()
+            loc_input = (body.get('location') or '').strip()
             if not text:
-                self.send_json_response({'success': False, 'error': 'text is required.'}, status=400)
+                self.send_json_response({'success': False, 'error': 'Complaint description text is required.'}, status=400)
                 return
-            # Prepared baseline NLP extraction contract
+
             q_lower = text.lower()
+
+            # 1. Location Sensitivity Extraction
+            sensitivity = 'General Area'
+            if any(w in q_lower for w in ['college', 'school', 'university', 'campus', 'student', 'classroom', 'hostel']):
+                sensitivity = 'Educational Zone'
+            elif any(w in q_lower for w in ['hospital', 'clinic', 'dispensary', 'patient', 'doctor', 'ambulance']):
+                sensitivity = 'Hospital & Medical Zone'
+            elif any(w in q_lower for w in ['market', 'bazaar', 'shop', 'vendor', 'stall', 'commercial', 'supermarket']):
+                sensitivity = 'Commercial Market Zone'
+            elif any(w in q_lower for w in ['highway', 'flyover', 'junction', 'cross', 'main road', 'traffic', 'expressway', 'road']):
+                sensitivity = 'Public Road / Transit Corridor'
+            elif any(w in q_lower for w in ['colony', 'apartment', 'house', 'nagar', 'residential', 'society', 'street']):
+                sensitivity = 'Residential Zone'
+            elif any(w in q_lower for w in ['substation', 'feeder', 'water tank', 'pump', 'transformer', 'grid']):
+                sensitivity = 'Critical Infrastructure'
+
+            # 2. Department & Category Classification
             dept = 'sanitation'
+            dept_name = 'Sanitation & Waste Management'
+            dept_icon = '🏢'
             cat = 'garbage_overflow'
-            urgency = 75
-            if any(w in q_lower for w in ['spark', 'wire', 'transformer', 'power', 'electric', 'current']):
+            cat_name = 'Garbage Overflow'
+            cat_icon = '🗑️'
+            suggested_title = 'Garbage Overflow Report'
+
+            if any(w in q_lower for w in ['spark', 'wire', 'transformer', 'shock', 'electric', 'current', 'cable', 'pole', 'power', 'outage', 'voltage', 'blackout']):
                 dept = 'electricity'
-                cat = 'sparking_wire'
-                urgency = 92
-            elif any(w in q_lower for w in ['water', 'pipe', 'leak', 'drain', 'flood']):
+                dept_name = 'Smart Electricity Department'
+                dept_icon = '⚡'
+                if any(w in q_lower for w in ['outage', 'blackout', 'no power', 'power out', 'power has been out', 'power is out', 'power cut', 'cut', 'tripped', 'no current', 'current cut', 'load shedding']):
+                    cat = 'power_outage'
+                    cat_name = 'Power Outage / Line Tripped'
+                    cat_icon = '🔌'
+                    suggested_title = 'Unscheduled Power Outage'
+                else:
+                    cat = 'sparking_wire'
+                    cat_name = 'Sparking Cable / Electrical Hazard'
+                    cat_icon = '⚡'
+                    suggested_title = 'Sparking Wire / Electrical Hazard'
+            elif any(w in q_lower for w in ['pothole', 'crater', 'asphalt', 'tar', 'road damage', 'broken road', 'accident', 'pavement']):
                 dept = 'sanitation'
-                cat = 'water_leakage'
-                urgency = 80
-            elif any(w in q_lower for w in ['food', 'hotel', 'stall', 'oil', 'rotten', 'stale']):
+                dept_name = 'Sanitation & Urban Roads'
+                dept_icon = '🏢'
+                cat = 'pothole'
+                cat_name = 'Pothole & Road Deterioration'
+                cat_icon = '🕳️'
+                suggested_title = 'Dangerous Pothole & Road Damage'
+            elif any(w in q_lower for w in ['water', 'pipe', 'leak', 'burst', 'drain', 'sewage', 'clog', 'silt', 'gutter', 'flood', 'waterlogging']):
+                dept = 'sanitation'
+                dept_name = 'Sanitation & Urban Drainage'
+                dept_icon = '🏢'
+                if any(w in q_lower for w in ['drain', 'sewage', 'clog', 'silt', 'gutter', 'flood', 'waterlogging']):
+                    cat = 'drain_blockage'
+                    cat_name = 'Drainage Blockage & Waterlogging'
+                    cat_icon = '🌊'
+                    suggested_title = 'Clogged Drain & Standing Water'
+                else:
+                    cat = 'water_leakage'
+                    cat_name = 'Water Pipeline Leakage'
+                    cat_icon = '🚰'
+                    suggested_title = 'Water Pipeline Leakage'
+            elif any(w in q_lower for w in ['food', 'hotel', 'restaurant', 'dhaba', 'stall', 'oil', 'stale', 'rotten', 'spoilage', 'unhygienic', 'fssai', 'tiffin']):
                 dept = 'food_safety'
+                dept_name = 'Food Safety & Hygiene'
+                dept_icon = '🍲'
                 cat = 'food_hygiene'
-                urgency = 78
+                cat_name = 'Food Hygiene Violation'
+                cat_icon = '🍱'
+                suggested_title = 'Unsanitary Food Preparation / Spoilage'
+            else:
+                dept = 'sanitation'
+                dept_name = 'Sanitation & Waste Management'
+                dept_icon = '🏢'
+                cat = 'garbage_overflow'
+                cat_name = 'Garbage Overflow & Waste Pile'
+                cat_icon = '🗑️'
+                suggested_title = 'Garbage Overflow Hazard'
+
+            # 3. Urgency Score Calculation (0-100)
+            base_urgency = 62
+            if dept == 'electricity':
+                base_urgency = 88 if cat == 'sparking_wire' else 75
+            elif cat == 'pothole' and any(w in q_lower for w in ['accident', 'danger', 'injury', 'damage', 'causing']):
+                base_urgency = 82
+            elif cat == 'garbage_overflow':
+                base_urgency = 70
+            elif cat == 'food_hygiene':
+                base_urgency = 78
+
+            # Duration bonus
+            if any(w in q_lower for w in ['3 days', 'three days', 'week', 'weeks', 'several days', 'days', 'long time', 'daily']):
+                base_urgency += 10
+            elif any(w in q_lower for w in ['since morning', 'hours', 'today']):
+                base_urgency += 5
+
+            # Location sensitivity bonus
+            if sensitivity in ['Educational Zone', 'Hospital & Medical Zone', 'Critical Infrastructure']:
+                base_urgency += 8
+            elif sensitivity in ['Commercial Market Zone', 'Public Road / Transit Corridor']:
+                base_urgency += 5
+
+            urgency_score = min(98, max(25, base_urgency))
+
+            # 4. Severity Mapping
+            if urgency_score >= 82:
+                severity = 'Critical'
+                form_severity = 'bulk'
+            elif urgency_score >= 70:
+                severity = 'High'
+                form_severity = 'bulk'
+            elif urgency_score >= 45:
+                severity = 'Medium'
+                form_severity = 'medium'
+            else:
+                severity = 'Low'
+                form_severity = 'low'
+
+            # 5. Suggested SLA
+            if urgency_score >= 82:
+                suggested_sla = 12.0
+            elif urgency_score >= 70:
+                suggested_sla = 24.0
+            else:
+                suggested_sla = 48.0
+
+            # 6. Confidence Score (Calculated from keyword density & phrasing structure)
+            words = re.findall(r'\w+', q_lower)
+            confidence = min(0.96, max(0.85, 0.86 + (min(len(words), 25) / 25.0 * 0.09)))
+            confidence = round(confidence, 2)
+
+            # 7. Human-safe Observable Reasoning
+            reasons = []
+            if sensitivity != 'General Area':
+                reasons.append(f"identified {sensitivity.lower()}")
+            if any(w in q_lower for w in ['3 days', 'three days', 'week', 'days']):
+                reasons.append("multi-day hazard persistence")
+            if any(w in q_lower for w in ['smell', 'stench', 'odor', 'bad smell']):
+                reasons.append("public health odor nuisance")
+            if any(w in q_lower for w in ['accident', 'injury', 'accidents', 'shock', 'spark']):
+                reasons.append("active risk to pedestrian and vehicular safety")
+
+            if reasons:
+                reasoning = f"Complaint mentions {cat_name.lower()} in a {sensitivity.lower()} ({', '.join(reasons)}), elevating urgency to {urgency_score}/100."
+            else:
+                reasoning = f"Complaint classified under {dept_name} as {cat_name} based on observable civic keywords."
+
+            # 8. Multi-Factor Civic Risk Score (0-100)
+            pop_factor = 9 if sensitivity in ['Educational Zone', 'Hospital & Medical Zone'] else (8 if sensitivity in ['Commercial Market Zone', 'Public Road / Transit Corridor'] else 6)
+            sev_factor = 9 if severity in ['Critical', 'High'] else 6
+            raw_risk = (sev_factor * 2.5) + (pop_factor * 2.0) + (7 * 2.0) + (8 * 2.0) + (confidence * 15.0)
+            civic_risk_score = min(100, max(15, round(raw_risk)))
+            risk_level = 'Critical' if civic_risk_score >= 81 else ('High' if civic_risk_score >= 61 else ('Medium' if civic_risk_score >= 31 else 'Low'))
+
+            # 9. Audit Log Entry in ai_predictions
+            try:
+                conn = get_db_connection()
+                cur = conn.cursor()
+                pred_id = f"PRED-{int(time.time()*1000)}"
+                cur.execute('''
+                    INSERT INTO ai_predictions (id, entityType, entityId, predictionType, confidenceScore, reasoning, recommendedAction, createdAt)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (pred_id, 'issue/draft', 'DRAFT-' + str(int(time.time()) % 10000), 'complaint_intelligence', confidence, reasoning, f"Recommend triage to {dept_name} with {suggested_sla}h SLA", int(time.time()*1000)))
+                conn.commit()
+                conn.close()
+            except Exception as pred_err:
+                print(f"[AI Audit Note]: {pred_err}")
 
             self.send_json_response({
                 'success': True,
                 'aiDepartment': dept,
+                'aiDeptName': dept_name,
+                'aiDeptIcon': dept_icon,
                 'aiCategory': cat,
-                'aiSeverity': 'High' if urgency >= 80 else 'Medium',
-                'aiPriorityScore': urgency,
-                'aiConfidence': 0.92,
-                'aiReasoning': 'Extracted civic keywords and contextual hazard severity indicators.',
-                'aiSuggestedSLA': 12.0 if urgency >= 85 else 24.0,
-                'isAdvisoryOnly': True
+                'aiCategoryName': cat_name,
+                'aiCategoryIcon': cat_icon,
+                'aiSeverity': severity,
+                'formSeverity': form_severity,
+                'aiUrgencyScore': urgency_score,
+                'aiSuggestedSLA': suggested_sla,
+                'aiLocationSensitivity': sensitivity,
+                'aiConfidence': confidence,
+                'aiReasoning': reasoning,
+                'aiRiskScore': civic_risk_score,
+                'aiRiskLevel': risk_level,
+                'suggestedTitle': suggested_title,
+                'isAdvisoryOnly': True,
+                'analysisSource': 'deterministic_local_rules'
             })
             return
 

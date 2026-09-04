@@ -393,57 +393,155 @@
   const CivicAiEngine = {
     // 1. Complaint Intelligence: NLP parsing of unstructured citizen text
     ComplaintIntelligence: {
-      parseComplaint: function(text) {
+      parseComplaint: async function(text) {
         if (!text || typeof text !== 'string') {
           return { error: 'Empty text input' };
         }
-        const q = text.toLowerCase();
-        let dept = 'sanitation';
-        let cat = 'garbage_overflow';
-        let urgency = 65;
-        let reasoning = 'Standard municipal sanitation inquiry detected.';
 
-        if (q.includes('spark') || q.includes('wire') || q.includes('transformer') || q.includes('shock') || q.includes('electric') || q.includes('cable')) {
-          dept = 'electricity';
-          cat = 'sparking_wire';
-          urgency = 92;
-          reasoning = 'High voltage electrical hazard detected. Potential life safety hazard requiring rapid isolation.';
-        } else if (q.includes('water') || q.includes('leak') || q.includes('pipe') || q.includes('drain') || q.includes('sewage') || q.includes('flood')) {
-          dept = 'sanitation';
-          cat = 'water_leakage';
-          urgency = 78;
-          reasoning = 'Urban hydraulic infrastructure leakage or drainage overflow detected.';
-        } else if (q.includes('food') || q.includes('hotel') || q.includes('restaurant') || q.includes('oil') || q.includes('stale') || q.includes('rotten') || q.includes('smell')) {
-          dept = 'food_safety';
-          cat = 'food_hygiene';
-          urgency = 82;
-          reasoning = 'Food adulteration or microbial spoilage risk detected in commercial dining zone.';
-        } else if (q.includes('pothole') || q.includes('road') || q.includes('crater') || q.includes('asphalt') || q.includes('tar')) {
-          dept = 'sanitation';
-          cat = 'pothole';
-          urgency = 70;
-          reasoning = 'Pavement structural deterioration detected affecting vehicular transit.';
-        } else if (q.includes('garbage') || q.includes('waste') || q.includes('dump') || q.includes('trash') || q.includes('bin')) {
-          dept = 'sanitation';
-          cat = 'garbage_overflow';
-          urgency = 80;
-          reasoning = 'Solid municipal waste accumulation in pedestrian transit corridor.';
+        // 1. Try Backend REST API Endpoint first
+        try {
+          const resp = await fetch('/api/ai/complaint-intelligence', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            if (data.success) {
+              return data;
+            }
+          }
+        } catch (netErr) {
+          console.warn('[Civic AI] Backend AI unreachable, executing deterministic local intelligence fallback:', netErr);
         }
 
-        const suggestedSla = urgency >= 85 ? 12.0 : (urgency >= 75 ? 24.0 : 48.0);
+        // 2. Deterministic Local Intelligence Fallback (Guaranteed 100% Offline / Standalone Capability)
+        const q = text.toLowerCase();
+        let dept = 'sanitation';
+        let deptName = 'Sanitation & Waste Management';
+        let deptIcon = '🏢';
+        let cat = 'garbage_overflow';
+        let catName = 'Garbage Overflow';
+        let catIcon = '🗑️';
+        let suggestedTitle = 'Garbage Overflow Hazard';
+
+        let sensitivity = 'General Area';
+        if (q.includes('college') || q.includes('school') || q.includes('university') || q.includes('campus') || q.includes('student')) {
+          sensitivity = 'Educational Zone';
+        } else if (q.includes('hospital') || q.includes('clinic') || q.includes('patient') || q.includes('doctor')) {
+          sensitivity = 'Hospital & Medical Zone';
+        } else if (q.includes('market') || q.includes('bazaar') || q.includes('shop') || q.includes('vendor') || q.includes('commercial')) {
+          sensitivity = 'Commercial Market Zone';
+        } else if (q.includes('highway') || q.includes('flyover') || q.includes('junction') || q.includes('main road') || q.includes('traffic') || q.includes('road')) {
+          sensitivity = 'Public Road / Transit Corridor';
+        } else if (q.includes('colony') || q.includes('apartment') || q.includes('house') || q.includes('society') || q.includes('street')) {
+          sensitivity = 'Residential Zone';
+        }
+
+        if (q.includes('spark') || q.includes('wire') || q.includes('transformer') || q.includes('shock') || q.includes('electric') || q.includes('cable') || q.includes('power') || q.includes('outage')) {
+          dept = 'electricity';
+          deptName = 'Smart Electricity Department';
+          deptIcon = '⚡';
+          if (q.includes('outage') || q.includes('blackout') || q.includes('no power') || q.includes('power out') || q.includes('power has been out') || q.includes('power is out') || q.includes('power cut') || q.includes('cut')) {
+            cat = 'power_outage';
+            catName = 'Power Outage / Line Tripped';
+            catIcon = '🔌';
+            suggestedTitle = 'Unscheduled Power Outage';
+          } else {
+            cat = 'sparking_wire';
+            catName = 'Sparking Cable / Electrical Hazard';
+            catIcon = '⚡';
+            suggestedTitle = 'Sparking Wire / Electrical Hazard';
+          }
+        } else if (q.includes('pothole') || q.includes('crater') || q.includes('asphalt') || q.includes('tar') || q.includes('broken road') || q.includes('accident')) {
+          dept = 'sanitation';
+          deptName = 'Sanitation & Urban Roads';
+          deptIcon = '🏢';
+          cat = 'pothole';
+          catName = 'Pothole & Road Deterioration';
+          catIcon = '🕳️';
+          suggestedTitle = 'Dangerous Pothole & Road Damage';
+        } else if (q.includes('water') || q.includes('pipe') || q.includes('leak') || q.includes('burst') || q.includes('drain') || q.includes('sewage') || q.includes('flood') || q.includes('waterlogging')) {
+          dept = 'sanitation';
+          deptName = 'Sanitation & Urban Drainage';
+          deptIcon = '🏢';
+          if (q.includes('drain') || q.includes('sewage') || q.includes('clog') || q.includes('silt') || q.includes('gutter') || q.includes('waterlogging')) {
+            cat = 'drain_blockage';
+            catName = 'Drainage Blockage & Waterlogging';
+            catIcon = '🌊';
+            suggestedTitle = 'Clogged Drain & Standing Water';
+          } else {
+            cat = 'water_leakage';
+            catName = 'Water Pipeline Leakage';
+            catIcon = '🚰';
+            suggestedTitle = 'Water Pipeline Leakage';
+          }
+        } else if (q.includes('food') || q.includes('hotel') || q.includes('restaurant') || q.includes('dhaba') || q.includes('oil') || q.includes('stale') || q.includes('rotten') || q.includes('spoilage')) {
+          dept = 'food_safety';
+          deptName = 'Food Safety & Hygiene';
+          deptIcon = '🍲';
+          cat = 'food_hygiene';
+          catName = 'Food Hygiene Violation';
+          catIcon = '🍱';
+          suggestedTitle = 'Unsanitary Food Preparation / Spoilage';
+        }
+
+        let urgency = 62;
+        if (dept === 'electricity') urgency = (cat === 'sparking_wire' ? 88 : 75);
+        else if (cat === 'pothole' && (q.includes('accident') || q.includes('danger') || q.includes('injury') || q.includes('causing'))) urgency = 82;
+        else if (cat === 'garbage_overflow') urgency = 70;
+        else if (cat === 'food_hygiene') urgency = 78;
+
+        if (q.includes('3 days') || q.includes('three days') || q.includes('week') || q.includes('days')) urgency += 10;
+        if (q.includes('since morning') || q.includes('hours') || q.includes('today')) urgency += 5;
+        if (sensitivity === 'Educational Zone' || sensitivity === 'Hospital & Medical Zone') urgency += 8;
+        else if (sensitivity === 'Commercial Market Zone' || sensitivity === 'Public Road / Transit Corridor') urgency += 5;
+        urgency = Math.min(98, Math.max(25, urgency));
+
+        const suggestedSla = urgency >= 82 ? 12.0 : (urgency >= 70 ? 24.0 : 48.0);
+        const formSeverity = urgency >= 70 ? 'bulk' : (urgency >= 45 ? 'medium' : 'low');
+        const severity = urgency >= 82 ? 'Critical' : (urgency >= 70 ? 'High' : (urgency >= 45 ? 'Medium' : 'Low'));
+        const confidence = 0.90;
+
+        const reasons = [];
+        if (sensitivity !== 'General Area') reasons.push(`identified ${sensitivity.toLowerCase()}`);
+        if (q.includes('3 days') || q.includes('three days') || q.includes('days')) reasons.push('multi-day hazard persistence');
+        if (q.includes('smell') || q.includes('stench') || q.includes('bad smell')) reasons.push('public health odor nuisance');
+        if (q.includes('accident') || q.includes('injury') || q.includes('shock')) reasons.push('active risk to pedestrian and vehicular safety');
+
+        const reasoning = reasons.length > 0
+          ? `Complaint mentions ${catName.toLowerCase()} in a ${sensitivity.toLowerCase()} (${reasons.join(', ')}), elevating urgency to ${urgency}/100.`
+          : `Complaint classified under ${deptName} as ${catName} based on observable civic keywords.`;
+
+        // Multi-factor Risk Score from CivicAiEngine.RiskScoring
+        const riskCalc = CivicAiEngine.RiskScoring.calculateRiskScore({
+          severity: severity === 'Critical' ? 9 : (severity === 'High' ? 8 : 5),
+          populationSensitivity: sensitivity === 'Educational Zone' || sensitivity === 'Hospital & Medical Zone' ? 9 : 7,
+          recurrence: 6,
+          slaUrgency: 7,
+          evidenceConfidence: confidence
+        });
 
         return {
+          success: true,
           aiDepartment: dept,
+          aiDeptName: deptName,
+          aiDeptIcon: deptIcon,
           aiCategory: cat,
-          aiSeverity: urgency >= 85 ? 'bulk' : (urgency >= 70 ? 'standard' : 'low'),
-          aiPriorityScore: urgency,
-          aiConfidence: 0.91,
-          aiReasoning: reasoning,
+          aiCategoryName: catName,
+          aiCategoryIcon: catIcon,
+          aiSeverity: severity,
+          formSeverity: formSeverity,
+          aiUrgencyScore: urgency,
           aiSuggestedSLA: suggestedSla,
+          aiLocationSensitivity: sensitivity,
+          aiConfidence: confidence,
+          aiReasoning: reasoning,
+          aiRiskScore: riskCalc.riskScore,
+          aiRiskLevel: riskCalc.riskLevel,
+          suggestedTitle: suggestedTitle,
           isAdvisoryOnly: true,
-          officerOverride: false,
-          overrideReason: null,
-          auditTrail: [{ action: 'AI_NLP_PARSED', timestamp: Date.now() }]
+          analysisSource: 'AI-assisted demo analysis'
         };
       }
     },
@@ -680,6 +778,109 @@
   };
 
   window.CivicAiEngine = CivicAiEngine;
+
+  // =========================================================================
+  // PHASE 2: AI COMPLAINT INTELLIGENCE CONTROLLER
+  // =========================================================================
+  window.currentAiAnalysisData = null;
+
+  window.analyzeComplaintWithAi = async function() {
+    const textInput = document.getElementById('aiComplaintTextInput');
+    const descInput = document.getElementById('reportDescInput');
+    const text = (textInput ? textInput.value : '') || (descInput ? descInput.value : '');
+
+    if (!text || text.trim().length < 5) {
+      showToast('Please describe your civic problem first!', 'warning', '✍️');
+      if (textInput) textInput.focus();
+      return;
+    }
+
+    const indicator = document.getElementById('aiAnalyzingIndicator');
+    const resultCard = document.getElementById('aiAnalysisResultCard');
+    const btnText = document.getElementById('aiAnalyzeBtnText');
+
+    if (indicator) indicator.style.display = 'flex';
+    if (resultCard) resultCard.style.display = 'none';
+    if (btnText) btnText.textContent = 'Analyzing...';
+
+    try {
+      const data = await CivicAiEngine.ComplaintIntelligence.parseComplaint(text.trim());
+      if (data.error) throw new Error(data.error);
+
+      window.currentAiAnalysisData = data;
+
+      // Populate UI Card
+      const resDept = document.getElementById('aiResDept');
+      const resCategory = document.getElementById('aiResCategory');
+      const resSeverity = document.getElementById('aiResSeverity');
+      const resUrgency = document.getElementById('aiResUrgency');
+      const resSla = document.getElementById('aiResSla');
+      const resSens = document.getElementById('aiResSensitivity');
+      const resRisk = document.getElementById('aiResRiskScore');
+      const resBadge = document.getElementById('aiResRiskBadge');
+      const resReasoning = document.getElementById('aiResReasoning');
+      const confBadge = document.getElementById('aiAnalysisConfidenceBadge');
+
+      if (resDept) resDept.textContent = data.aiDeptName || data.aiDepartment;
+      if (resCategory) resCategory.textContent = data.aiCategoryName || data.aiCategory;
+      if (resSeverity) {
+        resSeverity.textContent = data.aiSeverity;
+        resSeverity.style.color = data.aiSeverity === 'Critical' ? '#f87171' : (data.aiSeverity === 'High' ? '#fb923c' : '#34d399');
+      }
+      if (resUrgency) resUrgency.textContent = `${data.aiUrgencyScore} / 100`;
+      if (resSla) resSla.textContent = `${data.aiSuggestedSLA} hours`;
+      if (resSens) resSens.textContent = data.aiLocationSensitivity;
+      if (resRisk) resRisk.textContent = `${data.aiRiskScore} / 100`;
+      if (resBadge) {
+        const isCrit = data.aiRiskScore >= 81;
+        const isHigh = data.aiRiskScore >= 61;
+        resBadge.textContent = isCrit ? '🔴 Critical Risk' : (isHigh ? '🟠 High Risk' : (data.aiRiskScore >= 31 ? '🟡 Medium Risk' : '🟢 Low Risk'));
+        resBadge.style.color = isCrit ? '#f87171' : (isHigh ? '#fb923c' : (data.aiRiskScore >= 31 ? '#facc15' : '#34d399'));
+        resBadge.style.borderColor = resBadge.style.color;
+        resBadge.style.background = isCrit ? 'rgba(248, 113, 113, 0.15)' : 'rgba(251, 146, 60, 0.15)';
+      }
+      if (resReasoning) resReasoning.textContent = data.aiReasoning;
+      if (confBadge) confBadge.textContent = `Confidence: ${Math.round(data.aiConfidence * 100)}% (${data.analysisSource || 'Deterministic Rules'})`;
+
+      // Pre-fill form dropdowns and inputs
+      const deptSelect = document.getElementById('reportDeptSelect');
+      const titleInput = document.getElementById('reportTitleInput');
+      const severitySelect = document.getElementById('reportSeveritySelect');
+
+      if (deptSelect && data.aiDepartment) {
+        deptSelect.value = data.aiDepartment;
+      }
+      if (titleInput && (!titleInput.value || titleInput.value.length < 5)) {
+        titleInput.value = data.suggestedTitle || (text.slice(0, 45) + (text.length > 45 ? '...' : ''));
+      }
+      if (severitySelect && data.formSeverity) {
+        severitySelect.value = data.formSeverity;
+      }
+      if (descInput) {
+        descInput.value = text;
+      }
+
+      if (resultCard) resultCard.style.display = 'block';
+      playNotificationSound('chime');
+      showToast('AI suggestions ready! Please review before submitting.', 'info', '🤖');
+    } catch (err) {
+      console.error('[AI Analysis Error]:', err);
+      showToast('AI analysis is temporarily unavailable. You can continue by selecting the details manually.', 'warning', 'ℹ️');
+    } finally {
+      if (indicator) indicator.style.display = 'none';
+      if (btnText) btnText.textContent = 'Analyze with Civic AI';
+    }
+  };
+
+  window.applyAiSuggestionsToForm = function() {
+    const editAnchor = document.getElementById('reportDeptSelect');
+    if (editAnchor) {
+      editAnchor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      editAnchor.focus();
+      showToast('Review and modify any fields below before registering.', 'info', '✏️');
+    }
+  };
+
 
   // =========================================================================
   // 3. MOCK DATABASE WITH 100% UNIQUE HIGH-QUALITY INCIDENT IMAGES
@@ -3548,7 +3749,9 @@
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      showToast('Speech Recognition not supported on this browser. Please use Chrome, Edge, or Android Chrome.', 'error', '🎙️');
+      showToast('Voice input is not supported in this browser. Please type your complaint.', 'warning', '🎙️');
+      const textInput = document.getElementById('aiComplaintTextInput');
+      if (textInput) textInput.focus();
       return;
     }
 
@@ -3590,6 +3793,10 @@
         if (spokenText) {
           if (descInput) {
             descInput.value = spokenText;
+          }
+          const aiTextInput = document.getElementById('aiComplaintTextInput');
+          if (aiTextInput) {
+            aiTextInput.value = spokenText;
           }
           if (titleInput && (!titleInput.value || titleInput.value.length < 5)) {
             titleInput.value = spokenText.slice(0, 45) + (spokenText.length > 45 ? '...' : '');
@@ -4923,6 +5130,9 @@
         const submittedImage = selectedReportImageBase64 || 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80';
 
         try {
+          const aiMeta = window.currentAiAnalysisData || {};
+          const isAiConfirmed = aiMeta.aiDepartment ? (dept === aiMeta.aiDepartment ? 1 : 0) : 1;
+
           const newIssue = db.createIssue({
             state: state,
             city: city,
@@ -4936,13 +5146,26 @@
             title: title,
             description: desc,
             location: `${ward}, ${street}, ${city}`,
-            category: 'garbage',
-            categoryName: 'Civic Report',
-            categoryIcon: '📢',
+            category: aiMeta.aiCategory || 'garbage',
+            categoryName: aiMeta.aiCategoryName || 'Civic Report',
+            categoryIcon: aiMeta.aiCategoryIcon || '📢',
             severity: document.getElementById('reportSeveritySelect').value,
             severityLabel: 'ACTIVE',
-            imageBefore: submittedImage
+            imageBefore: submittedImage,
+            // Phase 2 AI Fields Persisted
+            aiRiskScore: aiMeta.aiRiskScore || 50,
+            aiConfidence: aiMeta.aiConfidence || 0.0,
+            aiReasoning: aiMeta.aiReasoning || '',
+            aiSuggestedSLA: aiMeta.aiSuggestedSLA || 48.0,
+            slaBreachProb: aiMeta.slaBreachProb || 0.1,
+            aiSuggestedDepartment: aiMeta.aiDepartment || dept,
+            aiSuggestedCategory: aiMeta.aiCategory || 'garbage',
+            aiSuggestedSeverity: aiMeta.aiSeverity || 'Medium',
+            citizenConfirmedAI: isAiConfirmed,
+            aiOverrideReason: isAiConfirmed ? '' : 'Citizen adjusted department manually'
           });
+
+          window.currentAiAnalysisData = null;
 
           reportForm.reset();
           window.clearSelectedImage();

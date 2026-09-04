@@ -1273,6 +1273,82 @@
             </button>
           </div>
 
+          <!-- STEP 1: NATURAL LANGUAGE COMPLAINT & CIVIC AI INTELLIGENCE -->
+          <div class="ai-complaint-box" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(16, 185, 129, 0.05)); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 12px; padding: 1.15rem; margin-bottom: 1.25rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.3rem;">🤖</span>
+                <div>
+                  <div style="font-weight: 800; font-size: 0.92rem; color: #38bdf8;">Step 1 — Describe your civic problem naturally</div>
+                  <div style="font-size: 0.74rem; color: #94a3b8;">Civic AI auto-understands department, category, SLA & urgency</div>
+                </div>
+              </div>
+              <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">Human-in-the-Loop</span>
+            </div>
+
+            <textarea id="aiComplaintTextInput" class="form-textarea" style="min-height: 85px; font-size: 0.88rem; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.3); color: white; margin-bottom: 0.75rem; line-height: 1.5;" placeholder="Describe your civic problem... (e.g. Garbage has been overflowing near our college for the last 3 days and there is a bad smell.)"></textarea>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap;">
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary btn-ai-analyze" id="btnAnalyzeComplaintAi" onclick="window.analyzeComplaintWithAi()" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: 700; font-size: 0.84rem; padding: 0.55rem 1.1rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                  <span>🤖</span> <span id="aiAnalyzeBtnText">Analyze with Civic AI</span>
+                </button>
+                <button type="button" class="btn btn-outline" id="btnVoiceComplaintAi" onclick="window.toggleVoiceRecording()" style="font-size: 0.82rem; padding: 0.55rem 0.9rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer;">
+                  <span>🎤</span> <span id="voiceBtnLabel">Describe by Voice</span>
+                </button>
+              </div>
+              <span style="font-size: 0.72rem; color: #64748b;">Or fill fields manually below</span>
+            </div>
+
+            <!-- Analyzing Loading State -->
+            <div id="aiAnalyzingIndicator" style="display: none; align-items: center; gap: 0.6rem; margin-top: 0.85rem; padding: 0.65rem 0.85rem; background: rgba(56, 189, 248, 0.1); border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.3);">
+              <div style="width: 16px; height: 16px; border: 2px solid #38bdf8; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+              <span style="font-size: 0.8rem; color: #38bdf8; font-weight: 700;">Civic AI is analyzing your report...</span>
+            </div>
+
+            <!-- Expandable Structured Advisory Result Card -->
+            <div id="aiAnalysisResultCard" style="display: none; margin-top: 0.85rem; padding: 1rem; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.35);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem;">
+                <div style="font-weight: 800; font-size: 0.86rem; color: #38bdf8; display: flex; align-items: center; gap: 0.4rem;">
+                  <span>🤖</span> CIVIC AI ANALYSIS (ADVISORY)
+                </div>
+                <span class="badge" id="aiAnalysisConfidenceBadge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.72rem;">
+                  Confidence: 94%
+                </span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.65rem; font-size: 0.8rem; margin-bottom: 0.75rem;">
+                <div><span style="color: #94a3b8;">Department:</span> <strong id="aiResDept" style="color: white; margin-left: 4px;">Sanitation</strong></div>
+                <div><span style="color: #94a3b8;">Category:</span> <strong id="aiResCategory" style="color: white; margin-left: 4px;">Garbage Overflow</strong></div>
+                <div><span style="color: #94a3b8;">Severity:</span> <strong id="aiResSeverity" style="color: #fb923c; margin-left: 4px;">High</strong></div>
+                <div><span style="color: #94a3b8;">Urgency:</span> <strong id="aiResUrgency" style="color: #38bdf8; margin-left: 4px;">82 / 100</strong></div>
+                <div><span style="color: #94a3b8;">Suggested SLA:</span> <strong id="aiResSla" style="color: #34d399; margin-left: 4px;">12 hours</strong></div>
+                <div><span style="color: #94a3b8;">Sensitivity:</span> <strong id="aiResSensitivity" style="color: white; margin-left: 4px;">Educational Zone</strong></div>
+              </div>
+
+              <!-- AI-Assisted Civic Risk Score -->
+              <div style="padding: 0.55rem 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                  <div style="font-size: 0.72rem; color: #94a3b8;">AI-assisted Civic Risk:</div>
+                  <div style="font-family: var(--font-mono); font-weight: 800; font-size: 1.1rem; color: white;" id="aiResRiskScore">82 / 100</div>
+                </div>
+                <span class="badge" id="aiResRiskBadge" style="background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid #f87171; font-size: 0.75rem;">🔴 Critical Risk</span>
+              </div>
+
+              <!-- Observable Reasoning (Why?) -->
+              <div style="font-size: 0.78rem; color: #cbd5e1; background: rgba(56, 189, 248, 0.06); padding: 0.6rem 0.8rem; border-left: 3px solid #38bdf8; border-radius: 4px; line-height: 1.45; margin-bottom: 0.75rem;">
+                <strong>Why?</strong> <span id="aiResReasoning">Repeated overflow lasting 3 days in educational zone creating public health nuisance.</span>
+              </div>
+
+              <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
+                <span style="font-size: 0.72rem; color: #94a3b8;">⚠️ AI suggestions are advisory. Please review before submitting.</span>
+                <button type="button" class="btn btn-sm btn-outline" id="btnApplyAiSuggestions" onclick="window.applyAiSuggestionsToForm()" style="font-size: 0.76rem; padding: 0.4rem 0.75rem; border-color: #38bdf8; color: #38bdf8; cursor: pointer;">
+                  <span>✏️</span> Edit Suggestions Below
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Image & Camera Evidence Submission Zone -->
           <div class="image-submission-zone" id="reportImageSubmissionZone">
             <!-- Hidden File & Camera Inputs -->
@@ -1859,6 +1935,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=16.0.0"></script>
+  <script src="js/bundle.js?v=17.0.0"></script>
 </body>
 </html>

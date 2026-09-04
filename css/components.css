@@ -1772,3 +1772,23 @@
 }
 
 
+
+
+/* Phase 2 AI Complaint Intelligence Styles */
+.ai-complaint-box {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.btn-ai-analyze {
+  box-shadow: 0 2px 10px rgba(2, 132, 199, 0.35);
+  transition: all 0.2s ease;
+}
+.btn-ai-analyze:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.5);
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
