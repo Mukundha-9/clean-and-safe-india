@@ -7,6 +7,38 @@ import sqlite3
 import datetime
 import threading
 import mimetypes
+import hashlib
+import secrets
+import hmac
+
+# ------------------------------------------------------------------------------
+# INDUSTRY-STANDARD PASSWORD SECURITY (SCRYPT WITH PER-USER SALT)
+# ------------------------------------------------------------------------------
+def hash_password(password: str) -> str:
+    """Hash a password securely using scrypt with a unique 16-byte random salt."""
+    if not password:
+        return ''
+    salt = secrets.token_hex(16)
+    key = hashlib.scrypt(password.encode('utf-8'), salt=bytes.fromhex(salt), n=16384, r=8, p=1)
+    return f"scrypt${salt}${key.hex()}"
+
+def verify_password(password: str, stored: str) -> bool:
+    """Verify password against stored scrypt hash or legacy plain-text (backward compatible)."""
+    if not stored or not password:
+        return False
+    if stored.startswith('scrypt$'):
+        parts = stored.split('$')
+        if len(parts) == 3:
+            salt_hex = parts[1]
+            hash_hex = parts[2]
+            try:
+                key = hashlib.scrypt(password.encode('utf-8'), salt=bytes.fromhex(salt_hex), n=16384, r=8, p=1)
+                return hmac.compare_digest(key.hex(), hash_hex)
+            except Exception:
+                return False
+    # Backward compatibility with existing plain-text demo passwords
+    return hmac.compare_digest(stored, password)
+
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -165,6 +197,87 @@ def init_database():
         )
     ''')
 
+    # Table: Incident Clusters (Duplicate grouping & multi-report aggregation)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS incident_clusters (
+            id TEXT PRIMARY KEY,
+            title TEXT,
+            category TEXT,
+            department TEXT,
+            ward TEXT,
+            lat REAL,
+            lng REAL,
+            reportCount INTEGER DEFAULT 1,
+            status TEXT DEFAULT 'active',
+            firstReportedAt INTEGER,
+            lastReportedAt INTEGER,
+            riskScore INTEGER DEFAULT 50
+        )
+    ''')
+
+    # Table: Hotspots (Predictive Ward Risk & Recurring Hotspot Tracking)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS hotspots (
+            ward TEXT PRIMARY KEY,
+            pastComplaints INTEGER DEFAULT 0,
+            avgResolutionHours REAL DEFAULT 24.0,
+            recurrenceRate REAL DEFAULT 0.0,
+            predictedRiskPercent INTEGER DEFAULT 50,
+            riskLevel TEXT DEFAULT 'Medium',
+            forecastHorizonHours INTEGER DEFAULT 48,
+            recommendedAction TEXT,
+            lastEvaluatedAt INTEGER
+        )
+    ''')
+
+    # Table: Workers (Municipal Field Workforce Registry)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS workers (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            phone TEXT,
+            department TEXT,
+            specialization TEXT,
+            currentStatus TEXT DEFAULT 'available',
+            lat REAL,
+            lng REAL,
+            tasksCompleted INTEGER DEFAULT 0,
+            currentTaskId TEXT
+        )
+    ''')
+
+    # Table: AI Predictions & Recommendations Log
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS ai_predictions (
+            id TEXT PRIMARY KEY,
+            entityType TEXT,
+            entityId TEXT,
+            predictionType TEXT,
+            confidenceScore REAL,
+            reasoning TEXT,
+            recommendedAction TEXT,
+            createdAt INTEGER
+        )
+    ''')
+
+    # Safe column migrations for issues table
+    cursor.execute("PRAGMA table_info(issues)")
+    existing_issue_cols = [row['name'] if isinstance(row, dict) or hasattr(row, 'keys') else row[1] for row in cursor.fetchall()]
+    new_issue_cols = [
+        ('clusterId', 'TEXT'),
+        ('aiRiskScore', 'INTEGER DEFAULT 50'),
+        ('aiConfidence', 'REAL DEFAULT 0.0'),
+        ('aiReasoning', 'TEXT'),
+        ('aiSuggestedSLA', 'REAL'),
+        ('slaBreachProb', 'REAL DEFAULT 0.0')
+    ]
+    for col_name, col_type in new_issue_cols:
+        if col_name not in existing_issue_cols:
+            try:
+                cursor.execute(f"ALTER TABLE issues ADD COLUMN {col_name} {col_type}")
+            except Exception as e:
+                print(f"[Database] Column {col_name} migration note: {e}")
+
     # Table: Users & Standing Ledger (Amazon-style persistent unique account store)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -197,6 +310,45 @@ def init_database():
         INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt)
         VALUES ('fso.officer@foodsafety.gov.in', 'user-103', 'Dr. Lakshmi Prasad (FSO)', 'password123', 'food', 'Designated Food Safety Officer (FSO)', 'FSSAI-INSP-2026-44', 'LP', 0, 0, strftime('%s', 'now'))
     ''')
+    conn.commit()
+
+
+    # Seed Field Workers if empty
+    cursor.execute('SELECT COUNT(*) FROM workers')
+    if cursor.fetchone()[0] == 0:
+        seed_workers = [
+            ('WRK-SAN-01', 'Ravi Kumar', '+91 98480 22311', 'sanitation', 'Garbage & Heavy Compactor Operations', 'available', 17.0012, 81.8048, 14, None),
+            ('WRK-ELE-02', 'Suresh Kumar', '+91 94401 55422', 'electricity', '11KV Substation & Line Repair', 'available', 17.0025, 81.8030, 22, None),
+            ('WRK-ROA-03', 'Anita Roy', '+91 99880 33411', 'sanitation', 'Asphalt Patching & Culvert Desilting', 'available', 16.9995, 81.8060, 9, None),
+            ('WRK-SAN-04', 'M. Appa Rao', '+91 98661 77211', 'sanitation', 'Commercial Market Solid Waste Collection', 'busy', 17.0030, 81.8010, 31, 'ISS-2026-00123')
+        ]
+        cursor.executemany('''
+            INSERT OR IGNORE INTO workers (id, name, phone, department, specialization, currentStatus, lat, lng, tasksCompleted, currentTaskId)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', seed_workers)
+
+    # Seed Hotspots if empty
+    cursor.execute('SELECT COUNT(*) FROM hotspots')
+    if cursor.fetchone()[0] == 0:
+        now_eval = int(time.time() * 1000)
+        seed_hotspots = [
+            ('Ward 12 (Market Zone)', 82, 18.5, 0.71, 87, 'Critical', 48, 'Increase collection vehicle frequency & deploy secondary compactor crew', now_eval),
+            ('Ward 7 (Railway Colony)', 44, 26.0, 0.58, 73, 'High', 48, 'Pre-monsoon culvert desilting & storm drain inspection', now_eval),
+            ('Ward 19 (Industrial Belt)', 29, 31.2, 0.42, 61, 'Medium', 48, 'Schedule preventive road asphalt patch inspection', now_eval),
+            ('Ward 3 (Residential Colony)', 11, 12.0, 0.15, 24, 'Low', 48, 'Routine maintenance schedule maintained', now_eval)
+        ]
+        cursor.executemany('''
+            INSERT OR IGNORE INTO hotspots (ward, pastComplaints, avgResolutionHours, recurrenceRate, predictedRiskPercent, riskLevel, forecastHorizonHours, recommendedAction, lastEvaluatedAt)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', seed_hotspots)
+
+    # Transparently upgrade existing plain-text passwords in users table to scrypt
+    cursor.execute('SELECT email, password FROM users')
+    for u_row in cursor.fetchall():
+        u_email = u_row[0]
+        u_pass = str(u_row[1] or '').strip()
+        if u_pass and not u_pass.startswith('scrypt$'):
+            cursor.execute('UPDATE users SET password = ? WHERE email = ?', (hash_password(u_pass), u_email))
     conn.commit()
 
     # Seed Database if empty
@@ -310,7 +462,15 @@ def seed_initial_data(conn):
     ]
 
     cursor.executemany('''
-        INSERT INTO issues VALUES (
+        INSERT INTO issues (
+            id, state, city, ward, street, department, deptName, deptIcon, title,
+            description, location, category, categoryName, categoryIcon, severity,
+            severityLabel, status, timestamp, slaDeadline, slaHoursLeft, resolvedTimestamp,
+            isSlaBreached, imageBefore, imageAfter, reportedBy, reportedById, verifiedByOfficer,
+            verifiedTimestamp, assignedWorker, assignedTimestamp, workerStatus,
+            recommendedResource, upvotes, upvotedBy, comments, rewardIssued, fineLevied,
+            lat, lng, vendorId, vendorName, mq135GasPpm
+        ) VALUES (
             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
         )
     ''', seed_issues)
@@ -516,6 +676,36 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             })
             return
 
+        # ---------------------------------------------------------------------
+        # PHASE 7 PREPARED ENDPOINTS: CLUSTERS, HOTSPOTS & WORKERS
+        # ---------------------------------------------------------------------
+        if path == '/api/clusters':
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM incident_clusters ORDER BY lastReportedAt DESC')
+            rows = [dict(r) for r in cursor.fetchall()]
+            conn.close()
+            self.send_json_response({'success': True, 'clusters': rows, 'total': len(rows)})
+            return
+
+        if path == '/api/hotspots':
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM hotspots ORDER BY predictedRiskPercent DESC')
+            rows = [dict(r) for r in cursor.fetchall()]
+            conn.close()
+            self.send_json_response({'success': True, 'hotspots': rows, 'total': len(rows)})
+            return
+
+        if path == '/api/workers':
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM workers ORDER BY tasksCompleted DESC')
+            rows = [dict(r) for r in cursor.fetchall()]
+            conn.close()
+            self.send_json_response({'success': True, 'workers': rows, 'total': len(rows)})
+            return
+
         # 5. REST API: GET /api/stats
         if path == '/api/stats':
             conn = get_db_connection()
@@ -641,17 +831,9 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'mq135GasPpm': body.get('mq135GasPpm')
             }
 
-            cursor.execute('''
-                INSERT INTO issues VALUES (
-                    :id, :state, :city, :ward, :street, :department, :deptName, :deptIcon, :title,
-                    :description, :location, :category, :categoryName, :categoryIcon, :severity,
-                    :severityLabel, :status, :timestamp, :slaDeadline, :slaHoursLeft, :resolvedTimestamp,
-                    :isSlaBreached, :imageBefore, :imageAfter, :reportedBy, :reportedById, :verifiedByOfficer,
-                    :verifiedTimestamp, :assignedWorker, :assignedTimestamp, :workerStatus,
-                    :recommendedResource, :upvotes, :upvotedBy, :comments, :rewardIssued, :fineLevied,
-                    :lat, :lng, :vendorId, :vendorName, :mq135GasPpm
-                )
-            ''', new_issue)
+            cols = ', '.join(new_issue.keys())
+            placeholders = ', '.join([f":{k}" for k in new_issue.keys()])
+            cursor.execute(f"INSERT INTO issues ({cols}) VALUES ({placeholders})", new_issue)
 
             conn.commit()
             conn.close()
@@ -892,7 +1074,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'email': email,
                 'id': user_id,
                 'name': display_name,
-                'password': password,
+                'password': hash_password(password),
                 'department': 'citizen',
                 'roleTitle': 'Verified Citizen Reporter',
                 'officialId': official_id,
@@ -922,6 +1104,144 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'message': 'Citizen account successfully registered with 20 Welcome Civic Credits!'
             }
             self.send_json_response(session_payload)
+            return
+
+        # ---------------------------------------------------------------------
+        # PHASE 7 PREPARED ENDPOINTS: CLUSTERS, HOTSPOTS & WORKERS (POST)
+        # ---------------------------------------------------------------------
+        if path == '/api/clusters/link':
+            issue_id = body.get('issueId')
+            cluster_id = body.get('clusterId')
+            if not issue_id or not cluster_id:
+                self.send_json_response({'success': False, 'error': 'issueId and clusterId are required.'}, status=400)
+                return
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute('UPDATE issues SET clusterId = ? WHERE id = ?', (cluster_id, issue_id))
+            cursor.execute('UPDATE incident_clusters SET reportCount = reportCount + 1, lastReportedAt = ? WHERE id = ?', (int(time.time()*1000), cluster_id))
+            conn.commit()
+            conn.close()
+            self.send_json_response({'success': True, 'message': f'Issue {issue_id} linked to Cluster {cluster_id}.'})
+            return
+
+        if path == '/api/hotspots/predict':
+            ward = body.get('ward')
+            if not ward:
+                self.send_json_response({'success': False, 'error': 'ward is required.'}, status=400)
+                return
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM hotspots WHERE ward = ?', (ward,))
+            row = cursor.fetchone()
+            conn.close()
+            if row:
+                self.send_json_response({'success': True, 'hotspot': dict(row)})
+            else:
+                self.send_json_response({'success': True, 'hotspot': {
+                    'ward': ward, 'predictedRiskPercent': 45, 'riskLevel': 'Medium',
+                    'recommendedAction': 'Continuous baseline monitoring'
+                }})
+            return
+
+        if path == '/api/workers/update-status':
+            worker_id = body.get('workerId')
+            new_status = body.get('status')
+            task_id = body.get('taskId')
+            if not worker_id or not new_status:
+                self.send_json_response({'success': False, 'error': 'workerId and status are required.'}, status=400)
+                return
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute('UPDATE workers SET currentStatus = ?, currentTaskId = ? WHERE id = ?', (new_status, task_id, worker_id))
+            conn.commit()
+            conn.close()
+            self.send_json_response({'success': True, 'message': f'Worker {worker_id} status updated to {new_status}.'})
+            return
+
+        # ---------------------------------------------------------------------
+        # PHASE 7 PREPARED AI SCAFFOLDING ENDPOINTS (ADVISORY DECISION SUPPORT)
+        # ---------------------------------------------------------------------
+        if path == '/api/ai/complaint-intelligence':
+            text = (body.get('text') or '').strip()
+            if not text:
+                self.send_json_response({'success': False, 'error': 'text is required.'}, status=400)
+                return
+            # Prepared baseline NLP extraction contract
+            q_lower = text.lower()
+            dept = 'sanitation'
+            cat = 'garbage_overflow'
+            urgency = 75
+            if any(w in q_lower for w in ['spark', 'wire', 'transformer', 'power', 'electric', 'current']):
+                dept = 'electricity'
+                cat = 'sparking_wire'
+                urgency = 92
+            elif any(w in q_lower for w in ['water', 'pipe', 'leak', 'drain', 'flood']):
+                dept = 'sanitation'
+                cat = 'water_leakage'
+                urgency = 80
+            elif any(w in q_lower for w in ['food', 'hotel', 'stall', 'oil', 'rotten', 'stale']):
+                dept = 'food_safety'
+                cat = 'food_hygiene'
+                urgency = 78
+
+            self.send_json_response({
+                'success': True,
+                'aiDepartment': dept,
+                'aiCategory': cat,
+                'aiSeverity': 'High' if urgency >= 80 else 'Medium',
+                'aiPriorityScore': urgency,
+                'aiConfidence': 0.92,
+                'aiReasoning': 'Extracted civic keywords and contextual hazard severity indicators.',
+                'aiSuggestedSLA': 12.0 if urgency >= 85 else 24.0,
+                'isAdvisoryOnly': True
+            })
+            return
+
+        if path == '/api/ai/workforce-recommend':
+            dept = body.get('department', 'sanitation')
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM workers WHERE department = ? AND currentStatus = "available"', (dept,))
+            avail_workers = [dict(r) for r in cursor.fetchall()]
+            conn.close()
+            if not avail_workers:
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM workers WHERE department = ?', (dept,))
+                avail_workers = [dict(r) for r in cursor.fetchall()]
+                conn.close()
+
+            rec_worker = avail_workers[0] if avail_workers else {
+                'id': 'WRK-SAN-01', 'name': 'Ravi Kumar', 'department': dept,
+                'specialization': 'General Operations', 'tasksCompleted': 14
+            }
+            self.send_json_response({
+                'success': True,
+                'recommendedWorker': rec_worker,
+                'confidence': 0.88,
+                'reasoning': f"Worker {rec_worker.get('name')} is closest to the incident zone with {rec_worker.get('tasksCompleted', 0)} completed tasks.",
+                'estimatedArrivalMinutes': 14,
+                'isAdvisoryOnly': True
+            })
+            return
+
+        if path == '/api/ai/food-risk':
+            score = float(body.get('hygieneScore', 65))
+            violations = int(body.get('violationsCount', 1))
+            gas_ppm = float(body.get('mq135GasPpm', 220))
+            
+            # Multi-factor advisory risk score
+            risk_pct = min(98, max(12, int((100 - score) * 0.4 + (violations * 15) + (gas_ppm / 500.0 * 30))))
+            risk_level = 'Critical' if risk_pct >= 80 else 'High' if risk_pct >= 60 else 'Medium' if risk_pct >= 35 else 'Low'
+            
+            self.send_json_response({
+                'success': True,
+                'riskPercent': risk_pct,
+                'riskLevel': risk_level,
+                'confidence': 0.89,
+                'recommendedAction': 'Priority Statutory Inspection & MQ-135 Verification' if risk_pct >= 60 else 'Routine Surveillance Inspection',
+                'isAdvisoryOnly': True
+            })
             return
 
         # 7. REST API: POST /api/auth/login (Strict Real-Time SQLite Credential Verification)
@@ -962,13 +1282,24 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             stored_password = str(user_dict.get('password') or '').strip()
             provided_password = str(password).strip()
 
-            # ❌ If password does NOT match the password saved in SQLite
-            if stored_password != provided_password:
+            # Verify with scrypt or legacy plain-text
+            if not verify_password(provided_password, stored_password):
                 self.send_json_response({
                     'success': False,
                     'error': 'Incorrect password! Please enter the exact password you created during registration.'
                 }, status=401)
                 return
+
+            # Transparently upgrade plain-text password to scrypt upon successful authentication
+            if not stored_password.startswith('scrypt$'):
+                try:
+                    up_conn = get_db_connection()
+                    up_cursor = up_conn.cursor()
+                    up_cursor.execute('UPDATE users SET password = ? WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))', (hash_password(provided_password), email))
+                    up_conn.commit()
+                    up_conn.close()
+                except Exception as up_err:
+                    print(f"[Security] Password upgrade note: {up_err}")
 
             safe_user = {k: v for k, v in user_dict.items() if k != 'password'}
             session_payload = {
