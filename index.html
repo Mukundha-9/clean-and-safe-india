@@ -1426,7 +1426,16 @@
                   <button type="button" class="preset-chip-btn" onclick="window.selectSamplePhoto('food')">
                     🍲 Food Safety Risk
                   </button>
+                  <button type="button" class="preset-chip-btn" onclick="window.selectSamplePhoto('pothole')">
+                    🕳️ Road Pothole
+                  </button>
                 </div>
+              </div>
+
+              <!-- Photo Privacy & Data Notice -->
+              <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 0.55rem; line-height: 1.4; display: flex; align-items: center; gap: 0.45rem; padding: 0.4rem 0.65rem; background: rgba(30, 41, 59, 0.45); border-radius: 6px; border-left: 2px solid #38bdf8;">
+                <span>🔒</span>
+                <span><strong>Privacy Protected:</strong> Photo evidence is used exclusively for civic defect verification. Please avoid capturing personal faces, private identity documents, or vehicle registration plates.</span>
               </div>
             </div>
 
@@ -1441,6 +1450,16 @@
                 <button type="button" class="btn-remove-image" onclick="window.clearSelectedImage()">
                   ✕ Change Photo
                 </button>
+              </div>
+            </div>
+
+            <!-- Civic AI Visual Evidence Verification Advisory Zone -->
+            <div id="imageAiAdvisoryZone" style="display: none; margin-top: 0.75rem;">
+              <button type="button" id="btnVerifyEvidence" class="btn-ai-analyze" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.6rem 1rem; font-size: 0.82rem; font-weight: 700; background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(14, 165, 233, 0.25)); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 8px; cursor: pointer;" onclick="window.runImageVerification()">
+                <span>🤖</span> Verify Evidence with Civic AI
+              </button>
+              <div id="imageAiAdvisoryCard" style="display: none; margin-top: 0.65rem;">
+                <!-- Populated dynamically by CivicAiEngine.ImageVerification -->
               </div>
             </div>
           </div>
@@ -1974,6 +1993,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=18.0.0"></script>
+  <script src="js/bundle.js?v=19.0.0"></script>
 </body>
 </html>

@@ -11,6 +11,7 @@ import mimetypes
 import hashlib
 import secrets
 import hmac
+import random
 
 # ------------------------------------------------------------------------------
 # INDUSTRY-STANDARD PASSWORD SECURITY (SCRYPT WITH PER-USER SALT)
@@ -159,7 +160,15 @@ def init_database():
             lng REAL,
             vendorId TEXT,
             vendorName TEXT,
-            mq135GasPpm REAL
+            mq135GasPpm REAL,
+            imageAiHazard TEXT,
+            imageAiConfidence TEXT,
+            imageTextConsistency TEXT,
+            imageRiskModifier INTEGER DEFAULT 0,
+            imageAiReasoning TEXT,
+            imageAiAccepted INTEGER DEFAULT 0,
+            imageOfficerVerified INTEGER DEFAULT 0,
+            imageOfficerOverrideReason TEXT
         )
     ''')
 
@@ -275,7 +284,15 @@ def init_database():
         ('aiSuggestedCategory', 'TEXT'),
         ('aiSuggestedSeverity', 'TEXT'),
         ('citizenConfirmedAI', 'INTEGER DEFAULT 1'),
-        ('aiOverrideReason', 'TEXT')
+        ('aiOverrideReason', 'TEXT'),
+        ('imageAiHazard', 'TEXT'),
+        ('imageAiConfidence', 'TEXT'),
+        ('imageTextConsistency', 'TEXT'),
+        ('imageRiskModifier', 'INTEGER DEFAULT 0'),
+        ('imageAiReasoning', 'TEXT'),
+        ('imageAiAccepted', 'INTEGER DEFAULT 0'),
+        ('imageOfficerVerified', 'INTEGER DEFAULT 0'),
+        ('imageOfficerOverrideReason', 'TEXT')
     ]
     for col_name, col_type in new_issue_cols:
         if col_name not in existing_issue_cols:
@@ -845,7 +862,15 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'aiSuggestedCategory': body.get('aiSuggestedCategory', body.get('category')),
                 'aiSuggestedSeverity': body.get('aiSuggestedSeverity', body.get('severity')),
                 'citizenConfirmedAI': int(body.get('citizenConfirmedAI', 1)),
-                'aiOverrideReason': body.get('aiOverrideReason', '')
+                'aiOverrideReason': body.get('aiOverrideReason', ''),
+                'imageAiHazard': body.get('imageAiHazard'),
+                'imageAiConfidence': body.get('imageAiConfidence'),
+                'imageTextConsistency': body.get('imageTextConsistency'),
+                'imageRiskModifier': int(body.get('imageRiskModifier', 0)),
+                'imageAiReasoning': body.get('imageAiReasoning'),
+                'imageAiAccepted': int(body.get('imageAiAccepted', 0)),
+                'imageOfficerVerified': int(body.get('imageOfficerVerified', 0)),
+                'imageOfficerOverrideReason': body.get('imageOfficerOverrideReason')
             }
 
             cols = ', '.join(new_issue.keys())
@@ -1025,7 +1050,6 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 self.send_json_response({'success': False, 'error': 'Please enter a valid email address.'}, status=400)
                 return
 
-            import random
             otp_code = str(random.randint(100000, 999999))
             ACTIVE_OTPS[email] = {
                 'otp': otp_code,
@@ -1423,201 +1447,286 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             })
             return
 
-        if path == '/api/ai/complaint-intelligence':
-            text = (body.get('text') or '').strip()
-            loc_input = (body.get('location') or '').strip()
-            if not text:
-                self.send_json_response({'success': False, 'error': 'Complaint description text is required.'}, status=400)
+        # ---------------------------------------------------------------------
+        # PHASE 3: TRANSPARENT AI IMAGE VERIFICATION & HUMAN-IN-THE-LOOP OVERRIDE
+        # ---------------------------------------------------------------------
+        if path == '/api/ai/image-verify':
+            # Visual Evidence Analysis in Honest Deterministic Demo Mode
+            image_data = body.get('image') or body.get('imageData') or body.get('imageUrl') or ''
+            complaint_text = (body.get('complaintText') or body.get('text') or '').strip()
+            dept_context = (body.get('department') or '').strip().lower()
+            cat_context = (body.get('category') or '').strip().lower()
+            preset_hint = (body.get('presetHint') or '').strip().lower()
+            base_risk = int(body.get('baseRiskScore') or 50)
+            issue_id = body.get('issueId')
+
+            # Validate evidence presence
+            if not image_data and not preset_hint:
+                self.send_json_response({
+                    'success': False,
+                    'error': 'Visual evidence (image data or sample preset) is required for verification.'
+                }, status=400)
                 return
 
-            q_lower = text.lower()
+            # Visual Evidence Hazard Classification
+            # Honest Capability: Rule-based visual classification demo mode (no fake deep learning or pixel analysis)
+            img_str = str(image_data).lower()
+            detected_hazard = 'Garbage / Waste Accumulation'
+            observable_reasoning = 'Visual evidence indicates surface solid waste accumulation and uncollected refuse.'
+            scientific_honesty_note = 'Observable visual patterns of discarded refuse. Cannot determine underlying biochemical contamination level.'
 
-            # 1. Location Sensitivity Extraction
-            sensitivity = 'General Area'
-            if any(w in q_lower for w in ['college', 'school', 'university', 'campus', 'student', 'classroom', 'hostel']):
-                sensitivity = 'Educational Zone'
-            elif any(w in q_lower for w in ['hospital', 'clinic', 'dispensary', 'patient', 'doctor', 'ambulance']):
-                sensitivity = 'Hospital & Medical Zone'
-            elif any(w in q_lower for w in ['market', 'bazaar', 'shop', 'vendor', 'stall', 'commercial', 'supermarket']):
-                sensitivity = 'Commercial Market Zone'
-            elif any(w in q_lower for w in ['highway', 'flyover', 'junction', 'cross', 'main road', 'traffic', 'expressway', 'road']):
-                sensitivity = 'Public Road / Transit Corridor'
-            elif any(w in q_lower for w in ['colony', 'apartment', 'house', 'nagar', 'residential', 'society', 'street']):
-                sensitivity = 'Residential Zone'
-            elif any(w in q_lower for w in ['substation', 'feeder', 'water tank', 'pump', 'transformer', 'grid']):
-                sensitivity = 'Critical Infrastructure'
+            # Determine class based on presetHint or image metadata / URL / content clues
+            if preset_hint == 'pothole' or 'pothole' in img_str or 'photo-1578328819058' in img_str:
+                detected_hazard = 'Pothole / Road Damage'
+                observable_reasoning = 'Visual evidence exhibits asphalt surface depression and road cavity distress.'
+                scientific_honesty_note = 'Visible road surface depression detected. Sub-surface structural integrity requires physical engineering inspection.'
+            elif preset_hint == 'spark' or 'spark' in img_str or 'electric' in img_str or 'photo-1544724569' in img_str:
+                detected_hazard = 'Electrical Hazard'
+                observable_reasoning = 'Visible electrical fixture / conductor distress indicators detected.'
+                scientific_honesty_note = 'Visible electrical hazard indicators detected. AI cannot confirm whether the line or conductor is energized.'
+            elif preset_hint == 'water' or 'water' in img_str or 'drain' in img_str or 'photo-1515162816' in img_str:
+                detected_hazard = 'Standing Water / Waterlogging'
+                observable_reasoning = 'Visual evidence indicates street-level standing water and inadequate drainage runoff.'
+                scientific_honesty_note = 'Observable surface ponding detected. Depth and drainage flow rate require on-site measurement.'
+            elif preset_hint == 'food' or 'food' in img_str or 'photo-1555396273' in img_str:
+                detected_hazard = 'Food-Safety Visual Concern'
+                observable_reasoning = 'Observable visual indicators of possible food-safety concern (uncovered food or unhygienic storage environment).'
+                scientific_honesty_note = 'Observable visual indicators of possible food-safety concern. Cannot determine microbiological contamination, bacterial presence, or food freshness.'
+            elif preset_hint == 'garbage' or 'garbage' in img_str or 'photo-1605600659' in img_str:
+                detected_hazard = 'Garbage / Waste Accumulation'
+                observable_reasoning = 'Visual evidence indicates surface solid waste accumulation and uncollected refuse.'
+                scientific_honesty_note = 'Observable visual patterns of discarded refuse. Cannot determine underlying biochemical contamination level.'
+            else:
+                # Default fallback based on complaint text / dept if preset hint not matched
+                if any(w in complaint_text.lower() for w in ['pothole', 'road', 'crater', 'asphalt']):
+                    detected_hazard = 'Pothole / Road Damage'
+                    observable_reasoning = 'Visual evidence exhibits asphalt surface depression and road cavity distress.'
+                    scientific_honesty_note = 'Visible road surface depression detected. Sub-surface structural integrity requires physical engineering inspection.'
+                elif any(w in complaint_text.lower() for w in ['spark', 'wire', 'cable', 'electric', 'shock']):
+                    detected_hazard = 'Electrical Hazard'
+                    observable_reasoning = 'Visible electrical fixture / conductor distress indicators detected.'
+                    scientific_honesty_note = 'Visible electrical hazard indicators detected. AI cannot confirm whether the line or conductor is energized.'
+                elif any(w in complaint_text.lower() for w in ['water', 'waterlogging', 'flood', 'drain']):
+                    detected_hazard = 'Standing Water / Waterlogging'
+                    observable_reasoning = 'Visual evidence indicates street-level standing water and inadequate drainage runoff.'
+                    scientific_honesty_note = 'Observable surface ponding detected. Depth and drainage flow rate require on-site measurement.'
+                elif any(w in complaint_text.lower() for w in ['food', 'hotel', 'restaurant', 'hygiene', 'stale']):
+                    detected_hazard = 'Food-Safety Visual Concern'
+                    observable_reasoning = 'Observable visual indicators of possible food-safety concern (uncovered food or unhygienic storage environment).'
+                    scientific_honesty_note = 'Observable visual indicators of possible food-safety concern. Cannot determine microbiological contamination, bacterial presence, or food freshness.'
 
-            # 2. Department & Category Classification
-            dept = 'sanitation'
-            dept_name = 'Sanitation & Waste Management'
-            dept_icon = '🏢'
-            cat = 'garbage_overflow'
-            cat_name = 'Garbage Overflow'
-            cat_icon = '🗑️'
-            suggested_title = 'Garbage Overflow Report'
+            # Cross-Consistency Evaluation (Visual Evidence vs. Citizen Complaint Text / Department)
+            q_text = complaint_text.lower()
+            consistency = 'HIGH'
+            risk_modifier = 12
+            consistency_label = 'HIGH Corroboration'
 
-            if any(w in q_lower for w in ['spark', 'wire', 'transformer', 'shock', 'electric', 'current', 'cable', 'pole', 'power', 'outage', 'voltage', 'blackout']):
-                dept = 'electricity'
-                dept_name = 'Smart Electricity Department'
-                dept_icon = '⚡'
-                if any(w in q_lower for w in ['outage', 'blackout', 'no power', 'power out', 'power has been out', 'power is out', 'power cut', 'cut', 'tripped', 'no current', 'current cut', 'load shedding']):
-                    cat = 'power_outage'
-                    cat_name = 'Power Outage / Line Tripped'
-                    cat_icon = '🔌'
-                    suggested_title = 'Unscheduled Power Outage'
+            # Class-specific keyword sets
+            garbage_keywords = ['garbage', 'waste', 'trash', 'dump', 'overflow', 'litter', 'debris', 'bin', 'smell', 'stench', 'refuse', 'filth']
+            pothole_keywords = ['pothole', 'road', 'asphalt', 'crater', 'pavement', 'street', 'ditch', 'crack', 'tar']
+            electrical_keywords = ['spark', 'wire', 'cable', 'pole', 'electric', 'power', 'shock', 'current', 'transformer', 'outage', 'blackout', 'short circuit']
+            water_keywords = ['water', 'waterlogging', 'flood', 'drain', 'drainage', 'puddle', 'pool', 'overflow', 'clog', 'monsoon', 'pipeline']
+            food_keywords = ['food', 'hotel', 'restaurant', 'vendor', 'stall', 'kitchen', 'hygiene', 'pest', 'cockroach', 'fly', 'flies', 'stale', 'spoil', 'rotten', 'dirty', 'taste']
+
+            if detected_hazard == 'Garbage / Waste Accumulation':
+                if any(w in q_text for w in garbage_keywords) or dept_context == 'sanitation':
+                    consistency = 'HIGH'
+                    risk_modifier = 12
+                    consistency_label = 'HIGH Corroboration'
+                elif any(w in q_text for w in ['clean', 'dirty', 'street', 'area', 'colony']):
+                    consistency = 'MODERATE'
+                    risk_modifier = 5
+                    consistency_label = 'MODERATE Corroboration'
                 else:
-                    cat = 'sparking_wire'
-                    cat_name = 'Sparking Cable / Electrical Hazard'
-                    cat_icon = '⚡'
-                    suggested_title = 'Sparking Wire / Electrical Hazard'
-            elif any(w in q_lower for w in ['pothole', 'crater', 'asphalt', 'tar', 'road damage', 'broken road', 'accident', 'pavement']):
-                dept = 'sanitation'
-                dept_name = 'Sanitation & Urban Roads'
-                dept_icon = '🏢'
-                cat = 'pothole'
-                cat_name = 'Pothole & Road Deterioration'
-                cat_icon = '🕳️'
-                suggested_title = 'Dangerous Pothole & Road Damage'
-            elif any(w in q_lower for w in ['water', 'pipe', 'leak', 'burst', 'drain', 'sewage', 'clog', 'silt', 'gutter', 'flood', 'waterlogging']):
-                dept = 'sanitation'
-                dept_name = 'Sanitation & Urban Drainage'
-                dept_icon = '🏢'
-                if any(w in q_lower for w in ['drain', 'sewage', 'clog', 'silt', 'gutter', 'flood', 'waterlogging']):
-                    cat = 'drain_blockage'
-                    cat_name = 'Drainage Blockage & Waterlogging'
-                    cat_icon = '🌊'
-                    suggested_title = 'Clogged Drain & Standing Water'
+                    consistency = 'DISCREPANT'
+                    risk_modifier = -10
+                    consistency_label = 'DISCREPANT (Visual/Text Mismatch)'
+
+            elif detected_hazard == 'Pothole / Road Damage':
+                if any(w in q_text for w in pothole_keywords) or (dept_context in ['roads', 'transport', 'sanitation'] and any(w in q_text for w in ['road', 'pothole', 'street'])):
+                    consistency = 'HIGH'
+                    risk_modifier = 12
+                    consistency_label = 'HIGH Corroboration'
+                elif any(w in q_text for w in ['traffic', 'vehicle', 'bike', 'accident', 'drive', 'lane']):
+                    consistency = 'MODERATE'
+                    risk_modifier = 5
+                    consistency_label = 'MODERATE Corroboration'
                 else:
-                    cat = 'water_leakage'
-                    cat_name = 'Water Pipeline Leakage'
-                    cat_icon = '🚰'
-                    suggested_title = 'Water Pipeline Leakage'
-            elif any(w in q_lower for w in ['food', 'hotel', 'restaurant', 'dhaba', 'stall', 'oil', 'stale', 'rotten', 'spoilage', 'unhygienic', 'fssai', 'tiffin']):
-                dept = 'food_safety'
-                dept_name = 'Food Safety & Hygiene'
-                dept_icon = '🍲'
-                cat = 'food_hygiene'
-                cat_name = 'Food Hygiene Violation'
-                cat_icon = '🍱'
-                suggested_title = 'Unsanitary Food Preparation / Spoilage'
-            else:
-                dept = 'sanitation'
-                dept_name = 'Sanitation & Waste Management'
-                dept_icon = '🏢'
-                cat = 'garbage_overflow'
-                cat_name = 'Garbage Overflow & Waste Pile'
-                cat_icon = '🗑️'
-                suggested_title = 'Garbage Overflow Hazard'
+                    consistency = 'DISCREPANT'
+                    risk_modifier = -10
+                    consistency_label = 'DISCREPANT (Visual/Text Mismatch)'
 
-            # 3. Urgency Score Calculation (0-100)
-            base_urgency = 62
-            if dept == 'electricity':
-                base_urgency = 88 if cat == 'sparking_wire' else 75
-            elif cat == 'pothole' and any(w in q_lower for w in ['accident', 'danger', 'injury', 'damage', 'causing']):
-                base_urgency = 82
-            elif cat == 'garbage_overflow':
-                base_urgency = 70
-            elif cat == 'food_hygiene':
-                base_urgency = 78
+            elif detected_hazard == 'Electrical Hazard':
+                if any(w in q_text for w in electrical_keywords) or dept_context == 'electricity':
+                    consistency = 'HIGH'
+                    risk_modifier = 12
+                    consistency_label = 'HIGH Corroboration'
+                elif any(w in q_text for w in ['danger', 'hazard', 'pole', 'light', 'dark', 'street']):
+                    consistency = 'MODERATE'
+                    risk_modifier = 5
+                    consistency_label = 'MODERATE Corroboration'
+                else:
+                    consistency = 'DISCREPANT'
+                    risk_modifier = -10
+                    consistency_label = 'DISCREPANT (Visual/Text Mismatch)'
 
-            # Duration bonus
-            if any(w in q_lower for w in ['3 days', 'three days', 'week', 'weeks', 'several days', 'days', 'long time', 'daily']):
-                base_urgency += 10
-            elif any(w in q_lower for w in ['since morning', 'hours', 'today']):
-                base_urgency += 5
+            elif detected_hazard == 'Standing Water / Waterlogging':
+                if any(w in q_text for w in water_keywords) or dept_context in ['water', 'drainage'] or (dept_context == 'sanitation' and any(w in q_text for w in ['drain', 'water'])):
+                    consistency = 'HIGH'
+                    risk_modifier = 12
+                    consistency_label = 'HIGH Corroboration'
+                elif any(w in q_text for w in ['rain', 'monsoon', 'road', 'mosquito', 'smell']):
+                    consistency = 'MODERATE'
+                    risk_modifier = 5
+                    consistency_label = 'MODERATE Corroboration'
+                else:
+                    consistency = 'DISCREPANT'
+                    risk_modifier = -10
+                    consistency_label = 'DISCREPANT (Visual/Text Mismatch)'
 
-            # Location sensitivity bonus
-            if sensitivity in ['Educational Zone', 'Hospital & Medical Zone', 'Critical Infrastructure']:
-                base_urgency += 8
-            elif sensitivity in ['Commercial Market Zone', 'Public Road / Transit Corridor']:
-                base_urgency += 5
+            elif detected_hazard == 'Food-Safety Visual Concern':
+                if any(w in q_text for w in food_keywords) or dept_context == 'food':
+                    consistency = 'HIGH'
+                    risk_modifier = 12
+                    consistency_label = 'HIGH Corroboration'
+                elif any(w in q_text for w in ['eating', 'meal', 'sweet', 'oil', 'stall', 'shop']):
+                    consistency = 'MODERATE'
+                    risk_modifier = 5
+                    consistency_label = 'MODERATE Corroboration'
+                else:
+                    consistency = 'DISCREPANT'
+                    risk_modifier = -10
+                    consistency_label = 'DISCREPANT (Visual/Text Mismatch)'
 
-            urgency_score = min(98, max(25, base_urgency))
+            # Strict risk modifier bounds [-15, +15]
+            risk_modifier = max(-15, min(15, risk_modifier))
+            final_risk_score = max(5, min(99, base_risk + risk_modifier))
 
-            # 4. Severity Mapping
-            if urgency_score >= 82:
-                severity = 'Critical'
-                form_severity = 'bulk'
-            elif urgency_score >= 70:
-                severity = 'High'
-                form_severity = 'bulk'
-            elif urgency_score >= 45:
-                severity = 'Medium'
-                form_severity = 'medium'
-            else:
-                severity = 'Low'
-                form_severity = 'low'
-
-            # 5. Suggested SLA
-            if urgency_score >= 82:
-                suggested_sla = 12.0
-            elif urgency_score >= 70:
-                suggested_sla = 24.0
-            else:
-                suggested_sla = 48.0
-
-            # 6. Confidence Score (Calculated from keyword density & phrasing structure)
-            words = re.findall(r'\w+', q_lower)
-            confidence = min(0.96, max(0.85, 0.86 + (min(len(words), 25) / 25.0 * 0.09)))
-            confidence = round(confidence, 2)
-
-            # 7. Human-safe Observable Reasoning
-            reasons = []
-            if sensitivity != 'General Area':
-                reasons.append(f"identified {sensitivity.lower()}")
-            if any(w in q_lower for w in ['3 days', 'three days', 'week', 'days']):
-                reasons.append("multi-day hazard persistence")
-            if any(w in q_lower for w in ['smell', 'stench', 'odor', 'bad smell']):
-                reasons.append("public health odor nuisance")
-            if any(w in q_lower for w in ['accident', 'injury', 'accidents', 'shock', 'spark']):
-                reasons.append("active risk to pedestrian and vehicular safety")
-
-            if reasons:
-                reasoning = f"Complaint mentions {cat_name.lower()} in a {sensitivity.lower()} ({', '.join(reasons)}), elevating urgency to {urgency_score}/100."
-            else:
-                reasoning = f"Complaint classified under {dept_name} as {cat_name} based on observable civic keywords."
-
-            # 8. Multi-Factor Civic Risk Score (0-100)
-            pop_factor = 9 if sensitivity in ['Educational Zone', 'Hospital & Medical Zone'] else (8 if sensitivity in ['Commercial Market Zone', 'Public Road / Transit Corridor'] else 6)
-            sev_factor = 9 if severity in ['Critical', 'High'] else 6
-            raw_risk = (sev_factor * 2.5) + (pop_factor * 2.0) + (7 * 2.0) + (8 * 2.0) + (confidence * 15.0)
-            civic_risk_score = min(100, max(15, round(raw_risk)))
-            risk_level = 'Critical' if civic_risk_score >= 81 else ('High' if civic_risk_score >= 61 else ('Medium' if civic_risk_score >= 31 else 'Low'))
-
-            # 9. Audit Log Entry in ai_predictions
+            # Audit Logging in ai_predictions table
+            now_ms = int(time.time() * 1000)
+            pred_id = f"PRED-IMG-{now_ms}-{random.randint(100, 999)}"
             try:
                 conn = get_db_connection()
-                cur = conn.cursor()
-                pred_id = f"PRED-{int(time.time()*1000)}"
-                cur.execute('''
+                cursor = conn.cursor()
+                cursor.execute('''
                     INSERT INTO ai_predictions (id, entityType, entityId, predictionType, confidenceScore, reasoning, recommendedAction, createdAt)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (pred_id, 'issue/draft', 'DRAFT-' + str(int(time.time()) % 10000), 'complaint_intelligence', confidence, reasoning, f"Recommend triage to {dept_name} with {suggested_sla}h SLA", int(time.time()*1000)))
+                ''', (
+                    pred_id,
+                    'issue',
+                    issue_id or 'NEW_SUBMISSION',
+                    'image_verification',
+                    None,
+                    f"Hazard: {detected_hazard} | Consistency: {consistency} ({risk_modifier:+d}) | {observable_reasoning}",
+                    'Authoritative municipal officer physical verification recommended before field closure',
+                    now_ms
+                ))
                 conn.commit()
                 conn.close()
-            except Exception as pred_err:
-                print(f"[AI Audit Note]: {pred_err}")
+            except Exception as e:
+                print(f"[AI Audit Log Error] {e}")
 
             self.send_json_response({
                 'success': True,
-                'aiDepartment': dept,
-                'aiDeptName': dept_name,
-                'aiDeptIcon': dept_icon,
-                'aiCategory': cat,
-                'aiCategoryName': cat_name,
-                'aiCategoryIcon': cat_icon,
-                'aiSeverity': severity,
-                'formSeverity': form_severity,
-                'aiUrgencyScore': urgency_score,
-                'aiSuggestedSLA': suggested_sla,
-                'aiLocationSensitivity': sensitivity,
-                'aiConfidence': confidence,
-                'aiReasoning': reasoning,
-                'aiRiskScore': civic_risk_score,
-                'aiRiskLevel': risk_level,
-                'suggestedTitle': suggested_title,
+                'detectedHazard': detected_hazard,
+                'visualConfidence': 'Demo / Rule-Based (No vision model configured)',
+                'consistency': consistency,
+                'consistencyLabel': consistency_label,
+                'riskModifier': risk_modifier,
+                'baseRiskScore': base_risk,
+                'finalRiskScore': final_risk_score,
+                'observableReasoning': observable_reasoning,
+                'scientificHonestyNote': scientific_honesty_note,
+                'modelCapability': 'Deterministic Visual-Evidence Demo Mode',
                 'isAdvisoryOnly': True,
-                'analysisSource': 'deterministic_local_rules'
+                'disclaimer': 'Visual AI assessment is advisory decision-support only. Authoritative action requires human officer verification.',
+                'timestamp': now_ms
+            })
+            return
+
+        if path == '/api/issues/verify-evidence':
+            # Human-in-the-Loop Officer Verification / Override
+            issue_id = body.get('issueId')
+            verified = bool(body.get('verified'))
+            override_reason = (body.get('overrideReason') or '').strip()
+            officer_name = (body.get('officerName') or 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)').strip()
+
+            if not issue_id:
+                self.send_json_response({'success': False, 'error': 'Issue ID is required.'}, status=400)
+                return
+
+            if not verified and not override_reason:
+                self.send_json_response({
+                    'success': False,
+                    'error': 'A non-empty justification is mandatory when overriding AI visual evidence assessment.'
+                }, status=400)
+                return
+
+            now_ms = int(time.time() * 1000)
+            officer_verified_val = 1 if verified else -1
+
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute('SELECT id, status, imageAiHazard FROM issues WHERE id = ?', (issue_id,))
+            issue_row = cursor.fetchone()
+
+            if not issue_row:
+                conn.close()
+                self.send_json_response({'success': False, 'error': f'Issue {issue_id} not found.'}, status=404)
+                return
+
+            cursor.execute('''
+                UPDATE issues
+                SET imageOfficerVerified = ?,
+                    imageOfficerOverrideReason = ?,
+                    verifiedByOfficer = ?,
+                    verifiedTimestamp = ?
+                WHERE id = ?
+            ''', (
+                officer_verified_val,
+                override_reason if not verified else None,
+                officer_name,
+                now_ms,
+                issue_id
+            ))
+
+            # Audit log the officer decision
+            audit_id = f"AUDIT-OVR-{now_ms}-{random.randint(100, 999)}"
+            cursor.execute('''
+                INSERT INTO ai_predictions (id, entityType, entityId, predictionType, confidenceScore, reasoning, recommendedAction, createdAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                audit_id,
+                'issue',
+                issue_id,
+                'officer_evidence_verification',
+                1.0 if verified else 0.0,
+                f"Officer {'VERIFIED' if verified else 'OVERRODE'} AI assessment. Reason: {override_reason or 'Corroborated by on-site officer inspection'}",
+                'Authoritative officer verification recorded in governance ledger',
+                now_ms
+            ))
+
+            conn.commit()
+
+            # Retrieve updated issue
+            cursor.execute('SELECT * FROM issues WHERE id = ?', (issue_id,))
+            updated_row = dict(cursor.fetchone())
+            conn.close()
+
+            updated_row['upvotedBy'] = json.loads(updated_row.get('upvotedBy') or '[]')
+            updated_row['comments'] = json.loads(updated_row.get('comments') or '[]')
+
+            # Broadcast SSE update
+            sse_hub.broadcast('ISSUE_UPDATED', updated_row)
+
+            self.send_json_response({
+                'success': True,
+                'issueId': issue_id,
+                'imageOfficerVerified': officer_verified_val,
+                'imageOfficerOverrideReason': override_reason if not verified else None,
+                'verifiedByOfficer': officer_name,
+                'verifiedTimestamp': now_ms,
+                'message': f"Evidence successfully {'verified' if verified else 'overridden'} by officer."
             })
             return
 

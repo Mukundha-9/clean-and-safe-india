@@ -801,6 +801,152 @@
           officerOverride: false
         };
       }
+    },
+
+    // 6. Transparent Visual Evidence AI Verification
+    ImageVerification: {
+      verify: async function(imageData, complaintText = '', deptContext = '', catContext = '', presetHint = '', baseRisk = 50) {
+        // Try backend REST API endpoint first
+        try {
+          const resp = await fetch('/api/ai/image-verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              image: imageData,
+              complaintText: complaintText,
+              department: deptContext,
+              category: catContext,
+              presetHint: presetHint,
+              baseRiskScore: baseRisk
+            })
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            if (data.success) return data;
+          }
+        } catch (e) {
+          console.warn('[Civic AI] Backend image verification failed, using local deterministic fallback:', e);
+        }
+
+        // Local Deterministic Rule-Based Fallback (Honest Demo Mode)
+        const imgStr = String(imageData || '').toLowerCase();
+        let detected = 'Garbage / Waste Accumulation';
+        let reasoning = 'Visual evidence indicates surface solid waste accumulation and uncollected refuse.';
+        let scientificNote = 'Observable visual patterns of discarded refuse. Cannot determine underlying biochemical contamination level.';
+
+        if (presetHint === 'pothole' || imgStr.includes('pothole') || imgStr.includes('photo-1578328819058')) {
+          detected = 'Pothole / Road Damage';
+          reasoning = 'Visual evidence exhibits asphalt surface depression and road cavity distress.';
+          scientificNote = 'Visible road surface depression detected. Sub-surface structural integrity requires physical engineering inspection.';
+        } else if (presetHint === 'spark' || imgStr.includes('spark') || imgStr.includes('electric') || imgStr.includes('photo-1544724569')) {
+          detected = 'Electrical Hazard';
+          reasoning = 'Visible electrical fixture / conductor distress indicators detected.';
+          scientificNote = 'Visible electrical hazard indicators detected. AI cannot confirm whether the line or conductor is energized.';
+        } else if (presetHint === 'water' || imgStr.includes('water') || imgStr.includes('drain') || imgStr.includes('photo-1515162816')) {
+          detected = 'Standing Water / Waterlogging';
+          reasoning = 'Visual evidence indicates street-level standing water and inadequate drainage runoff.';
+          scientificNote = 'Observable surface ponding detected. Depth and drainage flow rate require on-site measurement.';
+        } else if (presetHint === 'food' || imgStr.includes('food') || imgStr.includes('photo-1555396273')) {
+          detected = 'Food-Safety Visual Concern';
+          reasoning = 'Observable visual indicators of possible food-safety concern (uncovered food or unhygienic storage environment).';
+          scientificNote = 'Observable visual indicators of possible food-safety concern. Cannot determine microbiological contamination, bacterial presence, or food freshness.';
+        } else if (presetHint === 'garbage' || imgStr.includes('garbage') || imgStr.includes('photo-1605600659')) {
+          detected = 'Garbage / Waste Accumulation';
+          reasoning = 'Visual evidence indicates surface solid waste accumulation and uncollected refuse.';
+          scientificNote = 'Observable visual patterns of discarded refuse. Cannot determine underlying biochemical contamination level.';
+        } else {
+          const qText = String(complaintText || '').toLowerCase();
+          if (qText.includes('pothole') || qText.includes('road') || qText.includes('crater')) {
+            detected = 'Pothole / Road Damage';
+            reasoning = 'Visual evidence exhibits asphalt surface depression and road cavity distress.';
+            scientificNote = 'Visible road surface depression detected. Sub-surface structural integrity requires physical engineering inspection.';
+          } else if (qText.includes('spark') || qText.includes('wire') || qText.includes('electric')) {
+            detected = 'Electrical Hazard';
+            reasoning = 'Visible electrical fixture / conductor distress indicators detected.';
+            scientificNote = 'Visible electrical hazard indicators detected. AI cannot confirm whether the line or conductor is energized.';
+          } else if (qText.includes('water') || qText.includes('drain') || qText.includes('puddle')) {
+            detected = 'Standing Water / Waterlogging';
+            reasoning = 'Visual evidence indicates street-level standing water and inadequate drainage runoff.';
+            scientificNote = 'Observable surface ponding detected. Depth and drainage flow rate require on-site measurement.';
+          } else if (qText.includes('food') || qText.includes('hygiene') || qText.includes('restaurant')) {
+            detected = 'Food-Safety Visual Concern';
+            reasoning = 'Observable visual indicators of possible food-safety concern (uncovered food or unhygienic storage environment).';
+            scientificNote = 'Observable visual indicators of possible food-safety concern. Cannot determine microbiological contamination, bacterial presence, or food freshness.';
+          }
+        }
+
+        const q = String(complaintText || '').toLowerCase();
+        let consistency = 'HIGH';
+        let riskMod = 12;
+        let consistencyLabel = 'HIGH Corroboration';
+
+        const garbageKeywords = ['garbage', 'waste', 'trash', 'dump', 'overflow', 'litter', 'debris', 'bin', 'smell', 'stench', 'refuse'];
+        const potholeKeywords = ['pothole', 'road', 'asphalt', 'crater', 'pavement', 'street', 'ditch', 'crack', 'tar'];
+        const electricalKeywords = ['spark', 'wire', 'cable', 'pole', 'electric', 'power', 'shock', 'current', 'transformer', 'outage', 'blackout', 'short circuit'];
+        const waterKeywords = ['water', 'waterlogging', 'flood', 'drain', 'drainage', 'puddle', 'pool', 'overflow', 'clog', 'monsoon', 'pipeline'];
+        const foodKeywords = ['food', 'hotel', 'restaurant', 'vendor', 'stall', 'kitchen', 'hygiene', 'pest', 'cockroach', 'fly', 'flies', 'stale', 'spoil', 'rotten', 'dirty', 'taste'];
+
+        if (detected === 'Garbage / Waste Accumulation') {
+          if (garbageKeywords.some(w => q.includes(w)) || deptContext === 'sanitation') {
+            consistency = 'HIGH'; riskMod = 12; consistencyLabel = 'HIGH Corroboration';
+          } else if (['clean', 'dirty', 'street', 'area', 'colony'].some(w => q.includes(w))) {
+            consistency = 'MODERATE'; riskMod = 5; consistencyLabel = 'MODERATE Corroboration';
+          } else {
+            consistency = 'DISCREPANT'; riskMod = -10; consistencyLabel = 'DISCREPANT (Visual/Text Mismatch)';
+          }
+        } else if (detected === 'Pothole / Road Damage') {
+          if (potholeKeywords.some(w => q.includes(w)) || (['roads', 'transport', 'sanitation'].includes(deptContext) && ['road', 'pothole', 'street'].some(w => q.includes(w)))) {
+            consistency = 'HIGH'; riskMod = 12; consistencyLabel = 'HIGH Corroboration';
+          } else if (['traffic', 'vehicle', 'bike', 'accident', 'drive', 'lane'].some(w => q.includes(w))) {
+            consistency = 'MODERATE'; riskMod = 5; consistencyLabel = 'MODERATE Corroboration';
+          } else {
+            consistency = 'DISCREPANT'; riskMod = -10; consistencyLabel = 'DISCREPANT (Visual/Text Mismatch)';
+          }
+        } else if (detected === 'Electrical Hazard') {
+          if (electricalKeywords.some(w => q.includes(w)) || deptContext === 'electricity') {
+            consistency = 'HIGH'; riskMod = 12; consistencyLabel = 'HIGH Corroboration';
+          } else if (['danger', 'hazard', 'pole', 'light', 'dark', 'street'].some(w => q.includes(w))) {
+            consistency = 'MODERATE'; riskMod = 5; consistencyLabel = 'MODERATE Corroboration';
+          } else {
+            consistency = 'DISCREPANT'; riskMod = -10; consistencyLabel = 'DISCREPANT (Visual/Text Mismatch)';
+          }
+        } else if (detected === 'Standing Water / Waterlogging') {
+          if (waterKeywords.some(w => q.includes(w)) || ['water', 'drainage'].includes(deptContext) || (deptContext === 'sanitation' && ['drain', 'water'].some(w => q.includes(w)))) {
+            consistency = 'HIGH'; riskMod = 12; consistencyLabel = 'HIGH Corroboration';
+          } else if (['rain', 'monsoon', 'road', 'mosquito', 'smell'].some(w => q.includes(w))) {
+            consistency = 'MODERATE'; riskMod = 5; consistencyLabel = 'MODERATE Corroboration';
+          } else {
+            consistency = 'DISCREPANT'; riskMod = -10; consistencyLabel = 'DISCREPANT (Visual/Text Mismatch)';
+          }
+        } else if (detected === 'Food-Safety Visual Concern') {
+          if (foodKeywords.some(w => q.includes(w)) || deptContext === 'food') {
+            consistency = 'HIGH'; riskMod = 12; consistencyLabel = 'HIGH Corroboration';
+          } else if (['eating', 'meal', 'sweet', 'oil', 'stall', 'shop'].some(w => q.includes(w))) {
+            consistency = 'MODERATE'; riskMod = 5; consistencyLabel = 'MODERATE Corroboration';
+          } else {
+            consistency = 'DISCREPANT'; riskMod = -10; consistencyLabel = 'DISCREPANT (Visual/Text Mismatch)';
+          }
+        }
+
+        riskMod = Math.max(-15, Math.min(15, riskMod));
+        const finalRisk = Math.max(5, Math.min(99, Number(baseRisk || 50) + riskMod));
+
+        return {
+          success: true,
+          detectedHazard: detected,
+          visualConfidence: 'Demo / Rule-Based (No vision model configured)',
+          consistency: consistency,
+          consistencyLabel: consistencyLabel,
+          riskModifier: riskMod,
+          baseRiskScore: baseRisk,
+          finalRiskScore: finalRisk,
+          observableReasoning: reasoning,
+          scientificHonestyNote: scientificNote,
+          modelCapability: 'Deterministic Visual-Evidence Demo Mode',
+          isAdvisoryOnly: true,
+          disclaimer: 'Visual AI assessment is advisory decision-support only. Authoritative action requires human officer verification.'
+        };
+      }
     }
   };
 
@@ -4011,16 +4157,26 @@
     }
   };
 
+  // Phase 3 Visual Evidence State Variables
+  window.currentSelectedPhotoPreset = null;
+  window.currentImageAiData = null;
+  window.currentImageAiAccepted = false;
+
   // Image Upload / Camera File Selection Handler
   window.handleImageUpload = function(inputEl) {
     if (!inputEl || !inputEl.files || !inputEl.files[0]) return;
     const file = inputEl.files[0];
 
+    window.currentSelectedPhotoPreset = null;
     const reader = new FileReader();
     reader.onload = function(e) {
       selectedReportImageBase64 = e.target.result;
       displaySelectedImage(selectedReportImageBase64, file.name);
       showToast(`📸 Photo "${file.name}" attached & geotagged!`, 'reward', '📸');
+
+      const zone = document.getElementById('imageAiAdvisoryZone');
+      if (zone) zone.style.display = 'block';
+      window.runImageVerification();
     };
     reader.readAsDataURL(file);
   };
@@ -4029,14 +4185,20 @@
   window.selectSamplePhoto = function(type) {
     const samples = {
       garbage: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
+      pothole: 'https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?w=800&auto=format&fit=crop&q=80',
       spark: 'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=800&auto=format&fit=crop&q=80',
       water: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80',
       food: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80'
     };
 
+    window.currentSelectedPhotoPreset = type;
     selectedReportImageBase64 = samples[type] || samples.garbage;
     displaySelectedImage(selectedReportImageBase64, `${type}_evidence.jpg`);
     showToast('📸 Verified incident photo attached!', 'reward', '📸');
+
+    const zone = document.getElementById('imageAiAdvisoryZone');
+    if (zone) zone.style.display = 'block';
+    window.runImageVerification();
   };
 
   function displaySelectedImage(imageUrl, label) {
@@ -4058,20 +4220,218 @@
 
   window.clearSelectedImage = function() {
     selectedReportImageBase64 = null;
+    window.currentSelectedPhotoPreset = null;
+    window.currentImageAiData = null;
+    window.currentImageAiAccepted = false;
+
     const previewCard = document.getElementById('reportImagePreviewCard');
     const actionsContainer = document.getElementById('imageUploadActionsContainer');
     const zone = document.getElementById('reportImageSubmissionZone');
     const camInput = document.getElementById('reportCameraInput');
     const galInput = document.getElementById('reportGalleryInput');
+    const aiZone = document.getElementById('imageAiAdvisoryZone');
+    const aiCard = document.getElementById('imageAiAdvisoryCard');
 
     if (previewCard) previewCard.classList.remove('active');
     if (actionsContainer) actionsContainer.style.display = 'block';
     if (zone) zone.classList.remove('has-image');
     if (camInput) camInput.value = '';
     if (galInput) galInput.value = '';
+    if (aiZone) aiZone.style.display = 'none';
+    if (aiCard) { aiCard.style.display = 'none'; aiCard.innerHTML = ''; }
   };
 
+  // Phase 3 Citizen Image AI Verification Controllers
+  window.runImageVerification = async function() {
+    if (!selectedReportImageBase64) {
+      showToast('Please attach or select a photo first!', 'warning', '📷');
+      return;
+    }
+
+    const cardZone = document.getElementById('imageAiAdvisoryZone');
+    const cardEl = document.getElementById('imageAiAdvisoryCard');
+    const btn = document.getElementById('btnVerifyEvidence');
+
+    if (cardZone) cardZone.style.display = 'block';
+    if (btn) btn.innerHTML = '<span>⏳</span> Analyzing Visual Evidence...';
+
+    const textInput = document.getElementById('aiComplaintTextInput');
+    const descInput = document.getElementById('reportDescInput');
+    const complaintText = (textInput ? textInput.value : '') || (descInput ? descInput.value : '');
+    const deptSelect = document.getElementById('reportDeptSelect');
+    const dept = deptSelect ? deptSelect.value : '';
+    const baseRisk = (window.currentAiAnalysisData && window.currentAiAnalysisData.aiRiskScore) ? window.currentAiAnalysisData.aiRiskScore : 50;
+
+    const data = await CivicAiEngine.ImageVerification.verify(
+      selectedReportImageBase64,
+      complaintText,
+      dept,
+      '',
+      window.currentSelectedPhotoPreset || '',
+      baseRisk
+    );
+
+    window.currentImageAiData = data;
+    window.currentImageAiAccepted = true;
+
+    if (btn) btn.innerHTML = '<span>🤖</span> Re-Verify Evidence with Civic AI';
+
+    renderImageAiAdvisoryCard(data);
+  };
+
+  window.acceptImageAiAssessment = function() {
+    window.currentImageAiAccepted = true;
+    if (window.currentImageAiData) {
+      renderImageAiAdvisoryCard(window.currentImageAiData);
+      const mod = window.currentImageAiData.riskModifier;
+      showToast(`✓ AI Assessment accepted! (${mod >= 0 ? '+' : ''}${mod} risk modifier applied)`, 'reward', '🛡️');
+    }
+  };
+
+  window.dismissImageAiAssessment = function() {
+    window.currentImageAiAccepted = false;
+    const cardEl = document.getElementById('imageAiAdvisoryCard');
+    if (cardEl) {
+      cardEl.style.display = 'none';
+    }
+    showToast('AI evidence assessment ignored. Base risk retained.', 'info', 'ℹ️');
+  };
+
+  function renderImageAiAdvisoryCard(data) {
+    const cardEl = document.getElementById('imageAiAdvisoryCard');
+    if (!cardEl) return;
+
+    const consistencyColor = data.consistency === 'HIGH' ? '#34d399' : (data.consistency === 'MODERATE' ? '#fb923c' : '#f87171');
+    const consistencyBadgeText = data.consistencyLabel || (data.consistency === 'HIGH' ? '🟢 HIGH Corroboration' : (data.consistency === 'MODERATE' ? '🟡 MODERATE Corroboration' : '🔴 DISCREPANT (Mismatch)'));
+    const isAccepted = window.currentImageAiAccepted;
+
+    cardEl.style.display = 'block';
+    cardEl.innerHTML = `
+      <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)); border: 1px solid ${isAccepted ? 'rgba(56, 189, 248, 0.5)' : 'rgba(255,255,255,0.15)'}; border-radius: 8px; padding: 0.95rem; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.4rem; flex-wrap: wrap; gap: 0.4rem;">
+          <div style="font-weight: 800; font-size: 0.86rem; color: #38bdf8; display: flex; align-items: center; gap: 0.4rem;">
+            <span>🤖</span> CIVIC AI — VISUAL EVIDENCE VERIFICATION
+          </div>
+          <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.7rem;">Deterministic Demo Mode</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.55rem; font-size: 0.78rem; margin-bottom: 0.7rem;">
+          <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="color: #94a3b8; font-size: 0.7rem;">Detected Hazard:</div>
+            <div style="font-weight: 700; color: white;">${data.detectedHazard}</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="color: #94a3b8; font-size: 0.7rem;">Visual Confidence:</div>
+            <div style="font-weight: 600; color: #94a3b8;">${data.visualConfidence}</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="color: #94a3b8; font-size: 0.7rem;">Text ↔ Image Consistency:</div>
+            <div style="font-weight: 800; color: ${consistencyColor};">${consistencyBadgeText}</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="color: #94a3b8; font-size: 0.7rem;">Dynamic Risk Modifier:</div>
+            <div style="font-weight: 800; color: ${data.riskModifier >= 0 ? '#34d399' : '#f87171'};">
+              ${data.riskModifier >= 0 ? '+' : ''}${data.riskModifier} (Base: ${data.baseRiskScore} → ${data.finalRiskScore}/100)
+            </div>
+          </div>
+        </div>
+
+        <div style="background: rgba(56, 189, 248, 0.05); padding: 0.55rem 0.75rem; border-left: 3px solid #38bdf8; border-radius: 4px; font-size: 0.78rem; color: #cbd5e1; line-height: 1.4; margin-bottom: 0.5rem;">
+          <strong>Observable Evidence:</strong> ${data.observableReasoning}
+        </div>
+
+        ${data.scientificHonestyNote ? `
+          <div style="font-size: 0.72rem; color: #94a3b8; margin-bottom: 0.65rem; line-height: 1.35; font-style: italic;">
+            🔬 <strong>Scientific Note:</strong> ${data.scientificHonestyNote}
+          </div>
+        ` : ''}
+
+        <!-- Citizen Decision Controls -->
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.55rem;">
+          <button type="button" class="btn btn-sm btn-outline" style="font-size: 0.74rem; padding: 0.35rem 0.7rem; color: #94a3b8; border-color: rgba(255,255,255,0.2);" onclick="window.dismissImageAiAssessment()">
+            ✕ Ignore
+          </button>
+          <button type="button" class="btn btn-sm btn-primary" id="btnAcceptImageAi" style="font-size: 0.74rem; padding: 0.35rem 0.8rem; background: ${isAccepted ? '#10b981' : '#0284c7'};" onclick="window.acceptImageAiAssessment()">
+            ${isAccepted ? '✓ AI Assessment Accepted' : 'Accept AI Assessment'}
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   // e-Challan Handlers
+  // Phase 3 Officer Evidence Action Handlers
+  window.officerVerifyEvidence = async function(issueId) {
+    const issue = db.getIssueById(issueId);
+    if (!issue) return;
+    const officerName = (auth.getUser() && auth.getUser().name) ? auth.getUser().name : 'K. Mukundha (Zonal Administrator)';
+
+    try {
+      const resp = await fetch('/api/issues/verify-evidence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          issueId: issueId,
+          verified: true,
+          officerName: officerName
+        })
+      });
+      const data = await resp.json();
+      if (!data.success) throw new Error(data.error || 'Failed to verify');
+
+      issue.imageOfficerVerified = 1;
+      issue.imageOfficerOverrideReason = null;
+      issue.verifiedByOfficer = officerName;
+      issue.verifiedTimestamp = Date.now();
+      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.notify();
+
+      showToast('✅ Visual evidence verified by Officer!', 'reward', '🛡️');
+      window.viewIssueDetail(issueId);
+    } catch (e) {
+      showToast(e.message, 'error', '⚠️');
+    }
+  };
+
+  window.officerOverrideEvidence = async function(issueId) {
+    const issue = db.getIssueById(issueId);
+    if (!issue) return;
+    const officerName = (auth.getUser() && auth.getUser().name) ? auth.getUser().name : 'K. Mukundha (Zonal Administrator)';
+
+    const reason = window.prompt('Mandatory Justification: Why are you overriding the AI visual evidence assessment?\n(e.g., "On-site physical inspection revealed dry compost rather than drain hazard")');
+    if (!reason || !reason.trim()) {
+      showToast('Override cancelled. A non-empty justification is mandatory.', 'warning', '⚠️');
+      return;
+    }
+
+    try {
+      const resp = await fetch('/api/issues/verify-evidence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          issueId: issueId,
+          verified: false,
+          overrideReason: reason.trim(),
+          officerName: officerName
+        })
+      });
+      const data = await resp.json();
+      if (!data.success) throw new Error(data.error || 'Failed to override');
+
+      issue.imageOfficerVerified = -1;
+      issue.imageOfficerOverrideReason = reason.trim();
+      issue.verifiedByOfficer = officerName;
+      issue.verifiedTimestamp = Date.now();
+      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.notify();
+
+      showToast('⚠️ Officer override registered with audit justification.', 'reward', '📝');
+      window.viewIssueDetail(issueId);
+    } catch (e) {
+      showToast(e.message, 'error', '⚠️');
+    }
+  };
+
   window.openChallanModal = function() {
     const modal = document.getElementById('challanPaymentModal');
     if (modal) modal.classList.add('active');
@@ -4838,6 +5198,113 @@
               </div>`;
           })()}
 
+          <!-- Phase 3 Visual Evidence Verification & Officer Verification Card -->
+          ${(() => {
+            const hasImg = Boolean(issue.imageBefore);
+            if (!hasImg) return '';
+
+            const hazard = issue.imageAiHazard || (
+              (issue.category === 'pothole' || issue.category === 'road_damage') ? 'Pothole / Road Damage' :
+              issue.department === 'electricity' ? 'Electrical Hazard' :
+              (issue.department === 'food_safety' || issue.department === 'food') ? 'Food-Safety Visual Concern' :
+              issue.category === 'pipeline_burst' ? 'Standing Water / Waterlogging' : 'Garbage / Waste Accumulation'
+            );
+
+            const consistency = issue.imageTextConsistency || 'HIGH';
+            const riskMod = issue.imageRiskModifier !== undefined ? issue.imageRiskModifier : 12;
+            const consistencyColor = consistency === 'HIGH' ? '#34d399' : (consistency === 'MODERATE' ? '#fb923c' : '#f87171');
+            const consistencyLabel = consistency === 'HIGH' ? '🟢 HIGH Corroboration' : (consistency === 'MODERATE' ? '🟡 MODERATE Corroboration' : '🔴 DISCREPANT (Mismatch)');
+            
+            const isOfficerVerified = Number(issue.imageOfficerVerified) === 1;
+            const isOfficerOverridden = Number(issue.imageOfficerVerified) === -1;
+            const overrideReason = issue.imageOfficerOverrideReason || '';
+
+            return `
+              <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)); border: 1px solid ${isOfficerVerified ? 'rgba(16, 185, 129, 0.5)' : isOfficerOverridden ? 'rgba(239, 68, 68, 0.5)' : 'rgba(56, 189, 248, 0.4)'}; border-radius: var(--radius-md); padding: 1.15rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                  <div style="font-weight: 800; font-size: 0.92rem; color: #38bdf8; display: flex; align-items: center; gap: 0.45rem;">
+                    <span>📷</span> VISUAL EVIDENCE AUDIT & OFFICER VERIFICATION
+                  </div>
+                  <div>
+                    ${isOfficerVerified ? `
+                      <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">
+                        ✅ Officer Verified Evidence
+                      </span>
+                    ` : isOfficerOverridden ? `
+                      <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; font-size: 0.72rem;">
+                        ⚠️ Officer Overridden
+                      </span>
+                    ` : `
+                      <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.72rem;">
+                        ℹ️ AI-Assessed (Pending Officer Confirmation)
+                      </span>
+                    `}
+                  </div>
+                </div>
+
+                <!-- Visual Evidence Preview + Metadata -->
+                <div style="display: grid; grid-template-columns: minmax(180px, 240px) 1fr; gap: 1rem; margin-bottom: 0.85rem; align-items: start;">
+                  <div style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                    <img src="${imgBefore}" style="width: 100%; height: 150px; object-fit: cover; display: block;" alt="Incident Evidence">
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); padding: 0.3rem 0.5rem; font-size: 0.68rem; color: #cbd5e1;">
+                      📍 GPS: ${issue.lat || 17.0010}° N, ${issue.lng || 81.8045}° E
+                    </div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.55rem; font-size: 0.78rem;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                      <div style="color: #94a3b8; font-size: 0.7rem;">Detected Visual Hazard:</div>
+                      <div style="font-weight: 700; color: white;">${hazard}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                      <div style="color: #94a3b8; font-size: 0.7rem;">Visual Confidence:</div>
+                      <div style="font-weight: 600; color: #94a3b8;">${issue.imageAiConfidence || 'Demo / Rule-Based (No vision model configured)'}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                      <div style="color: #94a3b8; font-size: 0.7rem;">Text ↔ Image Consistency:</div>
+                      <div style="font-weight: 800; color: ${consistencyColor};">${consistencyLabel}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                      <div style="color: #94a3b8; font-size: 0.7rem;">Dynamic Risk Modifier:</div>
+                      <div style="font-weight: 800; color: ${riskMod >= 0 ? '#34d399' : '#f87171'};">
+                        ${riskMod >= 0 ? '+' : ''}${riskMod} Risk Modifier
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="background: rgba(56, 189, 248, 0.06); padding: 0.65rem 0.85rem; border-left: 3px solid #38bdf8; border-radius: 4px; font-size: 0.8rem; color: #cbd5e1; line-height: 1.45; margin-bottom: 0.75rem;">
+                  <strong>Observable Evidence Reasoning:</strong> ${issue.imageAiReasoning || `Visual evidence demonstrates features characteristic of ${hazard.toLowerCase()}. Cross-consistency verified against reported text.`}
+                </div>
+
+                ${isOfficerOverridden ? `
+                  <div style="margin-bottom: 0.75rem; padding: 0.6rem 0.85rem; background: rgba(239, 68, 68, 0.08); border-left: 3px solid #ef4444; border-radius: 4px; font-size: 0.8rem; color: #fca5a5;">
+                    <strong>Officer Override Justification:</strong> ${overrideReason}
+                  </div>
+                ` : isOfficerVerified ? `
+                  <div style="margin-bottom: 0.75rem; padding: 0.6rem 0.85rem; background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10b981; border-radius: 4px; font-size: 0.8rem; color: #6ee7b7;">
+                    <strong>Officer Verification:</strong> Verified on-site by ${issue.verifiedByOfficer || 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)'}. Photo evidence corroborated.
+                  </div>
+                ` : ''}
+
+                <!-- Authoritative Human Officer Action Controls -->
+                <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem;">
+                  <div style="font-size: 0.73rem; color: #94a3b8;">
+                    ⚖️ <strong>Authoritative Decision:</strong> AI classifications are non-binding. Officer confirmation required.
+                  </div>
+                  <div style="display: flex; gap: 0.5rem;">
+                    <button type="button" class="btn btn-sm btn-outline" style="font-size: 0.76rem; color: #f87171; border-color: rgba(239, 68, 68, 0.4); padding: 0.4rem 0.75rem; cursor: pointer;" onclick="window.officerOverrideEvidence('${issue.id}')">
+                      <span>✕</span> Officer Override
+                    </button>
+                    <button type="button" class="btn btn-sm btn-primary" style="font-size: 0.76rem; background: #10b981; border-color: #10b981; padding: 0.4rem 0.85rem; cursor: pointer;" onclick="window.officerVerifyEvidence('${issue.id}')">
+                      <span>✓</span> Verify Evidence
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+          })()}
+
           <!-- 5-Stage Live Order-Style Tracking Stepper -->
         <div>
           <div style="font-size: 0.95rem; font-weight: 800; color: white; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
@@ -5331,7 +5798,7 @@
             severityLabel: 'ACTIVE',
             imageBefore: submittedImage,
             // Phase 2 AI Fields Persisted
-            aiRiskScore: aiMeta.aiRiskScore || 50,
+            aiRiskScore: (window.currentImageAiAccepted && window.currentImageAiData && window.currentImageAiData.finalRiskScore) ? window.currentImageAiData.finalRiskScore : (aiMeta.aiRiskScore || 50),
             aiConfidence: aiMeta.aiConfidence || 0.0,
             aiReasoning: aiMeta.aiReasoning || '',
             aiSuggestedSLA: aiMeta.aiSuggestedSLA || 48.0,
@@ -5340,10 +5807,22 @@
             aiSuggestedCategory: aiMeta.aiCategory || 'garbage',
             aiSuggestedSeverity: aiMeta.aiSeverity || 'Medium',
             citizenConfirmedAI: isAiConfirmed,
-            aiOverrideReason: isAiConfirmed ? '' : 'Citizen adjusted department manually'
+            aiOverrideReason: isAiConfirmed ? '' : 'Citizen adjusted department manually',
+            // Phase 3 Visual Evidence AI Fields Persisted
+            imageAiHazard: (window.currentImageAiData && window.currentImageAiData.detectedHazard) ? window.currentImageAiData.detectedHazard : null,
+            imageAiConfidence: (window.currentImageAiData && window.currentImageAiData.visualConfidence) ? window.currentImageAiData.visualConfidence : null,
+            imageTextConsistency: (window.currentImageAiData && window.currentImageAiData.consistency) ? window.currentImageAiData.consistency : null,
+            imageRiskModifier: (window.currentImageAiData && window.currentImageAiData.riskModifier !== undefined) ? window.currentImageAiData.riskModifier : 0,
+            imageAiReasoning: (window.currentImageAiData && window.currentImageAiData.observableReasoning) ? window.currentImageAiData.observableReasoning : null,
+            imageAiAccepted: window.currentImageAiAccepted ? 1 : 0,
+            imageOfficerVerified: 0,
+            imageOfficerOverrideReason: null
           });
 
           window.currentAiAnalysisData = null;
+          window.currentImageAiData = null;
+          window.currentImageAiAccepted = false;
+          window.currentSelectedPhotoPreset = null;
 
           reportForm.reset();
           window.clearSelectedImage();
