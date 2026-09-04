@@ -144,6 +144,9 @@
       <!-- Department Context Header -->
       <!-- Department Context Header -->
       <div class="auth-header-info">
+        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 999px; padding: 0.25rem 0.75rem; font-size: 0.74rem; color: #38bdf8; font-weight: 700; margin-bottom: 0.75rem;">
+          <span>🤖</span> Phase 1 & 2 Upgrade: AI Predictive Governance Active
+        </div>
         <h2 id="authCardHeaderTitle">Citizen Portal Login</h2>
         <p id="authCardHeaderDesc">Report civic issues, track 48h SLA & earn citizen credits</p>
       </div>
@@ -372,6 +375,40 @@
 
       <!-- Subview 1: Feed -->
       <div id="citizenTab_feed" class="citizen-subview">
+        <!-- PHASE 1 & 2 CIVIC AI COMPLAINT INTELLIGENCE BANNER -->
+        <div class="civic-ai-banner" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)); border: 1px solid rgba(56, 189, 248, 0.45); border-radius: 14px; padding: 1.25rem 1.4rem; margin-bottom: 1.5rem; box-shadow: 0 4px 25px rgba(0,0,0,0.4);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+            <div style="max-width: 680px;">
+              <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
+                <span style="font-size: 1.5rem;">🤖</span>
+                <h3 style="font-size: 1.15rem; color: #38bdf8; margin: 0; font-weight: 800;">Civic AI Complaint Intelligence (Active & Live)</h3>
+                <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">Human-in-the-Loop</span>
+              </div>
+              <p style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5; margin: 0 0 0.85rem;">
+                <strong>From Reporting to Predicting:</strong> Civic AI auto-understands department, category, SLA breach risk, and urgency score (0–100) from plain-text descriptions or voice.
+              </p>
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span style="font-size: 0.76rem; color: #94a3b8; font-weight: 700;">⚡ Try 1-Click AI Test Scenarios:</span>
+                <button type="button" class="btn btn-outline btn-sm" onclick="window.testAiComplaintWithPhrase('Garbage has been overflowing near our college for the last 3 days and there is a bad smell.')" style="font-size: 0.76rem; padding: 0.35rem 0.7rem; border-color: rgba(56, 189, 248, 0.5); color: #38bdf8; background: rgba(56, 189, 248, 0.08); cursor: pointer; border-radius: 6px;">
+                  🗑️ Overflowing Garbage (College)
+                </button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="window.testAiComplaintWithPhrase('Deep dangerous road pothole on main road causing heavy traffic and risk of accident.')" style="font-size: 0.76rem; padding: 0.35rem 0.7rem; border-color: rgba(251, 146, 60, 0.5); color: #fb923c; background: rgba(251, 146, 60, 0.08); cursor: pointer; border-radius: 6px;">
+                  🕳️ Dangerous Road Pothole
+                </button>
+                <button type="button" class="btn btn-outline btn-sm" onclick="window.testAiComplaintWithPhrase('Power has been out in our street since morning and spark coming from pole.')" style="font-size: 0.76rem; padding: 0.35rem 0.7rem; border-color: rgba(250, 204, 21, 0.5); color: #facc15; background: rgba(250, 204, 21, 0.08); cursor: pointer; border-radius: 6px;">
+                  ⚡ Power Outage & Sparking Wire
+                </button>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; align-self: center;">
+              <button class="btn btn-primary" onclick="window.openReportModal()" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.25rem; border-radius: 8px; white-space: nowrap; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <span>🤖</span> <span>Report Grievance with AI</span>
+              </button>
+              <div style="font-size: 0.7rem; color: #64748b; text-align: center;">Transparent • Human-in-the-Loop</div>
+            </div>
+          </div>
+        </div>
+
         <div class="section-header">
           <div>
             <h2 class="section-title"><span>📢</span> Regional Complaints & 48h SLA Tracking</h2>
@@ -1935,6 +1972,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=17.0.0"></script>
+  <script src="js/bundle.js?v=18.0.0"></script>
 </body>
 </html>
