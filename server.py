@@ -334,6 +334,10 @@ def init_database():
         INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt)
         VALUES ('fso.officer@foodsafety.gov.in', 'user-103', 'Dr. Lakshmi Prasad (FSO)', 'password123', 'food', 'Designated Food Safety Officer (FSO)', 'FSSAI-INSP-2026-44', 'LP', 0, 0, strftime('%s', 'now'))
     ''')
+    cursor.execute('''
+        INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt)
+        VALUES ('worker4@municipality.gov.in', 'user-104', 'Ramesh (Squad 4 Leader)', 'password123', 'worker', 'Field Response Squad Lead', 'SQUAD-04-LEAD', 'SQ', 0, 0, strftime('%s', 'now'))
+    ''')
     conn.commit()
 
 

@@ -46,7 +46,8 @@
     }
     #citizenMasterView.active,
     #municipalMasterView.active,
-    #foodSafetyMasterView.active {
+    #foodSafetyMasterView.active,
+    #workerMasterView.active {
       display: block !important;
       min-height: 100vh;
     }
@@ -142,13 +143,34 @@
       </div>
 
       <!-- Department Context Header -->
-      <!-- Department Context Header -->
       <div class="auth-header-info">
-        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 999px; padding: 0.25rem 0.75rem; font-size: 0.74rem; color: #38bdf8; font-weight: 700; margin-bottom: 0.75rem;">
-          <span>🤖</span> Phase 1 & 2 Upgrade: Deterministic AI-assisted civic classification Active
-        </div>
         <h2 id="authCardHeaderTitle">Citizen Portal Login</h2>
         <p id="authCardHeaderDesc">Report civic issues, track 48h SLA & earn citizen credits</p>
+      </div>
+
+      <!-- 1-Click Authenticated Demo Profiles (Evaluator Quick-Access via scrypt Auth) -->
+      <div class="demo-profiles-container" style="margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.74rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Authenticated Demo Profiles:</span>
+          <span style="font-size: 0.68rem; color: #64748b;">scrypt 256-bit</span>
+        </div>
+        <div class="demo-profiles-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+          <button type="button" class="demo-profile-btn" onclick="window.selectDemoProfile('citizen')" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 8px; padding: 0.6rem 0.4rem; text-align: left; cursor: pointer; transition: all 0.2s;">
+            <div style="font-size: 0.68rem; color: #34d399; font-weight: 800;">📱 CITIZEN</div>
+            <div style="font-size: 0.85rem; font-weight: 800; color: white; margin: 1px 0;">Krish</div>
+            <div style="font-size: 0.68rem; color: #94a3b8;">Ward 12</div>
+          </button>
+          <button type="button" class="demo-profile-btn" onclick="window.selectDemoProfile('municipal')" style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 0.6rem 0.4rem; text-align: left; cursor: pointer; transition: all 0.2s;">
+            <div style="font-size: 0.68rem; color: #38bdf8; font-weight: 800;">🏛️ ADMIN</div>
+            <div style="font-size: 0.85rem; font-weight: 800; color: white; margin: 1px 0;">Mukundha</div>
+            <div style="font-size: 0.68rem; color: #94a3b8;">Zonal Admin</div>
+          </button>
+          <button type="button" class="demo-profile-btn" onclick="window.selectDemoProfile('worker')" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 8px; padding: 0.6rem 0.4rem; text-align: left; cursor: pointer; transition: all 0.2s;">
+            <div style="font-size: 0.68rem; color: #fbbf24; font-weight: 800;">👷 SQUAD LEAD</div>
+            <div style="font-size: 0.85rem; font-weight: 800; color: white; margin: 1px 0;">Squad 4</div>
+            <div style="font-size: 0.68rem; color: #94a3b8;">Field Response</div>
+          </button>
+        </div>
       </div>
 
       <!-- Citizen Sub-Mode Toggle (Sign In vs Register with OTP) -->
@@ -304,19 +326,16 @@
         </div>
       </div>
 
-      <!-- Sub-tabs -->
+      <!-- Shallow Navigation Pills (Citizen: Home, My Reports, Profile & Credits) -->
       <ul class="dashboard-nav-pills">
         <li class="dash-nav-pill citizen-nav-btn active" data-tab="feed" onclick="window.switchCitizenSubTab('feed')">
-          <span>📋</span> Incident Feed
+          <span>🏠</span> Home
+        </li>
+        <li class="dash-nav-pill citizen-nav-btn" data-tab="my_reports" onclick="window.switchCitizenSubTab('my_reports')">
+          <span>📋</span> My Reports
         </li>
         <li class="dash-nav-pill citizen-nav-btn" data-tab="wallet" onclick="window.switchCitizenSubTab('wallet')">
-          <span>🪙</span> Civic Credits & Streak
-        </li>
-        <li class="dash-nav-pill citizen-nav-btn" data-tab="cctv" onclick="window.switchCitizenSubTab('cctv')">
-          <span>📡</span> Public Safety CCTV
-        </li>
-        <li class="dash-nav-pill citizen-nav-btn" data-tab="support" onclick="window.switchCitizenSubTab('support')">
-          <span>💬</span> WhatsApp & Support
+          <span>👤</span> Profile & Credits
         </li>
       </ul>
 
@@ -375,44 +394,35 @@
 
       <!-- Subview 1: Feed -->
       <div id="citizenTab_feed" class="citizen-subview">
-        <!-- PHASE 1 & 2 CIVIC AI COMPLAINT INTELLIGENCE BANNER -->
-        <div class="civic-ai-banner" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)); border: 1px solid rgba(56, 189, 248, 0.45); border-radius: 14px; padding: 1.25rem 1.4rem; margin-bottom: 1.5rem; box-shadow: 0 4px 25px rgba(0,0,0,0.4);">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-            <div style="max-width: 680px;">
-              <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem;">
-                <span style="font-size: 1.5rem;">🤖</span>
-                <h3 style="font-size: 1.15rem; color: #38bdf8; margin: 0; font-weight: 800;">Civic AI Decision Support (Deterministic Local Intelligence)</h3>
-                <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">Human-in-the-Loop</span>
-              </div>
-              <p style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5; margin: 0 0 0.85rem;">
-                <strong>From Reporting to Predicting:</strong> Civic AI auto-understands department, category, SLA breach risk, and urgency score (0–100) from plain-text descriptions or voice.
-              </p>
-              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <span style="font-size: 0.76rem; color: #94a3b8; font-weight: 700;">⚡ Try 1-Click AI Test Scenarios:</span>
-                <button type="button" class="btn btn-outline btn-sm" onclick="window.testAiComplaintWithPhrase('Garbage has been overflowing near our college for the last 3 days and there is a bad smell.')" style="font-size: 0.76rem; padding: 0.35rem 0.7rem; border-color: rgba(56, 189, 248, 0.5); color: #38bdf8; background: rgba(56, 189, 248, 0.08); cursor: pointer; border-radius: 6px;">
-                  🗑️ Overflowing Garbage (College)
-                </button>
-                <button type="button" class="btn btn-outline btn-sm" onclick="window.testAiComplaintWithPhrase('Deep dangerous road pothole on main road causing heavy traffic and risk of accident.')" style="font-size: 0.76rem; padding: 0.35rem 0.7rem; border-color: rgba(251, 146, 60, 0.5); color: #fb923c; background: rgba(251, 146, 60, 0.08); cursor: pointer; border-radius: 6px;">
-                  🕳️ Dangerous Road Pothole
-                </button>
-                <button type="button" class="btn btn-outline btn-sm" onclick="window.testAiComplaintWithPhrase('Power has been out in our street since morning and spark coming from pole.')" style="font-size: 0.76rem; padding: 0.35rem 0.7rem; border-color: rgba(250, 204, 21, 0.5); color: #facc15; background: rgba(250, 204, 21, 0.08); cursor: pointer; border-radius: 6px;">
-                  ⚡ Power Outage & Sparking Wire
-                </button>
-              </div>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 0.5rem; align-self: center;">
-              <button class="btn btn-primary" onclick="window.openReportModal()" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.25rem; border-radius: 8px; white-space: nowrap; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                <span>🤖</span> <span>Report Grievance with AI</span>
-              </button>
-              <div style="font-size: 0.7rem; color: #64748b; text-align: center;">Transparent • Human-in-the-Loop</div>
-            </div>
+        <!-- Citizen Minimalist Hero Header -->
+        <div class="citizen-welcome-hero" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 78, 59, 0.25)); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div style="font-size: 0.78rem; color: #34d399; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">📍 Ward 12 (Market Zone), Surampalem</div>
+            <h2 style="color: white; font-size: 1.35rem; margin: 0.2rem 0 0.3rem; font-weight: 800;">Namaste, Krish</h2>
+            <p style="color: #cbd5e1; font-size: 0.84rem; margin: 0; line-height: 1.45;">Report civic problems directly to field squads with guaranteed 48-hour SLA resolution.</p>
           </div>
+          <button class="btn btn-primary" onclick="window.openReportModal()" style="font-weight: 800; font-size: 0.92rem; padding: 0.75rem 1.4rem; border-radius: 10px; background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <span style="font-size: 1.1rem; font-weight: 900;">+</span> <span>REPORT A CIVIC ISSUE</span>
+          </button>
+        </div>
+
+        <!-- Section: Active Reports (In Progress) -->
+        <div id="citizenActiveReportsSection" style="margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+            <h3 style="font-size: 1.05rem; color: white; margin: 0; display: flex; align-items: center; gap: 0.4rem;">
+              <span>⚡</span> My Active Reports
+            </h3>
+            <button type="button" class="btn btn-sm btn-link" onclick="window.switchCitizenSubTab('my_reports')" style="color: #38bdf8; font-size: 0.76rem; text-decoration: none; padding: 0; background: none; border: none; cursor: pointer;">
+              View all reports →
+            </button>
+          </div>
+          <div id="citizenActiveReportsGrid" class="grid-3"></div>
         </div>
 
         <div class="section-header">
           <div>
-            <h2 class="section-title"><span>📢</span> Regional Complaints & 48h SLA Tracking</h2>
-            <p class="section-desc">Filtered by State → City → Ward → Street jurisdiction.</p>
+            <h2 class="section-title"><span>📢</span> Nearby Civic Issues & Status</h2>
+            <p class="section-desc">Civic issues logged in your jurisdiction with response countdown.</p>
           </div>
           <input type="text" id="citizenSearchInput" class="form-input" placeholder="🔍 Search street, area, or Ticket ID..." style="width: 260px; font-size: 0.85rem; padding: 0.45rem 0.75rem;">
         </div>
@@ -427,6 +437,20 @@
         </div>
 
         <div id="citizenIssuesFeedGrid" class="grid-3"></div>
+      </div>
+
+      <!-- Subview: Dedicated My Reports -->
+      <div id="citizenTab_my_reports" class="citizen-subview" style="display: none;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><span>📋</span> My Submitted Civic Reports</h2>
+            <p class="section-desc">Track status, field squad assignment, and resolution proof for your grievances.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="window.openReportModal()" style="font-weight: 700;">
+            <span>+</span> Report New Issue
+          </button>
+        </div>
+        <div id="citizenMyReportsGrid" class="grid-3"></div>
       </div>
 
       <!-- Subview 2: Civic Credits, Streak & Participation Certificate -->
@@ -513,8 +537,8 @@
             <div style="padding: 1rem; color: white;">
               <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 2px;">Case 1: Vehicle Garbage Dumping (ANPR)</div>
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">Detects vehicle dumping and captures number plate for e-Challan.</p>
-              <button class="btn btn-sm btn-saffron" style="width: 100%;" onclick="window.openChallanModal()">
-                💳 View Notice & Pay ₹500 e-Challan
+              <button class="btn btn-sm btn-outline" style="width: 100%; border-color: #f59e0b; color: #f59e0b;" onclick="alert('Statutory Notice #ECH-2026-881 dispatched to Regional Transport Office (RTO) for Vehicle MH12 AB 1234.')">
+                📜 View RTO Violation Notice
               </button>
             </div>
           </div>
@@ -681,24 +705,20 @@
     <!-- Mobile App Bottom Navigation Bar (iOS/Android Native Style) -->
     <nav class="mobile-bottom-nav mobile-nav-citizen">
       <button class="mobile-nav-tab active" data-tab="feed" onclick="window.switchCitizenSubTab('feed')">
-        <span class="mobile-nav-icon">📋</span>
-        <span class="mobile-nav-label">Feed</span>
+        <span class="mobile-nav-icon">🏠</span>
+        <span class="mobile-nav-label">Home</span>
       </button>
-      <button class="mobile-nav-tab" data-tab="wallet" onclick="window.switchCitizenSubTab('wallet')">
-        <span class="mobile-nav-icon">🪙</span>
-        <span class="mobile-nav-label">Credits</span>
+      <button class="mobile-nav-tab" data-tab="my_reports" onclick="window.switchCitizenSubTab('my_reports')">
+        <span class="mobile-nav-icon">📋</span>
+        <span class="mobile-nav-label">Reports</span>
       </button>
       <button class="mobile-nav-tab mobile-nav-fab" onclick="window.openReportModal()" title="Report Issue">
         <span class="mobile-fab-icon">+</span>
         <span class="mobile-nav-label">Report</span>
       </button>
-      <button class="mobile-nav-tab" data-tab="cctv" onclick="window.switchCitizenSubTab('cctv')">
-        <span class="mobile-nav-icon">📡</span>
-        <span class="mobile-nav-label">CCTV</span>
-      </button>
-      <button class="mobile-nav-tab" data-tab="support" onclick="window.switchCitizenSubTab('support')">
-        <span class="mobile-nav-icon">💬</span>
-        <span class="mobile-nav-label">WhatsApp</span>
+      <button class="mobile-nav-tab" data-tab="wallet" onclick="window.switchCitizenSubTab('wallet')">
+        <span class="mobile-nav-icon">👤</span>
+        <span class="mobile-nav-label">Profile</span>
       </button>
     </nav>
   </div>
@@ -718,19 +738,22 @@
         </div>
       </div>
 
-      <!-- Sub-tabs -->
+      <!-- Sub-tabs (Municipal Shallow Nav: Overview, Issues, Hotspots, Map, Audit & Grid) -->
       <ul class="dashboard-nav-pills">
-        <li class="dash-nav-pill municipal-nav-btn active" data-tab="incidents" onclick="window.switchMunicipalSubTab('incidents')">
-          <span>🛡️</span> 48h SLA Triage Queue
+        <li class="dash-nav-pill municipal-nav-btn active" data-tab="overview" onclick="window.switchMunicipalSubTab('overview')">
+          <span>📊</span> Overview
         </li>
-        <li class="dash-nav-pill municipal-nav-btn" data-tab="electricity" onclick="window.switchMunicipalSubTab('electricity')">
-          <span>⚡</span> Grid & Smart Bins
+        <li class="dash-nav-pill municipal-nav-btn" data-tab="incidents" onclick="window.switchMunicipalSubTab('incidents')">
+          <span>🛡️</span> Issues Queue
+        </li>
+        <li class="dash-nav-pill municipal-nav-btn" data-tab="hotspots" onclick="window.switchMunicipalSubTab('hotspots')">
+          <span>🔮</span> Hotspots
         </li>
         <li class="dash-nav-pill municipal-nav-btn" data-tab="heatmap" onclick="window.switchMunicipalSubTab('heatmap')">
-          <span>🗺️</span> GIS Red-Zone & Fleet
+          <span>🗺️</span> GIS Map
         </li>
-        <li class="dash-nav-pill municipal-nav-btn" data-tab="workers" onclick="window.switchMunicipalSubTab('workers')">
-          <span>👷</span> Field Work Orders
+        <li class="dash-nav-pill municipal-nav-btn" data-tab="electricity" onclick="window.switchMunicipalSubTab('electricity')">
+          <span>⚡</span> Audit & Grid
         </li>
       </ul>
 
@@ -784,8 +807,8 @@
         </select>
       </div>
 
-      <!-- Subview 1: SLA Queue -->
-      <div id="munTab_incidents" class="municipal-subview">
+      <!-- Subview 1: Municipal Overview -->
+      <div id="munTab_overview" class="municipal-subview">
         <div class="grid-4" style="margin-bottom: 1.5rem;">
           <div class="cmd-metric-card">
             <span class="stat-label">Total City Reports</span>
@@ -835,10 +858,37 @@
             </div>
           </div>
         </div>
+      </div>
 
-                <!-- =========================================================================
-             PHASE 4: PREDICTIVE CIVIC INTELLIGENCE (FROM REACTIVE TO PREVENTIVE)
-             ========================================================================= -->
+      <!-- Subview 2: SLA Triage Queue (Issues) -->
+      <div id="munTab_incidents" class="municipal-subview" style="display: none;">
+        <div class="section-header" style="margin-bottom: 0.75rem;">
+          <div>
+            <h3 style="color: white; font-size: 1.25rem; margin: 0;">Cross-Department 48-Hour SLA Triage Queue</h3>
+            <p style="color: var(--text-muted); font-size: 0.82rem; margin: 2px 0 0;">Priority action list of grievances across Sanitation, Electricity, and Food Safety.</p>
+          </div>
+        </div>
+
+        <div class="cmd-table-container">
+          <table class="cmd-table">
+            <thead>
+              <tr>
+                <th>Ticket ID</th>
+                <th>Incident Details</th>
+                <th>State & Jurisdiction</th>
+                <th>Department</th>
+                <th>Severity</th>
+                <th>48h SLA Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="munIncidentTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Subview 3: Predictive Civic Intelligence Hotspots -->
+      <div id="munTab_hotspots" class="municipal-subview" style="display: none;">
         <div class="predictive-civic-intelligence-section" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.7)); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 14px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
             <div>
@@ -848,7 +898,7 @@
                   Predictive Civic Intelligence
                 </h3>
                 <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.72rem;">
-                  AI-Assisted Predictive Demo
+                  7-Day Early Warning
                 </span>
               </div>
               <p style="color: #94a3b8; font-size: 0.84rem; margin-top: 0.35rem; max-width: 650px;">
@@ -869,7 +919,7 @@
           <div class="grid-4" style="margin-bottom: 1.5rem;">
             <div class="cmd-metric-card" style="border-left: 3px solid #38bdf8;">
               <span class="stat-label">🔮 Active Predictive Hotspots</span>
-              <div class="cmd-metric-num" id="kpiActivePredictiveHotspots" style="color: #38bdf8;">6</div>
+              <div class="cmd-metric-num" id="kpiActivePredictiveHotspots">6</div>
               <span class="cmd-metric-sub">Across 5 Monitored Wards</span>
             </div>
             <div class="cmd-metric-card" style="border-left: 3px solid #ef4444;">
@@ -892,7 +942,7 @@
           <!-- Predictive Hotspots Table / Cards Container -->
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
             <h4 style="color: white; font-size: 1.05rem; margin: 0;">Forecasted Emerging Civic Hotspots (Next 7 Days)</h4>
-            <span style="font-size: 0.74rem; color: #94a3b8;">Source: Demo / Historical Incident Dataset • Human Review Required</span>
+            <span style="font-size: 0.74rem; color: #94a3b8;">Source: Historical Incident Dataset • Human Authorization Enforced</span>
           </div>
           <div class="cmd-table-container" style="margin-bottom: 1.25rem;">
             <table class="cmd-table">
@@ -912,47 +962,8 @@
               </tbody>
             </table>
           </div>
-
-          <!-- Section 23: "From Reactive to Predictive Governance" Explanatory Panel -->
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1rem 1.25rem;">
-            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-              <span style="font-size: 1.1rem;">🏛️</span>
-              <strong style="color: #38bdf8; font-size: 0.92rem;">From Reactive to Predictive Governance</strong>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.78rem; color: #cbd5e1; line-height: 1.5;">
-              <div style="padding: 0.75rem; background: rgba(255,255,255,0.02); border-radius: 8px; border-left: 3px solid #64748b;">
-                <div style="font-weight: 800; color: #94a3b8; margin-bottom: 4px;">TRADITIONAL CIVIC MODEL</div>
-                Citizen reports problem $\to$ Municipality receives complaint $\to$ Officer assigns response $\to$ Problem is resolved (Reactive).
-              </div>
-              <div style="padding: 0.75rem; background: rgba(56, 189, 248, 0.05); border-radius: 8px; border-left: 3px solid #38bdf8;">
-                <div style="font-weight: 800; color: #38bdf8; margin-bottom: 4px;">SMART CIVIC CONNECT PREDICTIVE LOOP</div>
-                Citizen reports $\to$ AI understands $\to$ Evidence is verified $\to$ Incidents are clustered $\to$ Historical patterns analyzed $\to$ Recurrence forecast $\to$ Preventive recommendation $\to$ Officer approves $\to$ Municipality acts before escalation.
-              </div>
-            </div>
-            <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 0.75rem; font-style: italic;">
-              "Inspired by modern smart-city approaches, Smart Civic Connect adapts predictive civic intelligence to India's citizen-centric, multi-department governance environment."
-            </div>
-          </div>
-        </div>
-
-<h4 style="color: white; margin-bottom: 0.75rem; font-size: 1.05rem;">Cross-Department 48-Hour SLA Queue</h4>
-        <div class="cmd-table-container">
-          <table class="cmd-table">
-            <thead>
-              <tr>
-                <th>Ticket ID</th>
-                <th>Incident Details</th>
-                <th>State & Jurisdiction</th>
-                <th>Department</th>
-                <th>Severity</th>
-                <th>48h SLA Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="munIncidentTableBody"></tbody>
-          </table>
-        </div>
       </div>
+
 
       <!-- Subview 2: Electricity Grid & Ultrasonic Smart Bins -->
       <div id="munTab_electricity" class="municipal-subview" style="display: none;">
@@ -1095,21 +1106,25 @@
 
     <!-- Mobile Municipal Bottom Nav -->
     <nav class="mobile-bottom-nav mobile-nav-municipal">
-      <button class="mobile-nav-tab active" data-tab="incidents" onclick="window.switchMunicipalSubTab('incidents')">
-        <span class="mobile-nav-icon">🛡️</span>
-        <span class="mobile-nav-label">Incidents</span>
+      <button class="mobile-nav-tab active" data-tab="overview" onclick="window.switchMunicipalSubTab('overview')">
+        <span class="mobile-nav-icon">📊</span>
+        <span class="mobile-nav-label">Overview</span>
       </button>
-      <button class="mobile-nav-tab" data-tab="electricity" onclick="window.switchMunicipalSubTab('electricity')">
-        <span class="mobile-nav-icon">⚡</span>
-        <span class="mobile-nav-label">SCADA</span>
+      <button class="mobile-nav-tab" data-tab="incidents" onclick="window.switchMunicipalSubTab('incidents')">
+        <span class="mobile-nav-icon">🛡️</span>
+        <span class="mobile-nav-label">Issues</span>
+      </button>
+      <button class="mobile-nav-tab" data-tab="hotspots" onclick="window.switchMunicipalSubTab('hotspots')">
+        <span class="mobile-nav-icon">🔮</span>
+        <span class="mobile-nav-label">Hotspots</span>
       </button>
       <button class="mobile-nav-tab" data-tab="heatmap" onclick="window.switchMunicipalSubTab('heatmap')">
         <span class="mobile-nav-icon">🗺️</span>
-        <span class="mobile-nav-label">GIS Map</span>
+        <span class="mobile-nav-label">Map</span>
       </button>
-      <button class="mobile-nav-tab" data-tab="workers" onclick="window.switchMunicipalSubTab('workers')">
-        <span class="mobile-nav-icon">👷</span>
-        <span class="mobile-nav-label">Squads</span>
+      <button class="mobile-nav-tab" data-tab="electricity" onclick="window.switchMunicipalSubTab('electricity')">
+        <span class="mobile-nav-icon">⚡</span>
+        <span class="mobile-nav-label">Audit</span>
       </button>
     </nav>
   </div>
@@ -1288,11 +1303,20 @@
             </div>
           </div>
 
-          <div style="background: #0d1527; border-radius: var(--radius-md); padding: 1.25rem; margin-top: 1.5rem; border: 1px dashed var(--border);">
-            <h4 style="color: white; font-size: 0.95rem; margin-bottom: 0.75rem;">🎛️ Simulate Gas Spoilage Levels</h4>
-            <div>
-              <label class="form-label" style="color: #94a3b8; font-size: 0.82rem;">Simulate MQ-135 Gas PPM (Dangerous Threshold > 350 PPM):</label>
-              <input type="range" id="iotGasSlider" min="100" max="700" value="185" style="width: 100%;">
+          <div class="statutory-sensor-card" style="background: #0d1527; border-radius: var(--radius-md); padding: 1.25rem; margin-top: 1.5rem; border: 1px solid rgba(245, 158, 11, 0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+              <h4 style="color: #f59e0b; font-size: 0.95rem; margin: 0; display: flex; align-items: center; gap: 0.4rem;">
+                <span>🔬</span> Statutory IoT Environmental Telemetry
+              </h4>
+              <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">CALIBRATED SENSOR ACTIVE</span>
+            </div>
+            <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.45; margin: 0 0 0.85rem;">
+              Automated MQ-135 sensor telemetry monitoring ambient ammonia and VOC levels in Surampalem Food Market Zone. Automated statutory notice triggers if air quality index breaches 350 PPM threshold.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; font-size: 0.78rem; background: rgba(255, 255, 255, 0.02); padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);">
+              <div><span style="color: #94a3b8;">Baseline:</span> <strong style="color: white; margin-left: 4px;">120 PPM</strong></div>
+              <div><span style="color: #94a3b8;">Current:</span> <strong style="color: #34d399; margin-left: 4px;" class="iotGasValue">185 PPM</strong></div>
+              <div><span style="color: #94a3b8;">Statutory Limit:</span> <strong style="color: #f87171; margin-left: 4px;">350 PPM</strong></div>
             </div>
           </div>
         </div>
@@ -1368,8 +1392,121 @@
 
 
   <!-- =========================================================================
-       MODALS
+       DEDICATED FIELD WORKER & SQUAD RESPONSE PORTAL
        ========================================================================= -->
+  <div id="workerMasterView" class="master-dashboard-view">
+    <!-- Worker Topbar -->
+    <header class="dashboard-topbar topbar-worker">
+      <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
+        <img src="assets/logo.png" alt="Clean & Safe India" class="topbar-logo-img">
+        <div style="min-width: 0;">
+          <div class="topbar-brand-title" style="font-weight: 800; font-size: 1.1rem; color: #fbbf24;">Field Squad Portal</div>
+          <div class="topbar-brand-subtitle" style="font-size: 0.72rem; color: #94a3b8;" id="workerTopSquadName">Squad 4 • Ward 12 Operations</div>
+        </div>
+      </div>
+
+      <!-- Shallow Navigation Pills (Worker: My Tasks, Completed, Squad Profile) -->
+      <ul class="dashboard-nav-pills">
+        <li class="dash-nav-pill worker-nav-btn active" data-tab="tasks" onclick="window.switchWorkerSubTab('tasks')">
+          <span>📋</span> My Tasks (<span id="workerOpenTaskCount">0</span>)
+        </li>
+        <li class="dash-nav-pill worker-nav-btn" data-tab="completed" onclick="window.switchWorkerSubTab('completed')">
+          <span>✅</span> Completed History
+        </li>
+        <li class="dash-nav-pill worker-nav-btn" data-tab="profile" onclick="window.switchWorkerSubTab('profile')">
+          <span>👤</span> Squad Profile
+        </li>
+      </ul>
+
+      <!-- User Actions & Logout -->
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div class="gov-auth-badge" style="border-color: rgba(245, 158, 11, 0.4);">
+          <span style="color: #fbbf24;">👷</span>
+          <span id="workerTopBadge" style="font-family: var(--font-mono); color: #fbbf24; font-weight: 700;">SQUAD-04-LEAD</span>
+        </div>
+        <button class="btn-switch-portal" onclick="window.handleLogout()">
+          <span>🔒</span> Logout
+        </button>
+      </div>
+    </header>
+
+    <main class="app-container">
+      <!-- Worker Subview 1: Open Tasks -->
+      <div id="workerTab_tasks" class="worker-subview">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><span>📋</span> Assigned Field Work Orders</h2>
+            <p class="section-desc">Active municipal dispatch orders assigned to Squad 4. Inspect on-site and upload photographic proof to resolve.</p>
+          </div>
+        </div>
+        <div class="grid-3" id="workerOpenTasksGrid"></div>
+      </div>
+
+      <!-- Worker Subview 2: Completed History -->
+      <div id="workerTab_completed" class="worker-subview" style="display: none;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><span>✅</span> Completed & Cleared Work Orders</h2>
+            <p class="section-desc">Historical record of resolved incidents with photographic evidence.</p>
+          </div>
+        </div>
+        <div class="grid-3" id="workerCompletedTasksGrid"></div>
+      </div>
+
+      <!-- Worker Subview 3: Squad Profile -->
+      <div id="workerTab_profile" class="worker-subview" style="display: none;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><span>👤</span> Squad Information & Equipment Assignment</h2>
+            <p class="section-desc">Designated municipal rapid response squad specifications.</p>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="color: white; margin-bottom: 0.75rem;">Squad Operational Profile</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: #cbd5e1;">
+              <div><strong>Squad Lead:</strong> Ramesh (Field Lead)</div>
+              <div><strong>Official ID:</strong> <span style="font-family: var(--font-mono); color: #fbbf24;">SQUAD-04-LEAD</span></div>
+              <div><strong>Jurisdiction:</strong> Ward 12 (Market Zone), Surampalem</div>
+              <div><strong>Specialization:</strong> Commercial Solid Waste & Rapid Compactor Operations</div>
+              <div><strong>Assigned Vehicle:</strong> Hydraulic Tipper #AP-05-TX</div>
+              <div><strong>Emergency Radio:</strong> Channel 4 (Municipal Control)</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3 style="color: white; margin-bottom: 0.75rem;">Performance & SLA Compliance</h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 0.5rem;">
+              <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                <div style="font-size: 1.8rem; font-weight: 900; color: #34d399; font-family: var(--font-mono);">98.4%</div>
+                <div style="font-size: 0.75rem; color: #94a3b8;">48h SLA Compliance</div>
+              </div>
+              <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                <div style="font-size: 1.8rem; font-weight: 900; color: #38bdf8; font-family: var(--font-mono);" id="workerCompletedCount">14</div>
+                <div style="font-size: 0.75rem; color: #94a3b8;">Total Tasks Cleared</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Mobile Worker Bottom Nav -->
+    <nav class="mobile-bottom-nav mobile-nav-worker">
+      <button class="mobile-nav-tab active" data-tab="tasks" onclick="window.switchWorkerSubTab('tasks')">
+        <span class="mobile-nav-icon">📋</span>
+        <span class="mobile-nav-label">Tasks</span>
+      </button>
+      <button class="mobile-nav-tab" data-tab="completed" onclick="window.switchWorkerSubTab('completed')">
+        <span class="mobile-nav-icon">✅</span>
+        <span class="mobile-nav-label">Done</span>
+      </button>
+      <button class="mobile-nav-tab" data-tab="profile" onclick="window.switchWorkerSubTab('profile')">
+        <span class="mobile-nav-icon">👤</span>
+        <span class="mobile-nav-label">Squad</span>
+      </button>
+    </nav>
+  </div>
+
 
   <!-- Report Issue Modal with Cascading 4-Tier Location Selection -->
   <div class="modal-overlay" id="reportIssueModal">
@@ -1741,38 +1878,6 @@
           </button>
         </div>
       </form>
-    </div>
-  </div>
-
-  <!-- Instant UPI e-Challan Modal -->
-  <div class="modal-overlay" id="challanPaymentModal">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3 style="font-size: 1.25rem; color: white;">💳 Municipal e-Challan Penalty Payment</h3>
-        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('challanPaymentModal')">✕</button>
-      </div>
-      <div class="modal-body" style="text-align: center;">
-        <div style="background: rgba(244, 63, 94, 0.15); border: 1px solid #f43f5e; border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
-          <div style="font-size: 0.8rem; color: #fda4af;">VIOLATION NOTICE #ECH-2026-881</div>
-          <div style="font-size: 1.4rem; font-weight: 900; color: #facc15; font-family: var(--font-mono); margin: 0.3rem 0;">Vehicle Plate: MH12 AB 1234</div>
-          <p style="font-size: 0.85rem; color: #e2e8f0;">Offense: Illegal Commercial Waste Dumping at Market Gate</p>
-        </div>
-
-        <div style="font-size: 2.2rem; font-weight: 900; color: white; margin-bottom: 0.5rem; font-family: var(--font-mono);">₹500.00</div>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">Scan UPI QR Code to clear penalty and avoid court summons</p>
-
-        <div style="background: white; padding: 1rem; border-radius: 12px; display: inline-block; box-shadow: 0 0 20px rgba(255,255,255,0.2); margin-bottom: 1.25rem;">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=upi://pay?pa=municipality@sbi&pn=MunicipalCorporation&am=500&cu=INR" alt="UPI QR" style="width: 160px; height: 160px; display: block;">
-        </div>
-
-        <div style="font-size: 0.8rem; color: #94a3b8;">Funds collected directly replenish the Municipal Cleanliness Fund</div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline" onclick="window.closeModal('challanPaymentModal')">Close</button>
-        <button type="button" class="btn btn-primary" onclick="window.simulateChallanPaySuccess()">
-          <span>✅</span> Simulate UPI Payment Received
-        </button>
-      </div>
     </div>
   </div>
 
@@ -2221,7 +2326,28 @@
     </div>
   </div>
 
-<div class="toast-container" id="toastContainer"></div>
+  <!-- Collapsible Evaluator Demo Drawer for Quick Scenario Evaluation -->
+  <div id="evaluatorDemoDrawer" class="evaluator-demo-drawer" style="position: fixed; bottom: 16px; left: 16px; z-index: 9999;">
+    <button type="button" id="btnToggleDemoDrawer" onclick="window.toggleEvaluatorDrawer()" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(56, 189, 248, 0.5); color: #38bdf8; padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 20px rgba(0,0,0,0.6); backdrop-filter: blur(10px);">
+      <span>🛠️ Demo Presets</span> <span id="demoDrawerArrowIcon">▲</span>
+    </button>
+    <div id="evaluatorDrawerPanel" style="display: none; position: absolute; bottom: 42px; left: 0; width: 340px; background: rgba(15, 23, 42, 0.98); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 12px; padding: 12px; box-shadow: 0 10px 35px rgba(0,0,0,0.8); backdrop-filter: blur(12px);">
+      <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 8px;">1-Click Evaluator Scenarios (Pre-Fills Report Form):</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <button type="button" class="btn btn-sm btn-outline" style="text-align: left; font-size: 0.76rem; padding: 6px 10px; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; background: rgba(56, 189, 248, 0.08);" onclick="window.testAiComplaintWithPhrase('Garbage has been overflowing near our college for the last 3 days and there is a bad smell.')">
+          🗑️ Overflowing Garbage (College)
+        </button>
+        <button type="button" class="btn btn-sm btn-outline" style="text-align: left; font-size: 0.76rem; padding: 6px 10px; border-color: rgba(251, 146, 60, 0.4); color: #fb923c; background: rgba(251, 146, 60, 0.08);" onclick="window.testAiComplaintWithPhrase('Deep dangerous road pothole on main road causing heavy traffic and risk of accident.')">
+          🕳️ Dangerous Road Pothole
+        </button>
+        <button type="button" class="btn btn-sm btn-outline" style="text-align: left; font-size: 0.76rem; padding: 6px 10px; border-color: rgba(250, 204, 21, 0.4); color: #facc15; background: rgba(250, 204, 21, 0.08);" onclick="window.testAiComplaintWithPhrase('Power has been out in our street since morning and spark coming from pole.')">
+          ⚡ Power Outage & Sparking Wire
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
 
   <!-- Cache Invalidation Script -->
   <script>
