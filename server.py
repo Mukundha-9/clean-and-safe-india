@@ -12,6 +12,7 @@ import hashlib
 import secrets
 import hmac
 import random
+import predictive_engine
 
 # ------------------------------------------------------------------------------
 # INDUSTRY-STANDARD PASSWORD SECURITY (SCRYPT WITH PER-USER SALT)
@@ -379,7 +380,12 @@ def init_database():
     count = cursor.fetchone()[0]
     if count == 0:
         seed_initial_data(conn)
-    
+
+    # Phase 4: Predictive Civic Intelligence Tables & Seeding
+    predictive_engine.init_predictive_tables(cursor)
+    predictive_engine.seed_predictive_intelligence_data(conn)
+    conn.commit()
+
     conn.close()
     print('[Database] SQLite database initialized successfully at', DB_FILE)
 
@@ -643,6 +649,8 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                     self.wfile.flush()
             except Exception:
                 sse_hub.unregister_client(self)
+        # Phase 4: Predictive Civic Intelligence Endpoints (GET)
+        if predictive_engine.handle_predictive_get(self, path, query):
             return
 
         # 2. REST API: GET /api/issues
@@ -765,6 +773,10 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             body = json.loads(post_body.decode('utf-8'))
         except Exception:
             body = {}
+
+        # Phase 4: Predictive Civic Intelligence Endpoints (POST)
+        if predictive_engine.handle_predictive_post(self, path, body, sse_hub):
+            return
 
         # 1. REST API: POST /api/issues
         if path == '/api/issues':

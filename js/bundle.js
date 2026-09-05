@@ -676,7 +676,7 @@
       }
     },
 
-    // 5. Predictive Hotspots: 48h Emerging Civic Risk Forecasting
+    // 5. Predictive Hotspots: 7-Day Emerging Civic Risk Forecasting & Governance
     PredictiveHotspots: {
       forecastWard: function(wardName, historicalComplaints = 0, recurrenceRate = 0.5, avgResHours = 24.0) {
         // Analytical regression projection
@@ -702,11 +702,128 @@
           ward: wardName,
           predictedRiskPercent: predictedRisk,
           riskLevel: riskLevel,
-          forecastHorizonHours: 48,
+          forecastHorizonHours: 168,
           recommendedAction: action,
           isSimulatedForecast: true,
           lastEvaluatedAt: Date.now()
         };
+      },
+
+      // Phase 4: Fetch active predictive hotspots from REST API
+      getForecasts: async function(filterWard = null) {
+        try {
+          const url = filterWard ? `/api/predictive-hotspots?ward=${encodeURIComponent(filterWard)}` : '/api/predictive-hotspots';
+          const res = await fetch(url);
+          if (res.ok) {
+            return await res.json();
+          }
+        } catch (err) {
+          console.warn('[Predictive Engine] Failed to fetch forecasts from API:', err);
+        }
+        return { success: false, data: [] };
+      },
+
+      // Phase 4: Recompute & refresh forecasts via AI endpoint
+      refreshForecasts: async function() {
+        try {
+          const res = await fetch('/api/ai/predictive-hotspots', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ triggered_by: 'municipal_dashboard' })
+          });
+          if (res.ok) {
+            return await res.json();
+          }
+        } catch (err) {
+          console.warn('[Predictive Engine] Failed to refresh forecasts:', err);
+        }
+        return { success: false };
+      },
+
+      // Phase 4: Get forecast by ID
+      getForecastById: async function(id) {
+        try {
+          const res = await fetch(`/api/predictive-hotspots/${encodeURIComponent(id)}`);
+          if (res.ok) {
+            return await res.json();
+          }
+        } catch (err) {
+          console.warn('[Predictive Engine] Failed to get forecast by id:', err);
+        }
+        return null;
+      },
+
+      // Phase 4: Get preventive actions
+      getPreventiveActions: async function(status = null) {
+        try {
+          const url = status ? `/api/preventive-actions?status=${encodeURIComponent(status)}` : '/api/preventive-actions';
+          const res = await fetch(url);
+          if (res.ok) {
+            return await res.json();
+          }
+        } catch (err) {
+          console.warn('[Predictive Engine] Failed to fetch preventive actions:', err);
+        }
+        return { success: false, data: [] };
+      },
+
+      // Phase 4: Approve preventive action
+      approveAction: async function(actionId, forecastId, approvedBy = 'Municipal Officer', notes = '') {
+        try {
+          const res = await fetch('/api/preventive-actions/approve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action_id: actionId,
+              forecast_id: forecastId,
+              approved_by: approvedBy,
+              notes: notes
+            })
+          });
+          return await res.json();
+        } catch (err) {
+          return { success: false, error: err.message };
+        }
+      },
+
+      // Phase 4: Reject preventive action (mandatory justification)
+      rejectAction: async function(actionId, forecastId, rejectedBy = 'Municipal Officer', justification = '') {
+        try {
+          const res = await fetch('/api/preventive-actions/reject', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action_id: actionId,
+              forecast_id: forecastId,
+              rejected_by: rejectedBy,
+              justification: justification
+            })
+          });
+          return await res.json();
+        } catch (err) {
+          return { success: false, error: err.message };
+        }
+      },
+
+      // Phase 4: Modify preventive action
+      modifyAction: async function(actionId, forecastId, modifiedBy = 'Municipal Officer', modifiedAction = '', priority = 'High', notes = '') {
+        try {
+          const res = await fetch('/api/preventive-actions/modify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action_id: actionId,
+              forecast_id: forecastId,
+              modified_by: modifiedBy,
+              modified_action: modifiedAction,
+              priority: priority,
+              notes: notes
+            })
+          });
+          return await res.json();
+        } catch (err) {
+          return { success: false, error: err.message };
+        }
       }
     },
 
@@ -2448,6 +2565,12 @@
         }
       });
 
+      // Phase 4: GIS Predictive Hotspot Layer Group
+      if (!gisPredictiveLayerGroup) {
+        gisPredictiveLayerGroup = L.layerGroup().addTo(gisMapInstance);
+      }
+      renderGisPredictiveHotspots(cachedPredictiveForecasts);
+
       // Plot Live Moving Fleet with Real-Time Animation
       const fleetData = [
         { name: 'Collection Truck AP-05-TX', type: '🚛', lat: 17.0035, lng: 81.8025, status: 'Moving (24 km/h)' },
@@ -2658,6 +2781,11 @@
       if (typeof updateFleetGPSMarkers === 'function') {
         updateFleetGPSMarkers(packet.payload);
       }
+    } else if (packet.type === 'PREDICTIVE_HOTSPOTS_REFRESHED') {
+      renderPredictiveHotspotsUI();
+      showToast('🔮 Predictive Civic Hotspots updated with latest telemetry', 'info', '🔮');
+    } else if (packet.type === 'PREVENTIVE_ACTION_CREATED' || packet.type === 'PREVENTIVE_ACTION_UPDATED') {
+      renderPredictiveHotspotsUI();
     }
   }
 
@@ -3300,6 +3428,9 @@
         `).join('');
       }
     }
+
+    // Phase 4: Populate Predictive Civic Intelligence in Municipal Dashboard
+    renderPredictiveHotspotsUI();
   }
 
   function renderFoodSafetyDashboard() {
@@ -5980,6 +6111,434 @@
       });
     }
 
+  // =========================================================================
+  // PHASE 4: PREDICTIVE CIVIC INTELLIGENCE CONTROLLER & GOVERNANCE UI
+  // =========================================================================
+  let cachedPredictiveForecasts = [];
+  let cachedPreventiveActions = [];
+  let activePredictiveForecastId = null;
+  let gisPredictiveLayerGroup = null;
+  let gisPredictiveLayerVisible = true;
+
+  async function renderPredictiveHotspotsUI() {
+    try {
+      const [forecastRes, actionRes] = await Promise.all([
+        CivicAiEngine.PredictiveHotspots.getForecasts(),
+        CivicAiEngine.PredictiveHotspots.getPreventiveActions()
+      ]);
+
+      if (forecastRes && forecastRes.success && Array.isArray(forecastRes.data)) {
+        cachedPredictiveForecasts = forecastRes.data;
+      }
+      if (actionRes && actionRes.success && Array.isArray(actionRes.data)) {
+        cachedPreventiveActions = actionRes.data;
+      }
+
+      // Update KPIs
+      const activeHotspotsCount = cachedPredictiveForecasts.length;
+      const criticalCount = cachedPredictiveForecasts.filter(f => (f.predicted_risk_level || '').toLowerCase() === 'critical' || f.predicted_risk_score >= 80).length;
+      const highRiskCount = cachedPredictiveForecasts.filter(f => {
+        const lvl = (f.predicted_risk_level || '').toLowerCase();
+        return lvl === 'high' || (f.predicted_risk_score >= 60 && f.predicted_risk_score < 80);
+      }).length;
+      const actionsCount = cachedPreventiveActions.length;
+
+      const kpiActive = document.getElementById('kpiActivePredictiveHotspots');
+      const kpiCrit = document.getElementById('kpiCriticalForecasts');
+      const kpiHigh = document.getElementById('kpiHighRiskAreas');
+      const kpiActions = document.getElementById('kpiPreventiveActionsCount');
+
+      if (kpiActive) kpiActive.textContent = activeHotspotsCount;
+      if (kpiCrit) kpiCrit.textContent = criticalCount;
+      if (kpiHigh) kpiHigh.textContent = highRiskCount;
+      if (kpiActions) kpiActions.textContent = actionsCount;
+
+      // Update Table
+      const tableBody = document.getElementById('predictiveHotspotsTableBody');
+      if (tableBody) {
+        if (cachedPredictiveForecasts.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 1.5rem; color: #94a3b8; font-size: 0.85rem;">No active predictive hotspots detected. Click "Refresh AI Forecasts" to compute forecasts.</td></tr>`;
+        } else {
+          tableBody.innerHTML = cachedPredictiveForecasts.map(f => {
+            const action = cachedPreventiveActions.find(a => a.forecast_id === f.id);
+            const status = action ? action.status : 'pending_review';
+
+            // Risk badge style
+            let riskBadgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981;';
+            let riskBadgeText = 'LOW';
+            if (f.predicted_risk_score >= 80 || f.predicted_risk_level === 'Critical') {
+              riskBadgeStyle = 'background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444;';
+              riskBadgeText = 'CRITICAL';
+            } else if (f.predicted_risk_score >= 60 || f.predicted_risk_level === 'High') {
+              riskBadgeStyle = 'background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b;';
+              riskBadgeText = 'HIGH';
+            } else if (f.predicted_risk_score >= 35 || f.predicted_risk_level === 'Moderate') {
+              riskBadgeStyle = 'background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid #eab308;';
+              riskBadgeText = 'MODERATE';
+            }
+
+            // Recurrence badge style
+            let recBadge = `<span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.72rem;">${f.recurrence_pattern || 'MODERATE'}</span>`;
+            if ((f.recurrence_pattern || '').includes('STRONG')) {
+              recBadge = `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid #f87171; font-size: 0.72rem;">🔥 STRONG</span>`;
+            } else if ((f.recurrence_pattern || '').includes('INSUFFICIENT')) {
+              recBadge = `<span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid #94a3b8; font-size: 0.72rem;">ℹ️ INSUFFICIENT DATA</span>`;
+            }
+
+            // Status indicator
+            let statusBtn = `<button class="btn btn-sm btn-outline" style="border-color: #38bdf8; color: #38bdf8; font-size: 0.75rem;" onclick="window.openPredictiveDetailModal('${f.id}')">Review & Act</button>`;
+            if (status === 'approved') {
+              statusBtn = `<div style="display:flex; flex-direction:column; gap:3px;"><span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">✓ APPROVED</span><button class="btn btn-sm btn-link" style="font-size: 0.7rem; color: #94a3b8; padding: 0;" onclick="window.openPredictiveDetailModal('${f.id}')">Details</button></div>`;
+            } else if (status === 'rejected') {
+              statusBtn = `<div style="display:flex; flex-direction:column; gap:3px;"><span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid #ef4444; font-size: 0.72rem;">✕ REJECTED</span><button class="btn btn-sm btn-link" style="font-size: 0.7rem; color: #94a3b8; padding: 0;" onclick="window.openPredictiveDetailModal('${f.id}')">Details</button></div>`;
+            } else if (status === 'modified') {
+              statusBtn = `<div style="display:flex; flex-direction:column; gap:3px;"><span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; font-size: 0.72rem;">✎ MODIFIED</span><button class="btn btn-sm btn-link" style="font-size: 0.7rem; color: #94a3b8; padding: 0;" onclick="window.openPredictiveDetailModal('${f.id}')">Details</button></div>`;
+            }
+
+            return `
+              <tr>
+                <td>
+                  <div style="font-weight: 700; color: white;">${f.ward_name}</div>
+                  <div style="font-size: 0.72rem; color: #38bdf8;">Zone: ${f.ward_name.includes('Market') ? 'Commercial' : f.ward_name.includes('7') ? 'Highway' : 'Urban Residential'}</div>
+                </td>
+                <td>
+                  <div style="font-weight: 600; color: #f1f5f9;">${f.civic_category}</div>
+                  <div style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase;">${f.department}</div>
+                </td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="badge" style="${riskBadgeStyle}">${riskBadgeText}</span>
+                    <span style="font-family: var(--font-mono); font-weight: 800; color: white; font-size: 0.85rem;">${f.predicted_risk_score}/100</span>
+                  </div>
+                </td>
+                <td>${recBadge}</td>
+                <td>
+                  <span class="badge" style="background: rgba(255,255,255,0.05); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); font-size: 0.72rem;">${f.forecast_horizon || 'Next 7 Days'}</span>
+                </td>
+                <td style="max-width: 260px;">
+                  <div style="font-size: 0.78rem; color: #cbd5e1; line-height: 1.35;">${f.recommended_preventive_action || 'Routine monitoring'}</div>
+                  <div style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">Advisory: Human Officer Authorization Required</div>
+                </td>
+                <td>${statusBtn}</td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+
+      // Update GIS layer if map instance is ready
+      renderGisPredictiveHotspots(cachedPredictiveForecasts);
+    } catch (e) {
+      console.warn('[Predictive Hotspots UI] Render error:', e);
+    }
+  }
+
+  // GIS Predictive Hotspot Layer
+  function renderGisPredictiveHotspots(forecasts) {
+    if (typeof L === 'undefined' || !gisMapInstance) return;
+    if (!gisPredictiveLayerGroup) {
+      gisPredictiveLayerGroup = L.layerGroup().addTo(gisMapInstance);
+    }
+    gisPredictiveLayerGroup.clearLayers();
+
+    const list = forecasts || cachedPredictiveForecasts || [];
+    list.forEach(f => {
+      // CRITICAL: NEVER FABRICATE COORDINATES. If no valid coordinates, DO NOT PLOT.
+      if (f.lat === null || f.lat === undefined || f.lng === null || f.lng === undefined || (f.lat === 0 && f.lng === 0)) {
+        return;
+      }
+
+      let color = '#10b981'; // green
+      let radius = 180;
+      if (f.predicted_risk_score >= 80 || f.predicted_risk_level === 'Critical') {
+        color = '#ef4444'; // red
+        radius = 360;
+      } else if (f.predicted_risk_score >= 60 || f.predicted_risk_level === 'High') {
+        color = '#f97316'; // orange
+        radius = 280;
+      } else if (f.predicted_risk_score >= 35 || f.predicted_risk_level === 'Moderate') {
+        color = '#eab308'; // amber
+        radius = 220;
+      }
+
+      const circle = L.circle([f.lat, f.lng], {
+        radius: radius,
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.22,
+        weight: 2.5,
+        dashArray: '5, 5'
+      }).addTo(gisPredictiveLayerGroup);
+
+      circle.bindPopup(`
+        <div style="color: #0f172a; font-family: sans-serif; min-width: 220px; padding: 4px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span style="font-weight: 900; font-size: 0.95rem; color: ${color};">🔮 PREDICTIVE HOTSPOT</span>
+            <span style="background: ${color}; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 800; font-size: 0.7rem;">${f.predicted_risk_level.toUpperCase()}</span>
+          </div>
+          <div style="font-weight: 800; font-size: 0.9rem; margin-bottom: 2px;">${f.civic_category}</div>
+          <div style="font-size: 0.78rem; color: #475569; margin-bottom: 6px;">📍 ${f.ward_name} (${f.department.toUpperCase()})</div>
+          <div style="background: #f1f5f9; padding: 6px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 6px;">
+            <div><strong>Risk Score:</strong> ${f.predicted_risk_score}/100</div>
+            <div><strong>Horizon:</strong> ${f.forecast_horizon || 'Next 7 Days'}</div>
+            <div><strong>Recurrence:</strong> ${f.recurrence_pattern}</div>
+          </div>
+          <div style="font-size: 0.73rem; color: #334155; margin-bottom: 6px;"><strong>Advisory Action:</strong> ${f.recommended_preventive_action}</div>
+          <button style="background: #0284c7; color: white; border: none; border-radius: 4px; padding: 5px 8px; font-size: 0.72rem; font-weight: 700; width: 100%; cursor: pointer;" onclick="window.openPredictiveDetailModal('${f.id}')">
+            Review Governance Details
+          </button>
+        </div>
+      `);
+    });
+  }
+
+  function toggleGisPredictiveLayer() {
+    if (!gisMapInstance || !gisPredictiveLayerGroup) return;
+    const btn = document.getElementById('btnToggleGisPredictive');
+    if (gisPredictiveLayerVisible) {
+      gisMapInstance.removeLayer(gisPredictiveLayerGroup);
+      gisPredictiveLayerVisible = false;
+      if (btn) {
+        btn.style.opacity = '0.5';
+        btn.textContent = '🔮 Show Predictive Hotspots';
+      }
+      showToast('Predictive Hotspot layer hidden on GIS map', 'info', '🗺️');
+    } else {
+      gisMapInstance.addLayer(gisPredictiveLayerGroup);
+      gisPredictiveLayerVisible = true;
+      if (btn) {
+        btn.style.opacity = '1';
+        btn.textContent = '🔮 Hide Predictive Hotspots';
+      }
+      showToast('Predictive Hotspot layer visible on GIS map', 'info', '🔮');
+    }
+  }
+
+  window.toggleGisPredictiveLayer = toggleGisPredictiveLayer;
+
+  // Predictive Detail Modal Controls
+  window.openPredictiveDetailModal = function(forecastId) {
+    const f = cachedPredictiveForecasts.find(x => x.id === forecastId);
+    if (!f) return;
+    activePredictiveForecastId = forecastId;
+
+    const action = cachedPreventiveActions.find(a => a.forecast_id === forecastId);
+    const actionStatus = action ? action.status : 'pending_review';
+
+    // Risk badge
+    const badgeEl = document.getElementById('predModalRiskBadge');
+    if (badgeEl) {
+      badgeEl.textContent = `${(f.predicted_risk_level || 'MODERATE').toUpperCase()} RISK`;
+      if (f.predicted_risk_score >= 80 || f.predicted_risk_level === 'Critical') {
+        badgeEl.style.background = 'rgba(239, 68, 68, 0.2)';
+        badgeEl.style.color = '#f87171';
+        badgeEl.style.border = '1px solid #ef4444';
+      } else if (f.predicted_risk_score >= 60 || f.predicted_risk_level === 'High') {
+        badgeEl.style.background = 'rgba(245, 158, 11, 0.2)';
+        badgeEl.style.color = '#fbbf24';
+        badgeEl.style.border = '1px solid #f59e0b';
+      } else {
+        badgeEl.style.background = 'rgba(234, 179, 8, 0.2)';
+        badgeEl.style.color = '#facc15';
+        badgeEl.style.border = '1px solid #eab308';
+      }
+    }
+
+    const recEl = document.getElementById('predModalRecurrence');
+    if (recEl) recEl.textContent = f.recurrence_pattern || 'MODERATE RECURRENCE';
+
+    const scoreEl = document.getElementById('predModalRiskScore');
+    if (scoreEl) {
+      scoreEl.textContent = `${f.predicted_risk_score} / 100`;
+      scoreEl.style.color = f.predicted_risk_score >= 80 ? '#ef4444' : f.predicted_risk_score >= 60 ? '#f59e0b' : '#eab308';
+    }
+
+    const catEl = document.getElementById('predModalCategory');
+    if (catEl) catEl.textContent = f.civic_category;
+
+    const wardEl = document.getElementById('predModalWard');
+    if (wardEl) wardEl.textContent = f.ward_name;
+
+    const deptEl = document.getElementById('predModalDept');
+    if (deptEl) deptEl.textContent = (f.department || 'Sanitation').toUpperCase();
+
+    const histEl = document.getElementById('predModalHistCount');
+    if (histEl) histEl.textContent = `${f.historical_incident_count || 0} incidents`;
+
+    const recentEl = document.getElementById('predModalRecentCount');
+    if (recentEl) recentEl.textContent = `${f.recent_incident_count || 0} incidents`;
+
+    const slaEl = document.getElementById('predModalSlaIndicator');
+    if (slaEl) {
+      slaEl.textContent = f.sla_breach_indicator || 'Standard SLA Compliance';
+      slaEl.style.color = (f.sla_breach_indicator || '').includes('Delay') ? '#f87171' : '#34d399';
+    }
+
+    // Factors list
+    const factorsList = document.getElementById('predModalFactorsList');
+    if (factorsList) {
+      let factors = f.contributing_factors;
+      if (typeof factors === 'string') {
+        try { factors = JSON.parse(factors); } catch (e) { factors = [factors]; }
+      }
+      if (Array.isArray(factors) && factors.length > 0) {
+        factorsList.innerHTML = factors.map(factor => `<li>${factor}</li>`).join('');
+      } else {
+        factorsList.innerHTML = `<li>Historical incident frequency in jurisdiction</li><li>Civic recurrence index</li>`;
+      }
+    }
+
+    const recBox = document.getElementById('predModalRecommendation');
+    if (recBox) recBox.textContent = (action && action.modified_action) ? action.modified_action : f.recommended_preventive_action;
+
+    const statusBadge = document.getElementById('predModalStatusBadge');
+    if (statusBadge) {
+      statusBadge.textContent = actionStatus.toUpperCase().replace('_', ' ');
+      if (actionStatus === 'approved') {
+        statusBadge.className = 'badge';
+        statusBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+        statusBadge.style.color = '#34d399';
+        statusBadge.style.border = '1px solid #10b981';
+      } else if (actionStatus === 'rejected') {
+        statusBadge.className = 'badge';
+        statusBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+        statusBadge.style.color = '#f87171';
+        statusBadge.style.border = '1px solid #ef4444';
+      } else if (actionStatus === 'modified') {
+        statusBadge.className = 'badge';
+        statusBadge.style.background = 'rgba(168, 85, 247, 0.2)';
+        statusBadge.style.color = '#c084fc';
+        statusBadge.style.border = '1px solid #a855f7';
+      } else {
+        statusBadge.className = 'badge';
+        statusBadge.style.background = 'rgba(245, 158, 11, 0.2)';
+        statusBadge.style.color = '#fbbf24';
+        statusBadge.style.border = '1px solid #f59e0b';
+      }
+    }
+
+    // Reset sub-boxes
+    const rejBox = document.getElementById('predRejectReasonBox');
+    if (rejBox) rejBox.style.display = 'none';
+    const modBox = document.getElementById('predModifyBox');
+    if (modBox) modBox.style.display = 'none';
+
+    window.openModal('predictiveDetailModal');
+  };
+
+  window.approveCurrentPredictiveAction = async function() {
+    if (!activePredictiveForecastId) return;
+    const action = cachedPreventiveActions.find(a => a.forecast_id === activePredictiveForecastId);
+    const actionId = action ? action.id : null;
+    const currentUser = (auth && auth.getUser()) ? auth.getUser().name : 'Municipal Officer';
+
+    const res = await CivicAiEngine.PredictiveHotspots.approveAction(actionId, activePredictiveForecastId, currentUser, 'Authorized from Municipal Command');
+    if (res && res.success) {
+      showToast('✅ Preventive action authorized by Municipal Officer!', 'reward', '🛡️');
+      await renderPredictiveHotspotsUI();
+      window.openPredictiveDetailModal(activePredictiveForecastId);
+    } else {
+      showToast(`Action error: ${res ? res.error : 'Unknown'}`, 'error', '⚠️');
+    }
+  };
+
+  window.promptRejectPredictiveAction = function() {
+    const box = document.getElementById('predRejectReasonBox');
+    if (box) {
+      box.style.display = 'block';
+      const input = document.getElementById('predRejectReasonInput');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+    }
+  };
+
+  window.confirmRejectPredictiveAction = async function() {
+    if (!activePredictiveForecastId) return;
+    const input = document.getElementById('predRejectReasonInput');
+    const justification = input ? input.value.trim() : '';
+
+    if (!justification) {
+      showToast('⚠️ Mandatory justification required to reject preventive action!', 'error', '❗');
+      if (input) input.focus();
+      return;
+    }
+
+    const action = cachedPreventiveActions.find(a => a.forecast_id === activePredictiveForecastId);
+    const actionId = action ? action.id : null;
+    const currentUser = (auth && auth.getUser()) ? auth.getUser().name : 'Municipal Officer';
+
+    const res = await CivicAiEngine.PredictiveHotspots.rejectAction(actionId, activePredictiveForecastId, currentUser, justification);
+    if (res && res.success) {
+      showToast('✕ Preventive action rejected and logged in audit log.', 'info', '📋');
+      const box = document.getElementById('predRejectReasonBox');
+      if (box) box.style.display = 'none';
+      await renderPredictiveHotspotsUI();
+      window.openPredictiveDetailModal(activePredictiveForecastId);
+    } else {
+      showToast(`Rejection failed: ${res ? res.error : 'Unknown'}`, 'error', '⚠️');
+    }
+  };
+
+  window.promptModifyPredictiveAction = function() {
+    const f = cachedPredictiveForecasts.find(x => x.id === activePredictiveForecastId);
+    const action = cachedPreventiveActions.find(a => a.forecast_id === activePredictiveForecastId);
+    const box = document.getElementById('predModifyBox');
+    if (box && f) {
+      box.style.display = 'block';
+      const input = document.getElementById('predModifyActionInput');
+      if (input) {
+        input.value = (action && action.modified_action) ? action.modified_action : f.recommended_preventive_action;
+        input.focus();
+      }
+    }
+  };
+
+  window.confirmModifyPredictiveAction = async function() {
+    if (!activePredictiveForecastId) return;
+    const input = document.getElementById('predModifyActionInput');
+    const modifiedAction = input ? input.value.trim() : '';
+    const prioritySelect = document.getElementById('predModifyPrioritySelect');
+    const priority = prioritySelect ? prioritySelect.value : 'High';
+    const reasonInput = document.getElementById('predModifyReasonInput');
+    const notes = reasonInput ? reasonInput.value.trim() : 'Modified by Municipal Officer';
+
+    if (!modifiedAction) {
+      showToast('⚠️ Please specify modified recommendation text.', 'error', '❗');
+      return;
+    }
+
+    const action = cachedPreventiveActions.find(a => a.forecast_id === activePredictiveForecastId);
+    const actionId = action ? action.id : null;
+    const currentUser = (auth && auth.getUser()) ? auth.getUser().name : 'Municipal Officer';
+
+    const res = await CivicAiEngine.PredictiveHotspots.modifyAction(actionId, activePredictiveForecastId, currentUser, modifiedAction, priority, notes);
+    if (res && res.success) {
+      showToast('✎ Preventive recommendation modified & authorized.', 'reward', '🛡️');
+      const box = document.getElementById('predModifyBox');
+      if (box) box.style.display = 'none';
+      await renderPredictiveHotspotsUI();
+      window.openPredictiveDetailModal(activePredictiveForecastId);
+    } else {
+      showToast(`Modification failed: ${res ? res.error : 'Unknown'}`, 'error', '⚠️');
+    }
+  };
+
+  window.refreshPredictiveForecasts = async function() {
+    showToast('🔄 Recomputing predictive civic intelligence...', 'info', '🔮');
+    const res = await CivicAiEngine.PredictiveHotspots.refreshForecasts();
+    if (res && res.success) {
+      await renderPredictiveHotspotsUI();
+      showToast('✅ AI predictive forecasts refreshed successfully!', 'reward', '🔮');
+    } else {
+      showToast('Failed to refresh forecasts from server.', 'error', '⚠️');
+    }
+  };
+
+  window.renderPredictiveHotspotsUI = renderPredictiveHotspotsUI;
+
+
     // Dismiss Modals when tapping outside on background overlay
     document.querySelectorAll('.modal-overlay').forEach(modal => {
       modal.addEventListener('click', (e) => {
@@ -5996,6 +6555,7 @@
     startLiveSLATimerEngine();
     startLiveIoTSimulator();
     initRealtimeSSE();
+    renderPredictiveHotspotsUI();
   });
 
 })();

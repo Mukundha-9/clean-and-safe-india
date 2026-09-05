@@ -836,7 +836,106 @@
           </div>
         </div>
 
-        <h4 style="color: white; margin-bottom: 0.75rem; font-size: 1.05rem;">Cross-Department 48-Hour SLA Queue</h4>
+                <!-- =========================================================================
+             PHASE 4: PREDICTIVE CIVIC INTELLIGENCE (FROM REACTIVE TO PREVENTIVE)
+             ========================================================================= -->
+        <div class="predictive-civic-intelligence-section" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.7)); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 14px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <span style="font-size: 1.5rem;">🔮</span>
+                <h3 style="color: white; font-size: 1.35rem; margin: 0; font-weight: 800; letter-spacing: -0.02em;">
+                  Predictive Civic Intelligence
+                </h3>
+                <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.72rem;">
+                  AI-Assisted Predictive Demo
+                </span>
+              </div>
+              <p style="color: #94a3b8; font-size: 0.84rem; margin-top: 0.35rem; max-width: 650px;">
+                Forecasting emerging civic hotspots over the <strong>Next 7 Days</strong> from historical incident frequency, recurrence signals, severity profiles, and SLA patterns.
+              </p>
+            </div>
+            <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="btn btn-sm btn-outline" onclick="window.refreshPredictiveForecasts()" style="border-color: #38bdf8; color: #38bdf8; font-size: 0.8rem; cursor: pointer;">
+                <span>🔄</span> Refresh AI Forecasts
+              </button>
+              <button type="button" class="btn btn-sm btn-primary" onclick="window.switchMunicipalSubTab('heatmap')" style="font-size: 0.8rem; cursor: pointer;">
+                <span>🗺️</span> View GIS Hotspots
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 KPI Cards -->
+          <div class="grid-4" style="margin-bottom: 1.5rem;">
+            <div class="cmd-metric-card" style="border-left: 3px solid #38bdf8;">
+              <span class="stat-label">🔮 Active Predictive Hotspots</span>
+              <div class="cmd-metric-num" id="kpiActivePredictiveHotspots" style="color: #38bdf8;">6</div>
+              <span class="cmd-metric-sub">Across 5 Monitored Wards</span>
+            </div>
+            <div class="cmd-metric-card" style="border-left: 3px solid #ef4444;">
+              <span class="stat-label">🔴 Critical Forecasts</span>
+              <div class="cmd-metric-num" id="kpiCriticalForecasts" style="color: #ef4444;">1</div>
+              <span class="cmd-metric-sub">Risk Score ≥ 80 / 100</span>
+            </div>
+            <div class="cmd-metric-card" style="border-left: 3px solid #f59e0b;">
+              <span class="stat-label">🟠 High-Risk Areas</span>
+              <div class="cmd-metric-num" id="kpiHighRiskAreas" style="color: #f59e0b;">1</div>
+              <span class="cmd-metric-sub">Risk Score 60–79 / 100</span>
+            </div>
+            <div class="cmd-metric-card" style="border-left: 3px solid #10b981;">
+              <span class="stat-label">🛡️ Preventive Actions</span>
+              <div class="cmd-metric-num" id="kpiPreventiveActionsCount" style="color: #10b981;">6</div>
+              <span class="cmd-metric-sub">Advisory Recommendations</span>
+            </div>
+          </div>
+
+          <!-- Predictive Hotspots Table / Cards Container -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+            <h4 style="color: white; font-size: 1.05rem; margin: 0;">Forecasted Emerging Civic Hotspots (Next 7 Days)</h4>
+            <span style="font-size: 0.74rem; color: #94a3b8;">Source: Demo / Historical Incident Dataset • Human Review Required</span>
+          </div>
+          <div class="cmd-table-container" style="margin-bottom: 1.25rem;">
+            <table class="cmd-table">
+              <thead>
+                <tr>
+                  <th>Ward / Zone</th>
+                  <th>Civic Category</th>
+                  <th>Predictive Risk</th>
+                  <th>Recurrence Pattern</th>
+                  <th>Forecast Horizon</th>
+                  <th>Preventive Recommendation</th>
+                  <th>Officer Action</th>
+                </tr>
+              </thead>
+              <tbody id="predictiveHotspotsTableBody">
+                <!-- Dynamically Populated by bundle.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Section 23: "From Reactive to Predictive Governance" Explanatory Panel -->
+          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1rem 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <span style="font-size: 1.1rem;">🏛️</span>
+              <strong style="color: #38bdf8; font-size: 0.92rem;">From Reactive to Predictive Governance</strong>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.78rem; color: #cbd5e1; line-height: 1.5;">
+              <div style="padding: 0.75rem; background: rgba(255,255,255,0.02); border-radius: 8px; border-left: 3px solid #64748b;">
+                <div style="font-weight: 800; color: #94a3b8; margin-bottom: 4px;">TRADITIONAL CIVIC MODEL</div>
+                Citizen reports problem $\to$ Municipality receives complaint $\to$ Officer assigns response $\to$ Problem is resolved (Reactive).
+              </div>
+              <div style="padding: 0.75rem; background: rgba(56, 189, 248, 0.05); border-radius: 8px; border-left: 3px solid #38bdf8;">
+                <div style="font-weight: 800; color: #38bdf8; margin-bottom: 4px;">SMART CIVIC CONNECT PREDICTIVE LOOP</div>
+                Citizen reports $\to$ AI understands $\to$ Evidence is verified $\to$ Incidents are clustered $\to$ Historical patterns analyzed $\to$ Recurrence forecast $\to$ Preventive recommendation $\to$ Officer approves $\to$ Municipality acts before escalation.
+              </div>
+            </div>
+            <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 0.75rem; font-style: italic;">
+              "Inspired by modern smart-city approaches, Smart Civic Connect adapts predictive civic intelligence to India's citizen-centric, multi-department governance environment."
+            </div>
+          </div>
+        </div>
+
+<h4 style="color: white; margin-bottom: 0.75rem; font-size: 1.05rem;">Cross-Department 48-Hour SLA Queue</h4>
         <div class="cmd-table-container">
           <table class="cmd-table">
             <thead>
@@ -959,6 +1058,11 @@
             <div class="gis-legend-row" style="margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px;">
               <span>🚚</span>
               <span style="color: #38bdf8; font-weight: 700;">Live GPS Vehicle Fleet Active</span>
+            </div>
+            <div class="gis-legend-row" style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px;">
+              <button type="button" id="btnToggleGisPredictive" onclick="window.toggleGisPredictiveLayer()" style="background: rgba(244, 63, 94, 0.15); border: 1px solid #f43f5e; color: #fda4af; padding: 5px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; width: 100%;">
+                🔮 Toggle Predictive Hotspots
+              </button>
             </div>
           </div>
         </div>
@@ -1981,7 +2085,143 @@
     </div>
   </div>
 
-  <div class="toast-container" id="toastContainer"></div>
+    <!-- =========================================================================
+       PHASE 4: PREDICTIVE CIVIC RISK & PREVENTIVE ACTION MODAL (HUMAN-IN-THE-LOOP)
+       ========================================================================= -->
+  <div class="modal-overlay" id="predictiveDetailModal">
+    <div class="modal-box modal-lg" style="max-width: 680px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.4rem;">🔮</span>
+          <div>
+            <h3 style="font-size: 1.2rem; color: white; margin: 0;">Predictive Civic Risk Assessment</h3>
+            <div style="font-size: 0.75rem; color: #94a3b8;">Advisory Forecast & Human Governance Authorization</div>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('predictiveDetailModal')">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.25rem;">
+        <!-- Top Badges -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div style="display: flex; gap: 0.4rem; align-items: center;">
+            <span class="badge" id="predModalRiskBadge" style="font-size: 0.78rem;">CRITICAL RISK</span>
+            <span class="badge" id="predModalRecurrence" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.78rem;">STRONG RECURRENCE</span>
+          </div>
+          <span class="badge" style="background: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.15); font-size: 0.75rem;">
+            📅 Horizon: Next 7 Days
+          </span>
+        </div>
+
+        <!-- Risk Metric Grid -->
+        <div class="grid-2" style="gap: 1rem; margin-bottom: 1.25rem;">
+          <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 1rem;">
+            <div style="font-size: 0.74rem; color: #94a3b8; text-transform: uppercase;">Predictive Civic Risk Score</div>
+            <div id="predModalRiskScore" style="font-family: var(--font-mono); font-weight: 900; font-size: 2rem; color: #ef4444; margin: 4px 0;">84 / 100</div>
+            <div style="font-size: 0.74rem; color: #94a3b8;">Multi-factor weighting (Frequency 30% • Recency 20% • Pattern 20% • Severity 10% • SLA 10% • AI 10%)</div>
+          </div>
+          <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 1rem;">
+            <div style="font-size: 0.74rem; color: #94a3b8; text-transform: uppercase;">Target Jurisdiction & Category</div>
+            <div style="font-weight: 800; font-size: 1.05rem; color: white; margin-top: 4px;" id="predModalCategory">Garbage Overflow</div>
+            <div style="font-size: 0.85rem; color: #38bdf8; margin-top: 2px;">📍 <span id="predModalWard">Ward 12 (Market Zone)</span></div>
+            <div style="font-size: 0.75rem; color: #cbd5e1; margin-top: 4px;">Department: <strong id="predModalDept">SANITATION</strong></div>
+          </div>
+        </div>
+
+        <!-- Historical Breakdown Details -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; font-size: 0.8rem;">
+          <div><span style="color: #94a3b8;">Historical Incidents:</span> <strong id="predModalHistCount" style="color: white; margin-left: 4px;">8 incidents</strong></div>
+          <div><span style="color: #94a3b8;">Recent Window (30d):</span> <strong id="predModalRecentCount" style="color: #38bdf8; margin-left: 4px;">5 incidents</strong></div>
+          <div style="grid-column: span 2;"><span style="color: #94a3b8;">SLA Signals:</span> <strong id="predModalSlaIndicator" style="color: #f87171; margin-left: 4px;">Repeated Delays Detected</strong></div>
+        </div>
+
+        <!-- Observable Contributing Factors (Why?) -->
+        <div style="margin-bottom: 1.25rem;">
+          <h5 style="color: #38bdf8; font-size: 0.88rem; margin: 0 0 0.5rem; font-weight: 800;">
+            Observable Contributing Factors (Why is this area elevated risk?)
+          </h5>
+          <ul id="predModalFactorsList" style="margin: 0; padding-left: 1.25rem; font-size: 0.82rem; color: #cbd5e1; line-height: 1.6;">
+            <!-- Populated dynamically -->
+          </ul>
+        </div>
+
+        <!-- Preventive Recommendation Box -->
+        <div style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid #38bdf8; border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+          <div style="font-size: 0.74rem; font-weight: 800; color: #38bdf8; text-transform: uppercase;">
+            🛡️ Recommended Preventive Action (Advisory)
+          </div>
+          <p id="predModalRecommendation" style="margin: 4px 0 0; color: white; font-size: 0.88rem; font-weight: 600; line-height: 1.45;">
+            Schedule preventive waste collection inspection in the affected zone and review nearby collection frequency.
+          </p>
+        </div>
+
+        <!-- Human Review Governance Status -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.6rem 0.85rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
+          <span style="font-size: 0.8rem; color: #94a3b8;">Human Authorization Status:</span>
+          <span class="badge" id="predModalStatusBadge">PENDING OFFICER APPROVAL</span>
+        </div>
+
+        <!-- Officer Rejection Input Box (Initially Hidden) -->
+        <div id="predRejectReasonBox" style="display: none; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.85rem; margin-bottom: 1rem;">
+          <label style="font-size: 0.78rem; font-weight: 800; color: #f87171; display: block; margin-bottom: 4px;">
+            Mandatory Rejection Justification (Audited):
+          </label>
+          <textarea id="predRejectReasonInput" class="form-textarea" style="min-height: 60px; font-size: 0.82rem; margin-bottom: 0.5rem;" placeholder="Explain why this preventive action is rejected or not needed..."></textarea>
+          <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('predRejectReasonBox').style.display='none'">Cancel</button>
+            <button type="button" class="btn btn-sm btn-danger" onclick="window.confirmRejectPredictiveAction()">Confirm Rejection</button>
+          </div>
+        </div>
+
+        <!-- Officer Modification Input Box (Initially Hidden) -->
+        <div id="predModifyBox" style="display: none; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 8px; padding: 0.85rem; margin-bottom: 1rem;">
+          <label style="font-size: 0.78rem; font-weight: 800; color: #c084fc; display: block; margin-bottom: 4px;">
+            Modify Preventive Recommendation:
+          </label>
+          <textarea id="predModifyActionInput" class="form-textarea" style="min-height: 60px; font-size: 0.82rem; margin-bottom: 0.5rem;"></textarea>
+          <div class="grid-2" style="gap: 0.5rem; margin-bottom: 0.5rem;">
+            <div>
+              <label style="font-size: 0.72rem; color: #94a3b8;">Priority:</label>
+              <select id="predModifyPrioritySelect" class="form-select" style="font-size: 0.78rem;">
+                <option value="Critical">Critical</option>
+                <option value="High" selected>High</option>
+                <option value="Routine">Routine</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.72rem; color: #94a3b8;">Modification Reason:</label>
+              <input type="text" id="predModifyReasonInput" class="form-input" style="font-size: 0.78rem;" placeholder="e.g. Adjusted for expected weekend volume">
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('predModifyBox').style.display='none'">Cancel</button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="window.confirmModifyPredictiveAction()">Save & Authorize Modified Action</button>
+          </div>
+        </div>
+
+        <div style="font-size: 0.73rem; color: #94a3b8; font-style: italic; line-height: 1.4; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.6rem;">
+          ⚠️ AI forecast is advisory. It identifies historical patterns and does not guarantee that an incident will occur. Municipal officers remain responsible for final operational decisions.
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <button type="button" class="btn btn-outline" onclick="window.closeModal('predictiveDetailModal')">Close</button>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="window.promptRejectPredictiveAction()" style="border-color: #ef4444; color: #f87171;">
+            <span>✕</span> Reject Action
+          </button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="window.promptModifyPredictiveAction()" style="border-color: #a855f7; color: #c084fc;">
+            <span>✎</span> Modify Recommendation
+          </button>
+          <button type="button" class="btn btn-sm btn-primary" onclick="window.approveCurrentPredictiveAction()" style="background: linear-gradient(135deg, #059669, #10b981);">
+            <span>✓</span> Approve Preventive Action
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="toast-container" id="toastContainer"></div>
 
   <!-- Cache Invalidation Script -->
   <script>
@@ -1993,6 +2233,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=19.0.0"></script>
+  <script src="js/bundle.js?v=20.0.0"></script>
 </body>
 </html>
