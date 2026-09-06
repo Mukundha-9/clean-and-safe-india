@@ -3617,11 +3617,11 @@
     if (finesEl) finesEl.textContent = `₹${finesCollected.toLocaleString('en-IN')}`;
 
     const tableBody = document.getElementById('munIncidentTableBody');
-    if (tableBody) {
-      if (issues.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">No civic incidents found in the selected jurisdiction (${selectedState} → ${selectedCity} → ${selectedWard}).</td></tr>`;
-      } else {
-        tableBody.innerHTML = issues.map(issue => {
+    const tableBodyQueue = document.getElementById('munIncidentTableBody_queue');
+    if (tableBody || tableBodyQueue) {
+      const htmlContent = issues.length === 0
+        ? `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">No civic incidents found in the selected jurisdiction (${selectedState} → ${selectedCity} → ${selectedWard}).</td></tr>`
+        : issues.map(issue => {
           const isResolved = issue.status === 'resolved';
           const isEscalated = issue.status === 'escalated' || issue.isSlaBreached;
           const reportedTimeStr = formatReportDateTime(issue.timestamp);
@@ -3678,7 +3678,8 @@
             </tr>
           `;
         }).join('');
-      }
+      if (tableBody) tableBody.innerHTML = htmlContent;
+      if (tableBodyQueue) tableBodyQueue.innerHTML = htmlContent;
     }
 
     const outageGrid = document.getElementById('munPowerOutageGrid');

@@ -3,10 +3,9 @@
    Provides Offline Support, Asset Caching, Push Notifications & Background Sync
    ========================================================================== */
 
-const CACHE_NAME = 'clean-safe-india-v22.0.0';
+const CACHE_NAME = 'clean-safe-india-v25.0.0';
 const STATIC_ASSETS = [
   './',
-  './index.html',
   './manifest.json',
   './css/main.css',
   './css/responsive.css',
@@ -46,8 +45,8 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event: Network-First with Cache Fallback for instant updates
 self.addEventListener('fetch', (event) => {
-  // Never intercept or cache API endpoints or JS bundles
-  if (event.request.url.includes('/api/') || event.request.url.includes('bundle.js')) return;
+  // Never intercept or cache API endpoints, index.html, or JS bundles
+  if (event.request.url.includes('/api/') || event.request.url.includes('bundle.js') || event.request.url.includes('index.html') || event.request.mode === 'navigate') return;
   if (event.request.method !== 'GET') return;
 
   event.respondWith(

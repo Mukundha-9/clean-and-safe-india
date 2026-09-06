@@ -824,9 +824,67 @@
             </div>
           </div>
         </div>
+
+        <!-- Command Quick Hub: Instant Jumps -->
+        <div class="grid-3" style="margin-bottom: 2rem; gap: 1rem;">
+          <div class="cmd-metric-card" onclick="window.switchMunicipalSubTab('heatmap')" style="cursor: pointer; border-color: rgba(56, 189, 248, 0.4); background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(56, 189, 248, 0.08)); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <span style="font-size: 1.4rem;">🗺️</span>
+              <span class="badge badge-resolved" style="font-size: 0.68rem;">LIVE TRACKING</span>
+            </div>
+            <div style="font-weight: 800; color: white; font-size: 1rem;">Geospatial GIS Map</div>
+            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 3px;">Ward 12 Red-Zone, hazard pins &amp; moving vehicle fleet.</div>
+            <div style="margin-top: 0.6rem; color: #38bdf8; font-size: 0.78rem; font-weight: 700;">Open Live Map &rarr;</div>
+          </div>
+
+          <div class="cmd-metric-card" onclick="window.switchMunicipalSubTab('electricity')" style="cursor: pointer; border-color: rgba(250, 204, 21, 0.4); background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(250, 204, 21, 0.08)); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <span style="font-size: 1.4rem;">⚡</span>
+              <span class="badge badge-assigned" style="font-size: 0.68rem;">AUDIT &amp; SCADA</span>
+            </div>
+            <div style="font-weight: 800; color: white; font-size: 1rem;">Audit &amp; Power Grid</div>
+            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 3px;">Immutable squad audit ledger &amp; 33/11 KV feeder grid.</div>
+            <div style="margin-top: 0.6rem; color: #facc15; font-size: 0.78rem; font-weight: 700;">View Audit Ledger &rarr;</div>
+          </div>
+
+          <div class="cmd-metric-card" onclick="window.switchMunicipalSubTab('hotspots')" style="cursor: pointer; border-color: rgba(244, 63, 94, 0.4); background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(244, 63, 94, 0.08)); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <span style="font-size: 1.4rem;">🔮</span>
+              <span class="badge badge-escalated" style="font-size: 0.68rem;">AI FORECAST</span>
+            </div>
+            <div style="font-weight: 800; color: white; font-size: 1rem;">Predictive Hotspots</div>
+            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 3px;">Automated recurrence forecasts &amp; preventive actions.</div>
+            <div style="margin-top: 0.6rem; color: #fda4af; font-size: 0.78rem; font-weight: 700;">Inspect Hotspots &rarr;</div>
+          </div>
+        </div>
+
+        <!-- Primary Incident SLA Triage Table directly on Overview -->
+        <div class="section-header" style="margin-bottom: 0.75rem;">
+          <div>
+            <h3 style="color: white; font-size: 1.25rem; margin: 0;">Cross-Department 48-Hour SLA Triage Queue</h3>
+            <p style="color: var(--text-muted); font-size: 0.82rem; margin: 2px 0 0;">Priority action list of grievances in your assigned jurisdiction.</p>
+          </div>
+        </div>
+
+        <div class="cmd-table-container" style="margin-bottom: 2rem;">
+          <table class="cmd-table">
+            <thead>
+              <tr>
+                <th>Ticket ID</th>
+                <th>Incident Details</th>
+                <th>State &amp; Jurisdiction</th>
+                <th>Department</th>
+                <th>Severity</th>
+                <th>48h SLA Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="munIncidentTableBody"></tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- Subview 2: SLA Triage Queue (Issues) -->
+      <!-- Subview 2: SLA Triage Queue (Issues - Alternative Shallow Tab) -->
       <div id="munTab_incidents" class="municipal-subview" style="display: none;">
         <div class="section-header" style="margin-bottom: 0.75rem;">
           <div>
@@ -841,14 +899,14 @@
               <tr>
                 <th>Ticket ID</th>
                 <th>Incident Details</th>
-                <th>State & Jurisdiction</th>
+                <th>State &amp; Jurisdiction</th>
                 <th>Department</th>
                 <th>Severity</th>
                 <th>48h SLA Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="munIncidentTableBody"></tbody>
+            <tbody id="munIncidentTableBody_queue"></tbody>
           </table>
         </div>
       </div>
@@ -2544,16 +2602,25 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- Cache Invalidation Script -->
+  <!-- Cache Invalidation & Direct Refresh Script -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => {
         regs.forEach(r => r.update());
       });
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => {
+            if (name !== 'clean-safe-india-v25.0.0') {
+              caches.delete(name);
+            }
+          });
+        });
+      }
     }
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=22.0.0"></script>
+  <script src="js/bundle.js?v=25.0.0"></script>
 </body>
 </html>
