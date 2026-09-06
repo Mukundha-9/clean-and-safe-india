@@ -80,11 +80,70 @@ window.handleLogout = function() {
   ui.showToast("Logged out securely. Session ended.", "info", "🔒");
 };
 
+// Switch Municipal Sub-Mode (Admin vs Worker)
+window.switchMunicipalAuthSubMode = function(submode) {
+  const adminBtn = document.getElementById('municipalSubModeAdminBtn');
+  const workerBtn = document.getElementById('municipalSubModeWorkerBtn');
+  const headerTitle = document.getElementById('authCardHeaderTitle');
+  const headerDesc = document.getElementById('authCardHeaderDesc');
+  const submitBtn = document.getElementById('authSubmitBtn');
+  const emailInput = document.getElementById('authEmailInput');
+  const demoEmailEl = document.getElementById('demoCredsEmail');
+  const demoPassEl = document.getElementById('demoCredsPass');
+
+  if (submode === 'worker') {
+    activeAuthDept = 'worker';
+    if (adminBtn) {
+      adminBtn.style.background = 'transparent';
+      adminBtn.style.color = '#94a3b8';
+    }
+    if (workerBtn) {
+      workerBtn.style.background = '#f59e0b';
+      workerBtn.style.color = '#060911';
+    }
+    if (headerTitle) headerTitle.textContent = "Field Squad & Sanitation Worker Login";
+    if (headerDesc) headerDesc.textContent = "Assigned field dispatch, route navigation & resolution photo proof";
+    if (submitBtn) {
+      submitBtn.className = "auth-btn-submit btn-dept-worker";
+      submitBtn.style.background = "#f59e0b";
+      submitBtn.style.color = "#060911";
+      submitBtn.innerHTML = "<span>👷</span> Access Field Squad Portal";
+    }
+    if (emailInput) emailInput.placeholder = "e.g. worker4@municipality.gov.in";
+    const deptAcc = SYSTEM_ACCOUNTS['worker'];
+    if (demoEmailEl && deptAcc) demoEmailEl.textContent = deptAcc.email;
+    if (demoPassEl && deptAcc) demoPassEl.textContent = deptAcc.password;
+  } else {
+    activeAuthDept = 'municipal';
+    if (adminBtn) {
+      adminBtn.style.background = '#38bdf8';
+      adminBtn.style.color = '#060911';
+    }
+    if (workerBtn) {
+      workerBtn.style.background = 'transparent';
+      workerBtn.style.color = '#94a3b8';
+    }
+    if (headerTitle) headerTitle.textContent = "Municipal & Electricity Official Login";
+    if (headerDesc) headerDesc.textContent = "Administrative triage, vehicle dispatch & power SCADA control";
+    if (submitBtn) {
+      submitBtn.className = "auth-btn-submit btn-dept-municipal";
+      submitBtn.style.background = "";
+      submitBtn.style.color = "";
+      submitBtn.innerHTML = "<span>🛡️</span> Access Municipal Command";
+    }
+    if (emailInput) emailInput.placeholder = "e.g. admin@municipality.gov.in";
+    const deptAcc = SYSTEM_ACCOUNTS['municipal'];
+    if (demoEmailEl && deptAcc) demoEmailEl.textContent = deptAcc.email;
+    if (demoPassEl && deptAcc) demoPassEl.textContent = deptAcc.password;
+  }
+};
+
 // Switch Department Tab in Login Card
 window.switchAuthDeptTab = function(dept) {
   activeAuthDept = dept;
   document.querySelectorAll('.auth-tab-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.dept === dept);
+    const match = (dept === 'worker' && btn.dataset.dept === 'municipal') || btn.dataset.dept === dept;
+    btn.classList.toggle('active', match);
   });
 
   const headerTitle = document.getElementById('authCardHeaderTitle');
@@ -92,34 +151,54 @@ window.switchAuthDeptTab = function(dept) {
   const submitBtn = document.getElementById('authSubmitBtn');
   const demoEmailEl = document.getElementById('demoCredsEmail');
   const demoPassEl = document.getElementById('demoCredsPass');
-
-  const deptAcc = SYSTEM_ACCOUNTS[dept];
+  const subModeToggle = document.getElementById('citizenAuthSubModeToggle');
+  const munSubModeToggle = document.getElementById('municipalAuthSubModeToggle');
+  const registerHint = document.getElementById('citizenRegisterHintLink');
+  const emailInput = document.getElementById('authEmailInput');
+  const deptAcc = SYSTEM_ACCOUNTS[dept] || SYSTEM_ACCOUNTS['municipal'];
 
   if (dept === 'citizen') {
     if (headerTitle) headerTitle.textContent = "Citizen Portal Login";
     if (headerDesc) headerDesc.textContent = "Report civic issues, track 48h SLA & earn citizen rewards";
     if (submitBtn) {
       submitBtn.className = "auth-btn-submit btn-dept-citizen";
+      submitBtn.style.background = "";
+      submitBtn.style.color = "";
       submitBtn.innerHTML = "<span>🚀</span> Login to Citizen Portal";
     }
+    if (subModeToggle) subModeToggle.style.display = 'flex';
+    if (munSubModeToggle) munSubModeToggle.style.display = 'none';
+    if (registerHint) registerHint.style.display = 'block';
+    if (emailInput) emailInput.placeholder = "e.g. yourname@gmail.com";
   } else if (dept === 'municipal') {
-    if (headerTitle) headerTitle.textContent = "Municipal & Electricity Official Login";
-    if (headerDesc) headerDesc.textContent = "Administrative triage, vehicle dispatch & power SCADA control";
-    if (submitBtn) {
-      submitBtn.className = "auth-btn-submit btn-dept-municipal";
-      submitBtn.innerHTML = "<span>🛡️</span> Access Municipal Command";
-    }
+    if (subModeToggle) subModeToggle.style.display = 'none';
+    if (munSubModeToggle) munSubModeToggle.style.display = 'flex';
+    if (registerHint) registerHint.style.display = 'none';
+    window.switchMunicipalAuthSubMode('admin');
   } else if (dept === 'food') {
     if (headerTitle) headerTitle.textContent = "Food Safety Authority (FSO) Login";
     if (headerDesc) headerDesc.textContent = "Official food hygiene inspections & digital QR certification";
     if (submitBtn) {
       submitBtn.className = "auth-btn-submit btn-dept-food";
+      submitBtn.style.background = "";
+      submitBtn.style.color = "";
       submitBtn.innerHTML = "<span>🍲</span> Access Food Safety Portal";
     }
+    if (subModeToggle) subModeToggle.style.display = 'none';
+    if (munSubModeToggle) munSubModeToggle.style.display = 'none';
+    if (registerHint) registerHint.style.display = 'none';
+    if (emailInput) emailInput.placeholder = "e.g. fso.officer@foodsafety.gov.in";
+  } else if (dept === 'worker') {
+    if (subModeToggle) subModeToggle.style.display = 'none';
+    if (munSubModeToggle) munSubModeToggle.style.display = 'flex';
+    if (registerHint) registerHint.style.display = 'none';
+    window.switchMunicipalAuthSubMode('worker');
   }
 
-  if (demoEmailEl) demoEmailEl.textContent = deptAcc.email;
-  if (demoPassEl) demoPassEl.textContent = deptAcc.password;
+  if (dept !== 'worker' && dept !== 'municipal') {
+    if (demoEmailEl) demoEmailEl.textContent = deptAcc.email;
+    if (demoPassEl) demoPassEl.textContent = deptAcc.password;
+  }
 };
 
 // 1-Click Helper to fill demo credentials
