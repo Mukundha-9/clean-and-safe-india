@@ -1961,3 +1961,214 @@
   padding: 0.85rem 1rem;
   border-radius: 10px;
 }
+
+/* ==========================================================================
+   Clean Test Account Quick-Fill Helper (Replaces bulky box)
+   ========================================================================== */
+.demo-autofill-helper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.85rem;
+  padding: 0.55rem 0.85rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.demo-autofill-btn {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.demo-autofill-btn:hover {
+  background: rgba(56, 189, 248, 0.25);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   Civic Credit Utility Rebate Modal Styles
+   ========================================================================== */
+.rebate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.rebate-card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.1rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.rebate-card:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+  transform: translateY(-2px);
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.rebate-card.selected {
+  border-color: #10b981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0.9) 100%);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.rebate-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.rebate-icon {
+  font-size: 1.75rem;
+}
+
+.rebate-cost-tag {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+}
+
+.rebate-title {
+  font-weight: 800;
+  font-size: 1rem;
+  color: white;
+  margin-bottom: 0.35rem;
+}
+
+.rebate-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   Statutory e-Challan / RTO Violation Slip Modal Styles
+   ========================================================================== */
+.echallan-slip-box {
+  background: #090e1a;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.echallan-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px dashed rgba(245, 158, 11, 0.3);
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.echallan-emblem-text {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #f59e0b;
+  font-weight: 800;
+}
+
+.echallan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  font-size: 0.82rem;
+  margin-bottom: 1.25rem;
+}
+
+.echallan-row-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+}
+
+.echallan-label {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.echallan-val {
+  font-weight: 700;
+  color: white;
+}
+
+.echallan-barcode-strip {
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+}
+
+.echallan-barcode-art {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  letter-spacing: 4px;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   FoodGuard AI Telemetry Modal Styles
+   ========================================================================== */
+.foodguard-telemetry-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .foodguard-telemetry-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+.foodguard-cv-frame {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+}
+
+.foodguard-cv-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.foodguard-bbox {
+  position: absolute;
+  border: 2px solid #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #a7f3d0;
+  padding: 2px 4px;
+}
+

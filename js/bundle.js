@@ -3835,12 +3835,25 @@
                 </div>
 
                 <div style="background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.2); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.76rem; color: #cbd5e1; margin-bottom: 0.85rem;">
-                  <div>👷 <strong>Squad:</strong> ${issue.assignedWorker || 'Municipal Rapid Squad 4'}</div>
+                  <div>👷 <strong>Squad:</strong> ${issue.assignedWorker || 'Municipal Rapid Squad 4'} • <span style="color: #38bdf8; font-weight: 700;">${issue.workerStatus || 'Assigned'}</span></div>
                   <div style="color: #fbbf24; margin-top: 2px;">⏱️ <strong>SLA Target:</strong> ${deadlineTimeStr}</div>
                 </div>
 
-                <div style="display: flex; gap: 0.5rem;">
-                  <button type="button" class="btn btn-primary" style="flex: 1; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 800; font-size: 0.82rem; padding: 0.55rem 0.75rem; cursor: pointer;" onclick="window.openResolveModal('${issue.id}')">
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                  ${(!issue.workerStatus || issue.workerStatus === 'Assigned' || issue.workerStatus === 'Dispatched') ? `
+                    <button type="button" class="btn btn-outline btn-sm" style="flex: 1; border-color: #38bdf8; color: #38bdf8; font-size: 0.78rem;" onclick="window.startWorkerTaskEnRoute('${issue.id}')">
+                      🚗 En Route
+                    </button>
+                  ` : issue.workerStatus === 'En Route to Site' ? `
+                    <button type="button" class="btn btn-outline btn-sm" style="flex: 1; border-color: #10b981; color: #34d399; font-size: 0.78rem;" onclick="window.markWorkerTaskArrived('${issue.id}')">
+                      📍 Arrived
+                    </button>
+                  ` : `
+                    <div style="width: 100%; font-size: 0.75rem; color: #34d399; font-weight: 700; margin-bottom: 2px;">
+                      🟢 On Site: Active Remediation
+                    </div>
+                  `}
+                  <button type="button" class="btn btn-primary" style="flex: 1.5; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 800; font-size: 0.82rem; padding: 0.55rem 0.75rem; cursor: pointer;" onclick="window.openResolveModal('${issue.id}')">
                     <span>📸</span> Upload Proof & Resolve
                   </button>
                   <button type="button" class="btn btn-outline btn-sm" onclick="window.viewIssueDetail('${issue.id}')" title="Inspect Ticket Details" style="border-color: #64748b; color: #cbd5e1; cursor: pointer;">
@@ -7107,6 +7120,114 @@
 
   window.renderPredictiveHotspotsUI = renderPredictiveHotspotsUI;
 
+  // =========================================================================
+  // PRODUCTION MODAL HANDLERS: UTILITY REBATE, CCTV E-CHALLAN, FOODGUARD
+  // =========================================================================
+  window._selectedRebate = { type: 'power', cost: 100 };
+
+  window.openUtilityRebateModal = function() {
+    const user = auth.getUser();
+    const balance = user ? (user.civicCredits !== undefined ? user.civicCredits : (user.wallet_points || 150)) : 150;
+    const balanceEl = document.getElementById('rebateModalCurrentBalance');
+    if (balanceEl) balanceEl.textContent = balance;
+
+    window.selectRebateOption('power', 100);
+    const voucher = document.getElementById('rebateSuccessVoucher');
+    if (voucher) voucher.style.display = 'none';
+
+    const btn = document.getElementById('confirmRedeemBtn');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<span>🎁</span> Redeem Benefit (Deduct Credits)';
+    }
+
+    window.openModal('utilityRebateModal');
+  };
+
+  window.selectRebateOption = function(type, cost) {
+    window._selectedRebate = { type, cost };
+    document.querySelectorAll('.rebate-card').forEach(card => card.classList.remove('selected'));
+    const target = document.getElementById(`rebateCard_${type}`);
+    if (target) target.classList.add('selected');
+  };
+
+  window.confirmSelectedRebate = function() {
+    const user = auth.getUser();
+    let currentBalance = user ? (user.civicCredits !== undefined ? user.civicCredits : (user.wallet_points || 150)) : 150;
+    const { type, cost } = window._selectedRebate || { type: 'power', cost: 100 };
+
+    if (currentBalance < cost) {
+      showToast(`Insufficient balance. You need ${cost} Civic Credits, but have ${currentBalance}.`, 'error', '⚠️');
+      return;
+    }
+
+    const newBalance = currentBalance - cost;
+    if (user) {
+      user.civicCredits = newBalance;
+      user.wallet_points = newBalance;
+    }
+
+    const modalBalEl = document.getElementById('rebateModalCurrentBalance');
+    if (modalBalEl) modalBalEl.textContent = newBalance;
+    const walletPointsEl = document.getElementById('citizenWalletPoints');
+    if (walletPointsEl) walletPointsEl.textContent = newBalance;
+
+    const code = `REB-2026-${type.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const voucher = document.getElementById('rebateSuccessVoucher');
+    const voucherCodeEl = document.getElementById('rebateVoucherCode');
+    const voucherTitleEl = document.getElementById('rebateSuccessTitle');
+
+    if (voucherCodeEl) voucherCodeEl.textContent = code;
+    if (voucherTitleEl) {
+      voucherTitleEl.textContent = type === 'power' ? '⚡ 5% Electricity Rebate Voucher' :
+        type === 'bus' ? '🚌 Free 30-Day City Bus Smartcard Pass' : '🏛️ Property Tax Waiver Voucher';
+    }
+    if (voucher) voucher.style.display = 'block';
+
+    const btn = document.getElementById('confirmRedeemBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>✅</span> Benefit Voucher Claimed';
+    }
+
+    showToast(`Claimed! ${cost} Credits deducted. Voucher: ${code}`, 'reward', '🎁');
+  };
+
+  window.openCctvNoticeModal = function(noticeId) {
+    window.openModal('cctvNoticeModal');
+  };
+
+  window.openFoodGuardAiTelemetry = function() {
+    window.openModal('foodGuardAiModal');
+  };
+
+  window.callMunicipalHelpline = function() {
+    showToast('Dialing Municipal Toll-Free 1800-425-0012...', 'info', '📞');
+    window.location.href = 'tel:18004250012';
+  };
+
+  window.connectCctvCommand = function() {
+    showToast('Connecting to Surampalem Central CCTV Surveillance Command...', 'reward', '📹');
+  };
+
+  // Field Worker Task En-Route & Arrived Transitions
+  window.startWorkerTaskEnRoute = function(issueId) {
+    const issue = db.getIssueById(issueId);
+    if (issue) {
+      issue.workerStatus = 'En Route to Site';
+      showToast(`Squad 4 is now en-route to #${issue.id} (${issue.location})`, 'info', '🚗');
+      renderWorkerDashboard();
+    }
+  };
+
+  window.markWorkerTaskArrived = function(issueId) {
+    const issue = db.getIssueById(issueId);
+    if (issue) {
+      issue.workerStatus = 'On Site - Conducting Work';
+      showToast(`Squad 4 arrived on site for #${issue.id}`, 'reward', '📍');
+      renderWorkerDashboard();
+    }
+  };
 
     // Dismiss Modals when tapping outside on background overlay
     document.querySelectorAll('.modal-overlay').forEach(modal => {

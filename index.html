@@ -263,18 +263,17 @@
         </div>
       </form>
 
-      <!-- Pre-loaded Official Demo Credentials -->
-      <div class="demo-creds-box">
-        <div class="demo-creds-text">
-          <div>🔑 <strong>Demo Credentials / Quick Access:</strong></div>
-          <div style="font-size: 0.72rem; color: #64748b; margin-bottom: 0.2rem;">(Or enter your personal email & password above)</div>
-          <div>Email: <strong id="demoCredsEmail">citizen@civictech.in</strong></div>
-          <div>Password: <strong id="demoCredsPass">password123</strong></div>
+      <!-- Sleek Evaluator Test Account Quick-Fill Helper -->
+      <div class="demo-autofill-helper">
+        <div style="display: flex; align-items: center; gap: 0.4rem;">
+          <span>⚡</span>
+          <span>Test Account: <strong id="demoCredsEmail" style="color: #cbd5e1;">citizen@civictech.in</strong></span>
         </div>
-        <button type="button" class="btn-fill-demo" onclick="window.fillDemoCredentials()">
-          ⚡ Auto-Fill
+        <button type="button" class="demo-autofill-btn" onclick="window.fillDemoCredentials()">
+          Auto-Fill
         </button>
       </div>
+
 
       <!-- 📲 Prominent Desktop / Mobile App Download Banner -->
       <div class="pwa-install-element" id="pwaAuthBottomInstallBanner" style="margin-top: 1rem; padding: 0.85rem 1rem; background: rgba(16, 185, 129, 0.1); border: 1px dashed rgba(16, 185, 129, 0.45); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
@@ -298,7 +297,7 @@
 
 
   <!-- =========================================================================
-       PHASE 1: DEDICATED CITIZEN PORTAL DASHBOARD
+       SECTOR 1: NATIONAL PUBLIC CITIZEN PORTAL
        ========================================================================= -->
   <div id="citizenMasterView" class="master-dashboard-view">
     <!-- Citizen Topbar -->
@@ -468,7 +467,7 @@
               <button class="btn btn-saffron btn-sm" onclick="window.openCitizenCertificateModal()">
                 <span>📜</span> View Official Certificate
               </button>
-              <button class="btn btn-outline btn-sm" onclick="alert('Civic Credits are redeemable for municipal utility rebates: 5% Electricity Rebate or Free City Bus Smartcard!')">
+              <button class="btn btn-outline btn-sm" onclick="window.openUtilityRebateModal()">
                 <span>🎁</span> Redeem Utility Benefits
               </button>
             </div>
@@ -522,7 +521,7 @@
             <div style="padding: 1rem; color: white;">
               <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 2px;">Case 1: Vehicle Garbage Dumping (ANPR)</div>
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">Detects vehicle dumping and captures number plate for e-Challan.</p>
-              <button class="btn btn-sm btn-outline" style="width: 100%; border-color: #f59e0b; color: #f59e0b;" onclick="alert('Statutory Notice #ECH-2026-881 dispatched to Regional Transport Office (RTO) for Vehicle MH12 AB 1234.')">
+              <button class="btn btn-sm btn-outline" style="width: 100%; border-color: #f59e0b; color: #f59e0b;" onclick="window.openCctvNoticeModal('ECH-2026-881')">
                 📜 View RTO Violation Notice
               </button>
             </div>
@@ -564,7 +563,7 @@
             <div style="padding: 1rem; color: white;">
               <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 2px;">Case 3: Food Prep & Stall Hygiene (FoodGuard AI)</div>
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">Bounding box AI checks food coverage, hairnets & drain proximity in real-time.</p>
-              <button class="btn btn-sm btn-outline" style="width: 100%; border-color: #34d399; color: #34d399;" onclick="alert('FoodGuard Computer Vision: Stall passed surface cleanliness and food shield coverage inspection (94/100)!')">
+              <button class="btn btn-sm btn-outline" style="width: 100%; border-color: #34d399; color: #34d399;" onclick="window.openFoodGuardAiTelemetry()">
                 🛡️ View FoodGuard AI Telemetry
               </button>
             </div>
@@ -600,9 +599,9 @@
                 </div>
               </div>
               <div class="wa-header-actions">
-                <span title="Voice Call" onclick="alert('Calling Municipal Toll-Free 1800-425-0012...')">📞</span>
-                <span title="Video Dispatch" onclick="alert('Connecting to CCTV Command Center...')">📹</span>
-                <span title="Search Chat" onclick="document.getElementById('waMsgInput').focus()">🔍</span>
+                <a href="tel:18004250012" title="Voice Call Municipal Toll-Free 1800-425-0012" style="text-decoration: none; color: inherit; cursor: pointer;">📞</a>
+                <span title="Video Dispatch (CCTV Command)" onclick="window.connectCctvCommand()" style="cursor: pointer;">📹</span>
+                <span title="Search Chat" onclick="document.getElementById('waMsgInput').focus()" style="cursor: pointer;">🔍</span>
                 <span title="Menu">⋮</span>
               </div>
             </div>
@@ -710,7 +709,7 @@
 
 
   <!-- =========================================================================
-       PHASE 2: DEDICATED MUNICIPAL & ELECTRICITY COMMAND DASHBOARD
+       SECTOR 2: INTEGRATED MUNICIPAL & ELECTRICITY COMMAND CENTER
        ========================================================================= -->
   <div id="municipalMasterView" class="master-dashboard-view">
     <!-- Municipal Topbar -->
@@ -1116,7 +1115,7 @@
 
 
   <!-- =========================================================================
-       PHASE 3: DEDICATED FOOD SAFETY DEPARTMENT DASHBOARD
+       SECTOR 3: FOOD SAFETY & STANDARDS REGULATORY AUTHORITY (FSSAI)
        ========================================================================= -->
   <div id="foodSafetyMasterView" class="master-dashboard-view">
     <!-- Food Safety Topbar -->
@@ -1377,7 +1376,7 @@
 
 
   <!-- =========================================================================
-       DEDICATED FIELD WORKER & SQUAD RESPONSE PORTAL
+       SECTOR 4: DEDICATED FIELD SQUAD RAPID RESPONSE PORTAL
        ========================================================================= -->
   <div id="workerMasterView" class="master-dashboard-view">
     <!-- Worker Topbar -->
@@ -2100,8 +2099,248 @@
     </div>
   </div>
 
+  <!-- =========================================================================
+       CIVIC CREDIT UTILITY BENEFITS REDEMPTION MODAL
+       ========================================================================= -->
+  <div class="modal-overlay" id="utilityRebateModal">
+    <div class="modal-box modal-lg" style="max-width: 650px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.4rem;">🎁</span>
+          <div>
+            <h3 style="font-size: 1.2rem; color: white; margin: 0;">Redeem Civic Credits for Utility Benefits</h3>
+            <div style="font-size: 0.75rem; color: #a7f3d0;">Official Municipal Public Welfare Rebate Program</div>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('utilityRebateModal')">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.25rem;">
+        <!-- Available Credit Balance Bar -->
+        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 0.9rem 1.25rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+          <div>
+            <div style="font-size: 0.74rem; text-transform: uppercase; color: #a7f3d0; font-weight: 800;">Your Redeemable Civic Balance</div>
+            <div style="font-size: 1.6rem; font-weight: 900; font-family: var(--font-mono); color: #34d399;">
+              <span id="rebateModalCurrentBalance">150</span> <span style="font-size: 0.95rem; font-weight: 700;">Credits</span>
+            </div>
+          </div>
+          <span class="badge" style="background: rgba(16, 185, 129, 0.25); color: #a7f3d0; border: 1px solid #10b981; font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+            Silver Guardian Status
+          </span>
+        </div>
+
+        <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+          Select an authorized civic reward below. Credits are deducted instantly and an official voucher code is generated:
+        </p>
+
+        <!-- Benefit Selection Grid -->
+        <div class="rebate-grid" id="rebateOptionsContainer">
+          <!-- Option 1: 5% Electricity Rebate -->
+          <div class="rebate-card selected" id="rebateCard_power" onclick="window.selectRebateOption('power', 100)">
+            <div class="rebate-card-header">
+              <span class="rebate-icon">⚡</span>
+              <span class="rebate-cost-tag">100 Credits</span>
+            </div>
+            <div class="rebate-title">5% Electricity Bill Rebate</div>
+            <p class="rebate-desc">
+              Applied directly against your APCPDCL / TSSPDCL domestic power consumer meter bill for next billing cycle.
+            </p>
+          </div>
+
+          <!-- Option 2: 1-Month Free Bus Pass -->
+          <div class="rebate-card" id="rebateCard_bus" onclick="window.selectRebateOption('bus', 150)">
+            <div class="rebate-card-header">
+              <span class="rebate-icon">🚌</span>
+              <span class="rebate-cost-tag">150 Credits</span>
+            </div>
+            <div class="rebate-title">Free 30-Day City Bus Pass</div>
+            <p class="rebate-desc">
+              Unlimited travel smartcard voucher across all municipal express & feeder transit lines in Surampalem Circle.
+            </p>
+          </div>
+
+          <!-- Option 3: Property Tax Concession -->
+          <div class="rebate-card" id="rebateCard_tax" onclick="window.selectRebateOption('tax', 200)">
+            <div class="rebate-card-header">
+              <span class="rebate-icon">🏛️</span>
+              <span class="rebate-cost-tag">200 Credits</span>
+            </div>
+            <div class="rebate-title">Property Tax Green Rebate</div>
+            <p class="rebate-desc">
+              ₹250 municipal assessment waiver for residents with verified active participation in ward cleanliness.
+            </p>
+          </div>
+        </div>
+
+        <!-- Success Redemption Voucher (Initially Hidden) -->
+        <div id="rebateSuccessVoucher" style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px dashed #10b981; border-radius: 10px; padding: 1rem; text-align: center; margin-top: 1rem;">
+          <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">🎉</div>
+          <h4 style="color: #34d399; font-size: 1.05rem; margin-bottom: 0.25rem;" id="rebateSuccessTitle">Benefit Voucher Generated</h4>
+          <div style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: 800; color: white; letter-spacing: 2px; margin: 0.5rem 0;" id="rebateVoucherCode">REB-2026-POWER-8912</div>
+          <p style="font-size: 0.78rem; color: #cbd5e1; margin-bottom: 0;" id="rebateSuccessInstructions">
+            Present this voucher code at the municipal utility desk or enter in online consumer bill payment portal.
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-outline" onclick="window.closeModal('utilityRebateModal')">Close</button>
+        <button type="button" class="btn btn-primary" id="confirmRedeemBtn" onclick="window.confirmSelectedRebate()" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: 800;">
+          <span>🎁</span> Redeem Benefit (Deduct Credits)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       STATUTORY CCTV & ANPR E-CHALLAN VIOLATION NOTICE MODAL
+       ========================================================================= -->
+  <div class="modal-overlay" id="cctvNoticeModal">
+    <div class="modal-box modal-lg" style="max-width: 620px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.4rem;">📜</span>
+          <div>
+            <h3 style="font-size: 1.2rem; color: #f59e0b; margin: 0;">Statutory Public Violation Notice</h3>
+            <div style="font-size: 0.75rem; color: #94a3b8;">Automated Traffic & Municipal Enforcement e-Challan</div>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('cctvNoticeModal')">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.25rem;">
+        <div class="echallan-slip-box">
+          <div class="echallan-topbar">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <img src="assets/logo.png" style="width: 32px; height: 32px;" alt="Emblem">
+              <div>
+                <div class="echallan-emblem-text">GOVERNMENT OF ANDHRA PRADESH • TRANSPORT & MUNICIPAL DEPT</div>
+                <div style="font-size: 0.75rem; color: #94a3b8;">Surampalem Circle • Automated Surveillance Division</div>
+              </div>
+            </div>
+            <span class="badge badge-escalated" style="font-size: 0.78rem;">OFFICIAL NOTICE</span>
+          </div>
+
+          <div class="echallan-grid">
+            <div class="echallan-row-item">
+              <div class="echallan-label">Notice Reference No:</div>
+              <div class="echallan-val" style="color: #f59e0b; font-family: var(--font-mono);">#ECH-2026-881</div>
+            </div>
+            <div class="echallan-row-item">
+              <div class="echallan-label">Target Vehicle Plate (ANPR):</div>
+              <div class="echallan-val" style="font-family: var(--font-mono); letter-spacing: 1px;">MH12 AB 1234</div>
+            </div>
+            <div class="echallan-row-item">
+              <div class="echallan-label">Offense Category:</div>
+              <div class="echallan-val">Illegal Public Garbage Dumping & Littering</div>
+            </div>
+            <div class="echallan-row-item">
+              <div class="echallan-label">Detected By:</div>
+              <div class="echallan-val">CAM-04 High-Definition ANPR Lens</div>
+            </div>
+            <div class="echallan-row-item">
+              <div class="echallan-label">Violation Location:</div>
+              <div class="echallan-val">College Road Food Court Junction, Ward 12</div>
+            </div>
+            <div class="echallan-row-item">
+              <div class="echallan-label">Statutory Fine:</div>
+              <div class="echallan-val" style="color: #ef4444; font-size: 1rem;">₹500.00</div>
+            </div>
+          </div>
+
+          <div style="background: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; padding: 0.65rem 0.9rem; border-radius: 6px; font-size: 0.78rem; color: #cbd5e1; line-height: 1.45;">
+            ⚖️ <strong>Legal Clause:</strong> Under Section 269 of IPC and Municipal Public Health By-Laws 2024, dumping refuse from moving/stationary vehicles into public thoroughfares incurs statutory penal liability. Notice forwarded to RTO records.
+          </div>
+
+          <div class="echallan-barcode-strip">
+            <div class="echallan-barcode-art">||| | |||| | ||||| ||| |||| | ||</div>
+            <div style="font-size: 0.68rem; color: #64748b; margin-top: 4px;">DIGITALLY SIGNED STATUTORY RECORD • ID: RTO-AP-2026-881</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-outline" onclick="window.closeModal('cctvNoticeModal')">Close</button>
+        <button type="button" class="btn btn-outline" onclick="window.print()" style="border-color: #f59e0b; color: #f59e0b;">
+          <span>🖨️</span> Print Official Notice
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       FOODGUARD COMPUTER VISION HYGIENE TELEMETRY MODAL
+       ========================================================================= -->
+  <div class="modal-overlay" id="foodGuardAiModal">
+    <div class="modal-box modal-lg" style="max-width: 680px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.4rem;">🛡️</span>
+          <div>
+            <h3 style="font-size: 1.2rem; color: #34d399; margin: 0;">FoodGuard Computer Vision Hygiene Telemetry</h3>
+            <div style="font-size: 0.75rem; color: #94a3b8;">Automated Optical Stall Inspection • Surampalem Food Court</div>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('foodGuardAiModal')">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.25rem;">
+        <div class="foodguard-telemetry-wrapper">
+          <!-- Left: CV Video Frame with Bounding Boxes -->
+          <div class="foodguard-cv-frame">
+            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80" class="foodguard-cv-img" alt="Food Court Stall">
+            <div class="foodguard-bbox" style="top: 15%; left: 10%; width: 45%; height: 35%;">
+              Food Shield: 98% Covered ✓
+            </div>
+            <div class="foodguard-bbox" style="bottom: 12%; left: 25%; width: 50%; height: 25%; border-color: #38bdf8; color: #bae6fd;">
+              Prep Counter: 92% Sanitized ✓
+            </div>
+            <div class="foodguard-bbox" style="bottom: 15%; right: 8%; width: 25%; height: 30%; border-color: #facc15; color: #fef08a;">
+              Bin: Sealed ✓
+            </div>
+          </div>
+
+          <!-- Right: Telemetry Metrics -->
+          <div style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 800;">Target Establishment:</div>
+              <h4 style="color: white; font-size: 1.1rem; margin: 2px 0 0.5rem;">Swagath Grand Fast Food</h4>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 0.85rem;">
+                <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                  <div style="font-size: 0.68rem; color: #94a3b8;">HYGIENE GRADE:</div>
+                  <div style="font-size: 1.15rem; font-weight: 900; color: #10b981;">GRADE A+</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                  <div style="font-size: 0.68rem; color: #94a3b8;">OVERALL SCORE:</div>
+                  <div style="font-size: 1.15rem; font-weight: 900; color: #38bdf8;">94 / 100</div>
+                </div>
+              </div>
+
+              <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 0.75rem;">
+                • <strong>Optical Food Shield:</strong> Compliant (Cover glass intact)<br>
+                • <strong>Staff Hairnets & Aprons:</strong> Detected on 3/3 food handlers<br>
+                • <strong>Drain Proximity:</strong> 3.8m distance (Safe zone)
+              </div>
+            </div>
+
+            <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.78rem; color: #a7f3d0;">
+              ✅ <strong>Statutory Compliance Passed:</strong> Next scheduled manual physical inspection in 14 days.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="window.closeModal('foodGuardAiModal')" style="width: 100%;">
+          Close Telemetry View
+        </button>
+      </div>
+    </div>
+  </div>
+
     <!-- =========================================================================
-       PHASE 4: PREDICTIVE CIVIC RISK & PREVENTIVE ACTION MODAL (HUMAN-IN-THE-LOOP)
+       PREDICTIVE CIVIC RISK & PREVENTIVE DECISION SUPPORT (HUMAN-IN-THE-LOOP)
        ========================================================================= -->
   <div class="modal-overlay" id="predictiveDetailModal">
     <div class="modal-box modal-lg" style="max-width: 680px;">
@@ -2250,6 +2489,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=21.0.0"></script>
+  <script src="js/bundle.js?v=22.0.0"></script>
 </body>
 </html>
