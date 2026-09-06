@@ -46,7 +46,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from urllib.parse import urlparse, parse_qs
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
 
 PORT = int(os.environ.get('PORT', 8000))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -113,6 +113,92 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+# ------------------------------------------------------------------------------
+# SESSION MANAGEMENT & AUTHORITATIVE SERVER-SIDE IDENTITY RESOLUTION
+# ------------------------------------------------------------------------------
+def create_session(user_dict, conn):
+    """
+    Generate cryptographically secure 64-character session token.
+    Persist session row in SQLite with authoritative user identity and jurisdiction.
+    """
+    token = secrets.token_hex(32)
+    now_ms = int(time.time() * 1000)
+    expires_at = now_ms + (7 * 86400 * 1000)  # 7 Days valid
+    
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT OR REPLACE INTO sessions (
+            token, userId, email, department, roleTitle, name, officialId,
+            jurisdictionState, jurisdictionCity, jurisdictionWard, createdAt, expiresAt
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        token,
+        user_dict.get('id'),
+        (user_dict.get('email') or '').lower().strip(),
+        user_dict.get('department'),
+        user_dict.get('roleTitle'),
+        user_dict.get('name'),
+        user_dict.get('officialId'),
+        user_dict.get('jurisdictionState'),
+        user_dict.get('jurisdictionCity'),
+        user_dict.get('jurisdictionWard'),
+        now_ms,
+        expires_at
+    ))
+    conn.commit()
+    return token
+
+def get_authenticated_user(handler, conn=None):
+    """
+    Authoritative server-side identity resolver.
+    Validates token from Authorization: Bearer <token> against sessions table.
+    Ensures token has not expired and retrieves authorized jurisdiction.
+    """
+    auth_header = handler.headers.get('Authorization', '').strip()
+    if not auth_header:
+        return None
+
+    token = auth_header
+    if token.lower().startswith('bearer '):
+        token = token[7:].strip()
+
+    if not token:
+        return None
+
+    close_conn = False
+    if conn is None:
+        conn = get_db_connection()
+        close_conn = True
+
+    try:
+        cursor = conn.cursor()
+        now_ms = int(time.time() * 1000)
+        cursor.execute('''
+            SELECT s.*, 
+                   u.jurisdictionState as u_state, 
+                   u.jurisdictionCity as u_city, 
+                   u.jurisdictionWard as u_ward
+            FROM sessions s
+            LEFT JOIN users u ON LOWER(TRIM(u.email)) = LOWER(TRIM(s.email))
+            WHERE s.token = ? AND s.expiresAt > ?
+        ''', (token, now_ms))
+        row = cursor.fetchone()
+        if row:
+            d = dict(row)
+            # Favor current users table authoritative values if set
+            if d.get('u_state'):
+                d['jurisdictionState'] = d['u_state']
+            if d.get('u_city'):
+                d['jurisdictionCity'] = d['u_city']
+            if d.get('u_ward'):
+                d['jurisdictionWard'] = d['u_ward']
+            return d
+
+        return None
+    finally:
+        if close_conn:
+            conn.close()
+
 def init_database():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -169,7 +255,10 @@ def init_database():
             imageAiReasoning TEXT,
             imageAiAccepted INTEGER DEFAULT 0,
             imageOfficerVerified INTEGER DEFAULT 0,
-            imageOfficerOverrideReason TEXT
+            imageOfficerOverrideReason TEXT,
+            enRouteTimestamp INTEGER,
+            arrivedTimestamp INTEGER,
+            supervisorNotes TEXT
         )
     ''')
 
@@ -271,6 +360,19 @@ def init_database():
         )
     ''')
 
+    # Table: Operational Audit Logs (Human-in-the-Loop & Squad Assignment Ledger)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS operational_audit_logs (
+            id TEXT PRIMARY KEY,
+            issueId TEXT,
+            officer TEXT,
+            actionType TEXT,
+            assignedWorker TEXT,
+            supervisorNotes TEXT,
+            timestamp INTEGER
+        )
+    ''')
+
     # Safe column migrations for issues table
     cursor.execute("PRAGMA table_info(issues)")
     existing_issue_cols = [row['name'] if isinstance(row, dict) or hasattr(row, 'keys') else row[1] for row in cursor.fetchall()]
@@ -293,7 +395,10 @@ def init_database():
         ('imageAiReasoning', 'TEXT'),
         ('imageAiAccepted', 'INTEGER DEFAULT 0'),
         ('imageOfficerVerified', 'INTEGER DEFAULT 0'),
-        ('imageOfficerOverrideReason', 'TEXT')
+        ('imageOfficerOverrideReason', 'TEXT'),
+        ('enRouteTimestamp', 'INTEGER'),
+        ('arrivedTimestamp', 'INTEGER'),
+        ('supervisorNotes', 'TEXT')
     ]
     for col_name, col_type in new_issue_cols:
         if col_name not in existing_issue_cols:
@@ -301,6 +406,24 @@ def init_database():
                 cursor.execute(f"ALTER TABLE issues ADD COLUMN {col_name} {col_type}")
             except Exception as e:
                 print(f"[Database] Column {col_name} migration note: {e}")
+
+    # Table: Sessions (Authoritative Cryptographic Session Store)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sessions (
+            token TEXT PRIMARY KEY,
+            userId TEXT,
+            email TEXT COLLATE NOCASE,
+            department TEXT,
+            roleTitle TEXT,
+            name TEXT,
+            officialId TEXT,
+            jurisdictionState TEXT,
+            jurisdictionCity TEXT,
+            jurisdictionWard TEXT,
+            createdAt INTEGER,
+            expiresAt INTEGER
+        )
+    ''')
 
     # Table: Users & Standing Ledger (Amazon-style persistent unique account store)
     cursor.execute('''
@@ -315,44 +438,119 @@ def init_database():
             avatar TEXT,
             civicCredits INTEGER DEFAULT 20,
             activeStreakWeeks INTEGER DEFAULT 1,
-            createdAt INTEGER
+            createdAt INTEGER,
+            jurisdictionState TEXT,
+            jurisdictionCity TEXT,
+            jurisdictionWard TEXT
         )
     ''')
+
+    # Safe column migrations for users table
+    cursor.execute("PRAGMA table_info(users)")
+    existing_user_cols = [row['name'] if isinstance(row, dict) or hasattr(row, 'keys') else row[1] for row in cursor.fetchall()]
+    user_cols_to_add = [
+        ('jurisdictionState', 'TEXT'),
+        ('jurisdictionCity', 'TEXT'),
+        ('jurisdictionWard', 'TEXT')
+    ]
+    for col_name, col_type in user_cols_to_add:
+        if col_name not in existing_user_cols:
+            try:
+                cursor.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}")
+            except Exception as e:
+                print(f"[Database] User column {col_name} migration note: {e}")
+
+    # Safe column migrations for workers table
+    cursor.execute("PRAGMA table_info(workers)")
+    existing_worker_cols = [row['name'] if isinstance(row, dict) or hasattr(row, 'keys') else row[1] for row in cursor.fetchall()]
+    worker_cols_to_add = [
+        ('operationalState', 'TEXT'),
+        ('operationalCity', 'TEXT'),
+        ('operationalWards', 'TEXT')
+    ]
+    for col_name, col_type in worker_cols_to_add:
+        if col_name not in existing_worker_cols:
+            try:
+                cursor.execute(f"ALTER TABLE workers ADD COLUMN {col_name} {col_type}")
+            except Exception as e:
+                print(f"[Database] Worker column {col_name} migration note: {e}")
 
     conn.commit()
 
     # Seed default system accounts if not present
     cursor.execute('''
-        INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt)
-        VALUES ('citizen@civictech.in', 'user-101', 'KRISH', 'password123', 'citizen', 'Verified Citizen Reporter', 'CIT-IND-2026-8941', 'KR', 20, 1, strftime('%s', 'now'))
+        INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt, jurisdictionState, jurisdictionCity, jurisdictionWard)
+        VALUES ('citizen@civictech.in', 'user-101', 'KRISH', 'password123', 'citizen', 'Verified Citizen Reporter', 'CIT-IND-2026-8941', 'KR', 20, 1, strftime('%s', 'now'), 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)')
     ''')
     cursor.execute('''
-        INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt)
-        VALUES ('admin@municipality.gov.in', 'user-102', 'K. Mukundha (Zonal Administrator)', 'password123', 'municipal', 'Designated Municipal & Electricity Administrator', 'GOV-MUNC-SEC-012', 'KM', 0, 0, strftime('%s', 'now'))
+        INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt, jurisdictionState, jurisdictionCity, jurisdictionWard)
+        VALUES ('admin@municipality.gov.in', 'user-102', 'K. Mukundha (Zonal Administrator)', 'password123', 'municipal', 'Designated Municipal & Electricity Administrator', 'GOV-MUNC-SEC-012', 'KM', 0, 0, strftime('%s', 'now'), 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)')
     ''')
     cursor.execute('''
-        INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt)
-        VALUES ('fso.officer@foodsafety.gov.in', 'user-103', 'Dr. Lakshmi Prasad (FSO)', 'password123', 'food', 'Designated Food Safety Officer (FSO)', 'FSSAI-INSP-2026-44', 'LP', 0, 0, strftime('%s', 'now'))
+        INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt, jurisdictionState, jurisdictionCity, jurisdictionWard)
+        VALUES ('fso.officer@foodsafety.gov.in', 'user-103', 'Dr. Lakshmi Prasad (FSO)', 'password123', 'food', 'Designated Food Safety Officer (FSO)', 'FSSAI-INSP-2026-44', 'LP', 0, 0, strftime('%s', 'now'), 'Andhra Pradesh', 'Surampalem', 'ALL')
     ''')
     cursor.execute('''
-        INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt)
-        VALUES ('worker4@municipality.gov.in', 'user-104', 'Ramesh (Squad 4 Leader)', 'password123', 'worker', 'Field Response Squad Lead', 'SQUAD-04-LEAD', 'SQ', 0, 0, strftime('%s', 'now'))
+        INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt, jurisdictionState, jurisdictionCity, jurisdictionWard)
+        VALUES ('worker4@municipality.gov.in', 'user-104', 'Ramesh (Squad 4 Leader)', 'password123', 'worker', 'Field Response Squad Lead', 'SQUAD-04-LEAD', 'SQ', 0, 0, strftime('%s', 'now'), 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)')
     ''')
-    conn.commit()
 
+    # Authoritatively backfill/update official jurisdictions in users table
+    cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'Ward 12 (Market Zone)' WHERE LOWER(email) IN ('admin@municipality.gov.in', 'zonal.officer@andhra.gov.in') AND (jurisdictionState IS NULL OR jurisdictionState = '')")
+    cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'ALL' WHERE LOWER(email) IN ('fso.officer@foodsafety.gov.in', 'inspector.sharma@fssai.gov.in') AND (jurisdictionState IS NULL OR jurisdictionState = '')")
+    cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'Ward 12 (Market Zone)' WHERE LOWER(email) = 'worker4@municipality.gov.in' AND (jurisdictionState IS NULL OR jurisdictionState = '')")
+    cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'Ward 12 (Market Zone)' WHERE LOWER(email) IN ('citizen@civictech.in', 'mukundha.k@gmail.com') AND (jurisdictionState IS NULL OR jurisdictionState = '')")
+
+    # Authoritatively backfill/update operational boundaries in workers table
+    cursor.execute("UPDATE workers SET operationalState = 'Andhra Pradesh', operationalCity = 'Surampalem', operationalWards = '[\"Ward 12 (Market Zone)\", \"Ward 11 (Lake View Zone)\"]' WHERE id = 'WRK-SAN-04' AND (operationalState IS NULL OR operationalState = '')")
+    cursor.execute("UPDATE workers SET operationalState = 'Andhra Pradesh', operationalCity = 'Surampalem', operationalWards = '[\"Ward 12 (Market Zone)\", \"Ward 14 (Campus Zone)\"]' WHERE id = 'WRK-SAN-01' AND (operationalState IS NULL OR operationalState = '')")
+    cursor.execute("UPDATE workers SET operationalState = 'Andhra Pradesh', operationalCity = 'Surampalem', operationalWards = '[\"Ward 12 (Market Zone)\", \"Ward 11 (Lake View Zone)\", \"Ward 14 (Campus Zone)\"]' WHERE id = 'WRK-ELE-02' AND (operationalState IS NULL OR operationalState = '')")
+    cursor.execute("UPDATE workers SET operationalState = 'Andhra Pradesh', operationalCity = 'Surampalem', operationalWards = '[\"Ward 12 (Market Zone)\", \"Ward 11 (Lake View Zone)\"]' WHERE id = 'WRK-ROA-03' AND (operationalState IS NULL OR operationalState = '')")
+
+    # Seed Out-of-Jurisdiction Test Accounts for Automated Security Verification
+    cursor.execute('''
+        INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt, jurisdictionState, jurisdictionCity, jurisdictionWard)
+        VALUES ('delhi.officer@mcd.gov.in', 'user-delhi-01', 'Rajesh Sharma (MCD Zonal Head)', 'password123', 'municipal', 'Zonal Officer (Delhi MCD)', 'GOV-MCD-DEL-01', 'RS', 0, 0, strftime('%s', 'now'), 'Delhi NCR', 'New Delhi', 'Ward 5 (Central)')
+    ''')
+    cursor.execute('''
+        INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt, jurisdictionState, jurisdictionCity, jurisdictionWard)
+        VALUES ('hyd.fso@foodsafety.gov.in', 'user-fso-hyd', 'Dr. Aruna Reddy (GHMC FSO)', 'password123', 'food', 'Food Safety Officer (GHMC)', 'FSSAI-HYD-2026-99', 'AR', 0, 0, strftime('%s', 'now'), 'Telangana', 'Hyderabad', 'ALL')
+    ''')
+    cursor.execute('''
+        INSERT OR IGNORE INTO workers (id, name, phone, department, specialization, currentStatus, lat, lng, tasksCompleted, currentTaskId, operationalState, operationalCity, operationalWards)
+        VALUES ('WRK-SAN-99', 'Squad 99 (Lead: Gopal)', '+91 99001 12233', 'sanitation', 'Remote Outpost Collection', 'available', 17.0200, 81.8200, 5, NULL, 'Andhra Pradesh', 'Surampalem', '[\"Ward 99 (Remote Zone)\"]')
+    ''')
+
+    # Seed default active sessions for quick testing & immediate authentication
+    now_ms = int(time.time() * 1000)
+    exp_ms = now_ms + (30 * 86400 * 1000)
+    demo_sessions = [
+        ('DEMO_TOKEN_MUNICIPAL_OFFICER', 'user-102', 'admin@municipality.gov.in', 'municipal', 'Designated Municipal & Electricity Administrator', 'K. Mukundha (Zonal Administrator)', 'GOV-MUNC-SEC-012', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', now_ms, exp_ms),
+        ('DEMO_TOKEN_FOOD_OFFICER', 'user-103', 'fso.officer@foodsafety.gov.in', 'food', 'Designated Food Safety Officer (FSO)', 'Dr. Lakshmi Prasad (FSO)', 'FSSAI-INSP-2026-44', 'Andhra Pradesh', 'Surampalem', 'ALL', now_ms, exp_ms),
+        ('DEMO_TOKEN_WORKER_4', 'user-104', 'worker4@municipality.gov.in', 'worker', 'Field Response Squad Lead', 'Ramesh (Squad 4 Leader)', 'SQUAD-04-LEAD', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', now_ms, exp_ms),
+        ('DEMO_TOKEN_CITIZEN', 'user-101', 'citizen@civictech.in', 'citizen', 'Verified Citizen Reporter', 'KRISH', 'CIT-IND-2026-8941', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', now_ms, exp_ms),
+        ('DEMO_TOKEN_DELHI_OFFICER', 'user-delhi-01', 'delhi.officer@mcd.gov.in', 'municipal', 'Zonal Officer (Delhi MCD)', 'Rajesh Sharma (MCD Zonal Head)', 'GOV-MCD-DEL-01', 'Delhi NCR', 'New Delhi', 'Ward 5 (Central)', now_ms, exp_ms),
+        ('DEMO_TOKEN_HYD_FSO', 'user-fso-hyd', 'hyd.fso@foodsafety.gov.in', 'food', 'Food Safety Officer (GHMC)', 'Dr. Aruna Reddy (GHMC FSO)', 'FSSAI-HYD-2026-99', 'Telangana', 'Hyderabad', 'ALL', now_ms, exp_ms),
+    ]
+    cursor.executemany('''
+        INSERT OR REPLACE INTO sessions (token, userId, email, department, roleTitle, name, officialId, jurisdictionState, jurisdictionCity, jurisdictionWard, createdAt, expiresAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', demo_sessions)
+
+    conn.commit()
 
     # Seed Field Workers if empty
     cursor.execute('SELECT COUNT(*) FROM workers')
     if cursor.fetchone()[0] == 0:
         seed_workers = [
-            ('WRK-SAN-01', 'Ravi Kumar', '+91 98480 22311', 'sanitation', 'Garbage & Heavy Compactor Operations', 'available', 17.0012, 81.8048, 14, None),
-            ('WRK-ELE-02', 'Suresh Kumar', '+91 94401 55422', 'electricity', '11KV Substation & Line Repair', 'available', 17.0025, 81.8030, 22, None),
-            ('WRK-ROA-03', 'Anita Roy', '+91 99880 33411', 'sanitation', 'Asphalt Patching & Culvert Desilting', 'available', 16.9995, 81.8060, 9, None),
-            ('WRK-SAN-04', 'M. Appa Rao', '+91 98661 77211', 'sanitation', 'Commercial Market Solid Waste Collection', 'busy', 17.0030, 81.8010, 31, 'ISS-2026-00123')
+            ('WRK-SAN-01', 'Squad 1 (Lead: Ravi Kumar)', '+91 98480 22311', 'sanitation', 'Garbage & Heavy Compactor Operations', 'available', 17.0012, 81.8048, 14, None, 'Andhra Pradesh', 'Surampalem', '["Ward 12 (Market Zone)", "Ward 14 (Campus Zone)"]'),
+            ('WRK-ELE-02', 'Lineman Squad B (Lead: Suresh Kumar)', '+91 94401 55422', 'electricity', '11KV Substation & Line Repair', 'available', 17.0025, 81.8030, 22, None, 'Andhra Pradesh', 'Surampalem', '["Ward 12 (Market Zone)", "Ward 11 (Lake View Zone)", "Ward 14 (Campus Zone)"]'),
+            ('WRK-ROA-03', 'Roads Squad 3 (Lead: Anita Roy)', '+91 99880 33411', 'sanitation', 'Asphalt Patching & Culvert Desilting', 'available', 16.9995, 81.8060, 9, None, 'Andhra Pradesh', 'Surampalem', '["Ward 12 (Market Zone)", "Ward 11 (Lake View Zone)"]'),
+            ('WRK-SAN-04', 'Squad 4 (Lead: Ramesh)', '+91 98661 77211', 'sanitation', 'Commercial Market Solid Waste Collection', 'busy', 17.0030, 81.8010, 31, 'ISS-2026-00123', 'Andhra Pradesh', 'Surampalem', '["Ward 12 (Market Zone)", "Ward 11 (Lake View Zone)"]')
         ]
         cursor.executemany('''
-            INSERT OR IGNORE INTO workers (id, name, phone, department, specialization, currentStatus, lat, lng, tasksCompleted, currentTaskId)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT OR IGNORE INTO workers (id, name, phone, department, specialization, currentStatus, lat, lng, tasksCompleted, currentTaskId, operationalState, operationalCity, operationalWards)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', seed_workers)
 
     # Seed Hotspots if empty
@@ -661,17 +859,95 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
         if path == '/api/issues':
             conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM issues ORDER BY timestamp DESC')
+
+            # Authoritative server-side identity & jurisdiction resolution
+            auth_user = get_authenticated_user(self, conn)
+            user_dept = auth_user.get('department') if auth_user else None
+
+            where_clauses = []
+            params = []
+
+            # 1. Municipal Officer: scoped strictly to assigned official jurisdiction & municipal departments
+            if user_dept == 'municipal':
+                state = auth_user.get('jurisdictionState')
+                city = auth_user.get('jurisdictionCity')
+                ward = auth_user.get('jurisdictionWard')
+
+                if state:
+                    where_clauses.append("state = ?")
+                    params.append(state)
+                if city:
+                    where_clauses.append("city = ?")
+                    params.append(city)
+                if ward and ward != 'ALL':
+                    where_clauses.append("ward = ?")
+                    params.append(ward)
+
+                # Municipal officers manage civic infra, sanitation, electricity, etc., not food safety
+                where_clauses.append("department != 'food_safety'")
+
+            # 2. Food Safety Officer: scoped strictly to food_safety violations within city
+            elif user_dept in ['food', 'food_safety']:
+                where_clauses.append("department = 'food_safety'")
+                state = auth_user.get('jurisdictionState')
+                city = auth_user.get('jurisdictionCity')
+                ward = auth_user.get('jurisdictionWard')
+
+                if state:
+                    where_clauses.append("state = ?")
+                    params.append(state)
+                if city:
+                    where_clauses.append("city = ?")
+                    params.append(city)
+                if ward and ward != 'ALL':
+                    where_clauses.append("ward = ?")
+                    params.append(ward)
+
+            # 3. Field Worker: scoped strictly to tasks assigned to this worker or squad
+            elif user_dept == 'worker':
+                w_name = auth_user.get('name', '')
+                w_id = auth_user.get('officialId', '')
+                where_clauses.append("(assignedWorker LIKE ? OR assignedWorker LIKE ? OR assignedWorker LIKE ?)")
+                params.append(f"%{w_name}%")
+                params.append(f"%Squad 4%")
+                params.append(f"%{w_id}%")
+
+            # 4. Citizen or Unauthenticated Public View
+            else:
+                q_state = query.get('state', [None])[0]
+                q_city = query.get('city', [None])[0]
+                q_ward = query.get('ward', [None])[0]
+                if q_state and q_state != 'all':
+                    where_clauses.append("state = ?")
+                    params.append(q_state)
+                if q_city and q_city != 'all':
+                    where_clauses.append("city = ?")
+                    params.append(q_city)
+                if q_ward and q_ward != 'all':
+                    where_clauses.append("ward = ?")
+                    params.append(q_ward)
+
+            sql = 'SELECT * FROM issues'
+            if where_clauses:
+                sql += ' WHERE ' + ' AND '.join(where_clauses)
+            sql += ' ORDER BY timestamp DESC'
+
+            cursor.execute(sql, params)
             rows = cursor.fetchall()
             issues = []
             for r in rows:
                 item = dict(r)
                 item['upvotedBy'] = json.loads(item['upvotedBy'] or '[]')
                 item['comments'] = json.loads(item['comments'] or '[]')
+
+                # Public / Citizen data protection: redact internal officer supervisor notes
+                if not auth_user or user_dept == 'citizen':
+                    item['supervisorNotes'] = None
+
                 issues.append(item)
             conn.close()
 
-            self.send_json_response({'success': True, 'issues': issues})
+            self.send_json_response({'success': True, 'issues': issues, 'count': len(issues)})
             return
 
         # 3. REST API: GET /api/vendors
@@ -852,11 +1128,11 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'imageAfter': None,
                 'reportedBy': body.get('reportedBy', 'KRISH'),
                 'reportedById': user_id,
-                'verifiedByOfficer': 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
-                'verifiedTimestamp': now + 900000,
-                'assignedWorker': assigned_squad,
-                'assignedTimestamp': now + 1800000,
-                'workerStatus': 'Dispatched & En Route to Site',
+                'verifiedByOfficer': None,
+                'verifiedTimestamp': None,
+                'assignedWorker': None,
+                'assignedTimestamp': None,
+                'workerStatus': 'Pending Allocation',
                 'recommendedResource': 'Tractor / Heavy Squad' if body.get('severity') == 'bulk' else 'Collection Truck',
                 'upvotes': 1,
                 'upvotedBy': json.dumps([user_id]),
@@ -908,17 +1184,472 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             })
             return
 
+        # Stage B: REST API: POST /api/issues/assign (Officer Squad Allocation & Persistence)
+        if path == '/api/issues/assign':
+            issue_id = (body.get('issueId') or '').strip()
+            worker_id = (body.get('workerId') or '').strip()
+            supervisor_notes = (body.get('supervisorNotes') or '').strip()
+            confirm_reassign = bool(body.get('confirmReassign', False))
+
+            if not issue_id:
+                self.send_json_response({'success': False, 'error': 'Issue ID is required.'}, status=400)
+                return
+
+            if not worker_id:
+                self.send_json_response({'success': False, 'error': 'Target field squad ID is required.'}, status=400)
+                return
+
+            conn = get_db_connection()
+            cursor = conn.cursor()
+
+            # 1. Authoritative Officer Authentication Validation (Requirement 2 & 3)
+            auth_user = get_authenticated_user(self, conn)
+            if not auth_user:
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': 'Authentication required. Please log in with municipal officer credentials.'
+                }, status=401)
+                return
+
+            if auth_user.get('department') != 'municipal':
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': 'Unauthorized. Only authenticated Municipal Officers may authorize field squad assignments.'
+                }, status=403)
+                return
+
+            official_officer_name = auth_user.get('name') or 'Municipal Officer'
+
+            # 2. Issue Validation (Requirement 2 & 3)
+            cursor.execute('SELECT * FROM issues WHERE id = ?', (issue_id,))
+            issue_row = cursor.fetchone()
+            if not issue_row:
+                conn.close()
+                self.send_json_response({'success': False, 'error': f"Grievance ticket {issue_id} not found."}, status=404)
+                return
+
+            issue_dict = dict(issue_row)
+            if issue_dict.get('status') == 'resolved':
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Cannot assign field squad to an already resolved grievance.'}, status=400)
+                return
+
+            # Reject cross-department assignment: Municipal Officer cannot assign Food Safety issues
+            if issue_dict.get('department') == 'food_safety':
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': 'Cross-department assignment prohibited. Municipal Officers cannot assign Food Safety violations.'
+                }, status=403)
+                return
+
+            # 3. Enforce Server-Side Government Jurisdiction Check
+            officer_state = auth_user.get('jurisdictionState')
+            officer_city = auth_user.get('jurisdictionCity')
+            officer_ward = auth_user.get('jurisdictionWard')
+
+            if officer_state and officer_state != issue_dict.get('state'):
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': f"Cross-jurisdiction assignment rejected. Officer jurisdiction is {officer_state} but incident is in {issue_dict.get('state')}."
+                }, status=403)
+                return
+
+            if officer_city and officer_city != issue_dict.get('city'):
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': f"Cross-jurisdiction assignment rejected. Officer jurisdiction is {officer_city} but incident is in {issue_dict.get('city')}."
+                }, status=403)
+                return
+
+            if officer_ward and officer_ward != 'ALL' and officer_ward != issue_dict.get('ward'):
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': f"Cross-jurisdiction assignment rejected. Officer jurisdiction is {officer_ward} but incident is in {issue_dict.get('ward')}."
+                }, status=403)
+                return
+
+            # 4. Worker / Squad Validation & Operational Area Boundary Enforcement
+            cursor.execute('SELECT * FROM workers WHERE id = ? OR name = ?', (worker_id, worker_id))
+            worker_row = cursor.fetchone()
+            if not worker_row:
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': f"Invalid worker/squad '{worker_id}'. Selected squad is not registered in the municipal workforce registry."
+                }, status=400)
+                return
+
+            target_worker = dict(worker_row)
+            assigned_worker_name = target_worker['name']
+
+            # Worker Operational Area Verification
+            w_op_state = target_worker.get('operationalState')
+            w_op_city = target_worker.get('operationalCity')
+            w_op_wards = target_worker.get('operationalWards')
+
+            if w_op_state and w_op_state != issue_dict.get('state'):
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': f"Worker operational state mismatch. Squad '{assigned_worker_name}' operates in {w_op_state}, but incident is in {issue_dict.get('state')}."
+                }, status=400)
+                return
+
+            if w_op_city and w_op_city != issue_dict.get('city'):
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': f"Worker operational city mismatch. Squad '{assigned_worker_name}' operates in {w_op_city}, but incident is in {issue_dict.get('city')}."
+                }, status=400)
+                return
+
+            if w_op_wards:
+                try:
+                    permitted_wards = json.loads(w_op_wards) if isinstance(w_op_wards, str) else w_op_wards
+                except Exception:
+                    permitted_wards = [w_op_wards]
+
+                if permitted_wards and 'ALL' not in permitted_wards and issue_dict.get('ward') not in permitted_wards:
+                    conn.close()
+                    self.send_json_response({
+                        'success': False,
+                        'error': f"Squad '{assigned_worker_name}' is not authorized to operate in {issue_dict.get('ward')}. Permitted operational wards: {permitted_wards}."
+                    }, status=400)
+                    return
+
+            # 4. Prevent Duplicate / Accidental Duplicate Assignment (Requirement 2 & TEST 6)
+            existing_assigned = (issue_dict.get('assignedWorker') or '').strip()
+            if existing_assigned:
+                if worker_id in existing_assigned or target_worker['name'] in existing_assigned or target_worker['id'] in existing_assigned:
+                    conn.close()
+                    self.send_json_response({
+                        'success': False,
+                        'error': f"Duplicate assignment rejected: Issue {issue_id} is already assigned to {existing_assigned}.",
+                        'isDuplicate': True
+                    }, status=409)
+                    return
+
+                if not confirm_reassign:
+                    conn.close()
+                    self.send_json_response({
+                        'success': False,
+                        'error': f"Issue {issue_id} is already assigned to {existing_assigned}. Reassignment confirmation required.",
+                        'requiresConfirmation': True
+                    }, status=409)
+                    return
+
+            # 5. Persist Assignment in SQLite with Real Server Timestamp (Requirement 3 & 10)
+            now_ms = int(time.time() * 1000)
+
+            cursor.execute('''
+                UPDATE issues
+                SET assignedWorker = ?,
+                    assignedTimestamp = ?,
+                    workerStatus = 'Assigned',
+                    supervisorNotes = ?,
+                    verifiedByOfficer = COALESCE(verifiedByOfficer, ?),
+                    verifiedTimestamp = COALESCE(verifiedTimestamp, ?)
+                WHERE id = ?
+            ''', (
+                assigned_worker_name,
+                now_ms,
+                supervisor_notes or None,
+                official_officer_name,
+                now_ms,
+                issue_id
+            ))
+
+            cursor.execute('''
+                UPDATE workers
+                SET currentStatus = 'busy',
+                    currentTaskId = ?
+                WHERE id = ?
+            ''', (issue_id, target_worker['id']))
+
+            # 6. Audit Trail Logging (Requirement 8)
+            audit_id = f"AUDIT-ASSIGN-{now_ms}-{random.randint(100, 999)}"
+            cursor.execute('''
+                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                audit_id,
+                issue_id,
+                official_officer_name,
+                'squad_assignment',
+                assigned_worker_name,
+                supervisor_notes or 'Standard municipal SOP dispatch',
+                now_ms
+            ))
+
+            cursor.execute('''
+                INSERT INTO ai_predictions (id, entityType, entityId, predictionType, confidenceScore, reasoning, recommendedAction, createdAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                f"PRED-{audit_id}",
+                'issue',
+                issue_id,
+                'squad_assignment',
+                1.0,
+                f"Officer assigned {assigned_worker_name}. Instructions: {supervisor_notes or 'Standard SOP'}",
+                f"Deploy {assigned_worker_name}",
+                now_ms
+            ))
+
+            comments = json.loads(issue_dict.get('comments') or '[]')
+            comments.append({
+                'author': official_officer_name,
+                'text': f"Squad allocated: {assigned_worker_name}. Dispatch instructions: {supervisor_notes or 'Standard municipal resolution protocol'}",
+                'time': 'Just now'
+            })
+            cursor.execute('UPDATE issues SET comments = ? WHERE id = ?', (json.dumps(comments), issue_id))
+
+            conn.commit()
+
+            cursor.execute('SELECT * FROM issues WHERE id = ?', (issue_id,))
+            updated_issue = dict(cursor.fetchone())
+            conn.close()
+
+            updated_issue['upvotedBy'] = json.loads(updated_issue.get('upvotedBy') or '[]')
+            updated_issue['comments'] = json.loads(updated_issue.get('comments') or '[]')
+
+            # 7. Real-Time SSE Event Broadcast (Requirement 6)
+            sse_payload = {
+                'id': updated_issue['id'],
+                'assignedWorker': updated_issue['assignedWorker'],
+                'assignedTimestamp': updated_issue['assignedTimestamp'],
+                'workerStatus': updated_issue['workerStatus'],
+                'supervisorNotes': updated_issue['supervisorNotes'],
+                'ward': updated_issue.get('ward'),
+                'title': updated_issue.get('title'),
+                'severity': updated_issue.get('severity'),
+                'department': updated_issue.get('department'),
+                'comments': updated_issue.get('comments')
+            }
+            sse_hub.broadcast('ISSUE_ASSIGNED', sse_payload)
+
+            self.send_json_response({
+                'success': True,
+                'message': f"Squad '{assigned_worker_name}' successfully assigned to issue {issue_id}.",
+                'issue': updated_issue
+            })
+            return
+
+        # Stage C: REST API: POST /api/issues/transition (Worker Lifecycle State Persistence)
+        if path == '/api/issues/transition' or (path.startswith('/api/issues/') and path.endswith('/transition')):
+            if path == '/api/issues/transition':
+                issue_id = (body.get('issueId') or '').strip()
+            else:
+                issue_id = path.split('/')[3].strip()
+
+            target_status = (body.get('status') or body.get('workerStatus') or '').strip()
+            worker_id = (body.get('workerId') or '').strip()
+            worker_email = (body.get('workerEmail') or '').strip().lower()
+            worker_name_param = (body.get('workerName') or '').strip()
+
+            if not issue_id:
+                self.send_json_response({'success': False, 'error': 'Issue ID is required.'}, status=400)
+                return
+
+            # Allowed Stage C transition targets
+            valid_statuses = ['En Route to Site', 'On Site - Conducting Work']
+            if target_status not in valid_statuses:
+                self.send_json_response({
+                    'success': False,
+                    'error': f"Invalid status transition '{target_status}'. Stage C only permits: {', '.join(valid_statuses)}."
+                }, status=400)
+                return
+
+            conn = get_db_connection()
+            cursor = conn.cursor()
+
+            cursor.execute('SELECT * FROM issues WHERE id = ?', (issue_id,))
+            issue_row = cursor.fetchone()
+            if not issue_row:
+                conn.close()
+                self.send_json_response({'success': False, 'error': f"Grievance ticket {issue_id} not found."}, status=404)
+                return
+
+            issue_dict = dict(issue_row)
+            if issue_dict.get('status') == 'resolved':
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Cannot update lifecycle status of an already resolved grievance.'}, status=400)
+                return
+
+            assigned_worker = (issue_dict.get('assignedWorker') or '').strip()
+            if not assigned_worker:
+                conn.close()
+                self.send_json_response({'success': False, 'error': f"Issue {issue_id} is not assigned to any field squad yet."}, status=400)
+                return
+
+            # 1. Authoritative Identity Verification
+            auth_user = get_authenticated_user(self, conn)
+            if not auth_user:
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': 'Authentication required for field status transition.'
+                }, status=401)
+                return
+
+            if auth_user.get('department') not in ['worker', 'municipal']:
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': 'Unauthorized. Only assigned field workers or supervising municipal officers may transition task lifecycle.'
+                }, status=403)
+                return
+
+            # 2. Enforce that Worker is actually assigned to this issue
+            if auth_user.get('department') == 'worker':
+                assigned_lower = assigned_worker.lower()
+                user_name_lower = (auth_user.get('name') or '').lower()
+                user_email_lower = (auth_user.get('email') or '').lower()
+                user_official_id = (auth_user.get('officialId') or '').lower()
+
+                is_assigned = (
+                    user_name_lower in assigned_lower or
+                    ('squad 4' in assigned_lower and 'squad 4' in user_name_lower) or
+                    ('squad 1' in assigned_lower and 'squad 1' in user_name_lower) or
+                    ('lineman' in assigned_lower and 'lineman' in user_name_lower) or
+                    (user_official_id and user_official_id in assigned_lower) or
+                    (user_email_lower and user_email_lower in assigned_lower)
+                )
+                if not is_assigned:
+                    conn.close()
+                    self.send_json_response({
+                        'success': False,
+                        'error': f"Worker '{auth_user.get('name')}' is not assigned to issue {issue_id}. Current assigned squad: {assigned_worker}."
+                    }, status=403)
+                    return
+
+            worker_display_name = auth_user.get('name') or assigned_worker
+
+            now_ms = int(time.time() * 1000)
+            audit_action = 'worker_en_route' if target_status == 'En Route to Site' else 'worker_arrived'
+            audit_id = f"AUDIT-WRK-{now_ms}-{random.randint(100, 999)}"
+
+            comments = json.loads(issue_dict.get('comments') or '[]')
+
+            if target_status == 'En Route to Site':
+                actual_en_route_ts = issue_dict.get('enRouteTimestamp') or now_ms
+                cursor.execute('''
+                    UPDATE issues
+                    SET workerStatus = 'En Route to Site',
+                        enRouteTimestamp = ?
+                    WHERE id = ?
+                ''', (actual_en_route_ts, issue_id))
+
+                log_notes = f"Field squad departed base and is en route to site ({issue_dict.get('location') or 'incident location'})."
+                cursor.execute('''
+                    INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    audit_id,
+                    issue_id,
+                    worker_display_name,
+                    audit_action,
+                    assigned_worker,
+                    log_notes,
+                    now_ms
+                ))
+
+                comments.append({
+                    'author': worker_display_name,
+                    'text': f"🚗 Squad departed base and is travelling to site ({issue_dict.get('location') or 'incident location'}).",
+                    'time': 'Just now'
+                })
+
+            elif target_status == 'On Site - Conducting Work':
+                actual_arrived_ts = issue_dict.get('arrivedTimestamp') or now_ms
+                actual_en_route_ts = issue_dict.get('enRouteTimestamp') or (now_ms - 15 * 60 * 1000)
+
+                cursor.execute('''
+                    UPDATE issues
+                    SET workerStatus = 'On Site - Conducting Work',
+                        enRouteTimestamp = COALESCE(enRouteTimestamp, ?),
+                        arrivedTimestamp = ?
+                    WHERE id = ?
+                ''', (actual_en_route_ts, actual_arrived_ts, issue_id))
+
+                log_notes = f"Field squad arrived on site. Remediation perimeter established at {issue_dict.get('location') or 'incident location'}."
+                cursor.execute('''
+                    INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    audit_id,
+                    issue_id,
+                    worker_display_name,
+                    audit_action,
+                    assigned_worker,
+                    log_notes,
+                    now_ms
+                ))
+
+                comments.append({
+                    'author': worker_display_name,
+                    'text': f"📍 Squad arrived on site. Commenced remediation operations.",
+                    'time': 'Just now'
+                })
+
+            cursor.execute('UPDATE issues SET comments = ? WHERE id = ?', (json.dumps(comments), issue_id))
+            conn.commit()
+
+            cursor.execute('SELECT * FROM issues WHERE id = ?', (issue_id,))
+            updated_issue = dict(cursor.fetchone())
+            conn.close()
+
+            updated_issue['upvotedBy'] = json.loads(updated_issue.get('upvotedBy') or '[]')
+            updated_issue['comments'] = json.loads(updated_issue.get('comments') or '[]')
+
+            # Real-Time SSE Broadcast
+            sse_payload = {
+                'id': updated_issue['id'],
+                'workerStatus': updated_issue['workerStatus'],
+                'enRouteTimestamp': updated_issue['enRouteTimestamp'],
+                'arrivedTimestamp': updated_issue['arrivedTimestamp'],
+                'assignedWorker': updated_issue['assignedWorker'],
+                'assignedTimestamp': updated_issue['assignedTimestamp'],
+                'supervisorNotes': updated_issue['supervisorNotes'],
+                'status': updated_issue['status'],
+                'ward': updated_issue.get('ward'),
+                'title': updated_issue.get('title'),
+                'severity': updated_issue.get('severity'),
+                'department': updated_issue.get('department'),
+                'comments': updated_issue.get('comments')
+            }
+            sse_hub.broadcast('ISSUE_TRANSITIONED', sse_payload)
+
+            self.send_json_response({
+                'success': True,
+                'message': f"Issue {issue_id} status updated to '{target_status}'.",
+                'issue': updated_issue
+            })
+            return
+
         # 2. REST API: POST /api/issues/resolve
         if path.startswith('/api/issues/') and path.endswith('/resolve'):
             parts = path.split('/')
             issue_id = parts[3]
 
-            notes = body.get('notes', 'Field execution verified and site cleaned.')
-            photo_after = body.get('photoAfter', 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80')
-            now = int(time.time() * 1000)
-
             conn = get_db_connection()
             cursor = conn.cursor()
+
+            # 1. Authoritative Authentication Check
+            auth_user = get_authenticated_user(self, conn)
+            if not auth_user:
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': 'Authentication required to resolve grievance.'
+                }, status=401)
+                return
+
             cursor.execute('SELECT * FROM issues WHERE id = ?', (issue_id,))
             row = cursor.fetchone()
 
@@ -927,8 +1658,49 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 self.send_json_response({'success': False, 'error': 'Issue not found'}, status=404)
                 return
 
+            issue_dict = dict(row)
+
+            # 2. Department & Authority Check
+            if issue_dict.get('department') == 'food_safety':
+                if auth_user.get('department') not in ['food', 'food_safety']:
+                    conn.close()
+                    self.send_json_response({
+                        'success': False,
+                        'error': 'Unauthorized. Only Food Safety Officers may resolve food safety violations.'
+                    }, status=403)
+                    return
+            else:
+                if auth_user.get('department') not in ['municipal', 'worker']:
+                    conn.close()
+                    self.send_json_response({
+                        'success': False,
+                        'error': 'Unauthorized. Only Municipal Officers or authorized workforce may resolve municipal grievances.'
+                    }, status=403)
+                    return
+
+            # 3. Jurisdiction Check
+            if auth_user.get('department') == 'municipal':
+                if auth_user.get('jurisdictionState') and auth_user.get('jurisdictionState') != issue_dict.get('state'):
+                    conn.close()
+                    self.send_json_response({'success': False, 'error': 'Resolution rejected: Incident is outside officer jurisdiction state.'}, status=403)
+                    return
+                if auth_user.get('jurisdictionCity') and auth_user.get('jurisdictionCity') != issue_dict.get('city'):
+                    conn.close()
+                    self.send_json_response({'success': False, 'error': 'Resolution rejected: Incident is outside officer jurisdiction city.'}, status=403)
+                    return
+                if auth_user.get('jurisdictionWard') and auth_user.get('jurisdictionWard') != 'ALL':
+                    if auth_user.get('jurisdictionWard') != issue_dict.get('ward'):
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Resolution rejected: Incident is outside officer jurisdiction ward.'}, status=403)
+                        return
+
+            notes = body.get('notes', 'Field execution verified and site cleaned.')
+            photo_after = body.get('photoAfter', 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80')
+            now = int(time.time() * 1000)
+            officer_name = auth_user.get('name') or 'Field Officer'
+
             comments = json.loads(row['comments'] or '[]')
-            comments.append({'author': body.get('officerName', 'Field Officer'), 'text': f'Issue resolved: {notes}', 'time': 'Just now'})
+            comments.append({'author': officer_name, 'text': f'Issue resolved: {notes}', 'time': 'Just now'})
 
             cursor.execute('''
                 UPDATE issues SET
@@ -961,9 +1733,28 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
 
         # 3. REST API: POST /api/food-violations
         if path == '/api/food-violations':
+            conn = get_db_connection()
+            cursor = conn.cursor()
+
+            auth_user = get_authenticated_user(self, conn)
+            if not auth_user:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Authentication required.'}, status=401)
+                return
+
+            if auth_user.get('department') not in ['food', 'food_safety']:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Unauthorized. Only Food Safety Officers may issue statutory notices.'}, status=403)
+                return
+
+            city = body.get('city', 'Surampalem')
+            if auth_user.get('jurisdictionCity') and auth_user.get('jurisdictionCity') != city:
+                conn.close()
+                self.send_json_response({'success': False, 'error': f"Cross-jurisdiction violation notice rejected. FSO jurisdiction is {auth_user.get('jurisdictionCity')}."}, status=403)
+                return
+
             fine_amount = float(body.get('fineAmount', 500))
             state = body.get('state', 'Andhra Pradesh')
-            city = body.get('city', 'Surampalem')
             ward = body.get('ward', 'Ward 14 (Campus Food Zone)')
             street = body.get('street', 'College Road')
             vendor_name = body.get('vendorName', 'Food Stall')
@@ -972,9 +1763,6 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             notes = body.get('notes', 'Inspection notice served.')
 
             vendor_id = f'FSSAI-{"AP" if state == "Andhra Pradesh" else "IND"}-2026-V{int(time.time()) % 900 + 100}'
-
-            conn = get_db_connection()
-            cursor = conn.cursor()
 
             new_vendor = {
                 'id': vendor_id,
@@ -987,7 +1775,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'hygieneGrade': 'C',
                 'score': '45/100',
                 'validTill': 'Action Required (Statutory Notice)',
-                'inspectedBy': 'Dr. Lakshmi Prasad (FSO)',
+                'inspectedBy': auth_user.get('name') or 'Dr. Lakshmi Prasad (FSO)',
                 'status': 'VIOLATION NOTICE ISSUED',
                 'isViolated': 1,
                 'violationClause': clause,
@@ -1014,6 +1802,20 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
 
         # 4. REST API: POST /api/food-rectify
         if path == '/api/food-rectify':
+            conn = get_db_connection()
+            cursor = conn.cursor()
+
+            auth_user = get_authenticated_user(self, conn)
+            if not auth_user:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Authentication required.'}, status=401)
+                return
+
+            if auth_user.get('department') not in ['food', 'food_safety']:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Unauthorized. Only Food Safety Officers may certify food rectifications.'}, status=403)
+                return
+
             issue_id = body.get('issueId')
             notes = body.get('notes', 'Re-inspected and compliant.')
             gas_ppm = body.get('gasPpm', 180)
@@ -1145,7 +1947,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 INSERT OR REPLACE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt)
                 VALUES (:email, :id, :name, :password, :department, :roleTitle, :officialId, :avatar, :civicCredits, :activeStreakWeeks, :createdAt)
             ''', user_data)
-            conn.commit()
+            token = create_session(user_data, conn)
             conn.close()
 
             # Clear used OTP
@@ -1155,7 +1957,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             safe_user = {k: v for k, v in user_data.items() if k != 'password'}
             session_payload = {
                 'success': True,
-                'token': f'CIVIC_JWT_{int(time.time()*1000)}',
+                'token': token,
                 'department': 'citizen',
                 'user': safe_user,
                 'message': 'Citizen account successfully registered with 20 Welcome Civic Credits!'
@@ -1850,11 +2652,16 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 except Exception as up_err:
                     print(f"[Security] Password upgrade note: {up_err}")
 
+            # Generate real cryptographic session token persisted in SQLite
+            sess_conn = get_db_connection()
+            token = create_session(user_dict, sess_conn)
+            sess_conn.close()
+
             safe_user = {k: v for k, v in user_dict.items() if k != 'password'}
             session_payload = {
                 'success': True,
-                'token': f'CIVIC_JWT_{int(time.time()*1000)}',
-                'department': department,
+                'token': token,
+                'department': user_dict.get('department') or department,
                 'user': safe_user
             }
             self.send_json_response(session_payload)
@@ -1913,7 +2720,7 @@ if __name__ == '__main__':
     telemetry_thread = threading.Thread(target=background_telemetry_loop, daemon=True)
     telemetry_thread.start()
 
-    server = HTTPServer(('0.0.0.0', PORT), CivicAppRequestHandler)
+    server = ThreadingHTTPServer(('0.0.0.0', PORT), CivicAppRequestHandler)
     print(f'===========================================================')
     print(f'  Clean & Safe India - Real-Time Backend Server Online!')
     print(f'  Local URL:    http://localhost:{PORT}')

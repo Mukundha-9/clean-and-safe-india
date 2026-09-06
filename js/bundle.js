@@ -201,6 +201,10 @@
       return this.session ? this.session.department : null;
     }
 
+    getToken() {
+      return this.session ? this.session.token : null;
+    }
+
     async login(department, email, password) {
       const cleanEmail = (email || '').trim().toLowerCase();
       const cleanPass = (password || '').trim();
@@ -2208,7 +2212,11 @@
 
     async initBackend() {
       try {
-        const res = await fetch('/api/issues');
+        const headers = {};
+        const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch('/api/issues', { headers });
         if (res.ok) {
           const data = await res.json();
           if (data.issues && data.issues.length > 0) {
@@ -2400,9 +2408,12 @@
       broadcastRealtimeEvent('ISSUE_RESOLVED', issue);
 
       // Async persist resolution to SQLite Backend
+      const resolveHeaders = { 'Content-Type': 'application/json' };
+      const resolveToken = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
+      if (resolveToken) resolveHeaders['Authorization'] = `Bearer ${resolveToken}`;
       fetch('/api/issues/' + issueId + '/resolve', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: resolveHeaders,
         body: JSON.stringify({
           notes: resolutionNotes,
           photoAfter: issue.imageAfter,
@@ -2444,9 +2455,12 @@
       broadcastRealtimeEvent('FOOD_RECTIFIED', issue);
 
       // Async persist to SQLite Backend
+      const rectifyHeaders = { 'Content-Type': 'application/json' };
+      const rectifyToken = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
+      if (rectifyToken) rectifyHeaders['Authorization'] = `Bearer ${rectifyToken}`;
       fetch('/api/food-rectify', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: rectifyHeaders,
         body: JSON.stringify({ issueId, notes, gasPpm, score, outcome })
       }).catch(e => console.log('Backend food rectify offline:', e));
 
@@ -2537,9 +2551,12 @@
       broadcastRealtimeEvent('FOOD_VIOLATION_LOGGED', { issue: newIssue, vendor: newVendor });
 
       // Async persist to SQLite Backend
+      const fvHeaders = { 'Content-Type': 'application/json' };
+      const fvToken = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
+      if (fvToken) fvHeaders['Authorization'] = `Bearer ${fvToken}`;
       fetch('/api/food-violations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: fvHeaders,
         body: JSON.stringify(data)
       }).catch(e => console.log('Backend food violation offline:', e));
 
@@ -2876,6 +2893,47 @@
       renderCitizenDashboard();
       renderMunicipalDashboard();
       renderFoodSafetyDashboard();
+    } else if (packet.type === 'ISSUE_ASSIGNED') {
+      const assigned = packet.payload;
+      const idx = db.issues.findIndex(i => i.id === assigned.id);
+      if (idx !== -1) {
+        db.issues[idx] = { ...db.issues[idx], ...assigned };
+      } else {
+        db.issues.unshift(assigned);
+      }
+      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.notify();
+      showToast(`🚛 Squad Assigned to Ticket #${assigned.id} (${assigned.assignedWorker})`, 'info', '👷');
+      playNotificationSound('chime');
+      renderMunicipalDashboard();
+      renderWorkerDashboard();
+      renderCitizenDashboard();
+      if (typeof activeIssueIdForModal !== 'undefined' && activeIssueIdForModal === assigned.id) {
+        window.viewIssueDetail(assigned.id);
+      }
+    } else if (packet.type === 'ISSUE_TRANSITIONED') {
+      const transitioned = packet.payload;
+      const idx = db.issues.findIndex(i => i.id === transitioned.id);
+      if (idx !== -1) {
+        db.issues[idx] = { ...db.issues[idx], ...transitioned };
+      } else {
+        db.issues.unshift(transitioned);
+      }
+      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.notify();
+      const isEnRoute = transitioned.workerStatus && transitioned.workerStatus.includes('En Route');
+      const statusIcon = isEnRoute ? '🚗' : '📍';
+      const statusMsg = isEnRoute
+        ? `🚗 Field squad is en route to Ticket #${transitioned.id}`
+        : `📍 Field squad arrived on site for Ticket #${transitioned.id}`;
+      showToast(statusMsg, 'info', statusIcon);
+      playNotificationSound('chime');
+      renderMunicipalDashboard();
+      renderWorkerDashboard();
+      renderCitizenDashboard();
+      if (typeof activeIssueIdForModal !== 'undefined' && activeIssueIdForModal === transitioned.id) {
+        window.viewIssueDetail(transitioned.id);
+      }
     } else if (packet.type === 'FOOD_VIOLATION_LOGGED') {
       if (packet.payload && packet.payload.vendor) {
         const v = packet.payload.vendor;
@@ -3284,6 +3342,12 @@
               <div style="color: #34d399;">✓ <strong>Resolved:</strong> ${resolvedTimeStr} (${turnaroundStr})</div>
             ` : isEscalated ? `
               <div style="color: #f87171; font-weight: 700;">⚠️ <strong>SLA Breached:</strong> Forwarded to Zonal Commissioner</div>
+            ` : (issue.workerStatus === 'On Site - Conducting Work' || issue.arrivedTimestamp) ? `
+              <div style="color: #34d399; font-weight: 600;">📍 <strong>Field squad has arrived on site</strong></div>
+            ` : (issue.workerStatus === 'En Route to Site' || issue.enRouteTimestamp) ? `
+              <div style="color: #38bdf8; font-weight: 600;">🚗 <strong>Field squad is travelling to your location</strong></div>
+            ` : issue.assignedWorker ? `
+              <div style="color: #fbbf24;">👷 <strong>Field Squad Assigned:</strong> ${issue.assignedWorker}</div>
             ` : `
               <div style="color: #38bdf8;">⏱️ <strong>48h Deadline:</strong> ${deadlineTimeStr}</div>
             `}
@@ -3488,7 +3552,16 @@
   }
 
   function renderMunicipalDashboard() {
-    let issues = db.getAllIssues();
+    const user = auth.getUser() || {};
+    const jurBadge = document.getElementById('munJurisdictionBadge');
+    if (jurBadge) {
+      const state = user.jurisdictionState || 'Andhra Pradesh';
+      const city = user.jurisdictionCity || 'Surampalem';
+      const ward = user.jurisdictionWard || 'Ward 12 (Market Zone)';
+      jurBadge.textContent = `${state} → ${city} → ${ward}`;
+    }
+
+    let issues = db.getAllIssues().filter(i => i.department !== 'food_safety');
     
     // 4-Tier Geospatial Jurisdiction Filter
     if (selectedState !== 'all') {
@@ -3563,9 +3636,20 @@
                 </div>
               </td>
               <td>
-                <div style="display: flex; gap: 0.4rem;">
-                  <button class="btn btn-sm btn-outline" style="color: white; border-color: var(--command-border);" onclick="window.viewIssueDetail('${issue.id}')">📦 Track</button>
-                  ${!isResolved ? `<button class="btn btn-sm btn-primary" onclick="window.openResolveModal('${issue.id}')">Resolve</button>` : `<span style="font-size: 0.8rem; color: #10b981; font-weight: 700;">Done</span>`}
+                <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center;">
+                  <button class="btn btn-sm btn-outline" style="color: white; border-color: var(--command-border); padding: 0.35rem 0.6rem;" onclick="window.viewIssueDetail('${issue.id}')">📦 Track</button>
+                  ${!isResolved ? `
+                    ${(!issue.assignedWorker || issue.assignedWorker === 'Unassigned' || !issue.assignedTimestamp) ? `
+                      <button class="btn btn-sm btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: 700; white-space: nowrap; padding: 0.35rem 0.65rem;" onclick="window.openAssignSquadModal('${issue.id}')">
+                        🚛 Assign Squad
+                      </button>
+                    ` : `
+                      <button class="btn btn-sm btn-outline" style="border-color: #38bdf8; color: #38bdf8; font-size: 0.72rem; white-space: nowrap; padding: 0.35rem 0.55rem;" onclick="window.openAssignSquadModal('${issue.id}')" title="Assigned to ${issue.assignedWorker}">
+                        🔄 Reassign
+                      </button>
+                    `}
+                    <button class="btn btn-sm btn-outline" style="border-color: #475569; color: #cbd5e1; padding: 0.35rem 0.55rem;" onclick="window.openResolveModal('${issue.id}')">Resolve</button>
+                  ` : `<span style="font-size: 0.8rem; color: #10b981; font-weight: 700;">Done</span>`}
                 </div>
               </td>
             </tr>
@@ -3622,6 +3706,14 @@
   }
 
   function renderFoodSafetyDashboard() {
+    const user = auth.getUser() || {};
+    const jurBadge = document.getElementById('foodJurisdictionBadge');
+    if (jurBadge) {
+      const state = user.jurisdictionState || 'Andhra Pradesh';
+      const city = user.jurisdictionCity || 'Surampalem';
+      jurBadge.textContent = `${state} → ${city} (City-Wide Food Safety Directorate)`;
+    }
+
     const allIssues = db.getAllIssues();
     let foodIssues = allIssues.filter(i => i.department === 'food_safety');
     let vendors = db.getAllVendors();
@@ -3777,20 +3869,29 @@
     if (!user) return;
     const issues = db.getAllIssues();
 
-    // Squad tasks matching Squad 4 / Ramesh or all field tasks
-    const squadOpen = issues.filter(i => 
-      i.status !== 'resolved' && 
-      (!i.assignedWorker || i.assignedWorker.includes('Squad 4') || i.assignedWorker.includes('Ramesh') || i.assignedWorker.includes('Municipal Rapid'))
-    );
+    // Squad tasks matching Squad 4 / Ramesh or current logged-in worker
+    const isSquad4User = user.email === 'worker4@municipality.gov.in' || (user.name && user.name.includes('Squad 4')) || (user.officialId && user.officialId.includes('SQUAD-04'));
 
-    const squadCompleted = issues.filter(i => 
-      i.status === 'resolved' && 
-      (!i.assignedWorker || i.assignedWorker.includes('Squad 4') || i.assignedWorker.includes('Ramesh') || i.assignedWorker.includes('Municipal Rapid'))
-    );
+    const squadOpen = issues.filter(i => {
+      if (i.status === 'resolved') return false;
+      if (!i.assignedWorker) return false;
+      if (isSquad4User) {
+        return i.assignedWorker.includes('Squad 4') || i.assignedWorker.includes('Ramesh') || i.assignedWorker.includes('WRK-SAN-04') || i.assignedWorker.includes('Municipal Rapid Squad 4');
+      }
+      return i.assignedWorker.includes(user.name) || (user.officialId && i.assignedWorker.includes(user.officialId));
+    });
 
-    // Fallback if none matched so evaluator always has interactive tasks
-    const displayOpen = squadOpen.length > 0 ? squadOpen : issues.filter(i => i.status !== 'resolved');
-    const displayCompleted = squadCompleted.length > 0 ? squadCompleted : issues.filter(i => i.status === 'resolved');
+    const squadCompleted = issues.filter(i => {
+      if (i.status !== 'resolved') return false;
+      if (!i.assignedWorker) return false;
+      if (isSquad4User) {
+        return i.assignedWorker.includes('Squad 4') || i.assignedWorker.includes('Ramesh') || i.assignedWorker.includes('WRK-SAN-04') || i.assignedWorker.includes('Municipal Rapid Squad 4');
+      }
+      return i.assignedWorker.includes(user.name) || (user.officialId && i.assignedWorker.includes(user.officialId));
+    });
+
+    const displayOpen = squadOpen;
+    const displayCompleted = squadCompleted;
 
     const countEl = document.getElementById('workerOpenTaskCount');
     if (countEl) countEl.textContent = displayOpen.length;
@@ -3809,17 +3910,23 @@
           </div>`;
       } else {
         openGrid.innerHTML = displayOpen.map(issue => {
+          const assignedTimeStr = issue.assignedTimestamp ? formatReportDateTime(issue.assignedTimestamp) : 'Awaiting confirmation';
           const deadlineTimestamp = issue.slaDeadline || (issue.timestamp + 48 * 3600 * 1000);
           const deadlineTimeStr = formatReportDateTime(deadlineTimestamp);
           const isEscalated = issue.status === 'escalated' || issue.isSlaBreached;
+          const currentWorkerStatus = issue.workerStatus || 'Assigned';
+          const isEnRoute = currentWorkerStatus === 'En Route to Site' || Boolean(issue.enRouteTimestamp && !issue.arrivedTimestamp && currentWorkerStatus !== 'On Site - Conducting Work');
+          const isOnSite = currentWorkerStatus === 'On Site - Conducting Work' || Boolean(issue.arrivedTimestamp);
 
           return `
-            <div class="issue-card" style="border: 1px solid rgba(245, 158, 11, 0.35); background: #0c1322;">
+            <div class="issue-card" style="border: 1px solid rgba(56, 189, 248, 0.35); background: #0c1322;">
               <div class="issue-card-media">
                 <img src="${issue.imageBefore}" class="issue-card-img" alt="${issue.title}" loading="lazy">
                 <div class="issue-floating-badges">
-                  <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b;">DISPATCHED</span>
-                  <span class="issue-sla-pill ${isEscalated ? 'text-danger' : ''}">${isEscalated ? '⚠️ SLA BREACHED' : '⏱️ ' + issue.slaHoursLeft + 'h SLA left'}</span>
+                  <span class="badge" style="background: ${isOnSite ? 'rgba(16, 185, 129, 0.2)' : isEnRoute ? 'rgba(14, 165, 233, 0.2)' : 'rgba(56, 189, 248, 0.2)'}; color: ${isOnSite ? '#34d399' : isEnRoute ? '#38bdf8' : '#38bdf8'}; border: 1px solid ${isOnSite ? '#10b981' : isEnRoute ? '#0284c7' : '#0284c7'}; font-weight: 700;">
+                    ${isOnSite ? 'ON SITE' : isEnRoute ? 'EN ROUTE' : 'ASSIGNED'}
+                  </span>
+                  <span class="issue-sla-pill ${isEscalated ? 'text-danger' : ''}">${isEscalated ? '⚠️ SLA BREACHED' : '⏱️ ' + (issue.slaHoursLeft || 48) + 'h SLA left'}</span>
                 </div>
               </div>
               <div class="issue-card-body">
@@ -3827,37 +3934,49 @@
                   <span class="cat-badge">${issue.deptIcon || '🏢'} ${issue.deptName || 'Sanitation'}</span>
                   <span class="badge sev-${issue.severity}">${(issue.severity || 'medium').toUpperCase()}</span>
                 </div>
-                <h3 class="issue-title" style="color: white;">${issue.title}</h3>
+                <div style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8; font-size: 0.85rem; margin-bottom: 0.25rem;">${issue.id}</div>
+                <h3 class="issue-title" style="color: white; margin: 0 0 0.4rem 0;">${issue.title}</h3>
                 <p class="issue-desc">${issue.description}</p>
                 <div class="issue-location-row" style="margin-bottom: 0.6rem;">
                   <span>📍</span>
                   <span><strong>${issue.location}</strong></span>
                 </div>
 
-                <div style="background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.2); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.76rem; color: #cbd5e1; margin-bottom: 0.85rem;">
-                  <div>👷 <strong>Squad:</strong> ${issue.assignedWorker || 'Municipal Rapid Squad 4'} • <span style="color: #38bdf8; font-weight: 700;">${issue.workerStatus || 'Assigned'}</span></div>
-                  <div style="color: #fbbf24; margin-top: 2px;">⏱️ <strong>SLA Target:</strong> ${deadlineTimeStr}</div>
+                <div style="background: rgba(56, 189, 248, 0.06); border: 1px solid rgba(56, 189, 248, 0.2); padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.78rem; color: #cbd5e1; margin-bottom: 0.85rem;">
+                  <div>👷 <strong>Squad:</strong> ${issue.assignedWorker || 'Squad 4'} • <span style="color: ${isOnSite ? '#34d399' : isEnRoute ? '#38bdf8' : '#38bdf8'}; font-weight: 700;">Current status: ${currentWorkerStatus}</span></div>
+                  <div style="color: #fbbf24; margin-top: 3px;">📅 <strong>Assigned Time:</strong> ${assignedTimeStr}</div>
+                  ${issue.enRouteTimestamp ? `<div style="color: #38bdf8; margin-top: 3px;">🚗 <strong>Departed En Route:</strong> ${formatReportDateTime(issue.enRouteTimestamp)}</div>` : ''}
+                  ${issue.arrivedTimestamp ? `<div style="color: #34d399; margin-top: 3px;">📍 <strong>Arrived On Site:</strong> ${formatReportDateTime(issue.arrivedTimestamp)}</div>` : ''}
+                  <div style="color: #94a3b8; margin-top: 3px;">⏱️ <strong>Target SLA:</strong> ${deadlineTimeStr}</div>
+                  ${issue.supervisorNotes ? `
+                    <div style="margin-top: 5px; padding-top: 5px; border-top: 1px dashed rgba(255,255,255,0.1); color: #7dd3fc;">
+                      📋 <strong>Supervisor Instruction:</strong> ${issue.supervisorNotes}
+                    </div>
+                  ` : ''}
                 </div>
 
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                  ${(!issue.workerStatus || issue.workerStatus === 'Assigned' || issue.workerStatus === 'Dispatched') ? `
-                    <button type="button" class="btn btn-outline btn-sm" style="flex: 1; border-color: #38bdf8; color: #38bdf8; font-size: 0.78rem;" onclick="window.startWorkerTaskEnRoute('${issue.id}')">
-                      🚗 En Route
+                <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+                  ${isOnSite ? `
+                    <div style="width: 100%; padding: 0.55rem 0.65rem; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 4px; font-size: 0.78rem; color: #34d399; text-align: center; font-weight: 700;">
+                      🟢 On Site — Conducting Remediation (Awaiting Work & Proof - Stage D)
+                    </div>
+                  ` : isEnRoute ? `
+                    <button type="button" class="btn btn-primary btn-sm" onclick="window.markWorkerTaskArrived('${issue.id}')" style="width: 100%; background: linear-gradient(135deg, #0284c7, #0ea5e9); font-weight: 700; cursor: pointer; padding: 0.55rem; color: white;">
+                      <span>📍</span> Mark Arrived at Site
                     </button>
-                  ` : issue.workerStatus === 'En Route to Site' ? `
-                    <button type="button" class="btn btn-outline btn-sm" style="flex: 1; border-color: #10b981; color: #34d399; font-size: 0.78rem;" onclick="window.markWorkerTaskArrived('${issue.id}')">
-                      📍 Arrived
-                    </button>
+                    <div style="width: 100%; padding: 0.35rem 0.5rem; background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.25); border-radius: 4px; font-size: 0.74rem; color: #7dd3fc; text-align: center;">
+                      🚗 En Route to Site • Log Arrival when on Site
+                    </div>
                   ` : `
-                    <div style="width: 100%; font-size: 0.75rem; color: #34d399; font-weight: 700; margin-bottom: 2px;">
-                      🟢 On Site: Active Remediation
+                    <button type="button" class="btn btn-primary btn-sm" onclick="window.startWorkerTaskEnRoute('${issue.id}')" style="width: 100%; background: linear-gradient(135deg, #0284c7, #38bdf8); font-weight: 700; cursor: pointer; padding: 0.55rem; color: #021226;">
+                      <span>🚗</span> Start En Route
+                    </button>
+                    <div style="width: 100%; padding: 0.35rem 0.5rem; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 4px; font-size: 0.74rem; color: #7dd3fc; text-align: center;">
+                      📋 Work Order Assigned • Ready for Transit
                     </div>
                   `}
-                  <button type="button" class="btn btn-primary" style="flex: 1.5; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 800; font-size: 0.82rem; padding: 0.55rem 0.75rem; cursor: pointer;" onclick="window.openResolveModal('${issue.id}')">
-                    <span>📸</span> Upload Proof & Resolve
-                  </button>
-                  <button type="button" class="btn btn-outline btn-sm" onclick="window.viewIssueDetail('${issue.id}')" title="Inspect Ticket Details" style="border-color: #64748b; color: #cbd5e1; cursor: pointer;">
-                    <span>🔍</span>
+                  <button type="button" class="btn btn-outline btn-sm" onclick="window.viewIssueDetail('${issue.id}')" title="Inspect Ticket Details" style="width: 100%; border-color: #64748b; color: #cbd5e1; cursor: pointer;">
+                    <span>🔍</span> Inspect Work Order Details
                   </button>
                 </div>
               </div>
@@ -5655,7 +5774,7 @@
     }
   };
 
-  window.viewIssueDetail = function(issueId) {
+  window.viewIssueDetail = async function(issueId) {
     try {
       const issue = db.getIssueById(issueId);
       if (!issue) return;
@@ -5670,24 +5789,267 @@
       const isResolved = status === 'resolved';
       const isEscalated = status === 'escalated' || Boolean(issue.isSlaBreached);
       const reportedTimeStr = formatReportDateTime(issue.timestamp || Date.now());
-      const resolvedTs = isResolved ? getRealisticResolvedTimestamp(issue) : null;
+      const resolvedTs = isResolved ? (issue.resolvedTimestamp || getRealisticResolvedTimestamp(issue)) : null;
       const resolvedTimeStr = isResolved ? formatReportDateTime(resolvedTs) : null;
-      const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, resolvedTs, issue) : '2h 30m Turnaround';
+      const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, resolvedTs, issue) : null;
       const deadlineTimestamp = issue.slaDeadline || ((issue.timestamp || Date.now()) + 48 * 3600 * 1000);
       const deadlineTimeStr = formatReportDateTime(deadlineTimestamp);
 
-      const verifiedOfficer = issue.verifiedByOfficer || 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)';
-      const verifiedTimeStr = formatReportDateTime(issue.verifiedTimestamp || ((issue.timestamp || Date.now()) + 18 * 60 * 1000));
-      const assignedWorker = issue.assignedWorker || 'Municipal Rapid Squad';
-      const assignedTimeStr = formatReportDateTime(issue.assignedTimestamp || ((issue.timestamp || Date.now()) + 45 * 60 * 1000));
-      const workerStatus = issue.workerStatus || (isResolved ? 'Completed & Verified On-Site' : isEscalated ? 'Delayed (>48h) — Auto-Forwarded' : 'Active On-Site Cleaning & Hazard Removal');
-      const recommendedResource = issue.recommendedResource || 'Hydraulic Tipper & Sanitization Squad';
+      // Authentic operational values (no fabricated timestamps)
+      const isOfficerVerified = Boolean(issue.verifiedTimestamp || issue.verifiedByOfficer || Number(issue.imageOfficerVerified) === 1);
+      const verifiedOfficer = issue.verifiedByOfficer || (isOfficerVerified ? 'Municipal Area Officer' : null);
+      const verifiedTimeStr = issue.verifiedTimestamp ? formatReportDateTime(issue.verifiedTimestamp) : null;
+
+      const isSquadAssigned = Boolean(issue.assignedTimestamp || issue.assignedWorker);
+      const assignedWorker = issue.assignedWorker || null;
+      const assignedTimeStr = issue.assignedTimestamp ? formatReportDateTime(issue.assignedTimestamp) : null;
+
+      const isSquadEnRoute = Boolean(issue.enRouteTimestamp || (issue.workerStatus && issue.workerStatus.toLowerCase().includes('en route')));
+      const enRouteTimeStr = issue.enRouteTimestamp ? formatReportDateTime(issue.enRouteTimestamp) : null;
+
+      const isSquadArrived = Boolean(issue.arrivedTimestamp || (issue.workerStatus && (issue.workerStatus.toLowerCase().includes('on site') || issue.workerStatus.toLowerCase().includes('arrived'))));
+      const arrivedTimeStr = issue.arrivedTimestamp ? formatReportDateTime(issue.arrivedTimestamp) : null;
+
+      const workerStatus = issue.workerStatus || (isResolved ? 'Completed & Verified On-Site' : isEscalated ? 'Delayed (>48h) — Escalated' : (isSquadArrived ? 'On Site - Conducting Work' : isSquadEnRoute ? 'En Route to Site' : isSquadAssigned ? 'Assigned' : 'Pending Allocation'));
+      const recommendedResource = issue.recommendedResource || 'Standard Municipal Service Unit';
       const deptIcon = issue.deptIcon || '🏢';
       const deptName = issue.deptName || 'Sanitation & Civic Works';
       const issueTitle = issue.title || 'Civic Grievance';
       const issueLocation = issue.location || 'Surampalem, Andhra Pradesh';
       const imgBefore = issue.imageBefore || 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80';
-      const imgAfter = issue.imageAfter || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80';
+
+      // 1. Deterministic Query: Related issues in same ward & category/department
+      const relatedIssues = (db.issues || []).filter(other => {
+        if (!other || other.id === issue.id) return false;
+        const sameWard = Boolean(issue.ward && other.ward && issue.ward.toLowerCase().trim() === other.ward.toLowerCase().trim());
+        const sameCategory = Boolean(issue.category && other.category && issue.category.toLowerCase().trim() === other.category.toLowerCase().trim());
+        const sameDept = Boolean(issue.department && other.department && issue.department.toLowerCase().trim() === other.department.toLowerCase().trim());
+        return sameWard && (sameCategory || sameDept);
+      });
+
+      // 2. Query Ward Predictive Hotspot & Recurring Problem Context
+      let wardForecast = null;
+      try {
+        const fRes = await fetch(`/api/predictive-hotspots?ward=${encodeURIComponent(issue.ward || '')}`);
+        if (fRes.ok) {
+          const fData = await fRes.json();
+          if (fData && fData.forecasts && fData.forecasts.length > 0) {
+            wardForecast = fData.forecasts[0];
+          }
+        }
+      } catch (e) {
+        if (typeof CivicAiEngine !== 'undefined' && CivicAiEngine.PredictiveHotspots) {
+          try {
+            const fData = await CivicAiEngine.PredictiveHotspots.getForecasts(issue.ward);
+            if (fData && fData.forecasts && fData.forecasts.length > 0) wardForecast = fData.forecasts[0];
+          } catch (_) {}
+        }
+      }
+
+      const currentDept = auth.getDepartment();
+      const isCitizen = currentDept === 'citizen';
+
+      // 3. Build Authentic 12-Step Civic Operations Timeline
+      // Strictly genuine timestamps: no invented times for assessment states!
+      const timelineSteps = [
+        {
+          stepNum: 1,
+          title: 'Citizen Grievance Intake',
+          icon: '📝',
+          state: 'completed',
+          timeStr: reportedTimeStr,
+          desc: `Complaint registered by <strong>${issue.reportedBy || 'Citizen'}</strong> with GPS geotagged coordinates (<code>${issue.lat || 17.0010}° N, ${issue.lng || 81.8045}° E</code>) and initial photographic proof.`,
+          subMeta: [
+            `📍 ${issue.location || issue.ward || 'Ward Zone'}`,
+            `👤 Citizen ID: ${issue.reportedById || issue.userId || 'CIT-101'}`,
+            `📸 Proof Attached`
+          ]
+        },
+        {
+          stepNum: 2,
+          title: 'Smart Triage & SLA Priority Classification',
+          icon: '⚙️',
+          state: 'completed',
+          timeStr: 'Intake Assessment State',
+          desc: `Triage classification: <strong>${deptName}</strong> (${issue.categoryName || issue.category || 'General Civic Concern'}). Priority designated as <strong>${severity}</strong> with target response deadline <strong>Within ${issue.aiSuggestedSLA || 48} Hours</strong>.`,
+          subMeta: [
+            `🏢 Dept: ${deptName}`,
+            `⚡ Priority: ${severity}`,
+            `⏱️ Target SLA: ${issue.aiSuggestedSLA || 48}h`
+          ]
+        },
+        {
+          stepNum: 3,
+          title: 'Photographic Evidence Assessment',
+          icon: '📸',
+          state: issue.imageBefore ? 'completed' : 'pending',
+          timeStr: issue.imageBefore ? 'Visual Proof Registered' : 'Pending Upload',
+          desc: issue.imageBefore
+            ? `Geotagged photographic audit registered. Visual assessment indicates image appears consistent with reported description (${issue.imageAiHazard || issue.categoryName || 'civic hazard'}).`
+            : `No initial photograph uploaded. On-site field visual audit required during inspection.`,
+          subMeta: [
+            `📷 Geotagged Proof: ${issue.imageBefore ? 'Attached' : 'None'}`,
+            `🔍 Consistency: ${issue.imageTextConsistency === 'HIGH' ? 'High' : 'Standard'}`
+          ]
+        },
+        {
+          stepNum: 4,
+          title: 'Ward Corroboration & Recurring Hotspot Check',
+          icon: '🔍',
+          state: 'completed',
+          timeStr: 'Ward Jurisdiction Scan',
+          desc: relatedIssues.length > 0
+            ? `<strong>${relatedIssues.length} related report(s)</strong> identified in ${issue.ward || 'this ward'}. Elevated operational priority assigned.`
+            : `Ward jurisdiction check completed for ${issue.ward || 'this ward'}. Isolated single report.`,
+          subMeta: [
+            `📋 Related Reports in Ward: ${relatedIssues.length}`,
+            `🔮 Hotspot Status: ${wardForecast ? wardForecast.riskLevel + ' Risk' : 'Standard'}`
+          ]
+        },
+        {
+          stepNum: 5,
+          title: 'Municipal Officer Decision & Authorization',
+          icon: '🛡️',
+          state: isOfficerVerified ? 'completed' : 'active',
+          timeStr: verifiedTimeStr || 'Awaiting Officer Review',
+          desc: isOfficerVerified
+            ? `Grievance inspected and verified by <strong>${verifiedOfficer}</strong>. Remediation priority approved for field dispatch.`
+            : `Pending review by Municipal Ward Officer. Ticket queued in Municipal Command prioritization list.`,
+          subMeta: [
+            `🛡️ Officer: ${verifiedOfficer || 'Pending Review'}`,
+            `📋 Decision: ${isOfficerVerified ? 'Verified & Authorized' : 'Pending Authorization'}`
+          ]
+        },
+        {
+          stepNum: 6,
+          title: 'Field Squad & Fleet Allocation',
+          icon: '🚛',
+          state: isSquadAssigned ? 'completed' : (isOfficerVerified ? 'active' : 'pending'),
+          timeStr: assignedTimeStr || 'Pending Squad Assignment',
+          desc: isSquadAssigned
+            ? (isCitizen
+                ? 'Field squad assigned for this issue.'
+                : `Work order assigned to <strong>${assignedWorker}</strong>. Fleet resource designated: <strong>${recommendedResource}</strong>.${issue.supervisorNotes ? `<div style="margin-top: 4px; font-size: 0.78rem; color: #cbd5e1;"><strong>Supervisor Instructions:</strong> ${issue.supervisorNotes}</div>` : ''}`)
+            : `Field squad allocation pending. Municipal dispatcher assigns squad based on ward proximity and vehicle availability.`,
+          subMeta: isSquadAssigned
+            ? (isCitizen
+                ? ['✓ Squad Assigned', `Assigned: ${assignedTimeStr}`]
+                : ['✓ Squad Assigned', `👷 ${assignedWorker}`, 'Assigned by: Municipal Officer', `Assigned: ${assignedTimeStr}`, `🚚 ${recommendedResource}`])
+            : ['Pending Assignment', `🚚 Resource: ${recommendedResource}`]
+        },
+        {
+          stepNum: 7,
+          title: 'Field Squad En Route to Site',
+          icon: '🚗',
+          state: (issue.enRouteTimestamp || isSquadArrived || isResolved) ? 'completed' : (isSquadEnRoute ? 'active' : 'pending'),
+          timeStr: enRouteTimeStr || (isSquadEnRoute ? 'En Route Now' : 'Pending Departure'),
+          desc: (issue.enRouteTimestamp || isSquadArrived || isResolved)
+            ? (isCitizen ? 'Field squad departed base and travelled to your location.' : 'Field squad departed base and navigated directly to incident GPS coordinates.')
+            : (isSquadEnRoute
+              ? (isCitizen ? 'Field squad is travelling to your location.' : 'Field squad is currently travelling to the incident site with required remediation equipment.')
+              : (isCitizen ? 'Field squad departure pending.' : 'Squad will log departure telemetry upon initiating transit to location.')),
+          subMeta: isCitizen
+            ? [`📡 Transit: ${issue.enRouteTimestamp ? 'Departed' : isSquadEnRoute ? 'Travelling to Location' : 'Pending'}`, `📍 Location: ${issue.location || 'Site'}`]
+            : [
+              `📡 Transit: ${issue.enRouteTimestamp ? 'Departed' : isSquadEnRoute ? 'En Route' : 'Pending'}`,
+              `📍 Destination: ${issue.location || 'Site'}`
+            ]
+        },
+        {
+          stepNum: 8,
+          title: 'Squad Arrived on Site',
+          icon: '📍',
+          state: (issue.arrivedTimestamp || isResolved) ? 'completed' : (isSquadArrived ? 'active' : 'pending'),
+          timeStr: arrivedTimeStr || (isSquadArrived ? 'On Site Now' : 'Pending Arrival'),
+          desc: (issue.arrivedTimestamp || isResolved)
+            ? (isCitizen ? 'Field squad has arrived on site.' : 'Field crew arrived on site and established operational remediation perimeter.')
+            : (isSquadArrived
+              ? (isCitizen ? 'Field squad has arrived on site.' : 'Field squad has arrived at the location and commenced on-ground remediation.')
+              : (isCitizen ? 'Arrival confirmation pending from field squad.' : 'Arrival confirmation pending from field squad mobile portal.')),
+          subMeta: isCitizen
+            ? [`📍 Status: ${issue.arrivedTimestamp ? 'Arrived on Site' : isSquadArrived ? 'On Site' : 'Pending Arrival'}`]
+            : [
+              `📍 Check-in: ${issue.arrivedTimestamp ? formatReportDateTime(issue.arrivedTimestamp) : (isSquadArrived ? 'Checked In' : 'Pending')}`,
+              `👷 Lead: ${assignedWorker || 'Field Lead'}`
+            ]
+        },
+        {
+          stepNum: 9,
+          title: 'Remediation Work & Resolution Proof Upload',
+          icon: '🛠️',
+          state: (isResolved || issue.imageAfter) ? 'completed' : (isSquadArrived ? 'active' : 'pending'),
+          timeStr: (isResolved && resolvedTs) ? formatReportDateTime(resolvedTs) : (isSquadArrived ? 'Work In Progress' : 'Pending Execution'),
+          desc: (isResolved || issue.imageAfter)
+            ? `Remediation executed on ground. Geotagged after-resolution photograph registered in municipal audit archive.`
+            : (isSquadArrived
+              ? `Field squad is actively executing cleaning, repairs, or containment. After-photo proof required for closure.`
+              : `Awaiting on-site work completion and photographic proof upload.`),
+          subMeta: [
+            `📸 After-Proof: ${issue.imageAfter ? 'Uploaded' : 'Pending'}`,
+            `📋 Protocol: Standard Municipal SOP`
+          ]
+        },
+        {
+          stepNum: 10,
+          title: 'Verified Resolution & Turnaround Sign-off',
+          icon: '✅',
+          state: isResolved ? 'completed' : (isEscalated ? 'breached' : 'pending'),
+          timeStr: isResolved ? formatReportDateTime(resolvedTs) : (isEscalated ? formatReportDateTime(deadlineTimestamp) : 'Expected by ' + deadlineTimeStr),
+          desc: isResolved
+            ? `Official resolution verified and certified! Measured turnaround: <strong>${turnaroundStr}</strong> (Successfully resolved within 48h SLA).`
+            : (isEscalated
+              ? `<strong>48H SLA BREACHED:</strong> Grievance exceeded guaranteed SLA resolution deadline. Automatically escalated to Municipal Commissioner Desk.`
+              : `Grievance actively tracked within the 48-Hour SLA window. Turnaround will be certified upon verified resolution.`),
+          subMeta: [
+            `⏱️ Turnaround: ${isResolved ? turnaroundStr : isEscalated ? 'Breached (>48h)' : `${issue.slaHoursLeft || 36}h Left`}`,
+            `Status: ${isResolved ? 'CLOSED & VERIFIED' : isEscalated ? 'ESCALATED' : 'ACTIVE'}`
+          ]
+        },
+        {
+          stepNum: 11,
+          title: 'Citizen Notification & Civic Incentive Credited',
+          icon: '🪙',
+          state: isResolved ? 'completed' : 'pending',
+          timeStr: isResolved ? formatReportDateTime(resolvedTs) : 'Upon Verified Closure',
+          desc: isResolved
+            ? `Citizen notified of completed remediation with before/after visual comparison. <strong>+50 Civic Credits</strong> awarded to <strong>${issue.reportedBy || 'Citizen'}</strong>.`
+            : `Citizen will receive automated status notification and +50 Civic Credits once on-site work is verified.`,
+          subMeta: [
+            `🪙 Reward: +50 Civic Credits`,
+            `📱 Notification: ${isResolved ? 'Delivered' : 'Queued'}`
+          ]
+        },
+        {
+          stepNum: 12,
+          title: 'Predictive Risk Recalculation & Continuous Monitoring',
+          icon: '🔮',
+          state: isResolved ? 'completed' : 'pending',
+          timeStr: isResolved ? formatReportDateTime(resolvedTs) : 'Triggered on Resolution',
+          desc: isResolved
+            ? `Ward risk model dynamically recalculated. Closed incident factored into ongoing municipal predictive monitoring index.`
+            : `Resolution will automatically trigger deterministic risk re-indexing for ${issue.ward || 'this ward'} in the municipal forecast engine.`,
+          subMeta: [
+            `📊 Model: Deterministic Recalculation`,
+            `🔄 Monitoring: Continuous`
+          ]
+        }
+      ];
+
+      const timelineStepsHtml = timelineSteps.map(step => `
+        <div class="timeline-step ${step.state}">
+          <div class="timeline-node">${step.icon}</div>
+          <div class="timeline-content">
+            <div class="step-header-row">
+              <div class="step-title">Stage ${step.stepNum}: ${step.title}</div>
+              <div class="step-time-pill">${step.timeStr}</div>
+            </div>
+            <div class="step-desc">${step.desc}</div>
+            <div class="step-sub-meta">
+              ${step.subMeta.map(m => `<span>${m}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+      `).join('');
 
       content.innerHTML = `
         <div>
@@ -5710,7 +6072,7 @@
                 <div style="margin-top: 0.5rem;">
                   ${isResolved ? `
                     <div class="sla-live-badge sla-resolved">
-                      <span>✅</span> RESOLVED WITHIN 48H SLA (${turnaroundStr})
+                      <span>✅</span> RESOLVED WITHIN 48H SLA (${turnaroundStr || '2h 30m Turnaround'})
                     </div>
                   ` : isEscalated ? `
                     <div class="sla-live-badge sla-breached">
@@ -5737,409 +6099,243 @@
                 <strong>${deadlineTimeStr}</strong>
               </div>
               <div class="tracker-meta-item">
-                ${isResolved ? '✅ Verified Resolution Date & Time:' : '⏱️ Status Countdown:'}
-                <strong style="color: ${isResolved ? '#34d399' : isEscalated ? '#f87171' : '#38bdf8'};">
-                  ${isResolved ? `${resolvedTimeStr} (${turnaroundStr})` : isEscalated ? '🚨 Auto-Escalated to Commissioner' : `${issue.slaHoursLeft || 36} Hours Remaining`}
+                ${isResolved ? '✅ Verified Resolution Date & Time:' : '⏱️ Operational Status:'}
+                <strong style="color: ${isResolved ? '#34d399' : isEscalated ? '#f87171' : isSquadArrived ? '#34d399' : isSquadEnRoute ? '#38bdf8' : isSquadAssigned ? '#fbbf24' : '#38bdf8'};">
+                  ${isResolved ? `${resolvedTimeStr} (${turnaroundStr})` : isEscalated ? '🚨 Auto-Escalated to Commissioner' : isSquadArrived ? '📍 Field squad has arrived on site' : isSquadEnRoute ? '🚗 Field squad is travelling to your location' : isSquadAssigned ? '👷 Field Squad Assigned' : `${issue.slaHoursLeft || 36} Hours Remaining`}
                 </strong>
               </div>
               <div class="tracker-meta-item">
                 🪙 Civic Incentive Standing:
-                <strong style="color: #facc15;">+50 Civic Credits (Gold Streak)</strong>
+                <strong style="color: #facc15;">${isResolved ? '✅ +50 Civic Credits Credited' : '+50 Civic Credits (On Verified Closure)'}</strong>
               </div>
             </div>
           </div>
 
-          <!-- Before & After Photographic Evidence -->
+          <!-- Geotagged Photographic Audit Record (Before & After) -->
           <div style="margin-bottom: 1.5rem;">
-            <div style="font-size: 0.85rem; font-weight: 800; color: #38bdf8; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">
-              <span>📸</span> GEOTAGGED PHOTOGRAPHIC AUDIT RECORD
+            <div style="font-size: 0.85rem; font-weight: 800; color: #38bdf8; margin-bottom: 0.6rem; display: flex; align-items: center; justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 0.4rem;">
+                <span>📸</span> GEOTAGGED PHOTOGRAPHIC AUDIT RECORD
+              </span>
+              <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">
+                ${isResolved && issue.imageAfter ? 'Before & After Verification' : 'Initial Citizen Proof Registered'}
+              </span>
             </div>
-            <div style="display: grid; grid-template-columns: ${isResolved ? 'repeat(2, 1fr)' : '1fr'}; gap: 1rem;">
-              <div style="border-radius: var(--radius-lg); overflow: hidden; max-height: 230px; border: 1px solid var(--border); position: relative;">
-                <img src="${imgBefore}" style="width: 100%; height: 100%; object-fit: cover;" alt="Before">
+            <div style="display: grid; grid-template-columns: ${isResolved && issue.imageAfter ? 'repeat(2, 1fr)' : '1fr'}; gap: 1rem;">
+              <div style="border-radius: var(--radius-lg); overflow: hidden; max-height: 230px; border: 1px solid var(--border); position: relative; background: #0f172a;">
+                <img src="${imgBefore}" style="width: 100%; height: 100%; object-fit: cover; min-height: 180px;" alt="Before Remediation">
                 <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #f43f5e; font-weight: 800; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(244, 63, 94, 0.4);">
-                  1. REPORTED HAZARD (PROOF ATTACHED • ${reportedTimeStr})
+                  1. REPORTED HAZARD • ${reportedTimeStr}
+                </span>
+                <span style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #cbd5e1; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;">
+                  📍 GPS: ${issue.lat || 17.0010}° N, ${issue.lng || 81.8045}° E
                 </span>
               </div>
-              ${isResolved ? `
-              <div style="border-radius: var(--radius-lg); overflow: hidden; max-height: 230px; border: 1px solid #10b981; position: relative;">
-                <img src="${issue.imageAfter || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80'}" style="width: 100%; height: 100%; object-fit: cover;" alt="After">
-                <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #34d399; font-weight: 800; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.4);">
-                  2. CLEANED & RESOLVED (VERIFIED ON ${resolvedTimeStr})
-                </span>
-              </div>
-            ` : ''}
-          </div>
-        </div>
-
-        <!-- Phase 2 Civic AI Engine — Transparent Governance Audit & Risk Profile (Officers & Admins Only) -->
-          ${(() => {
-            const currentDept = auth.getDepartment();
-            const isCitizen = currentDept === 'citizen';
-            if (isCitizen) return ''; // Citizens see clean grievance timeline & evidence status, not internal AI risk scorecards
-
-            const isAi = Boolean(issue.aiRiskScore && (issue.citizenConfirmedAI !== undefined || issue.aiSuggestedDepartment));
-            if (!isAi) {
-              return `
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 0.85rem 1rem; margin-bottom: 1.5rem; font-size: 0.8rem; color: #94a3b8; display: flex; align-items: center; gap: 0.6rem;">
-                  <span>ℹ️</span>
-                  <span><strong>AI Governance Audit:</strong> Standard municipal SLA profile applied.</span>
-                </div>`;
-            }
-
-            const risk = Number(issue.aiRiskScore) || 50;
-            const riskColor = risk >= 75 ? '#f87171' : (risk >= 50 ? '#fb923c' : '#34d399');
-            const conf = issue.aiConfidence ? Math.round(Number(issue.aiConfidence) * (Number(issue.aiConfidence) <= 1 ? 100 : 1)) : 90;
-            const sla = issue.aiSuggestedSLA || 24;
-            const isAccepted = (issue.citizenConfirmedAI === 1 || issue.citizenConfirmedAI === true || issue.citizenConfirmedAI === 'true');
-            const overrideReason = issue.aiOverrideReason || (isAccepted ? '' : 'Citizen manually modified department or severity');
-
-            return `
-              <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: var(--radius-md); padding: 1.15rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
-                  <div style="font-weight: 800; font-size: 0.92rem; color: #38bdf8; display: flex; align-items: center; gap: 0.45rem;">
-                    <span>🤖</span> CIVIC AI ENGINE — GOVERNANCE AUDIT & RISK PROFILE
-                  </div>
-                  <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">Decision Support</span>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; font-size: 0.8rem; margin-bottom: 0.85rem;">
-                  <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-                    <div style="color: #94a3b8; font-size: 0.72rem;">AI Risk Score:</div>
-                    <div style="font-family: var(--font-mono); font-weight: 800; font-size: 1.15rem; color: ${riskColor};">${risk} / 100</div>
-                  </div>
-                  <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-                    <div style="color: #94a3b8; font-size: 0.72rem;">Suggested Department:</div>
-                    <div style="font-weight: 700; color: white;">${issue.aiSuggestedDepartment || deptName}</div>
-                  </div>
-                  <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-                    <div style="color: #94a3b8; font-size: 0.72rem;">Suggested Category:</div>
-                    <div style="font-weight: 700; color: white;">${issue.aiSuggestedCategory || issue.category || 'N/A'}</div>
-                  </div>
-                  <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-                    <div style="color: #94a3b8; font-size: 0.72rem;">AI Suggested SLA:</div>
-                    <div style="font-weight: 700; color: #34d399;">${sla} Hours</div>
-                  </div>
-                  <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-                    <div style="color: #94a3b8; font-size: 0.72rem;">Model Confidence:</div>
-                    <div style="font-weight: 700; color: #38bdf8;">${conf}%</div>
-                  </div>
-                  <div style="background: rgba(255,255,255,0.03); padding: 0.55rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-                    <div style="color: #94a3b8; font-size: 0.72rem;">Citizen Confirmation:</div>
-                    <div style="font-weight: 700; color: ${isAccepted ? '#34d399' : '#f59e0b'};">
-                      ${isAccepted ? '✅ Confirmed AI Suggestion' : '✏️ Modified by Citizen'}
-                    </div>
-                  </div>
-                </div>
-
-                ${!isAccepted && overrideReason ? `
-                  <div style="margin-bottom: 0.75rem; padding: 0.5rem 0.75rem; background: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 0.78rem; color: #fde68a;">
-                    <strong>Citizen Modification:</strong> ${overrideReason}
-                  </div>
-                ` : ''}
-
-                <div style="background: rgba(56, 189, 248, 0.06); padding: 0.65rem 0.85rem; border-left: 3px solid #38bdf8; border-radius: 4px; font-size: 0.8rem; color: #cbd5e1; line-height: 1.45; margin-bottom: 0.75rem;">
-                  <strong>Observable Reasoning:</strong> ${issue.aiReasoning || 'Identified hazard via keyword pattern matching. Prioritized under standard municipal SLA.'}
-                </div>
-
-                <div style="font-size: 0.72rem; color: #94a3b8; font-style: italic;">
-                  ⚖️ <strong>Advisory Decision Support:</strong> Human-in-the-loop governance is enforced. Municipal officers independently verify all AI classifications prior to field crew assignment.
-                </div>
-              </div>`;
-          })()}
-
-          <!-- Visual Evidence Verification Card -->
-          ${(() => {
-            const hasImg = Boolean(issue.imageBefore);
-            if (!hasImg) return '';
-
-            const currentDept = auth.getDepartment();
-            const isCitizen = currentDept === 'citizen';
-            const isOfficerVerified = Number(issue.imageOfficerVerified) === 1;
-            const isOfficerOverridden = Number(issue.imageOfficerVerified) === -1;
-            const overrideReason = issue.imageOfficerOverrideReason || '';
-            const officerDisplay = (issue.verifiedByOfficer && !issue.verifiedByOfficer.toUpperCase().includes('KRISH')) ? issue.verifiedByOfficer : 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)';
-
-            // CITIZEN VIEW: Clean photographic evidence card with verified status badge and GPS tag
-            if (isCitizen) {
-              const badgeHtml = isOfficerVerified
-                ? `<span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.74rem;">✅ Photo Evidence Verified by Municipal Office</span>`
-                : isOfficerOverridden
-                ? `<span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.74rem;">ℹ️ Inspected On-Site by Field Crew</span>`
-                : `<span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.74rem;">⏳ Photo Under Municipal Review</span>`;
-
-              return `
-                <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-md); padding: 1.15rem; margin-bottom: 1.5rem; box-shadow: 0 4px 16px rgba(0,0,0,0.25);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
-                    <div style="font-weight: 700; font-size: 0.88rem; color: #e2e8f0; display: flex; align-items: center; gap: 0.45rem;">
-                      <span>📷</span> Attached Photographic Evidence
-                    </div>
-                    <div>${badgeHtml}</div>
-                  </div>
-                  <div style="display: grid; grid-template-columns: minmax(140px, 200px) 1fr; gap: 1rem; align-items: center;">
-                    <div style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
-                      <img src="${imgBefore}" style="width: 100%; height: 130px; object-fit: cover; display: block;" alt="Complaint Photo Evidence">
-                      <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.75); padding: 0.25rem 0.45rem; font-size: 0.65rem; color: #cbd5e1;">
-                        📍 GPS: ${issue.lat || 17.0010}° N, ${issue.lng || 81.8045}° E
-                      </div>
-                    </div>
-                    <div style="font-size: 0.8rem; color: #94a3b8; line-height: 1.5;">
-                      <p style="margin: 0 0 0.4rem 0; color: #cbd5e1; font-weight: 500;">
-                        Photographic proof registered with geolocation verification.
-                      </p>
-                      <div style="font-size: 0.74rem; color: #64748b;">
-                        The municipal engineering team uses this geotagged photo to dispatch field squads directly to the spot.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              `;
-            }
-
-            // MUNICIPAL OFFICER & WORKER VIEW: Full administrative visual evidence audit
-            const hazard = issue.imageAiHazard || (
-              (issue.category === 'pothole' || issue.category === 'road_damage') ? 'Pothole / Road Damage' :
-              issue.department === 'electricity' ? 'Electrical Hazard' :
-              (issue.department === 'food_safety' || issue.department === 'food') ? 'Food-Safety Visual Concern' :
-              issue.category === 'pipeline_burst' ? 'Standing Water / Waterlogging' : 'Garbage / Waste Accumulation'
-            );
-
-            const consistency = issue.imageTextConsistency || 'HIGH';
-            const riskMod = issue.imageRiskModifier !== undefined ? issue.imageRiskModifier : 12;
-            const consistencyColor = consistency === 'HIGH' ? '#34d399' : (consistency === 'MODERATE' ? '#fb923c' : '#f87171');
-            const consistencyLabel = consistency === 'HIGH' ? '🟢 HIGH Corroboration' : (consistency === 'MODERATE' ? '🟡 MODERATE Corroboration' : '🔴 DISCREPANT (Mismatch)');
-
-            return `
-              <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)); border: 1px solid ${isOfficerVerified ? 'rgba(16, 185, 129, 0.5)' : isOfficerOverridden ? 'rgba(239, 68, 68, 0.5)' : 'rgba(56, 189, 248, 0.4)'}; border-radius: var(--radius-md); padding: 1.15rem; margin-bottom: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
-                  <div style="font-weight: 800; font-size: 0.92rem; color: #38bdf8; display: flex; align-items: center; gap: 0.45rem;">
-                    <span>📷</span> VISUAL EVIDENCE AUDIT & OFFICER VERIFICATION
-                  </div>
-                  <div>
-                    ${isOfficerVerified ? `
-                      <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">
-                        ✅ Officer Verified Evidence
-                      </span>
-                    ` : isOfficerOverridden ? `
-                      <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; font-size: 0.72rem;">
-                        ⚠️ Officer Overridden
-                      </span>
-                    ` : `
-                      <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.72rem;">
-                        ℹ️ Pending Officer Verification
-                      </span>
-                    `}
-                  </div>
-                </div>
-
-                <!-- Visual Evidence Preview + Metadata -->
-                <div style="display: grid; grid-template-columns: minmax(180px, 240px) 1fr; gap: 1rem; margin-bottom: 0.85rem; align-items: start;">
-                  <div style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
-                    <img src="${imgBefore}" style="width: 100%; height: 150px; object-fit: cover; display: block;" alt="Incident Evidence">
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); padding: 0.3rem 0.5rem; font-size: 0.68rem; color: #cbd5e1;">
-                      📍 GPS: ${issue.lat || 17.0010}° N, ${issue.lng || 81.8045}° E
-                    </div>
-                  </div>
-
-                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.55rem; font-size: 0.78rem;">
-                    <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
-                      <div style="color: #94a3b8; font-size: 0.7rem;">Detected Visual Hazard:</div>
-                      <div style="font-weight: 700; color: white;">${hazard}</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
-                      <div style="color: #94a3b8; font-size: 0.7rem;">Visual Confidence:</div>
-                      <div style="font-weight: 600; color: #94a3b8;">${issue.imageAiConfidence || 'High Precision Edge Heuristics (89%)'}</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
-                      <div style="color: #94a3b8; font-size: 0.7rem;">Text ↔ Image Consistency:</div>
-                      <div style="font-weight: 800; color: ${consistencyColor};">${consistencyLabel}</div>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
-                      <div style="color: #94a3b8; font-size: 0.7rem;">Dynamic Risk Modifier:</div>
-                      <div style="font-weight: 800; color: ${riskMod >= 0 ? '#34d399' : '#f87171'};">
-                        ${riskMod >= 0 ? '+' : ''}${riskMod} Risk Modifier
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div style="background: rgba(56, 189, 248, 0.06); padding: 0.65rem 0.85rem; border-left: 3px solid #38bdf8; border-radius: 4px; font-size: 0.8rem; color: #cbd5e1; line-height: 1.45; margin-bottom: 0.75rem;">
-                  <strong>Observable Evidence Reasoning:</strong> ${issue.imageAiReasoning || `Visual evidence demonstrates features characteristic of ${hazard.toLowerCase()}. Cross-consistency verified against reported text.`}
-                </div>
-
-                ${isOfficerOverridden ? `
-                  <div style="margin-bottom: 0.75rem; padding: 0.6rem 0.85rem; background: rgba(239, 68, 68, 0.08); border-left: 3px solid #ef4444; border-radius: 4px; font-size: 0.8rem; color: #fca5a5;">
-                    <strong>Officer Override Justification:</strong> ${overrideReason}
-                  </div>
-                ` : isOfficerVerified ? `
-                  <div style="margin-bottom: 0.75rem; padding: 0.6rem 0.85rem; background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10b981; border-radius: 4px; font-size: 0.8rem; color: #6ee7b7;">
-                    <strong>Officer Verification:</strong> Verified on-site by ${officerDisplay}. Photo evidence corroborated.
-                  </div>
-                ` : ''}
-
-                <!-- Authoritative Human Officer Action Controls -->
-                <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem;">
-                  <div style="font-size: 0.73rem; color: #94a3b8;">
-                    ⚖️ <strong>Authoritative Decision:</strong> AI classifications are advisory. Municipal officer verification required.
-                  </div>
-                  <div style="display: flex; gap: 0.5rem;">
-                    <button type="button" class="btn btn-sm btn-outline" style="font-size: 0.76rem; color: #f87171; border-color: rgba(239, 68, 68, 0.4); padding: 0.4rem 0.75rem; cursor: pointer;" onclick="window.officerOverrideEvidence('${issue.id}')">
-                      <span>✕</span> Officer Override
-                    </button>
-                    <button type="button" class="btn btn-sm btn-primary" style="font-size: 0.76rem; background: #10b981; border-color: #10b981; padding: 0.4rem 0.85rem; cursor: pointer;" onclick="window.officerVerifyEvidence('${issue.id}')">
-                      <span>✓</span> Verify Evidence
-                    </button>
-                  </div>
-                </div>
-              </div>
-            `;
-          })()}
-
-          <!-- 5-Stage Live Order-Style Tracking Stepper -->
-        <div>
-          <div style="font-size: 0.95rem; font-weight: 800; color: white; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <span>📦</span> <span>Live 48-Hour SLA Grievance Tracking Timeline</span>
-            </div>
-            <div style="font-size: 0.75rem; color: #94a3b8;">Standard 48-Hour SLA Window</div>
-          </div>
-
-          <div class="order-tracking-timeline">
-            <!-- Stage 1: Grievance Initiated -->
-            <div class="timeline-step completed">
-              <div class="timeline-node">📝</div>
-              <div class="timeline-content">
-                <div class="step-header-row">
-                  <div class="step-title">Stage 1: Grievance Initiated by Citizen</div>
-                  <div class="step-time-pill">${reportedTimeStr}</div>
-                </div>
-                <div class="step-desc">
-                  Complaint logged by <strong>${issue.reportedBy || 'KRISH'}</strong> with GPS geotagged coordinates (<code>${issue.lat || 17.0010}° N, ${issue.lng || 81.8045}° E</code>) and initial photographic evidence.
-                </div>
-                <div class="step-sub-meta">
-                  <span>📍 ${issue.location}</span>
-                  <span>👤 Reporter ID: ${issue.userId || 'user-101'}</span>
-                  <span>📷 Photo Evidence: Verified</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Stage 2: Consultant Officer Verification & SLA Start -->
-            <div class="timeline-step completed">
-              <div class="timeline-node">🔍</div>
-              <div class="timeline-content">
-                <div class="step-header-row">
-                  <div class="step-title">Stage 2: Verification by Consultant Officer & SLA Activation</div>
-                  <div class="step-time-pill">${verifiedTimeStr}</div>
-                </div>
-                <div class="step-desc">
-                  Grievance inspected and validated by <strong>${verifiedOfficer}</strong>. Severity level classified as <strong>${issue.severity.toUpperCase()}</strong>. Official <strong>48-Hour SLA Countdown Clock</strong> activated.
-                </div>
-                <div class="step-sub-meta">
-                  <span>🛡️ Verified By: ${verifiedOfficer}</span>
-                  <span>⏱️ 48h SLA Deadline: ${deadlineTimeStr}</span>
-                  <span>📂 Division: ${issue.deptName}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Stage 3: Squad & Vehicle Allocation -->
-            <div class="timeline-step ${isResolved || issue.status === 'in_progress' ? 'completed' : 'active'}">
-              <div class="timeline-node">🚛</div>
-              <div class="timeline-content">
-                <div class="step-header-row">
-                  <div class="step-title">Stage 3: Rapid Response Squad & Fleet Allocation</div>
-                  <div class="step-time-pill">${assignedTimeStr}</div>
-                </div>
-                <div class="step-desc">
-                  Work order assigned to <strong>${assignedWorker}</strong>. Automated vehicle dispatch allocated <strong>${issue.recommendedResource}</strong> with digital routing.
-                </div>
-                <div class="step-sub-meta">
-                  <span>👷 Assigned Squad: ${assignedWorker}</span>
-                  <span>🚚 Resource: ${issue.recommendedResource}</span>
-                  <span>📡 Telemetry: GPS Connected</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Stage 4: On-Site Work Execution -->
-            <div class="timeline-step ${isResolved ? 'completed' : isEscalated ? 'breached' : 'active'}">
-              <div class="timeline-node">🛠️</div>
-              <div class="timeline-content">
-                <div class="step-header-row">
-                  <div class="step-title">Stage 4: On-Site Field Remediation & Worker Status</div>
-                  <div class="step-time-pill">${isResolved ? (issue.resolvedTimestamp ? formatReportDateTime(issue.resolvedTimestamp - 1800000) : formatReportDateTime(issue.timestamp + 3600000 * 20)) : formatReportDateTime(Date.now() - 1800000)}</div>
-                </div>
-                <div class="step-desc">
-                  Rapid field crew deployed on ground conducting cleaning, electrical repairs, or food safety audit.
-                </div>
-                <div style="margin: 0.5rem 0;">
-                  <span style="font-size: 0.78rem; font-weight: 800; padding: 3px 10px; border-radius: 4px; ${isResolved ? 'background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);' : isEscalated ? 'background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4);' : 'background: rgba(2, 132, 199, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4);'}">
-                    ${isResolved ? '✅ Field Execution Completed' : isEscalated ? '🚨 SLA Delay: Auto-Forwarded to Commissioner' : `🟢 Worker Live Status: ${workerStatus}`}
+              ${isResolved && issue.imageAfter ? `
+                <div style="border-radius: var(--radius-lg); overflow: hidden; max-height: 230px; border: 1px solid #10b981; position: relative; background: #0f172a;">
+                  <img src="${issue.imageAfter}" style="width: 100%; height: 100%; object-fit: cover; min-height: 180px;" alt="After Remediation">
+                  <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #34d399; font-weight: 800; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.4);">
+                    2. VERIFIED RESOLUTION • ${resolvedTimeStr}
+                  </span>
+                  <span style="position: absolute; top: 8px; right: 8px; background: rgba(16, 185, 129, 0.25); color: #34d399; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; border: 1px solid #10b981;">
+                    ✅ Work Certified
                   </span>
                 </div>
-                <div class="step-sub-meta">
-                  <span>👷 Field Lead: ${assignedWorker}</span>
-                  <span>📋 Protocol: Swachh Bharat & SCADA Quality Standards</span>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Hotspot Association: Recurring Problem Context -->
+          ${wardForecast ? `
+            <div style="background: rgba(147, 51, 234, 0.08); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: var(--radius-md); padding: 0.9rem 1.15rem; margin-bottom: 1.25rem; box-shadow: 0 4px 16px rgba(147, 51, 234, 0.08);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.55rem; flex-wrap: wrap; gap: 0.4rem;">
+                <div style="font-weight: 700; font-size: 0.9rem; color: #d8b4fe; display: flex; align-items: center; gap: 0.45rem;">
+                  <span>🔮</span> LINKED TO RECURRING CIVIC PROBLEM — ${wardForecast.ward}
+                </div>
+                <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #e9d5ff; border: 1px solid rgba(168, 85, 247, 0.5); font-size: 0.72rem;">
+                  ${wardForecast.riskLevel || 'ELEVATED'} RISK
+                </span>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; font-size: 0.78rem; margin-bottom: 0.6rem;">
+                <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                  <div style="color: #94a3b8; font-size: 0.7rem;">Historical Reports:</div>
+                  <div style="font-weight: 700; color: white;">${wardForecast.historicalIncidentCount || wardForecast.pastComplaints || 8} incidents</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                  <div style="color: #94a3b8; font-size: 0.7rem;">30-Day Window:</div>
+                  <div style="font-weight: 700; color: #fb923c;">${wardForecast.recentIncidentCount || 5} recent reports</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                  <div style="color: #94a3b8; font-size: 0.7rem;">Recurrence Pattern:</div>
+                  <div style="font-weight: 700; color: #c084fc;">${wardForecast.recurrenceIndicator || 'Strong'}</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                  <div style="color: #94a3b8; font-size: 0.7rem;">SLA Breach History:</div>
+                  <div style="font-weight: 700; color: #f87171;">${wardForecast.slaBreachIndicator ? 'Detected' : 'Low'}</div>
+                </div>
+              </div>
+              <div style="background: rgba(147, 51, 234, 0.12); padding: 0.55rem 0.75rem; border-left: 3px solid #a855f7; border-radius: 4px; font-size: 0.78rem; color: #e9d5ff; line-height: 1.45;">
+                <strong>Recommended Preventive Action:</strong> ${wardForecast.preventiveRecommendation || wardForecast.recommendedAction || wardForecast.actionText || 'Schedule preventive waste collection inspection in the affected zone.'}
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Related Reports: Deterministic Ward Corroboration -->
+          ${relatedIssues.length > 0 ? `
+            <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-md); padding: 0.9rem 1.15rem; margin-bottom: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.4rem;">
+                <div style="font-weight: 700; font-size: 0.88rem; color: #38bdf8; display: flex; align-items: center; gap: 0.4rem;">
+                  <span>📋</span> RELATED CIVIC REPORTS (${relatedIssues.length} nearby in ${issue.ward || 'this ward'})
+                </div>
+                <span style="font-size: 0.72rem; color: #94a3b8;">Deterministic Ward Corroboration</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+                ${relatedIssues.slice(0, 3).map(rel => `
+                  <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.15s;" onclick="window.viewIssueDetail('${rel.id}')" title="Click to view this related issue">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                      <span style="font-family: var(--font-mono); color: #38bdf8; font-weight: 700; font-size: 0.75rem;">${rel.id}</span>
+                      <span style="color: #e2e8f0; font-size: 0.8rem;">${rel.title || 'Civic Grievance'}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0;">
+                      <span class="badge badge-${rel.status || 'pending'}" style="font-size: 0.68rem; padding: 2px 6px;">${(rel.status || 'pending').replace('_', ' ').toUpperCase()}</span>
+                      <span style="font-size: 0.7rem; color: #94a3b8;">${formatReportDate(rel.timestamp)}</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+              <div style="font-size: 0.73rem; color: #94a3b8; margin-top: 0.5rem; font-style: italic;">
+                Notice: These are related grievances logged in the same ward, not automatically merged duplicates. Multiple concurrent reports help dispatchers prioritize rapid field squad deployment.
+              </div>
+            </div>
+          ` : `
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); padding: 0.65rem 0.9rem; margin-bottom: 1.25rem; font-size: 0.78rem; color: #94a3b8; display: flex; align-items: center; gap: 0.45rem;">
+              <span>ℹ️</span>
+              <span>No concurrent related reports detected in <strong>${issue.ward || 'this ward'}</strong> for this category. Single isolated grievance.</span>
+            </div>
+          `}
+
+          <!-- Citizen View: Clean Civic Governance Profile (No raw AI metrics) -->
+          ${isCitizen ? `
+            <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: var(--radius-md); padding: 1rem 1.15rem; margin-bottom: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.45rem;">
+                <div style="font-weight: 700; font-size: 0.88rem; color: #38bdf8; display: flex; align-items: center; gap: 0.4rem;">
+                  <span>🏛️</span> CIVIC GOVERNANCE & RESOLUTION PROFILE
+                </div>
+                <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.72rem;">Citizen Summary</span>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.65rem; font-size: 0.8rem;">
+                <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                  <div style="color: #94a3b8; font-size: 0.7rem;">Operational Priority:</div>
+                  <div style="font-weight: 700; color: ${severity === 'CRITICAL' ? '#f87171' : severity === 'HIGH' ? '#fb923c' : '#38bdf8'}; font-size: 0.9rem;">
+                    ${severity === 'CRITICAL' ? 'Critical (Emergency Response)' : severity === 'HIGH' ? 'High (Public Safety & Health)' : 'Standard Civic Service'}
+                  </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                  <div style="color: #94a3b8; font-size: 0.7rem;">Field Squad Status:</div>
+                  <div style="font-weight: 700; color: ${isSquadArrived ? '#34d399' : isSquadEnRoute ? '#38bdf8' : isSquadAssigned ? '#fbbf24' : '#94a3b8'}; font-size: 0.85rem;">
+                    ${isResolved ? '✅ Remediation Complete' : isSquadArrived ? '📍 Field squad has arrived on site' : isSquadEnRoute ? '🚗 Field squad is travelling to your location' : isSquadAssigned ? '👷 Squad Assigned to Location' : 'Awaiting Squad Allocation'}
+                  </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                  <div style="color: #94a3b8; font-size: 0.7rem;">Target Response Window:</div>
+                  <div style="font-weight: 700; color: #34d399; font-size: 0.9rem;">
+                    Within ${issue.aiSuggestedSLA || 48} Hours
+                  </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                  <div style="color: #94a3b8; font-size: 0.7rem;">Visual Assessment:</div>
+                  <div style="font-weight: 700; color: #cbd5e1; font-size: 0.85rem;">
+                    ${issue.imageBefore ? (issue.imageTextConsistency === 'HIGH' ? '🟢 Photo appears consistent with report' : 'ℹ️ Photographic evidence registered') : 'No image attached'}
+                  </div>
+                </div>
+              </div>
+              <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 0.65rem; line-height: 1.4;">
+                🛡️ <strong>Governance Notice:</strong> Automated triage is advisory. Every grievance is verified by a designated Municipal Officer before field squad assignment.
+              </div>
+            </div>
+          ` : `
+            <!-- Municipal Officer & Worker View: Administrative Decision Support & Verification Controls -->
+            <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)); border: 1px solid ${Number(issue.imageOfficerVerified) === 1 ? 'rgba(16, 185, 129, 0.5)' : Number(issue.imageOfficerVerified) === -1 ? 'rgba(239, 68, 68, 0.5)' : 'rgba(56, 189, 248, 0.4)'}; border-radius: var(--radius-md); padding: 1.15rem; margin-bottom: 1.25rem; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                <div style="font-weight: 800; font-size: 0.92rem; color: #38bdf8; display: flex; align-items: center; gap: 0.45rem;">
+                  <span>🛡️</span> MUNICIPAL DECISION SUPPORT & OFFICER AUDIT
+                </div>
+                <div>
+                  ${Number(issue.imageOfficerVerified) === 1 ? `
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">✅ Officer Verified Evidence</span>
+                  ` : Number(issue.imageOfficerVerified) === -1 ? `
+                    <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; font-size: 0.72rem;">⚠️ Officer Overridden</span>
+                  ` : `
+                    <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.72rem;">ℹ️ Pending Officer Verification</span>
+                  `}
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.65rem; font-size: 0.8rem; margin-bottom: 0.75rem;">
+                <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                  <div style="color: #94a3b8; font-size: 0.7rem;">Suggested Department:</div>
+                  <div style="font-weight: 700; color: white;">${issue.aiSuggestedDepartment || deptName}</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                  <div style="color: #94a3b8; font-size: 0.7rem;">Suggested SLA:</div>
+                  <div style="font-weight: 700; color: #34d399;">${issue.aiSuggestedSLA || 48} Hours</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                  <div style="color: #94a3b8; font-size: 0.7rem;">Detected Hazard:</div>
+                  <div style="font-weight: 700; color: white;">${issue.imageAiHazard || issue.categoryName || 'General Concern'}</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                  <div style="color: #94a3b8; font-size: 0.7rem;">Visual Consistency:</div>
+                  <div style="font-weight: 700; color: ${issue.imageTextConsistency === 'HIGH' ? '#34d399' : '#fb923c'};">${issue.imageTextConsistency === 'HIGH' ? '🟢 Consistent' : '🟡 In Review'}</div>
+                </div>
+              </div>
+
+              <div style="background: rgba(56, 189, 248, 0.06); padding: 0.65rem 0.85rem; border-left: 3px solid #38bdf8; border-radius: 4px; font-size: 0.8rem; color: #cbd5e1; line-height: 1.45; margin-bottom: 0.75rem;">
+                <strong>Operational Recommendation:</strong> ${issue.aiReasoning || issue.imageAiReasoning || 'Triage criteria verified against standard municipal guidelines. Recommend priority squad deployment.'}
+              </div>
+
+              ${Number(issue.imageOfficerVerified) === -1 && issue.imageOfficerOverrideReason ? `
+                <div style="margin-bottom: 0.75rem; padding: 0.6rem 0.85rem; background: rgba(239, 68, 68, 0.08); border-left: 3px solid #ef4444; border-radius: 4px; font-size: 0.8rem; color: #fca5a5;">
+                  <strong>Officer Override Justification:</strong> ${issue.imageOfficerOverrideReason}
+                </div>
+              ` : Number(issue.imageOfficerVerified) === 1 ? `
+                <div style="margin-bottom: 0.75rem; padding: 0.6rem 0.85rem; background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10b981; border-radius: 4px; font-size: 0.8rem; color: #6ee7b7;">
+                  <strong>Officer Verification:</strong> Validated by ${issue.verifiedByOfficer || 'Municipal Inspection Officer'}. Evidence approved for field dispatch.
+                </div>
+              ` : ''}
+
+              <!-- Authoritative Human Officer Action Controls -->
+              <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem;">
+                <div style="font-size: 0.73rem; color: #94a3b8;">
+                  ⚖️ <strong>Authoritative Decision:</strong> Municipal officer confirmation required to authorize rapid fleet mobilization.
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button type="button" class="btn btn-sm btn-outline" style="font-size: 0.76rem; color: #f87171; border-color: rgba(239, 68, 68, 0.4); padding: 0.4rem 0.75rem; cursor: pointer;" onclick="window.officerOverrideEvidence('${issue.id}')">
+                    <span>✕</span> Officer Override
+                  </button>
+                  <button type="button" class="btn btn-sm btn-primary" style="font-size: 0.76rem; background: #10b981; border-color: #10b981; padding: 0.4rem 0.85rem; cursor: pointer;" onclick="window.officerVerifyEvidence('${issue.id}')">
+                    <span>✓</span> Verify Evidence
+                  </button>
+                  <button type="button" class="btn btn-sm btn-primary" style="font-size: 0.76rem; background: linear-gradient(135deg, #0284c7, #0369a1); border-color: #0284c7; padding: 0.4rem 0.85rem; cursor: pointer; font-weight: 700;" onclick="window.openAssignSquadModal('${issue.id}')">
+                    <span>🚛</span> ${isSquadAssigned ? 'Reassign Squad' : 'Assign Squad'}
+                  </button>
                 </div>
               </div>
             </div>
+          `}
 
-            <!-- Stage 5: Final Resolution OR SLA Auto-Forwarded to Commissioner -->
-            ${isResolved ? `
-              <div class="timeline-step completed">
-                <div class="timeline-node">🎉</div>
-                <div class="timeline-content">
-                  <div class="step-header-row">
-                    <div class="step-title" style="color: #34d399;">Stage 5: Verified Resolution & Civic Reward Issued</div>
-                    <div class="step-time-pill" style="color: #34d399; border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.1);">${resolvedTimeStr}</div>
-                  </div>
-                  <div class="step-desc">
-                    Field resolution certified and approved! Before/After photographic inspection verified. Turnaround time: <strong>${turnaroundStr}</strong> (Resolved well within 48-Hour SLA).
-                  </div>
-                  <div class="step-sub-meta">
-                    <span style="color: #facc15; font-weight: 700;">🪙 +50 Civic Credits Credited to ${issue.reportedBy || 'Citizen'}</span>
-                    <span style="color: #34d399;">📜 Participation Certificate Updated</span>
-                    <span>✅ Status: CLOSED & ARCHIVED</span>
-                  </div>
-                </div>
+          <!-- Civic Operations Lifecycle & Audit Timeline (12-Step Real Timeline) -->
+          <div>
+            <div style="font-size: 0.95rem; font-weight: 800; color: white; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span>🏛️</span> <span>Civic Operations Lifecycle & Audit Timeline</span>
               </div>
-            ` : isEscalated ? `
-              <div class="timeline-step breached">
-                <div class="timeline-node">🚨</div>
-                <div class="timeline-content">
-                  <div class="step-header-row">
-                    <div class="step-title" style="color: #f87171;">Stage 5: 🚨 SLA Breached (>48h) — Forwarded to Municipal Commissioner</div>
-                    <div class="step-time-pill" style="color: #f87171; border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1);">${deadlineTimeStr}</div>
-                  </div>
-                  <div class="step-desc" style="color: #fecdd3;">
-                    <strong>AUTOMATIC SLA ESCALATION:</strong> Field resolution was not completed within the mandatory 48-Hour SLA period. The ticket has been automatically forwarded to the <strong>Zonal Municipal Commissioner (Dr. Mahesh Babu) & Department Heads</strong> with Critical Red Priority for immediate direct intervention.
-                  </div>
-                  <div class="step-sub-meta">
-                    <span style="color: #f87171; font-weight: 700;">🚨 Forwarded To: Municipal Commissioner Red Desk</span>
-                    <span style="color: #facc15;">⚡ Priority: CRITICAL LEVEL 1</span>
-                    <span>⚠️ Escalation Reason: SLA Timer Expired</span>
-                  </div>
-                </div>
-              </div>
-            ` : `
-              <div class="timeline-step">
-                <div class="timeline-node">⏳</div>
-                <div class="timeline-content">
-                  <div class="step-header-row">
-                    <div class="step-title" style="color: #94a3b8;">Stage 5: Final Resolution & Reward (+50 Civic Credits)</div>
-                    <div class="step-time-pill">Expected by ${deadlineTimeStr}</div>
-                  </div>
-                  <div class="step-desc">
-                    In progress within the guaranteed 48-Hour SLA window. If not resolved before the SLA deadline, the grievance will be automatically forwarded to the Zonal Municipal Commissioner.
-                  </div>
-                  <div class="step-sub-meta">
-                    <span>🪙 Reward: +50 Civic Credits upon completion</span>
-                    <span>⏱️ Window: 48h Resolution Guarantee</span>
-                  </div>
-                </div>
-              </div>
-            `}
+              <div style="font-size: 0.75rem; color: #94a3b8;">Guaranteed 48-Hour SLA Protocol</div>
+            </div>
+
+            <div class="order-tracking-timeline">
+              ${timelineStepsHtml}
+            </div>
           </div>
 
           <!-- Community Comments & Live Citizen Discussion -->
@@ -6174,15 +6370,13 @@
             </div>
           </div>
         </div>
-      </div>
-    `;
+      `;
 
-    window.openModal('issueDetailModal');
+      window.openModal('issueDetailModal');
     } catch (err) {
       console.error('viewIssueDetail error:', err);
     }
   };
-
   window.openCommentsModal = function(issueId) {
     window.viewIssueDetail(issueId);
     setTimeout(() => {
@@ -6207,6 +6401,268 @@
     showToast('Comment posted to grievance log!', 'reward', '💬');
     window.viewIssueDetail(issueId);
     renderCitizenDashboard();
+  };
+
+  // =========================================================================
+  // STAGE B: MUNICIPAL SQUAD DISPATCH & WORK ORDER ALLOCATION MODAL ENGINE
+  // =========================================================================
+  window.openAssignSquadModal = async function(issueId) {
+    try {
+      const issue = db.getIssueById(issueId);
+      if (!issue) {
+        showToast('Grievance ticket not found.', 'error', '⚠️');
+        return;
+      }
+
+      const modalBody = document.getElementById('assignSquadModalBody');
+      if (!modalBody) return;
+
+      // Recommended Squad determination based on Department, Category, and Severity
+      let recSquadId = 'WRK-SAN-04';
+      let recSquadReason = 'Specialized commercial market solid waste compactor crew (Squad 4)';
+      if (issue.department === 'electricity') {
+        recSquadId = 'WRK-ELE-02';
+        recSquadReason = 'Certified 11KV electrical grid lineman crew (Lineman Squad B)';
+      } else if (issue.category === 'pothole' || issue.department === 'roads') {
+        recSquadId = 'WRK-ROA-03';
+        recSquadReason = 'Heavy asphalt patching & culvert desilting team (Roads Squad 3)';
+      } else if (issue.severity === 'low') {
+        recSquadId = 'WRK-SAN-01';
+        recSquadReason = 'Standard sanitation pushcart & routine collection squad (Squad 1)';
+      }
+
+      // Fetch active registered workforce
+      let workers = [];
+      try {
+        const wRes = await fetch('/api/workers');
+        if (wRes.ok) {
+          const wData = await wRes.json();
+          if (wData.workers && wData.workers.length > 0) {
+            workers = wData.workers;
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to fetch live workers from API, using default registry:', e);
+      }
+
+      if (workers.length === 0) {
+        workers = [
+          { id: 'WRK-SAN-04', name: 'Squad 4 (Lead: Ramesh)', department: 'sanitation', specialization: 'Commercial Market Solid Waste Collection', currentStatus: 'available', phone: '+91 98661 77211' },
+          { id: 'WRK-SAN-01', name: 'Squad 1 (Lead: Ravi Kumar)', department: 'sanitation', specialization: 'Garbage & Heavy Compactor Operations', currentStatus: 'available', phone: '+91 98480 22311' },
+          { id: 'WRK-ELE-02', name: 'Lineman Squad B (Lead: Suresh Kumar)', department: 'electricity', specialization: '11KV Substation & Line Repair', currentStatus: 'available', phone: '+91 94401 55422' },
+          { id: 'WRK-ROA-03', name: 'Roads Squad 3 (Lead: Anita Roy)', department: 'sanitation', specialization: 'Asphalt Patching & Culvert Desilting', currentStatus: 'available', phone: '+91 99880 33411' }
+        ];
+      }
+
+      const isAlreadyAssigned = Boolean(issue.assignedWorker && issue.assignedTimestamp);
+
+      modalBody.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <!-- 1. Grievance Reference Card -->
+          <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.9rem 1.1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem; flex-wrap: wrap; gap: 0.4rem;">
+              <span style="font-family: var(--font-mono); font-weight: 800; color: #38bdf8; font-size: 0.95rem;">${issue.id}</span>
+              <div style="display: flex; gap: 0.4rem;">
+                <span class="cat-badge" style="font-size: 0.72rem;">${issue.deptIcon || '🏢'} ${issue.deptName || 'Sanitation'}</span>
+                <span class="badge sev-${(issue.severity || 'medium').toLowerCase()}" style="font-size: 0.72rem;">${(issue.severity || 'medium').toUpperCase()}</span>
+              </div>
+            </div>
+            <h4 style="margin: 0 0 0.35rem 0; color: white; font-size: 1rem;">${issue.title}</h4>
+            <div style="font-size: 0.78rem; color: #94a3b8; display: flex; align-items: center; gap: 0.35rem;">
+              <span>📍</span> <span>${issue.location || issue.ward || 'Surampalem'}</span>
+            </div>
+            ${isAlreadyAssigned ? `
+              <div style="margin-top: 0.6rem; padding: 0.5rem 0.75rem; background: rgba(56, 189, 248, 0.08); border-left: 3px solid #38bdf8; border-radius: 4px; font-size: 0.76rem; color: #cbd5e1;">
+                ℹ️ Currently assigned to <strong>${issue.assignedWorker}</strong> (Assigned: ${formatReportDateTime(issue.assignedTimestamp)}). You may reassign to another squad below.
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- 2. Recommended Squad Callout -->
+          <div style="background: rgba(2, 132, 199, 0.08); border: 1px solid rgba(2, 132, 199, 0.3); border-radius: var(--radius-md); padding: 0.75rem 1rem; font-size: 0.8rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.25rem;">
+              <div style="font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 0.4rem;">
+                <span>🎯</span> Recommended Fleet Resource
+              </div>
+              <span class="badge" style="background: rgba(2, 132, 199, 0.25); color: #7dd3fc; border: 1px solid #0284c7; font-size: 0.7rem;">Automated Match</span>
+            </div>
+            <div style="color: #e2e8f0; font-size: 0.78rem;">
+              ${recSquadReason}
+            </div>
+          </div>
+
+          <!-- 3. Registered Squads Selection Grid -->
+          <div>
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <span style="font-weight: 700; color: white;">Select Field Response Squad:</span>
+              <span style="font-size: 0.72rem; color: #94a3b8;">${workers.length} registered municipal squads</span>
+            </label>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;" id="squadSelectionContainer">
+              ${workers.map(w => {
+                const isRec = w.id === recSquadId;
+                const isCurrent = issue.assignedWorker && (issue.assignedWorker.includes(w.id) || issue.assignedWorker.includes(w.name));
+                const isSelected = isCurrent || (!isAlreadyAssigned && isRec);
+                return `
+                  <label class="squad-select-card" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: ${isSelected ? 'rgba(2, 132, 199, 0.15)' : 'rgba(255,255,255,0.03)'}; border: 1px solid ${isSelected ? '#0284c7' : 'rgba(255,255,255,0.08)'}; border-radius: 8px; cursor: pointer; transition: all 0.15s;" onclick="window.highlightSelectedSquad(this)">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <input type="radio" name="assignedSquadRadio" value="${w.id}" data-name="${w.name}" ${isSelected ? 'checked' : ''} style="accent-color: #0284c7;">
+                      <div>
+                        <div style="font-weight: 700; color: white; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
+                          <span>${w.name}</span>
+                          ${isRec ? `<span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.65rem; padding: 2px 6px;">Recommended</span>` : ''}
+                          ${isCurrent ? `<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 0.65rem; padding: 2px 6px;">Current Squad</span>` : ''}
+                        </div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">
+                          ${w.specialization || w.department} • 📞 ${w.phone || 'Field Dispatch'}
+                        </div>
+                      </div>
+                    </div>
+                    <div style="text-align: right; flex-shrink: 0;">
+                      <span class="badge" style="font-size: 0.68rem; background: ${w.currentStatus === 'busy' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)'}; color: ${w.currentStatus === 'busy' ? '#fbbf24' : '#34d399'}; border: 1px solid ${w.currentStatus === 'busy' ? 'rgba(245, 158, 11, 0.3)' : 'rgba(16, 185, 129, 0.3)'};">
+                        ${(w.currentStatus || 'available').toUpperCase()}
+                      </span>
+                    </div>
+                  </label>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- 4. Optional Supervisor Dispatch Instructions -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="color: white; font-size: 0.82rem; font-weight: 700;">
+              Supervisor Dispatch Instructions (Optional):
+            </label>
+            <textarea id="assignSupervisorNotes" class="form-input" rows="2" style="font-size: 0.82rem; resize: vertical;" placeholder="e.g. Clear bulk commercial wet waste from walkway and sanitize pavement with bleaching powder.">${issue.supervisorNotes || ''}</textarea>
+            <span style="font-size: 0.72rem; color: #94a3b8;">Instructions will appear on the assigned field squad's handheld task roster.</span>
+          </div>
+
+          <!-- 5. Reassignment Confirmation Checkbox (if already assigned) -->
+          ${isAlreadyAssigned ? `
+            <div style="padding: 0.6rem 0.85rem; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 6px; font-size: 0.78rem;">
+              <label style="display: flex; align-items: center; gap: 0.5rem; color: #fde68a; cursor: pointer; margin: 0;">
+                <input type="checkbox" id="confirmReassignCheck" style="accent-color: #f59e0b;">
+                <span>Confirm reassignment to the newly selected squad (prevents accidental duplicate assignment).</span>
+              </label>
+            </div>
+          ` : ''}
+
+          <!-- 6. Action Buttons -->
+          <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.75rem;">
+            <button type="button" class="btn btn-outline" style="border-color: #64748b; color: #cbd5e1; font-size: 0.82rem;" onclick="window.closeModal('assignSquadModal')">
+              Cancel
+            </button>
+            <button type="button" class="btn btn-primary" id="btnSubmitSquadAssign" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: 800; font-size: 0.85rem; padding: 0.5rem 1.2rem;" onclick="window.submitSquadAssignment('${issue.id}')">
+              <span>🚛</span> Authorize & Dispatch Squad
+            </button>
+          </div>
+        </div>
+      `;
+
+      window.openModal('assignSquadModal');
+    } catch (err) {
+      console.error('openAssignSquadModal error:', err);
+    }
+  };
+
+  window.highlightSelectedSquad = function(clickedLabel) {
+    document.querySelectorAll('#squadSelectionContainer .squad-select-card').forEach(card => {
+      card.style.background = 'rgba(255,255,255,0.03)';
+      card.style.borderColor = 'rgba(255,255,255,0.08)';
+    });
+    if (clickedLabel) {
+      clickedLabel.style.background = 'rgba(2, 132, 199, 0.15)';
+      clickedLabel.style.borderColor = '#0284c7';
+      const radio = clickedLabel.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+    }
+  };
+
+  window.submitSquadAssignment = async function(issueId) {
+    const selectedRadio = document.querySelector('input[name="assignedSquadRadio"]:checked');
+    if (!selectedRadio) {
+      showToast('Please select a field squad to assign.', 'error', '⚠️');
+      return;
+    }
+
+    const workerId = selectedRadio.value;
+    const workerName = selectedRadio.getAttribute('data-name') || workerId;
+    const supervisorNotes = (document.getElementById('assignSupervisorNotes')?.value || '').trim();
+    const reassignCheckbox = document.getElementById('confirmReassignCheck');
+    const confirmReassign = reassignCheckbox ? reassignCheckbox.checked : false;
+
+    const user = auth.getUser();
+    const officerEmail = user?.email || 'admin@municipality.gov.in';
+    const officerName = user?.name || 'K. Mukundha (Zonal Administrator)';
+
+    const submitBtn = document.getElementById('btnSubmitSquadAssign');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>⏳</span> Authorizing Dispatch...';
+    }
+
+    try {
+      const assignHeaders = { 'Content-Type': 'application/json' };
+      const assignToken = auth.getToken();
+      if (assignToken) assignHeaders['Authorization'] = `Bearer ${assignToken}`;
+
+      const res = await fetch('/api/issues/assign', {
+        method: 'POST',
+        headers: assignHeaders,
+        body: JSON.stringify({
+          issueId: issueId,
+          workerId: workerId,
+          supervisorNotes: supervisorNotes,
+          officerEmail: officerEmail,
+          officerName: officerName,
+          confirmReassign: confirmReassign
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        if (data.requiresConfirmation) {
+          showToast(data.error || 'Reassignment confirmation required.', 'warning', '⚠️');
+          const checkEl = document.getElementById('confirmReassignCheck');
+          if (checkEl) checkEl.focus();
+        } else {
+          showToast(data.error || 'Assignment failed.', 'error', '❌');
+        }
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>🚛</span> Authorize & Dispatch Squad';
+        }
+        return;
+      }
+
+      // Success: update local DB
+      const updatedIssue = data.issue;
+      const idx = db.issues.findIndex(i => i.id === updatedIssue.id);
+      if (idx !== -1) {
+        db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
+      }
+      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.notify();
+
+      window.closeModal('assignSquadModal');
+      showToast(`✓ Squad '${updatedIssue.assignedWorker}' successfully dispatched to #${updatedIssue.id}!`, 'reward', '🚛');
+      playNotificationSound('chime');
+
+      renderMunicipalDashboard();
+      renderWorkerDashboard();
+
+      // If issue detail modal is open, refresh it immediately!
+      if (typeof activeIssueIdForModal !== 'undefined' && activeIssueIdForModal === updatedIssue.id) {
+        window.viewIssueDetail(updatedIssue.id);
+      }
+    } catch (err) {
+      console.error('submitSquadAssignment network error:', err);
+      showToast('Network error while assigning squad.', 'error', '❌');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>🚛</span> Authorize & Dispatch Squad';
+      }
+    }
   };
 
   window.openResolveModal = function(issueId) {
@@ -7210,22 +7666,102 @@
     showToast('Connecting to Surampalem Central CCTV Surveillance Command...', 'reward', '📹');
   };
 
-  // Field Worker Task En-Route & Arrived Transitions
-  window.startWorkerTaskEnRoute = function(issueId) {
-    const issue = db.getIssueById(issueId);
-    if (issue) {
-      issue.workerStatus = 'En Route to Site';
-      showToast(`Squad 4 is now en-route to #${issue.id} (${issue.location})`, 'info', '🚗');
+  // Field Worker Task En-Route & Arrived Transitions (Stage C: Backend Persisted Lifecycle)
+  window.startWorkerTaskEnRoute = async function(issueId) {
+    try {
+      const user = auth.getUser() || {};
+      const trHeaders = { 'Content-Type': 'application/json' };
+      const trToken = auth.getToken();
+      if (trToken) trHeaders['Authorization'] = `Bearer ${trToken}`;
+
+      const res = await fetch('/api/issues/transition', {
+        method: 'POST',
+        headers: trHeaders,
+        body: JSON.stringify({
+          issueId: issueId,
+          status: 'En Route to Site',
+          workerId: user.officialId || 'WRK-SAN-04',
+          workerEmail: user.email || 'worker4@municipality.gov.in',
+          workerName: user.name || 'Ramesh (Squad 4 Leader)'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        showToast(data.error || 'Failed to initiate transit.', 'error', '⚠️');
+        return;
+      }
+
+      // Update local db
+      const updatedIssue = data.issue;
+      const idx = db.issues.findIndex(i => i.id === issueId);
+      if (idx !== -1) {
+        db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
+      }
+      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.notify();
+
+      showToast(`🚗 Squad is now en route to #${issueId}!`, 'info', '🚗');
+      playNotificationSound('chime');
+
       renderWorkerDashboard();
+      renderMunicipalDashboard();
+      renderCitizenDashboard();
+
+      if (typeof activeIssueIdForModal !== 'undefined' && activeIssueIdForModal === issueId) {
+        window.viewIssueDetail(issueId);
+      }
+    } catch (err) {
+      console.error('startWorkerTaskEnRoute error:', err);
+      showToast('Network error while marking transit status.', 'error', '⚠️');
     }
   };
 
-  window.markWorkerTaskArrived = function(issueId) {
-    const issue = db.getIssueById(issueId);
-    if (issue) {
-      issue.workerStatus = 'On Site - Conducting Work';
-      showToast(`Squad 4 arrived on site for #${issue.id}`, 'reward', '📍');
+  window.markWorkerTaskArrived = async function(issueId) {
+    try {
+      const user = auth.getUser() || {};
+      const arrHeaders = { 'Content-Type': 'application/json' };
+      const arrToken = auth.getToken();
+      if (arrToken) arrHeaders['Authorization'] = `Bearer ${arrToken}`;
+
+      const res = await fetch('/api/issues/transition', {
+        method: 'POST',
+        headers: arrHeaders,
+        body: JSON.stringify({
+          issueId: issueId,
+          status: 'On Site - Conducting Work',
+          workerId: user.officialId || 'WRK-SAN-04',
+          workerEmail: user.email || 'worker4@municipality.gov.in',
+          workerName: user.name || 'Ramesh (Squad 4 Leader)'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        showToast(data.error || 'Failed to mark arrival.', 'error', '⚠️');
+        return;
+      }
+
+      // Update local db
+      const updatedIssue = data.issue;
+      const idx = db.issues.findIndex(i => i.id === issueId);
+      if (idx !== -1) {
+        db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
+      }
+      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.notify();
+
+      showToast(`📍 Squad marked arrived on site for #${issueId}! Remediation underway.`, 'reward', '📍');
+      playNotificationSound('chime');
+
       renderWorkerDashboard();
+      renderMunicipalDashboard();
+      renderCitizenDashboard();
+
+      if (typeof activeIssueIdForModal !== 'undefined' && activeIssueIdForModal === issueId) {
+        window.viewIssueDetail(issueId);
+      }
+    } catch (err) {
+      console.error('markWorkerTaskArrived error:', err);
+      showToast('Network error while marking on-site arrival.', 'error', '⚠️');
     }
   };
 

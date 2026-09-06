@@ -1661,6 +1661,29 @@
   box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
 }
 
+.timeline-step.pending .timeline-node {
+  background: rgba(15, 23, 42, 0.4);
+  border-color: #334155;
+  border-style: dashed;
+  color: #64748b;
+  opacity: 0.65;
+}
+
+.timeline-step.pending .timeline-content {
+  opacity: 0.7;
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.timeline-step.pending .step-title {
+  color: #94a3b8;
+}
+
+.timeline-step.pending .step-time-pill {
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.04);
+}
+
 @keyframes pulseNode {
   from { transform: scale(1); }
   to { transform: scale(1.08); }

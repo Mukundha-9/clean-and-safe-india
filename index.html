@@ -757,38 +757,20 @@
     </header>
 
     <main class="app-container">
-      <!-- 4-Tier Hierarchical Geospatial Jurisdiction Filter Bar (Municipal & SCADA Operations) -->
-      <div class="location-filter-bar" style="border-color: rgba(56, 189, 248, 0.3);">
-        <div class="location-filter-title" style="color: #38bdf8;">
-          <span>📍</span> <strong>Jurisdiction:</strong>
+      <!-- Official Authorized Government Jurisdiction Badge (Authoritative Server-Enforced Territory) -->
+      <div class="location-filter-bar" style="border-color: rgba(56, 189, 248, 0.4); background: rgba(15, 23, 42, 0.7); display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 1.25rem; border-radius: 8px; flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-size: 1.3rem;">🏛️</span>
+          <div>
+            <span style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; font-weight: 700; display: block;">Official Authorized Jurisdiction</span>
+            <strong id="munJurisdictionBadge" style="color: #38bdf8; font-size: 0.95rem;">Andhra Pradesh → Surampalem → Ward 12 (Market Zone)</strong>
+          </div>
         </div>
-        <select id="geoStateSelect_mun" class="location-select" onchange="window.handleGeoStateChange(this.value)">
-          <option value="all">🇮🇳 All States</option>
-          <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
-          <option value="Telangana">Telangana</option>
-          <option value="Maharashtra">Maharashtra</option>
-          <option value="Karnataka">Karnataka</option>
-          <option value="Tamil Nadu">Tamil Nadu</option>
-          <option value="Delhi NCR">Delhi NCR</option>
-        </select>
-        <select id="geoCitySelect_mun" class="location-select" onchange="window.handleGeoCityChange(this.value)">
-          <option value="all">All Cities</option>
-          <option value="Surampalem" selected>Surampalem</option>
-          <option value="Kakinada">Kakinada</option>
-          <option value="Visakhapatnam">Visakhapatnam</option>
-        </select>
-        <select id="geoWardSelect_mun" class="location-select" onchange="window.handleGeoWardChange(this.value)">
-          <option value="all">All Wards / Zones</option>
-          <option value="Ward 12 (Market Zone)" selected>Ward 12 (Market Zone)</option>
-          <option value="Ward 11 (Lake View Zone)">Ward 11 (Lake View Zone)</option>
-          <option value="Ward 14 (Campus Zone)">Ward 14 (Campus Zone)</option>
-        </select>
-        <select id="geoStreetSelect_mun" class="location-select" onchange="window.handleGeoStreetChange(this.value)">
-          <option value="all">All Streets / Landmarks</option>
-          <option value="Gandhi Statue Main Road">Gandhi Statue Main Road</option>
-          <option value="Market Gate Cross">Market Gate Cross</option>
-          <option value="College Road Food Court">College Road Food Court</option>
-        </select>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 4px; font-weight: 700; display: flex; align-items: center; gap: 0.35rem;">
+            <span>🔒</span> TERRITORY BOUND (LOCKED)
+          </span>
+        </div>
       </div>
 
       <!-- Subview 1: Municipal Overview -->
@@ -1163,38 +1145,20 @@
     </header>
 
     <main class="app-container">
-      <!-- 4-Tier Hierarchical Geospatial Jurisdiction Filter Bar (Food Safety Inspections) -->
-      <div class="location-filter-bar" style="border-color: rgba(245, 158, 11, 0.3);">
-        <div class="location-filter-title" style="color: #f59e0b;">
-          <span>📍</span> <strong>Jurisdiction:</strong>
+      <!-- Official Authorized FSSAI Jurisdiction Badge (Authoritative Server-Enforced Scope) -->
+      <div class="location-filter-bar" style="border-color: rgba(245, 158, 11, 0.4); background: rgba(15, 23, 42, 0.7); display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 1.25rem; border-radius: 8px; flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-size: 1.3rem;">🥗</span>
+          <div>
+            <span style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; font-weight: 700; display: block;">FSSAI Enforcement Jurisdiction</span>
+            <strong id="foodJurisdictionBadge" style="color: #f59e0b; font-size: 0.95rem;">Andhra Pradesh → Surampalem (City-Wide Food Safety Directorate)</strong>
+          </div>
         </div>
-        <select id="geoStateSelect_food" class="location-select" onchange="window.handleGeoStateChange(this.value)">
-          <option value="all">🇮🇳 All States</option>
-          <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
-          <option value="Telangana">Telangana</option>
-          <option value="Maharashtra">Maharashtra</option>
-          <option value="Karnataka">Karnataka</option>
-          <option value="Tamil Nadu">Tamil Nadu</option>
-          <option value="Delhi NCR">Delhi NCR</option>
-        </select>
-        <select id="geoCitySelect_food" class="location-select" onchange="window.handleGeoCityChange(this.value)">
-          <option value="all">All Cities</option>
-          <option value="Surampalem" selected>Surampalem</option>
-          <option value="Kakinada">Kakinada</option>
-          <option value="Visakhapatnam">Visakhapatnam</option>
-        </select>
-        <select id="geoWardSelect_food" class="location-select" onchange="window.handleGeoWardChange(this.value)">
-          <option value="all">All Wards / Zones</option>
-          <option value="Ward 12 (Market Zone)" selected>Ward 12 (Market Zone)</option>
-          <option value="Ward 11 (Lake View Zone)">Ward 11 (Lake View Zone)</option>
-          <option value="Ward 14 (Campus Zone)">Ward 14 (Campus Zone)</option>
-        </select>
-        <select id="geoStreetSelect_food" class="location-select" onchange="window.handleGeoStreetChange(this.value)">
-          <option value="all">All Streets / Landmarks</option>
-          <option value="Gandhi Statue Main Road">Gandhi Statue Main Road</option>
-          <option value="Market Gate Cross">Market Gate Cross</option>
-          <option value="College Road Food Court">College Road Food Court</option>
-        </select>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 4px; font-weight: 700; display: flex; align-items: center; gap: 0.35rem;">
+            <span>🔒</span> STATUTORY CITY SCOPE (LOCKED)
+          </span>
+        </div>
       </div>
 
       <!-- Subview 1: Food Complaints & Violations -->
@@ -1794,10 +1758,28 @@
   <div class="modal-overlay" id="issueDetailModal">
     <div class="modal-box modal-lg">
       <div class="modal-header">
-        <h3 style="font-size: 1.25rem; color: white;">📦 Live 48-Hour SLA Grievance Tracking & Verification</h3>
+        <h3 style="font-size: 1.25rem; color: white; display: flex; align-items: center; gap: 0.5rem;"><span>🏛️</span> <span>Civic Grievance Operations & Lifecycle Record</span></h3>
         <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('issueDetailModal')">✕</button>
       </div>
       <div class="modal-body" id="issueDetailContent"></div>
+    </div>
+  </div>
+
+  <!-- Stage B: Municipal Field Squad Assignment & Dispatch Modal -->
+  <div class="modal-overlay" id="assignSquadModal">
+    <div class="modal-box" style="max-width: 640px;">
+      <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding: 1.15rem 1.4rem;">
+        <div>
+          <h3 style="font-size: 1.2rem; color: white; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <span>🚛</span> <span>Municipal Squad & Field Dispatch Authorization</span>
+          </h3>
+          <p style="font-size: 0.76rem; color: #94a3b8; margin: 3px 0 0 0;">Official Task Assignment & Crew Mobilization Order</p>
+        </div>
+        <button type="button" class="btn btn-outline btn-icon-only" onclick="window.closeModal('assignSquadModal')">✕</button>
+      </div>
+      <div class="modal-body" id="assignSquadModalBody" style="padding: 1.25rem 1.4rem;">
+        <!-- Injected dynamically by window.openAssignSquadModal(issueId) -->
+      </div>
     </div>
   </div>
 
