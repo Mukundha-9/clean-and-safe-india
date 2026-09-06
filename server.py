@@ -13,6 +13,7 @@ import secrets
 import hmac
 import random
 import predictive_engine
+import ai_engine
 
 # ------------------------------------------------------------------------------
 # INDUSTRY-STANDARD PASSWORD SECURITY (SCRYPT WITH PER-USER SALT)
@@ -586,6 +587,7 @@ def init_database():
     # Phase 4: Predictive Civic Intelligence Tables & Seeding
     predictive_engine.init_predictive_tables(cursor)
     predictive_engine.seed_predictive_intelligence_data(conn)
+    ai_engine.init_ai_settings(conn)
     conn.commit()
 
     conn.close()
@@ -1015,6 +1017,107 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             rows = [dict(r) for r in cursor.fetchall()]
             conn.close()
             self.send_json_response({'success': True, 'workers': rows, 'total': len(rows)})
+            return
+
+        # REST API: GET /api/audit-logs
+        if path == '/api/audit-logs':
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            auth_user = get_authenticated_user(self, conn)
+
+            cursor.execute('''
+                SELECT l.id, l.issueId, l.officer, l.actionType, l.assignedWorker, l.supervisorNotes, l.timestamp,
+                       i.title as issueTitle, i.department as issueDept, i.ward as issueWard, i.state as issueState, i.city as issueCity
+                FROM operational_audit_logs l
+                LEFT JOIN issues i ON l.issueId = i.id
+                ORDER BY l.timestamp DESC
+                LIMIT 100
+            ''')
+            rows = [dict(r) for r in cursor.fetchall()]
+            conn.close()
+            self.send_json_response({'success': True, 'auditLogs': rows, 'total': len(rows)})
+            return
+
+        # REST API: GET /api/grid/status
+        if path == '/api/grid/status':
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, title, location, status, assignedWorker FROM issues WHERE department = 'electricity'")
+            elec_issues = [dict(r) for r in cursor.fetchall()]
+            conn.close()
+
+            feeders = [
+                {
+                    'id': 'FEEDER-01',
+                    'name': 'Feeder #1 (Market Commercial & Cold Storage)',
+                    'voltage': 11.2,
+                    'current': 142.5,
+                    'load': 1.6,
+                    'frequency': 50.02,
+                    'status': 'ONLINE',
+                    'breaker': 'CLOSED',
+                    'substation': 'Surampalem 33/11 KV Central'
+                },
+                {
+                    'id': 'FEEDER-02',
+                    'name': 'Feeder #2 (University & Campus Hostels)',
+                    'voltage': 11.1,
+                    'current': 98.4,
+                    'load': 1.1,
+                    'frequency': 50.01,
+                    'status': 'ONLINE',
+                    'breaker': 'CLOSED',
+                    'substation': 'Surampalem 33/11 KV Central'
+                },
+                {
+                    'id': 'FEEDER-03',
+                    'name': 'Feeder #3 (Industrial Agro Estate & Water Works)',
+                    'voltage': 11.3,
+                    'current': 210.0,
+                    'load': 2.4,
+                    'frequency': 49.98,
+                    'status': 'ONLINE',
+                    'breaker': 'CLOSED',
+                    'substation': 'Surampalem 33/11 KV Central'
+                },
+                {
+                    'id': 'FEEDER-04',
+                    'name': 'Feeder #4 (Ward 12 Residential Gandhi Road)',
+                    'voltage': 10.7,
+                    'current': 0.0,
+                    'load': 0.0,
+                    'frequency': 0.0,
+                    'status': 'OUTAGE',
+                    'breaker': 'TRIPPED',
+                    'substation': 'Surampalem 33/11 KV Central',
+                    'cause': 'Sparking & Low Hanging Cable (ISS-2026-00124)',
+                    'assignedLineman': 'Lineman Squad B (Suresh Kumar)',
+                    'etaMinutes': 35
+                }
+            ]
+            self.send_json_response({
+                'success': True,
+                'substation': 'Surampalem Central 33/11 KV Substation',
+                'overallStatus': 'WARNING_ACTIVE_OUTAGE',
+                'activeFeedersOnline': 3,
+                'totalFeeders': 4,
+                'feeders': feeders,
+                'activeElectricalTickets': elec_issues,
+                'timestamp': int(time.time() * 1000)
+            })
+            return
+
+        # REST API: GET /api/settings/ai-status
+        if path == '/api/settings/ai-status':
+            conn = get_db_connection()
+            has_key = bool(ai_engine.get_gemini_api_key(conn))
+            conn.close()
+            self.send_json_response({
+                'success': True,
+                'hasGeminiApiKey': has_key,
+                'activeModel': 'gemini-2.5-flash' if has_key else 'contextual-civic-intelligence',
+                'multimodalVisionAvailable': has_key
+            })
             return
 
         # 5. REST API: GET /api/stats
@@ -2034,6 +2137,50 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             conn.commit()
             conn.close()
             self.send_json_response({'success': True, 'message': f'Worker {worker_id} status updated to {new_status}.'})
+            return
+
+        # ---------------------------------------------------------------------
+        # REAL-TIME AI ENGINE ENDPOINTS (GEMINI 2.5 FLASH + CIVIC AGENT)
+        # ---------------------------------------------------------------------
+        if path == '/api/ai/chat':
+            user_msg = (body.get('message') or '').strip()
+            dept = body.get('department') or 'citizen'
+            if not user_msg:
+                self.send_json_response({'success': False, 'error': 'Message cannot be empty.'}, status=400)
+                return
+
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, title, department, location, ward, status, assignedWorker FROM issues ORDER BY timestamp DESC LIMIT 25")
+            issues_summary = [dict(r) for r in cursor.fetchall()]
+
+            auth_user = get_authenticated_user(self, conn)
+            context_data = {
+                'issues': issues_summary,
+                'department': dept,
+                'userName': auth_user.get('name') if auth_user else 'Citizen User'
+            }
+            res = ai_engine.call_gemini_chat(user_msg, dept, context_data, conn)
+            conn.close()
+            self.send_json_response(res)
+            return
+
+        if path in ['/api/ai/analyze-image', '/api/issues/assess-image']:
+            img_data = body.get('image') or body.get('imageData') or body.get('imageUrl') or ''
+            prompt_hint = body.get('prompt') or body.get('complaintText') or body.get('text') or ''
+
+            conn = get_db_connection()
+            analysis = ai_engine.call_gemini_vision(img_data, prompt_hint, conn)
+            conn.close()
+            self.send_json_response(analysis)
+            return
+
+        if path == '/api/settings/ai-key':
+            new_key = (body.get('apiKey') or '').strip()
+            conn = get_db_connection()
+            ai_engine.set_gemini_api_key(conn, new_key)
+            conn.close()
+            self.send_json_response({'success': True, 'message': 'Gemini API Key updated successfully.'})
             return
 
         # ---------------------------------------------------------------------

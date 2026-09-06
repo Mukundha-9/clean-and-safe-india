@@ -932,26 +932,78 @@
 
 
       <!-- Subview 2: Electricity Grid & Ultrasonic Smart Bins -->
+      <!-- Subview 5: Municipal Audit & SCADA Power Grid -->
       <div id="munTab_electricity" class="municipal-subview" style="display: none;">
+        <!-- Top Banner: SCADA Telemetry Header -->
         <div class="power-grid-banner">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
             <div>
-              <span class="power-status-pill power-status-online">SUBSTATION FEEDER ONLINE (14/16 Active)</span>
-              <h2 style="color: white; font-size: 1.4rem; margin-top: 0.5rem;">Surampalem Central 33/11 KV Substation</h2>
-              <p style="color: #c7d2fe; font-size: 0.85rem;">Live SCADA Power Grid Monitoring & Field Lineman Dispatch</p>
+              <span class="power-status-pill power-status-online" id="scadaFeederStatusPill">⚡ SCADA FEEDERS ONLINE (3/4 Active)</span>
+              <h2 style="color: white; font-size: 1.35rem; margin-top: 0.5rem;" id="scadaSubstationTitle">Surampalem Central 33/11 KV Substation</h2>
+              <p style="color: #c7d2fe; font-size: 0.82rem;">Authoritative SCADA Feeder Telemetry, Lineman Dispatch &amp; High-Voltage Grid Monitoring</p>
             </div>
             <div style="text-align: right;">
-              <div style="font-size: 1.8rem; font-weight: 900; font-family: var(--font-mono); color: #facc15;">2 Active Outages</div>
-              <div style="font-size: 0.78rem; color: #c7d2fe;">Restoration Crews En Route</div>
+              <div style="font-size: 1.6rem; font-weight: 900; font-family: var(--font-mono); color: #facc15;" id="scadaOutageCount">1 Active Outage</div>
+              <div style="font-size: 0.78rem; color: #c7d2fe;">Restoration Crew En Route (ETA: 35m)</div>
             </div>
           </div>
         </div>
 
-        <h3 style="color: white; margin-bottom: 1rem; font-size: 1.15rem;">Live Power Outages & Restoration Status</h3>
-        <div class="outage-board-grid" id="munPowerOutageGrid"></div>
+        <!-- 1. SCADA Feeder Grid -->
+        <div style="margin: 1.5rem 0 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+          <h3 style="color: white; font-size: 1.15rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <span>⚡</span> 33/11 KV Primary Distribution Feeders
+          </h3>
+          <span style="font-size: 0.75rem; color: #38bdf8; font-family: var(--font-mono); font-weight: 700;">SURAMPALEM ELECTRICITY SUB-GRID</span>
+        </div>
+        <div class="grid-4" id="munScadaFeederGrid" style="gap: 1rem; margin-bottom: 2rem;"></div>
 
-        <!-- Smart Ultrasonic Bins Section -->
-        <h3 style="color: white; margin: 1.5rem 0 1rem; font-size: 1.15rem;">🗑️ Ultrasonic IoT Smart Waste Bin Telemetry (Auto-Dispatch >80%)</h3>
+        <!-- 2. Active Power Outages & Restoration Status -->
+        <h3 style="color: white; margin-bottom: 0.75rem; font-size: 1.15rem;">🚨 Live Outage Redirection &amp; Squad Action</h3>
+        <div class="outage-board-grid" id="munPowerOutageGrid" style="margin-bottom: 2rem;"></div>
+
+        <!-- 3. AUTHORITATIVE OPERATIONAL GOVERNANCE AUDIT LEDGER (THE AUDIT COMPONENT) -->
+        <div class="audit-ledger-section" style="margin-bottom: 2rem; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.75rem;">
+            <div>
+              <h3 style="color: white; font-size: 1.15rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <span>🏛️</span> Operational Governance &amp; Squad Audit Ledger
+              </h3>
+              <p style="color: #94a3b8; font-size: 0.78rem; margin: 3px 0 0 0;">
+                Immutable database-backed audit trail: officer assignments, worker dispatch &amp; arrival verifications.
+              </p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <span class="badge badge-assigned" id="munAuditLogCountBadge" style="font-family: var(--font-mono); font-weight: 700;">7 AUDIT EVENTS</span>
+              <button type="button" class="btn btn-sm btn-outline" onclick="window.refreshAuditLedger()" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; border-color: #38bdf8; color: #38bdf8;">
+                🔄 Refresh Ledger
+              </button>
+            </div>
+          </div>
+
+          <div class="cmd-table-container">
+            <table class="cmd-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Audit Event ID</th>
+                  <th>Ticket / Subject</th>
+                  <th>Actor / Officer</th>
+                  <th>Action Type</th>
+                  <th>Operational Notes / Instructions</th>
+                </tr>
+              </thead>
+              <tbody id="munAuditLedgerTableBody">
+                <tr>
+                  <td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">Loading official operational audit records from server...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 4. Smart Ultrasonic Bins Section -->
+        <h3 style="color: white; margin: 1.5rem 0 1rem; font-size: 1.15rem;">🗑️ Ultrasonic IoT Smart Waste Bin Telemetry (Auto-Dispatch &gt;80%)</h3>
         <div class="smart-bin-grid">
           <div class="smart-bin-card critical-fill">
             <div class="bin-fill-ring-wrapper">
@@ -1961,7 +2013,12 @@
           <div style="font-size: 0.72rem; color: #d1fae5;" id="chatbotHeaderSubtitle">24/7 Public Service Helpdesk</div>
         </div>
       </div>
-      <button style="background: none; border: none; color: white; font-size: 1.1rem; cursor: pointer;" id="chatbotClose">✕</button>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <button type="button" onclick="window.openGeminiSettingsModal()" title="AI Engine Settings (Google Gemini 2.5 Flash)" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 2px 7px; border-radius: 6px; font-size: 0.72rem; cursor: pointer;">
+          ⚙️ AI Engine
+        </button>
+        <button style="background: none; border: none; color: white; font-size: 1.1rem; cursor: pointer;" id="chatbotClose">✕</button>
+      </div>
     </div>
 
     <!-- Department-Specific Quick Action Chips -->
@@ -1977,6 +2034,32 @@
     <div class="chatbot-input-bar">
       <input type="text" id="chatbotInput" class="form-input" placeholder="Type question, rule, or Ticket ID..." style="font-size: 0.85rem; padding: 0.5rem 0.75rem;">
       <button class="btn btn-primary btn-sm" id="chatbotSendBtn">Send</button>
+    </div>
+  </div>
+
+  <!-- Gemini API Key Configuration Modal -->
+  <div class="modal-overlay" id="geminiSettingsModal">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; color: white; display: flex; align-items: center; gap: 0.5rem;">
+          <span>✨</span> Google Gemini AI Configuration
+        </h3>
+        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('geminiSettingsModal')">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 1.25rem;">
+        <p style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5; margin-bottom: 1rem;">
+          Connect your Google Gemini 2.5 Flash API Key to unlock real-time multimodal civic hazard photo analysis and autonomous grievance resolution copilots.
+        </p>
+        <div class="form-group">
+          <label class="form-label" style="font-size: 0.78rem;">Gemini API Key:</label>
+          <input type="password" id="geminiApiKeyInput" class="form-input" placeholder="AIzaSy..." style="font-family: monospace;">
+        </div>
+        <div id="geminiKeyStatusMessage" style="font-size: 0.75rem; margin-top: 0.5rem;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+          <button class="btn btn-outline btn-sm" onclick="window.closeModal('geminiSettingsModal')">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="window.saveGeminiApiKey()">Save Key</button>
+        </div>
+      </div>
     </div>
   </div>
 

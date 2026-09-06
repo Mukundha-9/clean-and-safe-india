@@ -2622,6 +2622,8 @@
   // =========================================================================
   let gisMapInstance = null;
   let gisPredictiveLayerGroup = null;
+  let gisIssueMarkersGroup = null;
+  let cachedPredictiveForecasts = [];
 
   function initGISMap(targetCoords, zoomLevel) {
     const container = document.getElementById('gisMapContainer');
@@ -2646,8 +2648,14 @@
     try {
       if (gisMapInstance) {
         gisMapInstance.setView(center, zoom);
-        setTimeout(() => { if (gisMapInstance) gisMapInstance.invalidateSize(); }, 50);
+        setTimeout(() => { if (gisMapInstance) gisMapInstance.invalidateSize(); }, 60);
+        setTimeout(() => { if (gisMapInstance) gisMapInstance.invalidateSize(); }, 250);
+        renderMapIssueMarkers();
         return;
+      }
+
+      if (container._leaflet_id) {
+        container._leaflet_id = null;
       }
 
       gisMapInstance = L.map('gisMapContainer', {
@@ -2680,38 +2688,15 @@
       `);
 
       // Plot All Issues
-      const issues = db.getAllIssues();
-      issues.forEach(issue => {
-        if (issue.lat && issue.lng) {
-          const markerColor = issue.department === 'electricity' ? '#0284c7' : issue.department === 'food_safety' ? '#d97706' : '#059669';
-          
-          const circle = L.circleMarker([issue.lat, issue.lng], {
-            radius: issue.severity === 'bulk' ? 14 : 10,
-            fillColor: markerColor,
-            color: '#ffffff',
-            weight: 2.5,
-            opacity: 1,
-            fillOpacity: 0.9
-          }).addTo(gisMapInstance);
-
-          circle.bindPopup(`
-            <div style="color: #0f172a; font-family: sans-serif; min-width: 190px;">
-              <div style="font-weight: 800; font-size: 0.95rem; margin-bottom: 2px;">${issue.title}</div>
-              <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 6px;">📍 ${issue.location}</div>
-              <div style="display:flex; justify-content:space-between; align-items:center; font-size: 0.75rem; font-weight: 700; color: ${markerColor};">
-                <span>${issue.deptName}</span>
-                <span style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${issue.severity.toUpperCase()}</span>
-              </div>
-            </div>
-          `);
-        }
-      });
+      renderMapIssueMarkers();
 
       // Phase 4: GIS Predictive Hotspot Layer Group
       if (!gisPredictiveLayerGroup) {
         gisPredictiveLayerGroup = L.layerGroup().addTo(gisMapInstance);
       }
-      renderGisPredictiveHotspots(cachedPredictiveForecasts);
+      if (typeof renderGisPredictiveHotspots === 'function') {
+        renderGisPredictiveHotspots(cachedPredictiveForecasts);
+      }
 
       // Plot Live Moving Fleet with Real-Time Animation
       const fleetData = [
@@ -2745,6 +2730,44 @@
     } catch (err) {
       console.warn("GIS Map error:", err);
     }
+  }
+
+
+  function renderMapIssueMarkers() {
+    if (!gisMapInstance || typeof L === 'undefined') return;
+    if (!gisIssueMarkersGroup) {
+      gisIssueMarkersGroup = L.layerGroup().addTo(gisMapInstance);
+    } else {
+      gisIssueMarkersGroup.clearLayers();
+    }
+
+    const issues = db.getAllIssues();
+    issues.forEach(issue => {
+      if (issue.lat && issue.lng) {
+        const markerColor = issue.department === 'electricity' ? '#0284c7' : issue.department === 'food_safety' ? '#d97706' : '#10b981';
+        
+        const circle = L.circleMarker([issue.lat, issue.lng], {
+          radius: issue.severity === 'bulk' ? 14 : 10,
+          fillColor: markerColor,
+          color: '#ffffff',
+          weight: 2.5,
+          opacity: 1,
+          fillOpacity: 0.9
+        }).addTo(gisIssueMarkersGroup);
+
+        circle.bindPopup(`
+          <div style="color: #0f172a; font-family: sans-serif; min-width: 190px;">
+            <div style="font-weight: 800; font-size: 0.95rem; margin-bottom: 2px;">${issue.title}</div>
+            <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 6px;">📍 ${issue.location}</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size: 0.75rem; font-weight: 700; color: ${markerColor};">
+              <span>${issue.deptName || issue.department}</span>
+              <span style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${(issue.severity || 'normal').toUpperCase()}</span>
+            </div>
+            <div style="margin-top: 6px; font-size: 0.72rem; color: #475569;">Status: <strong>${issue.status.toUpperCase()}</strong> • Squad: <strong>${issue.assignedWorker || 'Unassigned'}</strong></div>
+          </div>
+        `);
+      }
+    });
   }
 
   // Real-Time Moving Fleet GPS Loop
@@ -3701,6 +3724,10 @@
       }
     }
 
+    // Populate Audit & Grid Subview Telemetry
+    renderAuditLedger();
+    renderScadaGrid();
+
     // Phase 4: Populate Predictive Civic Intelligence in Municipal Dashboard
     renderPredictiveHotspotsUI();
   }
@@ -4111,8 +4138,11 @@
     } else if (sessionDept === 'municipal') {
       const mView = document.getElementById('municipalMasterView');
       if (mView) mView.classList.add('active');
+      if (db && typeof db.initBackend === 'function') {
+        db.initBackend();
+      }
       renderMunicipalDashboard();
-      setTimeout(() => initGISMap([17.0010, 81.8045], 14), 100);
+      setTimeout(() => initGISMap([17.0010, 81.8045], 14), 120);
     } else if (sessionDept === 'food') {
       const fView = document.getElementById('foodSafetyMasterView');
       if (fView) fView.classList.add('active');
@@ -4238,7 +4268,7 @@
     }
   }
 
-  function handleChatbotMessage(forcedText) {
+  async function handleChatbotMessage(forcedText) {
     const input = document.getElementById('chatbotInput');
     const msgContainer = document.getElementById('chatbotMessages');
     if (!msgContainer) return;
@@ -4254,15 +4284,95 @@
     if (input) input.value = '';
     msgContainer.scrollTop = msgContainer.scrollHeight;
 
-    // Generate Dynamic Contextual AI Bot Response
-    setTimeout(() => {
-      const botBubble = document.createElement('div');
-      botBubble.className = 'chat-bubble bot';
-      botBubble.innerHTML = generateDynamicBotReply(userText);
-      msgContainer.appendChild(botBubble);
-      msgContainer.scrollTop = msgContainer.scrollHeight;
-    }, 350);
+    // Add Typing Indicator
+    const typingBubble = document.createElement('div');
+    typingBubble.className = 'chat-bubble bot';
+    typingBubble.innerHTML = '<span style="color:#38bdf8;">⚡ Smart Civic AI is thinking...</span>';
+    msgContainer.appendChild(typingBubble);
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+
+    try {
+      const dept = auth.getDepartment() || 'citizen';
+      const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ message: userText, department: dept })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const replyText = data.reply || '';
+        const formatted = replyText
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/`(.*?)`/g, '<code style="background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:3px; font-family:monospace;">$1</code>')
+          .replace(/\n\n/g, '<br><br>')
+          .replace(/\n• /g, '<br>• ');
+        typingBubble.innerHTML = formatted;
+        if (data.source && data.source.includes('gemini')) {
+          typingBubble.innerHTML += '<div style="font-size:0.68rem; color:#38bdf8; margin-top:6px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:4px;">✨ Powered by Google Gemini 2.5 Flash</div>';
+        }
+      } else {
+        typingBubble.innerHTML = generateDynamicBotReply(userText);
+      }
+    } catch (e) {
+      typingBubble.innerHTML = generateDynamicBotReply(userText);
+    }
+    msgContainer.scrollTop = msgContainer.scrollHeight;
   }
+
+  window.openGeminiSettingsModal = async function() {
+    const modal = document.getElementById('geminiSettingsModal');
+    const msg = document.getElementById('geminiKeyStatusMessage');
+    if (!modal) return;
+    modal.classList.add('active');
+    if (msg) {
+      msg.textContent = 'Checking active AI engine status...';
+      try {
+        const res = await fetch('/api/settings/ai-status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.hasGeminiApiKey) {
+            msg.innerHTML = '<span style="color:#10b981; font-weight:700;">✓ Active Google Gemini 2.5 Flash API Key connected!</span>';
+          } else {
+            msg.innerHTML = '<span style="color:#facc15;">No custom key connected yet. System is using integrated civic database AI.</span>';
+          }
+        }
+      } catch (err) {
+        msg.textContent = '';
+      }
+    }
+  };
+
+  window.saveGeminiApiKey = async function() {
+    const input = document.getElementById('geminiApiKeyInput');
+    const msg = document.getElementById('geminiKeyStatusMessage');
+    const key = (input ? input.value : '').trim();
+    if (!key) {
+      showToast('Please enter a valid Gemini API key.', 'warning', '⚠️');
+      return;
+    }
+    try {
+      const res = await fetch('/api/settings/ai-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: key })
+      });
+      if (res.ok) {
+        showToast('Gemini 2.5 Flash API Key connected successfully!', 'reward', '✨');
+        if (msg) msg.innerHTML = '<span style="color:#10b981; font-weight:700;">✓ Key saved! Real-time Gemini 2.5 Flash active.</span>';
+        setTimeout(() => window.closeModal('geminiSettingsModal'), 1200);
+      } else {
+        showToast('Could not save API key.', 'error', '⚠️');
+      }
+    } catch (e) {
+      showToast('Error connecting to server.', 'error', '⚠️');
+    }
+  };
+
 
   function generateDynamicBotReply(rawQuery) {
     const q = rawQuery.toLowerCase();
@@ -5663,10 +5773,14 @@
     if (mobileTargetBtn) mobileTargetBtn.classList.add('active');
 
     if (tabName === 'heatmap') {
-      setTimeout(() => initGISMap([17.0010, 81.8045], 14), 80);
+      setTimeout(() => initGISMap([17.0010, 81.8045], 14), 100);
     }
     if (tabName === 'hotspots') {
       renderPredictiveHotspotsUI();
+    }
+    if (tabName === 'electricity') {
+      renderAuditLedger();
+      renderScadaGrid();
     }
 
     renderMunicipalDashboard();
@@ -7153,7 +7267,7 @@
   // =========================================================================
   // PHASE 4: PREDICTIVE CIVIC INTELLIGENCE CONTROLLER & GOVERNANCE UI
   // =========================================================================
-  let cachedPredictiveForecasts = [];
+  cachedPredictiveForecasts = [];
   let cachedPreventiveActions = [];
   let activePredictiveForecastId = null;
   let gisPredictiveLayerVisible = true;
@@ -7784,3 +7898,161 @@
   });
 
 })();
+
+
+  // =========================================================================
+  // OPERATIONAL AUDIT LEDGER & SCADA TELEMETRY MANAGERS
+  // =========================================================================
+  window.refreshAuditLedger = async function() {
+    await renderAuditLedger();
+  };
+
+  async function renderAuditLedger() {
+    const tableBody = document.getElementById('munAuditLedgerTableBody');
+    const countBadge = document.getElementById('munAuditLogCountBadge');
+    if (!tableBody) return;
+
+    try {
+      const headers = {};
+      const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/audit-logs', { headers });
+      if (!res.ok) throw new Error('Failed to fetch audit records');
+      const data = await res.json();
+      const logs = data.auditLogs || [];
+
+      if (countBadge) {
+        countBadge.textContent = `${logs.length} AUDIT EVENTS`;
+      }
+
+      if (logs.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">No operational audit logs recorded yet.</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = logs.map(log => {
+        const timeStr = formatReportDateTime(log.timestamp);
+        let actionBadgeClass = 'badge-pending';
+        let actionLabel = log.actionType || 'LOG';
+        if (log.actionType === 'squad_assignment') {
+          actionBadgeClass = 'badge-assigned';
+          actionLabel = '🚛 SQUAD DISPATCHED';
+        } else if (log.actionType === 'worker_en_route') {
+          actionBadgeClass = 'badge-enroute';
+          actionLabel = '⚡ EN ROUTE TO SITE';
+        } else if (log.actionType === 'worker_arrived') {
+          actionBadgeClass = 'badge-onsite';
+          actionLabel = '📍 ON SITE / REMEDIATING';
+        } else if (log.actionType === 'officer_override') {
+          actionBadgeClass = 'badge-escalated';
+          actionLabel = '🛡️ OFFICER OVERRIDE';
+        }
+
+        return `
+          <tr>
+            <td>
+              <div style="font-size: 0.78rem; font-weight: 700; color: white;">${timeStr}</div>
+              <div style="font-size: 0.7rem; color: #94a3b8;">Authoritative Record</div>
+            </td>
+            <td>
+              <span style="font-family: var(--font-mono); font-weight: 700; font-size: 0.78rem; color: #38bdf8; background: rgba(56,189,248,0.1); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(56,189,248,0.25);">
+                ${log.id}
+              </span>
+            </td>
+            <td>
+              <div style="font-family: var(--font-mono); font-weight: 800; color: white; cursor: pointer;" onclick="window.viewIssueDetail('${log.issueId}')">
+                ${log.issueId}
+              </div>
+              <div style="font-size: 0.72rem; color: #94a3b8; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${log.issueTitle || ''}">
+                ${log.issueTitle || 'Incident Record'}
+              </div>
+            </td>
+            <td>
+              <div style="font-size: 0.8rem; font-weight: 700; color: #38bdf8;">${log.officer || 'Municipal Officer'}</div>
+              <div style="font-size: 0.72rem; color: #94a3b8;">👷 ${log.assignedWorker || 'Squad'}</div>
+            </td>
+            <td>
+              <span class="badge ${actionBadgeClass}" style="font-size: 0.7rem;">${actionLabel}</span>
+            </td>
+            <td>
+              <div style="font-size: 0.8rem; color: #cbd5e1; max-width: 280px; line-height: 1.4;">
+                ${log.supervisorNotes || 'Standard procedure logged.'}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    } catch (e) {
+      console.warn('Audit ledger fetch error:', e);
+      tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 1.5rem; color: #f87171;">Audit records could not be refreshed from backend (${e.message}).</td></tr>`;
+    }
+  }
+
+  async function renderScadaGrid() {
+    const feederContainer = document.getElementById('munScadaFeederGrid');
+    const outageContainer = document.getElementById('munPowerOutageGrid');
+    if (!feederContainer && !outageContainer) return;
+
+    try {
+      const res = await fetch('/api/grid/status');
+      if (!res.ok) return;
+      const data = await res.json();
+      const feeders = data.feeders || [];
+
+      if (feederContainer && feeders.length > 0) {
+        feederContainer.innerHTML = feeders.map(f => {
+          const isOutage = f.status === 'OUTAGE';
+          return `
+            <div class="scada-feeder-card" style="background: rgba(15, 23, 42, 0.8); border: 1px solid ${isOutage ? 'rgba(239, 68, 68, 0.5)' : 'rgba(56, 189, 248, 0.25)'}; border-radius: 10px; padding: 1rem; position: relative; overflow: hidden;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: #38bdf8;">${f.id}</span>
+                <span class="badge ${isOutage ? 'badge-escalated' : 'badge-resolved'}" style="font-size: 0.68rem;">${f.status}</span>
+              </div>
+              <h4 style="color: white; font-size: 0.88rem; margin: 0 0 0.4rem 0; line-height: 1.3;">${f.name}</h4>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; font-size: 0.75rem; color: #94a3b8; margin: 0.5rem 0; background: rgba(0,0,0,0.25); padding: 0.5rem; border-radius: 6px;">
+                <div>⚡ Volt: <strong style="color: white;">${f.voltage} kV</strong></div>
+                <div>📡 Freq: <strong style="color: white;">${f.frequency} Hz</strong></div>
+                <div>🔌 Load: <strong style="color: white;">${f.load} MW</strong></div>
+                <div>🛡️ Relay: <strong style="color: ${isOutage ? '#ef4444' : '#10b981'};">${f.breaker}</strong></div>
+              </div>
+              ${isOutage ? `
+                <div style="font-size: 0.72rem; color: #f87171; margin-top: 0.4rem;">
+                  ⚠️ ${f.cause || 'Fault line detected'}
+                </div>
+              ` : `
+                <div style="font-size: 0.72rem; color: #34d399; margin-top: 0.4rem;">
+                  ✓ Optimal voltage regulation
+                </div>
+              `}
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (outageContainer) {
+        const outageFeeders = feeders.filter(f => f.status === 'OUTAGE');
+        if (outageFeeders.length === 0) {
+          outageContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 1.5rem; color: #10b981; background: rgba(16,185,129,0.06); border-radius: 8px; border: 1px dashed rgba(16,185,129,0.3);">🟢 All substation feeders operating under normal load. Zero active power outages.</div>`;
+        } else {
+          outageContainer.innerHTML = outageFeeders.map(f => `
+            <div class="outage-card active-outage">
+              <div class="outage-header">
+                <span class="power-status-pill power-status-outage">⚡ OUTAGE ACTIVE</span>
+                <span class="outage-eta">ETA: ${f.etaMinutes || 35} Mins</span>
+              </div>
+              <h3 style="font-size: 1.15rem; color: white; margin-bottom: 0.35rem;">${f.name}</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted);"><strong>Area:</strong> Ward 12 Gandhi Statue Cross • <strong>Affected:</strong> ~450 Households</p>
+              <div style="background: rgba(255, 255, 255, 0.04); padding: 0.75rem; border-radius: var(--radius-sm); font-size: 0.82rem; margin: 0.6rem 0; border: 1px dashed var(--border);">
+                <div>⚠️ <strong>Cause:</strong> ${f.cause || 'Sparking & flashover on 11KV low hanging line'}</div>
+                <div>👷 <strong>Status:</strong> Jumper replacement & cable elevation in progress</div>
+              </div>
+              <div style="font-size: 0.8rem; color: #38bdf8;">👮 Lineman Squad: <strong>${f.assignedLineman || 'Lineman Squad B (Suresh Kumar)'}</strong></div>
+            </div>
+          `).join('');
+        }
+      }
+    } catch (e) {
+      console.warn('SCADA grid fetch error:', e);
+    }
+  }
