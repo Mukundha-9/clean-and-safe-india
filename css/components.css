@@ -1792,3 +1792,172 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* =========================================================================
+   MODERN UNIFIED COMPLAINT MODAL (REAL-TIME CIVIC REPORTING)
+   ========================================================================= */
+.complaint-status-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(2, 132, 199, 0.12));
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.status-strip-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.status-strip-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 640px) {
+  .status-strip-divider {
+    display: none;
+  }
+  .complaint-status-strip {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .status-strip-item {
+    justify-content: space-between !important;
+  }
+}
+
+.gps-pill-btn {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.2s ease;
+}
+
+.gps-pill-btn:hover {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: #38bdf8;
+}
+
+.modern-desc-container {
+  position: relative;
+  width: 100%;
+}
+
+.modern-complaint-textarea {
+  width: 100%;
+  min-height: 92px;
+  padding: 0.75rem 3.5rem 0.75rem 0.85rem !important;
+  background: rgba(15, 23, 42, 0.9) !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+  border-radius: 10px !important;
+  color: white !important;
+  font-size: 0.88rem !important;
+  line-height: 1.5 !important;
+  transition: all 0.2s ease !important;
+  resize: vertical;
+}
+
+.modern-complaint-textarea:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+  background: #090e1a !important;
+  outline: none;
+}
+
+.inline-mic-wrapper {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  z-index: 2;
+}
+
+.modern-voice-mic-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modern-voice-mic-btn:hover {
+  background: rgba(56, 189, 248, 0.3);
+  border-color: #38bdf8;
+  transform: scale(1.08);
+}
+
+.modern-voice-mic-btn.recording {
+  background: #ef4444;
+  border-color: #f87171;
+  color: white;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.8);
+  animation: pulseMic 1.2s infinite;
+}
+
+.voice-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.voice-transcribe-status {
+  font-size: 0.74rem;
+  color: #38bdf8;
+  margin-top: 0.25rem;
+  min-height: 16px;
+}
+
+.smart-triage-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.8rem;
+  margin-top: 0.4rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(56, 189, 248, 0.08));
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 8px;
+  color: #cbd5e1;
+  animation: fadeIn 0.25s ease;
+}
+
+.smart-triage-sparkle {
+  color: #34d399;
+  font-size: 0.95rem;
+}
+
+.complaint-section-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+}

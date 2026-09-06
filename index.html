@@ -1495,226 +1495,154 @@
 
   <!-- Report Issue Modal with Cascading 4-Tier Location Selection -->
   <div class="modal-overlay" id="reportIssueModal">
-    <div class="modal-box modal-lg">
-      <div class="modal-header">
-        <h3 style="font-size: 1.25rem; color: white;">📸 Submit New Civic Complaint</h3>
-        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('reportIssueModal')">✕</button>
+    <div class="modal-box modal-lg" style="max-width: 680px;">
+      <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding: 1.15rem 1.5rem;">
+        <div>
+          <h3 style="font-size: 1.25rem; color: white; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <span>📝</span> Submit Civic Complaint
+          </h3>
+          <p style="font-size: 0.76rem; color: #94a3b8; margin: 3px 0 0 0;">Clean &amp; Safe Municipal Grievance Redressal System</p>
+        </div>
+        <button type="button" class="btn btn-outline btn-icon-only" onclick="window.closeModal('reportIssueModal')">✕</button>
       </div>
 
       <form id="reportIssueForm">
-        <div class="modal-body">
-          <!-- Daily Citizen Report Quota Status Banner (Limit: 3/day) -->
-          <div class="daily-quota-modal-banner" id="modalDailyQuotaBanner">
-            <div>
-              <div class="quota-status-title" id="modalQuotaTitle">
-                <span>⚡</span> Daily Citizen Quota: <span id="modalQuotaText" style="color: #38bdf8; font-family: var(--font-mono); font-weight: 800;">3 / 3 Remaining</span>
-              </div>
-              <div class="quota-status-sub" id="modalQuotaSub">
-                Max 3 reports allowed per day across all departments (Food, Electricity, Sanitation) to guarantee 48h SLA response.
-              </div>
-            </div>
-            <div class="quota-pills-row" id="modalQuotaPills">
-              <span class="quota-slot-pill" id="quotaSlot1" title="Daily Slot 1"></span>
-              <span class="quota-slot-pill" id="quotaSlot2" title="Daily Slot 2"></span>
-              <span class="quota-slot-pill" id="quotaSlot3" title="Daily Slot 3"></span>
-            </div>
-          </div>
-
-          <!-- Live GPS Geolocation Auto-Detection Box -->
-          <div class="gps-detect-panel">
-            <div>
-              <div style="font-size: 0.85rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 0.4rem;">
-                <span>📍</span> Live Device GPS Geotagging
-              </div>
+        <div class="modal-body" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+          
+          <!-- Compact Status Bar: Live GPS & Citizen Quota -->
+          <div class="complaint-status-strip" id="modalDailyQuotaBanner">
+            <div class="status-strip-item">
               <div class="gps-status-badge" id="modalGpsStatusText">
                 <span class="gps-pulse-dot"></span>
-                <span>Coordinates: 17.0010° N, 81.8045° E (Surampalem)</span>
+                <span>GPS: 17.0010° N, 81.8045° E (Surampalem)</span>
               </div>
-            </div>
-            <button type="button" class="gps-detect-btn" id="modalGpsDetectBtn" onclick="window.detectLiveGPSLocation()">
-              <span>📡</span> <span id="modalGpsBtnLabel">Auto-Detect Live GPS</span>
-            </button>
-          </div>
-
-          <!-- STEP 1: NATURAL LANGUAGE COMPLAINT & CIVIC AI INTELLIGENCE -->
-          <div class="ai-complaint-box" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(16, 185, 129, 0.05)); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 12px; padding: 1.15rem; margin-bottom: 1.25rem;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
-              <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <span style="font-size: 1.3rem;">🤖</span>
-                <div>
-                  <div style="font-weight: 800; font-size: 0.92rem; color: #38bdf8;">Step 1 — Describe your civic problem naturally</div>
-                  <div style="font-size: 0.74rem; color: #94a3b8;">Civic AI auto-understands department, category, SLA & urgency</div>
-                </div>
-              </div>
-              <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">Human-in-the-Loop</span>
-            </div>
-
-            <textarea id="aiComplaintTextInput" class="form-textarea" style="min-height: 85px; font-size: 0.88rem; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.3); color: white; margin-bottom: 0.75rem; line-height: 1.5;" placeholder="Describe your civic problem... (e.g. Garbage has been overflowing near our college for the last 3 days and there is a bad smell.)"></textarea>
-
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap;">
-              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-primary btn-ai-analyze" id="btnAnalyzeComplaintAi" onclick="window.analyzeComplaintWithAi()" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: 700; font-size: 0.84rem; padding: 0.55rem 1.1rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <span>🤖</span> <span id="aiAnalyzeBtnText">Analyze with Civic AI</span>
-                </button>
-                <button type="button" class="btn btn-outline" id="btnVoiceComplaintAi" onclick="window.toggleVoiceRecording()" style="font-size: 0.82rem; padding: 0.55rem 0.9rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <span>🎤</span> <span id="voiceBtnLabel">Describe by Voice</span>
-                </button>
-              </div>
-              <span style="font-size: 0.72rem; color: #64748b;">Or fill fields manually below</span>
-            </div>
-
-            <!-- Analyzing Loading State -->
-            <div id="aiAnalyzingIndicator" style="display: none; align-items: center; gap: 0.6rem; margin-top: 0.85rem; padding: 0.65rem 0.85rem; background: rgba(56, 189, 248, 0.1); border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.3);">
-              <div style="width: 16px; height: 16px; border: 2px solid #38bdf8; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
-              <span style="font-size: 0.8rem; color: #38bdf8; font-weight: 700;">Civic AI is analyzing your report...</span>
-            </div>
-
-            <!-- Expandable Structured Advisory Result Card -->
-            <div id="aiAnalysisResultCard" style="display: none; margin-top: 0.85rem; padding: 1rem; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.35);">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem;">
-                <div style="font-weight: 800; font-size: 0.86rem; color: #38bdf8; display: flex; align-items: center; gap: 0.4rem;">
-                  <span>🤖</span> CIVIC AI ANALYSIS (ADVISORY)
-                </div>
-                <span class="badge" id="aiAnalysisConfidenceBadge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.72rem;">
-                  Confidence: 90% (Deterministic Civic Intelligence)
-                </span>
-              </div>
-
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.65rem; font-size: 0.8rem; margin-bottom: 0.75rem;">
-                <div><span style="color: #94a3b8;">Department:</span> <strong id="aiResDept" style="color: white; margin-left: 4px;">Sanitation</strong></div>
-                <div><span style="color: #94a3b8;">Category:</span> <strong id="aiResCategory" style="color: white; margin-left: 4px;">Garbage Overflow</strong></div>
-                <div><span style="color: #94a3b8;">Severity:</span> <strong id="aiResSeverity" style="color: #f87171; margin-left: 4px;">Critical</strong></div>
-                <div><span style="color: #94a3b8;">Urgency:</span> <strong id="aiResUrgency" style="color: #38bdf8; margin-left: 4px;">88 / 100</strong></div>
-                <div><span style="color: #94a3b8;">Suggested SLA:</span> <strong id="aiResSla" style="color: #34d399; margin-left: 4px;">12 hours</strong></div>
-                <div><span style="color: #94a3b8;">Sensitivity:</span> <strong id="aiResSensitivity" style="color: white; margin-left: 4px;">Educational Zone</strong></div>
-              </div>
-
-              <!-- AI-Assisted Civic Risk Score -->
-              <div style="padding: 0.55rem 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
-                <div>
-                  <div style="font-size: 0.72rem; color: #94a3b8;">AI-assisted Civic Risk:</div>
-                  <div style="font-family: var(--font-mono); font-weight: 800; font-size: 1.1rem; color: white;" id="aiResRiskScore">84 / 100</div>
-                </div>
-                <span class="badge" id="aiResRiskBadge" style="background: rgba(248, 113, 113, 0.2); color: #f87171; border: 1px solid #f87171; font-size: 0.75rem;">🔴 Critical Risk</span>
-              </div>
-
-              <!-- Observable Reasoning (Why?) -->
-              <div style="font-size: 0.78rem; color: #cbd5e1; background: rgba(56, 189, 248, 0.06); padding: 0.6rem 0.8rem; border-left: 3px solid #38bdf8; border-radius: 4px; line-height: 1.45; margin-bottom: 0.75rem;">
-                <strong>Why?</strong> <span id="aiResReasoning">Complaint mentions garbage overflow in a educational zone (identified educational zone, multi-day hazard persistence, public health odor nuisance), elevating urgency to 88/100.</span>
-              </div>
-
-              <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
-                <span style="font-size: 0.72rem; color: #94a3b8;">⚠️ AI suggestions are advisory. Please review before submitting.</span>
-                <button type="button" class="btn btn-sm btn-outline" id="btnApplyAiSuggestions" onclick="window.applyAiSuggestionsToForm()" style="font-size: 0.76rem; padding: 0.4rem 0.75rem; border-color: #38bdf8; color: #38bdf8; cursor: pointer;">
-                  <span>✏️</span> Edit Suggestions Below
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Image & Camera Evidence Submission Zone -->
-          <div class="image-submission-zone" id="reportImageSubmissionZone">
-            <!-- Hidden File & Camera Inputs -->
-            <input type="file" id="reportCameraInput" accept="image/*" capture="environment" style="display: none;" onchange="window.handleImageUpload(this)">
-            <input type="file" id="reportGalleryInput" accept="image/*" style="display: none;" onchange="window.handleImageUpload(this)">
-
-            <!-- Initial Action Buttons & Dropzone -->
-            <div id="imageUploadActionsContainer">
-              <div style="font-size: 0.85rem; font-weight: 700; color: white; margin-bottom: 2px;">
-                📸 Attach Photo Evidence (Required for 48h SLA)
-              </div>
-              <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-                Capture live photo using camera or choose from gallery. Automatic GPS geotag & timestamp applied.
-              </p>
-
-              <div class="upload-action-row">
-                <button type="button" class="btn-camera-trigger" onclick="document.getElementById('reportCameraInput').click()">
-                  <span>📷</span> Capture with Camera
-                </button>
-                <button type="button" class="btn-upload-trigger" onclick="document.getElementById('reportGalleryInput').click()">
-                  <span>📁</span> Browse Gallery
-                </button>
-              </div>
-
-              <!-- Quick Demo Incident Sample Photos -->
-              <div style="margin-top: 0.75rem;">
-                <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 600;">Or Select Verified Sample Photo:</span>
-                <div class="preset-sample-chips">
-                  <button type="button" class="preset-chip-btn" onclick="window.selectSamplePhoto('garbage')">
-                    🗑️ Garbage Overflow
-                  </button>
-                  <button type="button" class="preset-chip-btn" onclick="window.selectSamplePhoto('spark')">
-                    ⚡ Sparking Wire
-                  </button>
-                  <button type="button" class="preset-chip-btn" onclick="window.selectSamplePhoto('water')">
-                    🚰 Pipeline Burst
-                  </button>
-                  <button type="button" class="preset-chip-btn" onclick="window.selectSamplePhoto('food')">
-                    🍲 Food Safety Risk
-                  </button>
-                  <button type="button" class="preset-chip-btn" onclick="window.selectSamplePhoto('pothole')">
-                    🕳️ Road Pothole
-                  </button>
-                </div>
-              </div>
-
-              <!-- Photo Privacy & Data Notice -->
-              <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 0.55rem; line-height: 1.4; display: flex; align-items: center; gap: 0.45rem; padding: 0.4rem 0.65rem; background: rgba(30, 41, 59, 0.45); border-radius: 6px; border-left: 2px solid #38bdf8;">
-                <span>🔒</span>
-                <span><strong>Privacy Protected:</strong> Photo evidence is used exclusively for civic defect verification. Please avoid capturing personal faces, private identity documents, or vehicle registration plates.</span>
-              </div>
-            </div>
-
-            <!-- Live Image Preview Card -->
-            <div class="image-preview-card" id="reportImagePreviewCard">
-              <img src="" id="reportPreviewThumbnail" class="image-preview-thumbnail" alt="Selected Evidence">
-              <div class="image-watermark-overlay">
-                <div class="watermark-meta">
-                  <div id="previewGpsWatermark">📍 GPS: 17.0010° N, 81.8045° E (±4m)</div>
-                  <div id="previewTimeWatermark">⏱️ Verified: Today • Swachh Bharat Proof</div>
-                </div>
-                <button type="button" class="btn-remove-image" onclick="window.clearSelectedImage()">
-                  ✕ Change Photo
-                </button>
-              </div>
-            </div>
-
-            <!-- Civic AI Visual Evidence Verification Advisory Zone -->
-            <div id="imageAiAdvisoryZone" style="display: none; margin-top: 0.75rem;">
-              <button type="button" id="btnVerifyEvidence" class="btn-ai-analyze" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.6rem 1rem; font-size: 0.82rem; font-weight: 700; background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(14, 165, 233, 0.25)); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 8px; cursor: pointer;" onclick="window.runImageVerification()">
-                <span>🤖</span> Verify Evidence with Civic AI
-              </button>
-              <div id="imageAiAdvisoryCard" style="display: none; margin-top: 0.65rem;">
-                <!-- Populated dynamically by CivicAiEngine.ImageVerification -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Voice AI Recording Box -->
-          <div class="voice-ai-box">
-            <div>
-              <div style="font-size: 0.85rem; font-weight: 700; color: white;">🎙️ Regional Voice AI (Telugu / Hindi / English)</div>
-              <div style="font-size: 0.75rem; color: #94a3b8;" id="voiceStatusText">Click mic to speak your complaint naturally</div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <div class="voice-waveform" id="voiceWaveform" style="display: none;">
-                <div class="wave-bar" style="height: 14px;"></div>
-                <div class="wave-bar" style="height: 20px;"></div>
-                <div class="wave-bar" style="height: 10px;"></div>
-                <div class="wave-bar" style="height: 18px;"></div>
-              </div>
-              <button type="button" class="voice-ai-btn" id="voiceAiBtn" onclick="window.toggleVoiceRecording()">
-                <span>🎤</span> <span id="voiceBtnLabel">Record Voice</span>
+              <button type="button" class="gps-pill-btn" id="modalGpsDetectBtn" onclick="window.detectLiveGPSLocation()" title="Re-detect GPS location">
+                <span>📡</span> <span id="modalGpsBtnLabel">Locate</span>
               </button>
             </div>
+
+            <div class="status-strip-divider"></div>
+
+            <div class="status-strip-item" style="justify-content: flex-end;">
+              <div class="quota-status-title" id="modalQuotaTitle" style="font-size: 0.78rem; margin: 0;">
+                <span>⚡ Quota:</span> <span id="modalQuotaText" style="color: #38bdf8; font-family: var(--font-mono); font-weight: 800;">3 / 3 Left</span>
+              </div>
+              <div class="quota-pills-row" id="modalQuotaPills">
+                <span class="quota-slot-pill" id="quotaSlot1" title="Daily Slot 1"></span>
+                <span class="quota-slot-pill" id="quotaSlot2" title="Daily Slot 2"></span>
+                <span class="quota-slot-pill" id="quotaSlot3" title="Daily Slot 3"></span>
+              </div>
+              <span id="modalQuotaSub" style="display: none;">Max 3 reports allowed per day</span>
+            </div>
           </div>
 
-          <!-- 4-Tier Cascading Jurisdiction Picker -->
-          <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.25rem;">
-            <div style="font-weight: 800; font-size: 0.82rem; color: #38bdf8; margin-bottom: 0.6rem;">📍 4-TIER LOCATION DIVISION</div>
-            <div class="grid-2" style="gap: 0.75rem; margin-bottom: 0.75rem;">
+          <!-- PRIMARY SECTION: SINGLE UNIFIED COMPLAINT DESCRIPTION WITH INLINE VOICE -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+              <label class="form-label" style="margin: 0; font-size: 0.84rem; font-weight: 700; color: white;">
+                Describe the Civic Hazard / Issue: <span style="color: #f87171;">*</span>
+              </label>
+              <span style="font-size: 0.72rem; color: #94a3b8;">Type or tap mic to speak in 🇮🇳 English / తెలుగు / हिंदी</span>
+            </div>
+
+            <div class="modern-desc-container">
+              <textarea id="reportDescInput" class="form-textarea modern-complaint-textarea" oninput="window.triggerRealtimeTriage(this.value)" placeholder="Explain the hazard, landmark, duration, or safety threat... (e.g. Garbage bin overflowing onto the main road near the college gate for 2 days causing foul smell)" required></textarea>
+              
+              <!-- Hidden compatibility field for legacy references -->
+              <input type="hidden" id="aiComplaintTextInput">
+
+              <!-- Modern Floating Microphone Button inside the Textarea -->
+              <div class="inline-mic-wrapper">
+                <div class="voice-waveform" id="voiceWaveform" style="display: none;">
+                  <div class="wave-bar" style="height: 10px;"></div>
+                  <div class="wave-bar" style="height: 16px;"></div>
+                  <div class="wave-bar" style="height: 8px;"></div>
+                  <div class="wave-bar" style="height: 14px;"></div>
+                </div>
+                <button type="button" class="modern-voice-mic-btn" id="voiceAiBtn" onclick="window.toggleVoiceRecording()" title="Click to speak your complaint (Telugu / Hindi / English)">
+                  <span>🎤</span>
+                  <span id="voiceBtnLabel" class="voice-sr-only">Record Voice</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Voice Status Feedback Indicator -->
+            <div id="voiceStatusText" class="voice-transcribe-status"></div>
+
+            <!-- Real-Time Smart Auto-Triage Indicator (Appears seamlessly as user types/speaks) -->
+            <div id="smartTriagePill" class="smart-triage-pill" style="display: none;">
+              <span class="smart-triage-sparkle">⚡</span>
+              <span id="triageSummaryText" style="flex: 1; font-size: 0.78rem;">Auto-detected: <strong style="color: #38bdf8;">Sanitation</strong> • SLA: <strong style="color: #34d399;">24 Hours</strong></span>
+              <span style="font-size: 0.7rem; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px;">Smart Triage</span>
+            </div>
+
+            <!-- Hidden compatibility elements for existing JS references -->
+            <div id="aiAnalyzingIndicator" style="display: none;"></div>
+            <div id="aiAnalysisResultCard" style="display: none;">
+              <span id="aiResDept"></span><span id="aiResCategory"></span><span id="aiResSeverity"></span>
+              <span id="aiResUrgency"></span><span id="aiResSla"></span><span id="aiResSensitivity"></span>
+              <span id="aiResRiskScore"></span><span id="aiResRiskBadge"></span><span id="aiResReasoning"></span>
+              <span id="aiAnalysisConfidenceBadge"></span>
+              <button type="button" id="btnAnalyzeComplaintAi" style="display: none;"><span id="aiAnalyzeBtnText">Analyze</span></button>
+            </div>
+          </div>
+
+          <!-- PHOTO EVIDENCE SECTION (Camera & Gallery Only - No Stock Sample Chips) -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.84rem; font-weight: 700; color: white; margin-bottom: 0.35rem;">
+              Photo Evidence: <span style="font-size: 0.72rem; color: #94a3b8; font-weight: normal;">(Required for 48h SLA field dispatch)</span>
+            </label>
+
+            <div class="image-submission-zone" id="reportImageSubmissionZone">
+              <!-- Hidden File & Camera Inputs -->
+              <input type="file" id="reportCameraInput" accept="image/*" capture="environment" style="display: none;" onchange="window.handleImageUpload(this)">
+              <input type="file" id="reportGalleryInput" accept="image/*" style="display: none;" onchange="window.handleImageUpload(this)">
+
+              <!-- Action Buttons -->
+              <div id="imageUploadActionsContainer">
+                <div class="upload-action-row" style="margin: 0.25rem 0 0.5rem;">
+                  <button type="button" class="btn-camera-trigger" onclick="document.getElementById('reportCameraInput').click()">
+                    <span>📷</span> Capture Photo
+                  </button>
+                  <button type="button" class="btn-upload-trigger" onclick="document.getElementById('reportGalleryInput').click()">
+                    <span>📁</span> Upload from Device
+                  </button>
+                </div>
+                <div style="font-size: 0.72rem; color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
+                  <span>🔒</span> Geotagged &amp; timestamped for authentic municipal audit.
+                </div>
+              </div>
+
+              <!-- Live Image Preview Card -->
+              <div class="image-preview-card" id="reportImagePreviewCard">
+                <img src="" id="reportPreviewThumbnail" class="image-preview-thumbnail" alt="Selected Evidence">
+                <div class="image-watermark-overlay">
+                  <div class="watermark-meta">
+                    <div id="previewGpsWatermark">📍 GPS: 17.0010° N, 81.8045° E (±4m)</div>
+                    <div id="previewTimeWatermark">⏱️ Verified: Today • Swachh Bharat Proof</div>
+                  </div>
+                  <button type="button" class="btn-remove-image" onclick="window.clearSelectedImage()">
+                    ✕ Change Photo
+                  </button>
+                </div>
+              </div>
+
+              <!-- Subtle Background Verification Status (Hidden/Lightweight) -->
+              <div id="imageAiAdvisoryZone" style="display: none;">
+                <button type="button" id="btnVerifyEvidence" style="display: none;" onclick="window.runImageVerification()"></button>
+                <div id="imageAiAdvisoryCard" style="display: none;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SMART JURISDICTION & LOCATION DIVISION -->
+          <div class="complaint-section-box">
+            <div style="font-weight: 800; font-size: 0.8rem; color: #38bdf8; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">
+              <span>📍</span> JURISDICTION &amp; LOCATION
+            </div>
+            <div class="grid-2" style="gap: 0.65rem; margin-bottom: 0.65rem;">
               <div>
-                <label class="form-label" style="font-size: 0.75rem;">1. Select State:</label>
+                <label class="form-label" style="font-size: 0.74rem;">State:</label>
                 <select id="modalReportState" class="form-select" onchange="window.handleModalStateChange(this.value)">
                   <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
                   <option value="Telangana">Telangana</option>
@@ -1725,7 +1653,7 @@
                 </select>
               </div>
               <div>
-                <label class="form-label" style="font-size: 0.75rem;">2. Select City / District:</label>
+                <label class="form-label" style="font-size: 0.74rem;">City / District:</label>
                 <select id="modalReportCity" class="form-select" onchange="window.handleModalCityChange(this.value)">
                   <option value="Surampalem" selected>Surampalem</option>
                   <option value="Kakinada">Kakinada</option>
@@ -1733,9 +1661,9 @@
                 </select>
               </div>
             </div>
-            <div class="grid-2" style="gap: 0.75rem;">
+            <div class="grid-2" style="gap: 0.65rem;">
               <div>
-                <label class="form-label" style="font-size: 0.75rem;">3. Select Ward / Zone:</label>
+                <label class="form-label" style="font-size: 0.74rem;">Ward / Zone:</label>
                 <select id="modalReportWard" class="form-select">
                   <option value="Ward 12 (Market Zone)" selected>Ward 12 (Market Zone)</option>
                   <option value="Ward 11 (Lake View Zone)">Ward 11 (Lake View Zone)</option>
@@ -1743,49 +1671,46 @@
                 </select>
               </div>
               <div>
-                <label class="form-label" style="font-size: 0.75rem;">4. Street Name & Landmark:</label>
+                <label class="form-label" style="font-size: 0.74rem;">Street Name &amp; Landmark:</label>
                 <input type="text" id="reportLocationInput" class="form-input" placeholder="e.g. Gandhi Statue Main Road" required>
               </div>
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Select Department:</label>
-            <select id="reportDeptSelect" class="form-select">
-              <option value="sanitation" selected>🏢 Sanitation & Waste Management</option>
-              <option value="roads">🛣️ Infrastructure / Roads</option>
-              <option value="water_supply">💧 Water Supply</option>
-              <option value="food_safety">🍲 Food Safety & Hygiene</option>
-              <option value="electricity">⚡ Smart Electricity Department</option>
-            </select>
-          </div>
-
-          <div class="grid-2">
-            <div class="form-group">
-              <label class="form-label">Complaint Title / Summary:</label>
-              <input type="text" id="reportTitleInput" class="form-input" placeholder="e.g. Broken electric pole sparking on main road" required>
+          <!-- COMPLAINT CLASSIFICATION & SUMMARY (Auto-filled by Smart Triage) -->
+          <div class="grid-2" style="gap: 0.65rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 0.76rem;">Department:</label>
+              <select id="reportDeptSelect" class="form-select">
+                <option value="sanitation" selected>🏢 Sanitation &amp; Waste Management</option>
+                <option value="roads">🛣️ Infrastructure / Roads</option>
+                <option value="water_supply">💧 Water Supply</option>
+                <option value="food_safety">🍲 Food Safety &amp; Hygiene</option>
+                <option value="electricity">⚡ Smart Electricity Department</option>
+              </select>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Severity Level (Allocates Resource):</label>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 0.76rem;">Urgency / Severity:</label>
               <select id="reportSeveritySelect" class="form-select">
-                <option value="low">Low Severity (Pushcart)</option>
-                <option value="medium" selected>Medium Severity (Standard Truck)</option>
-                <option value="bulk">Bulk / High Hazard (Compactor/Squad)</option>
+                <option value="low">Low (Standard Dispatch)</option>
+                <option value="medium" selected>Medium Priority (24h SLA)</option>
+                <option value="bulk">Critical / High Hazard (Immediate)</option>
               </select>
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Detailed Description:</label>
-            <textarea id="reportDescInput" class="form-textarea" placeholder="Explain the hazard, landmark, duration, and safety threat..." required></textarea>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.76rem;">Complaint Summary / Short Title:</label>
+            <input type="text" id="reportTitleInput" class="form-input" placeholder="e.g. Severe Garbage Overflow at Market Gate" required>
           </div>
+
         </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline" onclick="window.closeModal('reportIssueModal')">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="reportSubmitBtn">
-            <span>🚀</span> Register Complaint (Start 48h SLA)
+        <div class="modal-footer" style="padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); background: #090e1a; display: flex; align-items: center; justify-content: space-between;">
+          <button type="button" class="btn btn-outline" onclick="window.closeModal('reportIssueModal')" style="padding: 0.6rem 1.25rem;">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="reportSubmitBtn" style="padding: 0.6rem 1.5rem; font-weight: 800; background: linear-gradient(135deg, #10b981, #059669); border-color: #10b981; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);">
+            <span>🚀</span> Register Complaint (Start SLA)
           </button>
         </div>
       </form>
@@ -2325,6 +2250,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=20.0.0"></script>
+  <script src="js/bundle.js?v=21.0.0"></script>
 </body>
 </html>

@@ -1096,18 +1096,106 @@
   window.CivicAiEngine = CivicAiEngine;
 
   // =========================================================================
-  // PHASE 2: AI COMPLAINT INTELLIGENCE CONTROLLER
+  // PHASE 2: REAL-TIME SMART CIVIC TRIAGE CONTROLLER
   // =========================================================================
   window.currentAiAnalysisData = null;
+  let reportTriageDebounceTimer = null;
+
+  window.triggerRealtimeTriage = function(text, immediate = false) {
+    clearTimeout(reportTriageDebounceTimer);
+    const aiTextInput = document.getElementById('aiComplaintTextInput');
+    if (aiTextInput) aiTextInput.value = text || '';
+
+    if (!text || text.trim().length < 6) {
+      const pill = document.getElementById('smartTriagePill');
+      if (pill) pill.style.display = 'none';
+      return Promise.resolve(null);
+    }
+
+    const runTriage = async () => {
+      try {
+        const data = await CivicAiEngine.ComplaintIntelligence.parseComplaint(text.trim());
+        if (!data || data.error) return null;
+
+        window.currentAiAnalysisData = data;
+
+        // Auto-select Department
+        const deptSelect = document.getElementById('reportDeptSelect');
+        if (deptSelect && data.aiDepartment) {
+          deptSelect.value = data.aiDepartment;
+        }
+
+        // Auto-fill Title if empty or was previously auto-filled
+        const titleInput = document.getElementById('reportTitleInput');
+        if (titleInput && (!titleInput.value || titleInput.dataset.autofilled === 'true' || titleInput.value.length < 5)) {
+          titleInput.value = data.suggestedTitle || (text.slice(0, 45) + (text.length > 45 ? '...' : ''));
+          titleInput.dataset.autofilled = 'true';
+        }
+
+        // Auto-select Severity
+        const severitySelect = document.getElementById('reportSeveritySelect');
+        if (severitySelect && data.formSeverity) {
+          severitySelect.value = data.formSeverity;
+        }
+
+        // Display Sleek Real-Time Smart Triage Badge
+        const livePill = document.getElementById('smartTriagePill');
+        const liveSummary = document.getElementById('triageSummaryText');
+        if (livePill && liveSummary) {
+          const deptName = data.aiDeptName || (deptSelect ? deptSelect.options[deptSelect.selectedIndex].text : 'Sanitation');
+          liveSummary.innerHTML = `Auto-detected: <strong style="color: #38bdf8;">${deptName}</strong> • SLA: <strong style="color: #34d399;">${data.aiSuggestedSLA || 24}h (${data.aiSeverity || 'Medium'})</strong>`;
+          livePill.style.display = 'flex';
+        }
+
+        // Populate backward-compatible elements if present
+        const resDept = document.getElementById('aiResDept');
+        const resCategory = document.getElementById('aiResCategory');
+        const resSeverity = document.getElementById('aiResSeverity');
+        const resUrgency = document.getElementById('aiResUrgency');
+        const resSla = document.getElementById('aiResSla');
+        const resSens = document.getElementById('aiResSensitivity');
+        const resRisk = document.getElementById('aiResRiskScore');
+        const resBadge = document.getElementById('aiResRiskBadge');
+        const resReasoning = document.getElementById('aiResReasoning');
+        const confBadge = document.getElementById('aiAnalysisConfidenceBadge');
+
+        if (resDept) resDept.textContent = data.aiDeptName || data.aiDepartment;
+        if (resCategory) resCategory.textContent = data.aiCategoryName || data.aiCategory;
+        if (resSeverity) resSeverity.textContent = data.aiSeverity;
+        if (resUrgency) resUrgency.textContent = `${data.aiUrgencyScore} / 100`;
+        if (resSla) resSla.textContent = `${data.aiSuggestedSLA} hours`;
+        if (resSens) resSens.textContent = data.aiLocationSensitivity;
+        if (resRisk) resRisk.textContent = `${data.aiRiskScore} / 100`;
+        if (resReasoning) resReasoning.textContent = data.aiReasoning;
+        if (confBadge) confBadge.textContent = `Confidence: ${Math.round((data.aiConfidence || 0.9) * 100)}%`;
+
+        return data;
+      } catch (err) {
+        console.warn('[Realtime Triage Notice]:', err);
+        return null;
+      }
+    };
+
+    if (immediate) {
+      return runTriage();
+    } else {
+      return new Promise((resolve) => {
+        reportTriageDebounceTimer = setTimeout(async () => {
+          const res = await runTriage();
+          resolve(res);
+        }, 300);
+      });
+    }
+  };
 
   window.analyzeComplaintWithAi = async function() {
     const textInput = document.getElementById('aiComplaintTextInput');
     const descInput = document.getElementById('reportDescInput');
-    const text = (textInput ? textInput.value : '') || (descInput ? descInput.value : '');
+    const text = (descInput ? descInput.value : '') || (textInput ? textInput.value : '');
 
     if (!text || text.trim().length < 5) {
       showToast('Please describe your civic problem first!', 'warning', '✍️');
-      if (textInput) textInput.focus();
+      if (descInput) descInput.focus();
       return;
     }
 
@@ -1168,6 +1256,7 @@
       }
       if (titleInput && (!titleInput.value || titleInput.value.length < 5)) {
         titleInput.value = data.suggestedTitle || (text.slice(0, 45) + (text.length > 45 ? '...' : ''));
+        titleInput.dataset.autofilled = 'true';
       }
       if (severitySelect && data.formSeverity) {
         severitySelect.value = data.formSeverity;
@@ -1176,25 +1265,34 @@
         descInput.value = text;
       }
 
+      // Update sleek smart pill
+      const pill = document.getElementById('smartTriagePill');
+      const summaryText = document.getElementById('triageSummaryText');
+      if (pill && summaryText) {
+        const deptName = data.aiDeptName || (deptSelect ? deptSelect.options[deptSelect.selectedIndex].text : 'Sanitation');
+        summaryText.innerHTML = `Auto-detected: <strong style="color: #38bdf8;">${deptName}</strong> • SLA: <strong style="color: #34d399;">${data.aiSuggestedSLA || 24}h (${data.aiSeverity})</strong>`;
+        pill.style.display = 'flex';
+      }
+
       if (resultCard) resultCard.style.display = 'block';
       playNotificationSound('chime');
-      showToast('AI suggestions ready! Please review before submitting.', 'info', '🤖');
+      showToast('Smart suggestions applied!', 'info', '⚡');
     } catch (err) {
       console.error('[AI Analysis Error]:', err);
-      showToast('AI analysis is temporarily unavailable. You can continue by selecting the details manually.', 'warning', 'ℹ️');
+      showToast('Smart analysis temporarily unavailable. You can proceed manually.', 'warning', 'ℹ️');
     } finally {
       if (indicator) indicator.style.display = 'none';
-      if (btnText) btnText.textContent = 'Analyze with Civic AI';
+      if (btnText) btnText.textContent = 'Analyze';
     }
   };
 
   window.testAiComplaintWithPhrase = function(sampleText) {
     window.openReportModal();
     setTimeout(() => {
-      const input = document.getElementById('aiComplaintTextInput');
+      const input = document.getElementById('reportDescInput') || document.getElementById('aiComplaintTextInput');
       if (input) {
         input.value = sampleText;
-        window.analyzeComplaintWithAi();
+        window.triggerRealtimeTriage(sampleText);
       }
     }, 250);
   };
@@ -4436,6 +4534,9 @@
           if (statusText) {
             statusText.innerHTML = `🗣️ <em>"${spokenText}"</em>`;
           }
+          if (window.triggerRealtimeTriage) {
+            window.triggerRealtimeTriage(spokenText);
+          }
         }
       };
 
@@ -4461,6 +4562,9 @@
         if (descInput && descInput.value) {
           if (statusText) statusText.textContent = '✅ Voice transcribed live into complaint box!';
           showToast('Voice transcribed successfully!', 'reward', '🎙️');
+          if (window.triggerRealtimeTriage) {
+            window.triggerRealtimeTriage(descInput.value);
+          }
         }
       };
 
@@ -5495,6 +5599,13 @@
     if (quota.isLimitReached) {
       showToast(`Daily Limit: You have reached your maximum of ${quota.limit} reports for today across all departments. Resets at midnight.`, 'error', '⚠️');
     }
+    const pill = document.getElementById('smartTriagePill');
+    const descInput = document.getElementById('reportDescInput');
+    if (pill && (!descInput || !descInput.value.trim())) {
+      pill.style.display = 'none';
+    } else if (descInput && descInput.value.trim().length >= 6) {
+      window.triggerRealtimeTriage(descInput.value);
+    }
     window.openModal('reportIssueModal');
   };
 
@@ -6391,6 +6502,12 @@
           window.currentSelectedPhotoPreset = null;
 
           reportForm.reset();
+          const smartPill = document.getElementById('smartTriagePill');
+          if (smartPill) smartPill.style.display = 'none';
+          const titleField = document.getElementById('reportTitleInput');
+          if (titleField) delete titleField.dataset.autofilled;
+          const voiceStatus = document.getElementById('voiceStatusText');
+          if (voiceStatus) voiceStatus.textContent = '';
           window.clearSelectedImage();
           window.closeModal('reportIssueModal');
 
@@ -6401,6 +6518,24 @@
           showToast(err.message, 'error', '⚠️');
         }
       });
+
+      // Real-time automatic triage on user input in complaint description
+      const reportDescEl = document.getElementById('reportDescInput');
+      if (reportDescEl) {
+        reportDescEl.addEventListener('input', (e) => {
+          if (window.triggerRealtimeTriage) {
+            window.triggerRealtimeTriage(e.target.value);
+          }
+        });
+      }
+
+      // If citizen manually edits title, preserve their manual input
+      const reportTitleEl = document.getElementById('reportTitleInput');
+      if (reportTitleEl) {
+        reportTitleEl.addEventListener('input', () => {
+          reportTitleEl.dataset.autofilled = 'false';
+        });
+      }
     }
 
     // Food Safety Officer: Log Violation Notice Form
