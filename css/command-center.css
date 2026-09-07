@@ -223,3 +223,56 @@
   color: white;
   white-space: nowrap;
 }
+
+/* Geospatial GIS Heatmap & Map Container (Desktop & Universal) */
+.gis-heatmap-wrapper {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  min-height: 480px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  margin-bottom: 2rem;
+  background: #090e1a;
+}
+
+#gisMapContainer {
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  z-index: 10;
+}
+
+.gis-legend-overlay {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 500;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  min-width: 220px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.gis-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  margin-bottom: 5px;
+}
+
+.gis-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
