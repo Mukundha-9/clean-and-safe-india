@@ -2398,32 +2398,7 @@
           : (issueData.severity === 'bulk' ? 'Sanitation Compactor Squad 4 (Lead: Ramesh K.)' : 'Collection Squad 2 (AP-05-TX)');
 
       const currentUser = auth.getUser() || SYSTEM_ACCOUNTS.citizen;
-      const reporterProfile = {
-        name: currentUser.name || 'KRISH',
-        fullName: currentUser.fullName || (currentUser.name === 'KRISH' ? 'Krish Varma' : currentUser.name),
-        email: currentUser.email || 'citizen@civictech.in',
-        phone: currentUser.phone || '+91 98480 22334',
-        permanentAddress: currentUser.permanentAddress || 'Plot 42, Sri Rama Nagar, Surampalem, Gandepalli Mandal, Kakinada District, Andhra Pradesh - 533437',
-        homeGps: currentUser.homeGps || {
-          lat: 17.0042,
-          lng: 81.8021,
-          landmark: 'Near Sri Rama Temple & Community Center',
-          city: 'Surampalem',
-          district: 'Kakinada',
-          state: 'Andhra Pradesh'
-        },
-        homeWard: currentUser.ward || 'Ward 12 (Market Zone)',
-        homeCity: 'Surampalem',
-        homeState: 'Andhra Pradesh',
-        kycStatus: currentUser.kycStatus || 'Verified via Aadhaar / Civic DigiLocker',
-        kycVerified: true,
-        aadhaarMasked: currentUser.aadhaarMasked || 'XXXX-XXXX-8941',
-        reliabilityScore: currentUser.reliabilityScore || '98% (High Credibility - 4 Verified Grievances)',
-        officialId: currentUser.officialId || 'CIT-IND-2026-8941',
-        avatar: currentUser.avatar || 'KR',
-        guardianLevel: currentUser.guardianLevel || 'Level 3: Silver Civic Guardian',
-        civicCredits: currentUser.civicCredits || 150
-      };
+      const reporterProfile = buildCitizenProfileObject(currentUser);
 
       const newIssue = {
         id: id,
@@ -3494,6 +3469,15 @@
         auth.saveSession(auth.session);
       }
 
+      const cAvatar = document.getElementById('citizenTopAvatar');
+      if (cAvatar && data.user) {
+        const dName = data.user.name || 'Citizen';
+        const parts = dName.split(' ').filter(Boolean);
+        const initials = data.user.avatar || (parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : dName.slice(0, 2).toUpperCase());
+        cAvatar.textContent = initials;
+        cAvatar.title = `Citizen Profile: ${dName} (${data.user.officialId || ''})`;
+      }
+
       playNotificationSound('chime');
       showToast('🎉 Citizen profile verified and completed!', 'reward', '🛡️');
       window.closeModal('citizenProfileSetupModal');
@@ -3910,6 +3894,16 @@
     if (certStanding) {
       certStanding.textContent = tierInfo.standingBadge;
     }
+
+    const user = auth.getUser();
+    if (user) {
+      const verifiedNameEl = document.getElementById('citizenVerifiedName');
+      if (verifiedNameEl) verifiedNameEl.textContent = user.name || 'Citizen';
+      const certRecipient = document.getElementById('certModalRecipientName');
+      if (certRecipient) certRecipient.textContent = user.name || 'Citizen';
+      const certId = document.getElementById('certModalOfficialId');
+      if (certId) certId.textContent = `ID: ${user.officialId || 'CIT-IND-2026-8941'}`;
+    }
   }
 
   function renderCitizenDashboard() {
@@ -3927,8 +3921,9 @@
     updateCitizenCreditsUI(totalCredits);
 
     // Synchronize Civic Passport Stats
+    const isKrishUser = user.email === 'citizen@civictech.in' || (user.name && user.name.toLowerCase().includes('krish'));
     const myAllIssues = issues.filter(i => 
-      i.reportedBy?.toLowerCase().includes('krish') || i.userId === user.id || i.reportedBy === user.name
+      (isKrishUser && i.reportedBy?.toLowerCase().includes('krish')) || (i.userId && i.userId === user.id) || (i.reportedBy && i.reportedBy === user.name)
     );
     const myActiveCount = myAllIssues.filter(i => i.status !== 'resolved').length;
     const myResolvedCount = myAllIssues.filter(i => i.status === 'resolved').length;
@@ -4632,9 +4627,15 @@
       // 1. Citizen Avatar & Name
       const cAvatar = document.getElementById('citizenTopAvatar');
       if (cAvatar) {
-        cAvatar.textContent = currentUser.avatar || 'KR';
-        cAvatar.title = `Citizen Profile: ${currentUser.name} (${currentUser.officialId || ''})`;
+        const parts = (currentUser.name || '').split(' ').filter(Boolean);
+        const initials = currentUser.avatar || (parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (currentUser.name ? currentUser.name.slice(0, 2).toUpperCase() : 'KR'));
+        cAvatar.textContent = initials;
+        cAvatar.title = `Citizen Profile: ${currentUser.name || 'Citizen'} (${currentUser.officialId || ''})`;
       }
+      const vName = document.getElementById('citizenVerifiedName');
+      if (vName) vName.textContent = currentUser.name || 'Citizen';
+      const waGreeting = document.getElementById('waBotGreetingName');
+      if (waGreeting) waGreeting.textContent = currentUser.name || 'Citizen';
 
       // 2. Municipal Admin Badge
       const mBadge = document.getElementById('munTopAdminBadge');
@@ -6502,132 +6503,154 @@
     return Math.round(R * c * 10) / 10;
   }
 
+  function buildCitizenProfileObject(user, issue = null) {
+    if (!user) {
+      user = auth.getUser() || SYSTEM_ACCOUNTS.citizen;
+    }
+    const isDefaultKrish = !user.email || user.email === 'citizen@civictech.in';
+    const fullName = (isDefaultKrish && (!user.name || user.name === 'KRISH' || user.name.toLowerCase() === 'krish')) ? 'Krish Varma' : (user.name || 'Citizen Reporter');
+    const email = user.email || (isDefaultKrish ? 'krish.varma@cleanindia.gov.in' : 'citizen@cleanindia.gov.in');
+    const phone = user.phone || (isDefaultKrish ? '+91 94401 88421' : '+91 98480 22334');
+    const state = user.jurisdictionState || 'Andhra Pradesh';
+    const city = user.jurisdictionCity || 'Surampalem';
+    const ward = user.jurisdictionWard || 'Ward 12 (Market Zone)';
+    const address = user.permanentAddress || (isDefaultKrish ? 'Plot 18, Gandhi Nagar Main Road, Ward 12, Surampalem, Andhra Pradesh - 533437' : `${ward}, ${city}, ${state}`);
+
+    // Compute initials from full name
+    let avatar = user.avatar;
+    if (!avatar || (avatar === 'KR' && !isDefaultKrish)) {
+      const parts = fullName.split(' ').filter(Boolean);
+      avatar = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : fullName.slice(0, 2).toUpperCase();
+    }
+    if (!avatar) avatar = isDefaultKrish ? 'KR' : 'CZ';
+
+    const officialId = user.officialId || ('CIT-IND-2026-' + (user.id ? String(user.id).replace(/[^0-9]/g, '').slice(-4) || '8941' : '8941'));
+    const credits = (user.civicCredits !== undefined && user.civicCredits !== null) ? user.civicCredits : (isDefaultKrish ? 150 : 20);
+    const maskedAadhaar = 'XXXX-XXXX-' + (officialId ? String(officialId).slice(-4) : '8941');
+
+    // Geo coordinates lookup based on city
+    let homeLat = 17.0042;
+    let homeLng = 81.8021;
+    const cityLower = (city || '').toLowerCase();
+    if (cityLower.includes('kakinada')) {
+      homeLat = 16.9891; homeLng = 82.2475;
+    } else if (cityLower.includes('visakhapatnam') || cityLower.includes('vizag')) {
+      homeLat = 17.7126; homeLng = 83.3235;
+    } else if (cityLower.includes('hyderabad')) {
+      homeLat = 17.3850; homeLng = 78.4867;
+    } else if (cityLower.includes('chennai')) {
+      homeLat = 13.0827; homeLng = 80.2707;
+    } else if (cityLower.includes('delhi')) {
+      homeLat = 28.6139; homeLng = 77.2090;
+    } else if (cityLower.includes('bangalore') || cityLower.includes('bengaluru')) {
+      homeLat = 12.9716; homeLng = 77.5946;
+    } else if (cityLower.includes('mumbai') || cityLower.includes('pune')) {
+      homeLat = 19.0760; homeLng = 72.8777;
+    }
+
+    return {
+      name: avatar,
+      fullName: fullName,
+      email: email,
+      phone: phone,
+      permanentAddress: address,
+      homeGps: {
+        lat: homeLat,
+        lng: homeLng,
+        landmark: `${address.split(',')[0] || 'Residence'}, ${ward}`,
+        city: city,
+        district: city,
+        state: state
+      },
+      homeWard: ward,
+      homeCity: city,
+      homeState: state,
+      kycStatus: 'Verified via Aadhaar / Civic DigiLocker',
+      kycVerified: true,
+      aadhaarMasked: maskedAadhaar,
+      reliabilityScore: '98% (High Credibility - Verified Citizen)',
+      officialId: officialId,
+      avatar: avatar,
+      guardianLevel: credits >= 100 ? 'Level 3: Silver Civic Guardian' : 'Level 1: Civic Contributor',
+      civicCredits: credits
+    };
+  }
+
   function getIssueReporterProfile(issue) {
     const currentUser = auth.getUser();
     if (!issue) {
-      issue = (db.issues || []).find(i => 
-        (currentUser && (i.userId === currentUser.id || i.reportedBy === currentUser.name)) ||
-        (i.reportedBy || '').toLowerCase().includes('krish')
-      ) || {
-        reportedBy: currentUser?.name || 'Krish Varma',
-        userId: currentUser?.id || 'user-101'
-      };
+      const myIssue = (db.issues || []).find(i => 
+        currentUser && (i.userId === currentUser.id || i.reportedBy === currentUser.name)
+      );
+      if (!issue && !myIssue) {
+        return buildCitizenProfileObject(currentUser);
+      }
+      issue = myIssue;
     }
-    if (issue.reporterProfile) return issue.reporterProfile;
+    if (issue && issue.reporterProfile) return issue.reporterProfile;
 
     const isCurrentUser = Boolean(
-      currentUser &&
+      currentUser && issue &&
       (
-        !issue.reportedBy ||
-        (issue.reportedBy && issue.reportedBy.toLowerCase().includes('krish') && (currentUser.email === 'citizen@civictech.in' || (currentUser.name && currentUser.name.toLowerCase().includes('krish')))) ||
-        (issue.userId && issue.userId === currentUser.id) ||
-        (issue.reportedBy && issue.reportedBy === currentUser.name)
+        (issue.userId && currentUser.id && issue.userId === currentUser.id) ||
+        (issue.reportedBy && currentUser.name && issue.reportedBy.toLowerCase().trim() === currentUser.name.toLowerCase().trim()) ||
+        (!issue.reportedBy && !issue.userId) ||
+        (issue.reportedBy && issue.reportedBy.toLowerCase().includes('krish') && (currentUser.email === 'citizen@civictech.in' || (currentUser.name && currentUser.name.toLowerCase().includes('krish'))))
       )
     );
 
     if (isCurrentUser && currentUser) {
-      const isDefaultKrish = !currentUser.email || currentUser.email === 'citizen@civictech.in';
-      const fullName = currentUser.name || (isDefaultKrish ? 'Krish Varma' : 'Citizen Reporter');
-      const email = currentUser.email || (isDefaultKrish ? 'krish.varma@cleanindia.gov.in' : 'citizen@cleanindia.gov.in');
-      const phone = currentUser.phone || (isDefaultKrish ? '+91 94401 88421' : '+91 98480 22334');
-      const state = currentUser.jurisdictionState || 'Andhra Pradesh';
-      const city = currentUser.jurisdictionCity || 'Surampalem';
-      const ward = currentUser.jurisdictionWard || 'Ward 12 (Market Zone)';
-      const address = currentUser.permanentAddress || (isDefaultKrish ? 'Plot 18, Gandhi Nagar Main Road, Ward 12, Surampalem, Andhra Pradesh - 533437' : `${ward}, ${city}, ${state}`);
-      const avatar = currentUser.avatar || (fullName ? fullName.substring(0, 2).toUpperCase() : 'KR');
-      const officialId = currentUser.officialId || ('CIT-IND-2026-' + (currentUser.id ? String(currentUser.id).replace(/[^0-9]/g, '').slice(-4) || '8941' : '8941'));
-      const credits = currentUser.civicCredits || 150;
-      const maskedAadhaar = 'XXXX-XXXX-' + (officialId ? String(officialId).slice(-4) : '8941');
-
-      return {
-        name: avatar,
-        fullName: fullName,
-        email: email,
-        phone: phone,
-        permanentAddress: address,
-        homeGps: {
-          lat: 17.0042,
-          lng: 81.8021,
-          landmark: `${address.split(',')[0] || 'Residence'}, ${ward}`,
-          city: city,
-          district: city,
-          state: state
-        },
-        homeWard: ward,
-        homeCity: city,
-        homeState: state,
-        kycStatus: 'Verified via Aadhaar / Civic DigiLocker',
-        kycVerified: true,
-        aadhaarMasked: maskedAadhaar,
-        reliabilityScore: '98% (High Credibility - Verified Citizen)',
-        officialId: officialId,
-        avatar: avatar,
-        guardianLevel: 'Level 3: Silver Civic Guardian',
-        civicCredits: credits
-      };
+      return buildCitizenProfileObject(currentUser, issue);
     }
 
-    const name = issue.reportedBy || 'Ward Resident';
-    const city = issue.city || (issue.location && issue.location.includes('Chennai') ? 'Chennai' : issue.location && issue.location.includes('New Delhi') ? 'New Delhi' : 'Surampalem');
-    const state = issue.state || (city === 'Chennai' ? 'Tamil Nadu' : city === 'New Delhi' ? 'Delhi NCR' : 'Andhra Pradesh');
+    const name = (issue && issue.reportedBy) || 'Ward Resident';
+    const city = (issue && issue.city) || (issue && issue.location && issue.location.includes('Chennai') ? 'Chennai' : issue && issue.location && issue.location.includes('New Delhi') ? 'New Delhi' : 'Surampalem');
+    const state = (issue && issue.state) || (city === 'Chennai' ? 'Tamil Nadu' : city === 'New Delhi' ? 'Delhi NCR' : 'Andhra Pradesh');
     
     return {
       name: name,
       fullName: name.includes('(') ? name.split('(')[0].trim() : name,
       email: `${name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'resident'}@cleanindia.gov.in`,
       phone: '+91 94401 88421',
-      permanentAddress: `Plot 18, Gandhi Nagar Main Road, ${issue.ward || 'Central Ward'}, ${city}, ${state} - 533437`,
+      permanentAddress: `Plot 18, Gandhi Nagar Main Road, ${(issue && issue.ward) || 'Central Ward'}, ${city}, ${state} - 533437`,
       homeGps: {
-        lat: Number(issue.lat || 17.0042),
-        lng: Number(issue.lng || 81.8021),
+        lat: Number((issue && issue.lat) || 17.0042),
+        lng: Number((issue && issue.lng) || 81.8021),
         city: city,
         district: city,
         state: state
       },
-      homeWard: issue.ward || 'Central Ward',
+      homeWard: (issue && issue.ward) || 'Central Ward',
       homeCity: city,
       homeState: state,
       kycStatus: 'Verified via Civic DigiLocker',
       kycVerified: true,
       aadhaarMasked: 'XXXX-XXXX-3419',
       reliabilityScore: '95% (Verified Citizen)',
-      officialId: 'CIT-IND-2026-' + (issue.userId ? String(issue.userId).replace(/[^0-9]/g, '') || '5401' : '5401'),
+      officialId: 'CIT-IND-2026-' + ((issue && issue.userId) ? String(issue.userId).replace(/[^0-9]/g, '') || '5401' : '5401'),
       avatar: name.substring(0, 2).toUpperCase(),
       guardianLevel: 'Active Ward Contributor',
       civicCredits: 100
     };
   }
 
-  window.openReporterProfile = function(issueId) {
-    let issue = null;
-    if (issueId && typeof issueId === 'object') {
-      issue = issueId;
-    } else if (issueId) {
-      issue = db.getIssueById(issueId);
-    }
+  function renderReporterProfileModal(profile, issue) {
+    const modalBody = document.getElementById('reporterProfileModalBody');
+    if (!modalBody) return;
 
-    const currentUser = auth.getUser();
     if (!issue) {
-      const myIssue = (db.issues || []).find(i => 
-        (currentUser && (i.userId === currentUser.id || i.reportedBy === currentUser.name)) ||
-        (i.reportedBy || '').toLowerCase().includes('krish')
-      );
-      issue = myIssue || {
-        id: currentUser?.officialId || 'CIT-IND-2026-8941',
-        reportedBy: currentUser?.name || 'Krish Varma',
-        location: currentUser?.permanentAddress || 'Gandhi Nagar Main Road, Ward 12, Surampalem',
-        ward: currentUser?.jurisdictionWard || 'Ward 12 (Market Zone)',
-        city: currentUser?.jurisdictionCity || 'Surampalem',
-        state: currentUser?.jurisdictionState || 'Andhra Pradesh',
-        lat: 17.0042,
-        lng: 81.8021,
+      issue = {
+        id: profile.officialId,
+        reportedBy: profile.fullName,
+        location: profile.permanentAddress,
+        ward: profile.homeWard,
+        city: profile.homeCity,
+        state: profile.homeState,
+        lat: profile.homeGps.lat,
+        lng: profile.homeGps.lng,
         deptName: 'Municipal Administration & Urban Development'
       };
     }
-
-    const profile = getIssueReporterProfile(issue);
-    const modalBody = document.getElementById('reporterProfileModalBody');
-    if (!modalBody) return;
 
     // Dual-Location Logic: Compare Citizen Permanent Residence vs Incident Reporting GPS
     const homeLat = Number(profile.homeGps?.lat || 17.0042);
@@ -6771,7 +6794,7 @@
               <span>📍</span> 2. INCIDENT SITE (TICKET ALLOCATION)
             </div>
             <div style="font-size: 0.82rem; font-weight: 700; color: white; margin-bottom: 0.3rem;">
-              ${issue.location}
+              ${issue.location || profile.permanentAddress}
             </div>
             <div class="gps-coords-badge">
               📍 ${incidentLat.toFixed(4)}° N, ${incidentLng.toFixed(4)}° E
@@ -6790,10 +6813,103 @@
     `;
 
     window.openModal('reporterProfileModal');
+  }
+
+  window.openReporterProfile = function(issueId) {
+    let issue = null;
+    if (issueId && typeof issueId === 'object') {
+      issue = issueId;
+    } else if (issueId) {
+      issue = db.getIssueById(issueId);
+    }
+
+    const currentUser = auth.getUser();
+    if (!issue) {
+      const myIssue = (db.issues || []).find(i => 
+        currentUser && (i.userId === currentUser.id || i.reportedBy === currentUser.name)
+      );
+      const profile = buildCitizenProfileObject(currentUser);
+      issue = myIssue || {
+        id: profile.officialId,
+        reportedBy: profile.fullName,
+        location: profile.permanentAddress,
+        ward: profile.homeWard,
+        city: profile.homeCity,
+        state: profile.homeState,
+        lat: profile.homeGps.lat,
+        lng: profile.homeGps.lng,
+        deptName: 'Municipal Administration & Urban Development'
+      };
+      return renderReporterProfileModal(profile, issue);
+    }
+
+    const profile = getIssueReporterProfile(issue);
+    renderReporterProfileModal(profile, issue);
   };
 
-  window.openCitizenProfileModal = function() {
-    window.openReporterProfile();
+  window.openCitizenProfileModal = async function() {
+    let currentUser = auth.getUser();
+    const token = auth.getToken();
+
+    if (token) {
+      try {
+        const controller = new AbortController();
+        const tId = setTimeout(() => controller.abort(), 2000);
+        const res = await fetch('/api/citizen/profile', {
+          headers: { 'Authorization': `Bearer ${token}` },
+          signal: controller.signal
+        });
+        clearTimeout(tId);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.success && data.user) {
+            currentUser = {
+              ...(auth.session?.user || {}),
+              ...data.user
+            };
+            if (auth.session) {
+              auth.session.user = currentUser;
+              auth.saveSession(auth.session);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Could not refresh citizen profile from server:', e);
+      }
+    }
+
+    if (!currentUser) {
+      currentUser = SYSTEM_ACCOUNTS.citizen;
+    }
+
+    // Refresh dynamic user avatar element on top bar
+    const cAvatar = document.getElementById('citizenTopAvatar');
+    if (cAvatar) {
+      const parts = (currentUser.name || '').split(' ').filter(Boolean);
+      const initials = currentUser.avatar || (parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (currentUser.name ? currentUser.name.slice(0, 2).toUpperCase() : 'KR'));
+      cAvatar.textContent = initials;
+      cAvatar.title = `Citizen Profile: ${currentUser.name || 'Citizen'} (${currentUser.officialId || ''})`;
+    }
+
+    const profile = buildCitizenProfileObject(currentUser);
+
+    const userIssue = (db.issues || []).find(i => 
+      currentUser && (i.userId === currentUser.id || i.reportedBy === currentUser.name)
+    );
+
+    const issue = userIssue || {
+      id: profile.officialId,
+      reportedBy: profile.fullName,
+      location: profile.permanentAddress,
+      ward: profile.homeWard,
+      city: profile.homeCity,
+      state: profile.homeState,
+      lat: profile.homeGps.lat,
+      lng: profile.homeGps.lng,
+      deptName: 'Municipal Administration & Urban Development'
+    };
+
+    renderReporterProfileModal(profile, issue);
   };
 
   window.viewIssueDetail = async function(issueId) {
