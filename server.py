@@ -622,24 +622,135 @@ def seed_initial_data(conn):
 
     # Initial Issues
     seed_issues = [
+        # KRISH REPORT 1: Category: Sanitation & Waste Management, Status: RESOLVED / COMPLETED, SLA: Resolved successfully
         (
-            'ISS-2026-00123', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Market Gate Cross',
+            'ISS-2026-00121', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Canteen Gate Cross',
             'sanitation', 'Sanitation & Waste Management', '🏢',
-            'Overflowing Commercial Waste at Market Gate',
-            'High volume wet & dry waste pile obstructing market walkway. Threat of vector-borne contamination.',
-            'Surampalem • Ward 12 (Market Zone), Market Gate Cross',
-            'garbage_overflow', 'Garbage Overflow', '🗑️', 'bulk', 'HIGH RISK BULK HAZARD', 'pending',
-            now - (8 * 3600 * 1000), now + (40 * 3600 * 1000), 39.9, None, 0,
-            'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80', None,
-            'Krish (Civic Guardian)', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (7 * 3600 * 1000),
-            'Municipal Rapid Squad 4', now - (6 * 3600 * 1000), 'Squad Dispatched with Hydraulic Compactor',
-            'Tractor / Heavy Squad', 14, json.dumps(['user-101', 'user-102']),
+            'Overflowing Waste Bins Near Canteen Gate',
+            'Commercial waste bins overflowing near the canteen entrance causing pedestrian obstruction and hygiene concerns. Bins cleared, sanitized and relocated to designated waste bay.',
+            'Surampalem • Ward 12 (Market Zone), Canteen Gate Cross',
+            'garbage_overflow', 'Sanitation & Waste Management', '🗑️',
+            'medium', 'RESOLVED IN 26 HOURS', 'resolved',
+            now - (30 * 3600 * 1000), now + (18 * 3600 * 1000), 0.0, now - (4 * 3600 * 1000),
+            0,
+            'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
+            'KRISH', 'user-101',
+            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (28 * 3600 * 1000),
+            'Sanitation Rapid Fleet 1 (Lead: Ravi Kumar)', now - (26 * 3600 * 1000),
+            'Completed & Verified On-Site', 'Compactor Fleet',
+            14, json.dumps(['user-101', 'user-102']),
             json.dumps([
-                {'author': 'System Watchdog', 'text': 'Live GPS Geotag logged: 17.0010° N, 81.8045° E (±4m). 48h SLA timer active.', 'time': '8h ago'},
-                {'author': 'Consultant Officer K. Mukundha', 'text': 'Grievance verified. Heavy hydraulic tipper assigned.', 'time': '7h ago'}
+                {'author': 'System Watchdog', 'text': 'Live GPS Geotag logged: 17.0015° N, 81.8042° E. 48h SLA timer active.', 'time': '30h ago'},
+                {'author': 'Consultant Officer K. Mukundha', 'text': 'Grievance verified. Heavy hydraulic tipper assigned.', 'time': '28h ago'},
+                {'author': 'Sanitation Rapid Fleet 1', 'text': 'Site cleared and sanitized with lime powder.', 'time': '4h ago'}
             ]),
-            0, 0, 17.0010, 81.8045, None, None, None
+            1, 0.0, 17.0015, 81.8042, None, None, None
         ),
+
+        # KRISH REPORT 2: Category: Sanitation & Waste Management, Status: RESOLVED / COMPLETED, SLA: Resolved successfully
+        (
+            'ISS-2026-00128', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Market Road Corner',
+            'sanitation', 'Sanitation & Waste Management', '🏢',
+            'Open Garbage Dumping Near Market Road',
+            'Illegal dumping of commercial cartons and household solid waste along Market Road corner. Entire stretch cleared, disinfected, and anti-dumping signage erected.',
+            'Surampalem • Ward 12 (Market Zone), Market Road Corner',
+            'garbage_overflow', 'Sanitation & Waste Management', '🗑️',
+            'medium', 'RESOLVED IN 18 HOURS', 'resolved',
+            now - (24 * 3600 * 1000), now + (24 * 3600 * 1000), 0.0, now - (6 * 3600 * 1000),
+            0,
+            'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
+            'KRISH', 'user-101',
+            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (22 * 3600 * 1000),
+            'Municipal Rapid Squad 4 (Lead: Ramesh)', now - (20 * 3600 * 1000),
+            'Completed & Verified On-Site', 'Tipper Truck',
+            18, json.dumps(['user-101']),
+            json.dumps([
+                {'author': 'Consultant Officer K. Mukundha', 'text': 'Sanitation supervisor notified and squad deployed.', 'time': '22h ago'},
+                {'author': 'Municipal Rapid Squad 4', 'text': 'Waste cleared and bins repositioned.', 'time': '6h ago'}
+            ]),
+            1, 0.0, 17.0018, 81.8038, None, None, None
+        ),
+
+        # KRISH REPORT 3: Category: Sanitation & Waste Management, Status: IN PROGRESS, SLA: 48-HOUR SLA BREACHED / ESCALATED
+        (
+            'ISS-2026-00123', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Gandhi Statue Main Road',
+            'sanitation', 'Sanitation & Waste Management', '🏢',
+            'Severe Commercial Waste Overflow at Market Gate',
+            'Over 3 tons of rotten municipal and commercial garbage overflowing onto main pedestrian road. Exceeded mandatory 48-Hour SLA period without field clearance. Automatically escalated to Municipal Commissioner Dr. Mahesh Babu & Zonal Health Directorate.',
+            'Surampalem • Ward 12 (Market Zone), Gandhi Statue Main Road',
+            'garbage_overflow', 'Sanitation & Waste Management', '🗑️',
+            'bulk', 'SLA BREACHED (>48H)', 'in_progress',
+            now - (58 * 3600 * 1000), now - (10 * 3600 * 1000), 0.0, None,
+            1,
+            'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
+            None,
+            'KRISH', 'user-101',
+            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (56 * 3600 * 1000),
+            'Sanitation Rapid Fleet 3 (Lead: P. Ramesh)', now - (54 * 3600 * 1000),
+            'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Desk for Urgent Action',
+            'Heavy Hydraulic Compactor & 10-Ton Tipper Fleet',
+            84, json.dumps(['user-101']),
+            json.dumps([
+                {'author': 'System SLA Monitor', 'text': '⏱️ 48-Hour SLA Breached! Grievance unaddressed after 48h limit.', 'time': '10h ago'},
+                {'author': 'Auto-Escalation Gateway', 'text': '🚨 Escalated to Higher Authority: Zonal Municipal Commissioner (Dr. Mahesh Babu) & Urban Health Directorate.', 'time': '10h ago'},
+                {'author': 'Municipal Commissioner Red Desk', 'text': 'Ticket received with Critical Priority 1. Direct disciplinary summons and immediate heavy squad deployed.', 'time': '8h ago'}
+            ]),
+            0, 0.0, 17.0012, 81.8048, None, None, None
+        ),
+
+        # KRISH REPORT 4: Category: Smart Electricity Department, Status: RESOLVED / COMPLETED, SLA: Resolved successfully
+        (
+            'ISS-2026-00130', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Gandhi Statue Junction',
+            'electricity', 'Smart Electricity Department', '⚡',
+            'Streetlight Failure Near Ward 12',
+            'Twin-arm LED streetlights completely non-operational near Gandhi Statue junction, leading to low visibility at night. Replaced faulty ballast and LED driver unit. Full illumination restored.',
+            'Surampalem • Ward 12 (Market Zone), Gandhi Statue Junction',
+            'electricity', 'Smart Electricity Department', '💡',
+            'medium', 'RESOLVED IN 28 HOURS', 'resolved',
+            now - (36 * 3600 * 1000), now + (12 * 3600 * 1000), 0.0, now - (8 * 3600 * 1000),
+            0,
+            'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800&auto=format&fit=crop&q=80',
+            'KRISH', 'user-101',
+            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (34 * 3600 * 1000),
+            'Lineman Squad B (Lead: Suresh Kumar)', now - (32 * 3600 * 1000),
+            'Completed & Verified On-Site', 'Lineman Bucket Van (AP-05-EB)',
+            22, json.dumps(['user-101']),
+            json.dumps([
+                {'author': 'Consultant Officer K. Mukundha', 'text': 'Electrical inspector assigned.', 'time': '34h ago'},
+                {'author': 'Lineman Squad B', 'text': 'Replaced driver unit. All streetlights operational.', 'time': '8h ago'}
+            ]),
+            1, 0.0, 17.0022, 81.8035, None, None, None
+        ),
+
+        # KRISH REPORT 5: Category: Water Leakage / Water Supply, Status: IN PROGRESS, SLA: Normal / active SLA window
+        (
+            'ISS-2026-00131', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Market Road Pavement',
+            'water_supply', 'Water Leakage / Water Supply', '💧',
+            'Water Pipeline Leakage Near Ward 12',
+            'Pressurized municipal water distribution main leaking clean drinking water onto Market Road pavement. Isolation valve inspection underway.',
+            'Surampalem • Ward 12 (Market Zone), Market Road Pavement',
+            'water_leakage', 'Water Leakage / Water Supply', '🚰',
+            'medium', 'ACTIVE SLA (38H LEFT)', 'in_progress',
+            now - (10 * 3600 * 1000), now + (38 * 3600 * 1000), 38.0, None,
+            0,
+            'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80',
+            None,
+            'KRISH', 'user-101',
+            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (8 * 3600 * 1000),
+            'Public Works Water Squad 2 (Lead: Anita Roy)', now - (6 * 3600 * 1000),
+            'On Site - Conducting Work', 'Valve Repair Utility Van',
+            9, json.dumps(['user-101']),
+            json.dumps([
+                {'author': 'Consultant Officer K. Mukundha', 'text': 'Water Board division alerted. Utility squad dispatched.', 'time': '8h ago'},
+                {'author': 'Public Works Water Squad 2', 'text': 'Pressure isolated. Excavating service collar for replacement.', 'time': '2h ago'}
+            ]),
+            0, 0.0, 17.0016, 81.8040, None, None, None
+        ),
+
+        # Other Community & Official Seed Records
         (
             'ISS-2026-00124', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Gandhi Statue Main Road',
             'electricity', 'Smart Electricity Department', '⚡',
@@ -651,7 +762,7 @@ def seed_initial_data(conn):
             'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=800&auto=format&fit=crop&q=80', None,
             'R. Venkatesh (Citizen)', 'user-103', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (17 * 3600 * 1000),
             'Lineman Squad B (Suresh Kumar)', now - (16 * 3600 * 1000), 'Feeder Isolated & Line Repair Crew Active',
-            'Lineman Bucket Van (AP-05-EB)', 28, json.dumps(['user-101', 'user-104', 'user-105']),
+            'Lineman Bucket Van (AP-05-EB)', 28, json.dumps(['user-103', 'user-104', 'user-105']),
             json.dumps([
                 {'author': 'System Watchdog', 'text': 'Critical Priority Alert triggered. Feeder #4 SCADA alert mapped.', 'time': '18h ago'},
                 {'author': 'Consultant Officer K. Mukundha', 'text': 'SCADA auto-tripped feeder. Lineman Suresh Kumar on site with insulated ladder.', 'time': '17h ago'}
@@ -669,33 +780,12 @@ def seed_initial_data(conn):
             'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80', None,
             'FoodGuard AI Sensor', 'system-fso', 'Dr. Lakshmi Prasad (FSO)', now - (5 * 3600 * 1000),
             'Food Safety Officer (Dr. Lakshmi Prasad)', now - (5 * 3600 * 1000), 'Statutory Notice FSSAI-AP-2026-V09 Served',
-            'FSO Inspection Squad', 19, json.dumps(['user-101']),
+            'FSO Inspection Squad', 19, json.dumps(['user-103']),
             json.dumps([
                 {'author': 'FoodGuard AI Sensor', 'text': 'Automated IoT Gas Spike: 360 PPM Ammonia detected.', 'time': '6h ago'},
                 {'author': 'Dr. Lakshmi Prasad (FSO)', 'text': 'Notice served under Sec 56 FSS Act. Penalty: ₹2,500. 7 days rectification period.', 'time': '5h ago'}
             ]),
             0, 2500, 17.0040, 81.8020, 'FSSAI-AP-2026-V09', 'Swagath Grand Fast Food', 360
-        ),
-        (
-            'ISS-2026-00128', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Gandhi Statue Main Road',
-            'sanitation', 'Sanitation & Waste Management', '🏢',
-            '🚨 SLA Breached: Massive Solid Waste & Garbage Dump Overflow',
-            'Over 3 tons of rotten municipal garbage overflowing onto main pedestrian road. Exceeded mandatory 48-Hour SLA period without field clearance. Automatically escalated to Municipal Commissioner Dr. Mahesh Babu & Zonal Health Directorate.',
-            'Surampalem • Ward 12 (Market Zone), Gandhi Statue Main Road',
-            'garbage_overflow', 'Garbage Overflow', '🗑️', 'bulk', 'SLA BREACHED (>48H)', 'escalated',
-            now - (62 * 3600 * 1000), now - (14 * 3600 * 1000), 0, None, 1,
-            'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80', None,
-            'KRISH (Civic Guardian)', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (61.5 * 3600 * 1000),
-            'Sanitation Rapid Fleet 3 (Lead: P. Ramesh)', now - (60 * 3600 * 1000),
-            'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Desk for Urgent Action',
-            'Heavy Hydraulic Compactor & 10-Ton Tipper Fleet', 84, json.dumps(['user-101']),
-            json.dumps([
-                {'author': 'System SLA Monitor', 'text': '⏱️ 48-Hour SLA Breached! Grievance unaddressed after 48h limit.', 'time': '14h ago'},
-                {'author': 'Auto-Escalation Gateway', 'text': '🚨 Escalated to Higher Authority: Zonal Municipal Commissioner (Dr. Mahesh Babu) & Urban Health Directorate.', 'time': '14h ago'},
-                {'author': 'Municipal Commissioner Red Desk', 'text': 'Ticket received with Critical Priority 1. Direct disciplinary summons and immediate heavy squad deployed.', 'time': '12h ago'},
-                {'author': 'KRISH (Citizen)', 'text': 'Garbage dump is emitting toxic odor and blocking school children. Thank you for forwarding to the Commissioner.', 'time': '4h ago'}
-            ]),
-            0, 0, 17.0012, 81.8048, None, None, None
         ),
         (
             'ISS-2026-00122', 'Andhra Pradesh', 'Surampalem', 'Ward 11 (Lake View Zone)', 'Lake View Road',
@@ -709,7 +799,7 @@ def seed_initial_data(conn):
             'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
             'S. Rajesh (Citizen)', 'user-106', 'Consultant Officer K. Mukundha', now - (35 * 3600 * 1000),
             'Public Works Squad 2', now - (34 * 3600 * 1000), 'Field Execution Completed & Cleaned Proof Uploaded',
-            'Collection Truck', 22, json.dumps(['user-101', 'user-106']),
+            'Collection Truck', 22, json.dumps(['user-106']),
             json.dumps([
                 {'author': 'Consultant Officer K. Mukundha', 'text': 'Grievance verified. PW squad closed repair within 26 hours.', 'time': '10h ago'}
             ]),

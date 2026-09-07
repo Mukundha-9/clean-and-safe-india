@@ -1332,8 +1332,104 @@
   // =========================================================================
   // 3. MOCK DATABASE WITH 100% UNIQUE HIGH-QUALITY INCIDENT IMAGES
   // =========================================================================
-  const INITIAL_ISSUES = [
-    // --- ANDHRA PRADESH ---
+    const INITIAL_ISSUES = [
+    // --- ANDHRA PRADESH: CITIZEN KRISH VERIFIED REPORTS (EXACT 5 REPORTS) ---
+    // REPORT 1: Category: Sanitation & Waste Management, Status: RESOLVED / COMPLETED, SLA: Resolved successfully
+    {
+      isDemo: true,
+      id: 'ISS-2026-00121',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      street: 'Canteen Gate Cross',
+      department: 'sanitation',
+      deptName: 'Sanitation & Waste Management',
+      deptIcon: '🏢',
+      title: 'Overflowing Waste Bins Near Canteen Gate',
+      description: 'Commercial waste bins overflowing near the canteen entrance causing pedestrian obstruction and hygiene concerns. Bins cleared, sanitized and relocated to designated waste bay.',
+      location: 'Ward 12 (Market Zone), Canteen Gate Cross, Surampalem',
+      category: 'garbage_overflow',
+      categoryName: 'Sanitation & Waste Management',
+      categoryIcon: '🗑️',
+      severity: 'medium',
+      severityLabel: 'RESOLVED IN 26 HOURS',
+      status: 'resolved',
+      timestamp: Date.now() - 3600000 * 30,
+      slaDeadline: Date.now() + 3600000 * 18,
+      resolvedTimestamp: Date.now() - 3600000 * 4,
+      slaHoursLeft: 0,
+      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedTimestamp: Date.now() - 3600000 * 28,
+      assignedWorker: 'Sanitation Rapid Fleet 1 (Lead: Ravi Kumar)',
+      assignedTimestamp: Date.now() - 3600000 * 26,
+      workerStatus: 'Completed & Verified On-Site',
+      isSlaBreached: false,
+      lat: 17.0015,
+      lng: 81.8042,
+      reportedBy: 'KRISH',
+      userId: 'user-101',
+      upvotes: 14,
+      upvotedBy: ['user-101', 'user-102'],
+      imageBefore: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
+      imageAfter: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
+      recommendedResource: 'Compactor Fleet',
+      rewardIssued: true,
+      fineLevied: 0,
+      comments: [
+        { author: 'System Watchdog', role: 'system', text: 'Live GPS Geotag logged: 17.0015° N, 81.8042° E. 48h SLA timer active.', time: '30h ago' },
+        { author: 'Consultant Officer K. Mukundha', role: 'admin', text: 'Grievance verified. Heavy hydraulic tipper assigned.', time: '28h ago' },
+        { author: 'Sanitation Rapid Fleet 1', role: 'worker', text: 'Site cleared and sanitized with lime powder.', time: '4h ago' }
+      ]
+    },
+
+    // REPORT 2: Category: Sanitation & Waste Management, Status: RESOLVED / COMPLETED, SLA: Resolved successfully
+    {
+      isDemo: true,
+      id: 'ISS-2026-00128',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      street: 'Market Road Corner',
+      department: 'sanitation',
+      deptName: 'Sanitation & Waste Management',
+      deptIcon: '🏢',
+      title: 'Open Garbage Dumping Near Market Road',
+      description: 'Illegal dumping of commercial cartons and household solid waste along Market Road corner. Entire stretch cleared, disinfected, and anti-dumping signage erected.',
+      location: 'Ward 12 (Market Zone), Market Road Corner, Surampalem',
+      category: 'garbage_overflow',
+      categoryName: 'Sanitation & Waste Management',
+      categoryIcon: '🗑️',
+      severity: 'medium',
+      severityLabel: 'RESOLVED IN 18 HOURS',
+      status: 'resolved',
+      timestamp: Date.now() - 3600000 * 24,
+      slaDeadline: Date.now() + 3600000 * 24,
+      resolvedTimestamp: Date.now() - 3600000 * 6,
+      slaHoursLeft: 0,
+      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedTimestamp: Date.now() - 3600000 * 22,
+      assignedWorker: 'Municipal Rapid Squad 4 (Lead: Ramesh)',
+      assignedTimestamp: Date.now() - 3600000 * 20,
+      workerStatus: 'Completed & Verified On-Site',
+      isSlaBreached: false,
+      lat: 17.0018,
+      lng: 81.8038,
+      reportedBy: 'KRISH',
+      userId: 'user-101',
+      upvotes: 18,
+      upvotedBy: ['user-101'],
+      imageBefore: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=800&auto=format&fit=crop&q=80',
+      imageAfter: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
+      recommendedResource: 'Tipper Truck',
+      rewardIssued: true,
+      fineLevied: 0,
+      comments: [
+        { author: 'Consultant Officer K. Mukundha', role: 'admin', text: 'Sanitation supervisor notified and squad deployed.', time: '22h ago' },
+        { author: 'Municipal Rapid Squad 4', role: 'worker', text: 'Waste cleared and bins repositioned.', time: '6h ago' }
+      ]
+    },
+
+    // REPORT 3: Category: Sanitation & Waste Management, Status: IN PROGRESS, SLA: 48-HOUR SLA BREACHED / ESCALATED
     {
       isDemo: true,
       id: 'ISS-2026-00123',
@@ -1344,42 +1440,138 @@
       department: 'sanitation',
       deptName: 'Sanitation & Waste Management',
       deptIcon: '🏢',
-      title: 'Severe Garbage Overflow at Market Gate',
-      description: 'Overfilled municipal waste bin spilling onto pedestrian footpath. High stench and public hygiene risk.',
+      title: 'Severe Commercial Waste Overflow at Market Gate',
+      description: 'Over 3 tons of rotten municipal and commercial garbage overflowing onto main pedestrian road. Exceeded mandatory 48-Hour SLA period without field clearance. Automatically escalated to Municipal Commissioner Dr. Mahesh Babu & Zonal Health Directorate.',
       location: 'Ward 12 (Market Zone), Gandhi Statue Main Road, Surampalem',
-      category: 'garbage',
-      categoryName: 'Urban Garbage Overflow',
+      category: 'garbage_overflow',
+      categoryName: 'Sanitation & Waste Management',
       categoryIcon: '🗑️',
       severity: 'bulk',
-      severityLabel: 'BULK HAZARD',
-      status: 'pending',
-      timestamp: Date.now() - 3600000 * 8,
-      slaDeadline: Date.now() + 3600000 * 40,
+      severityLabel: 'SLA BREACHED (>48H)',
+      status: 'in_progress',
+      timestamp: Date.now() - 3600000 * 58,
+      slaDeadline: Date.now() - 3600000 * 10,
       resolvedTimestamp: null,
-      slaHoursLeft: 40,
+      slaHoursLeft: 0,
+      isSlaBreached: true,
+      escalatedTo: 'Zonal Municipal Commissioner (Dr. Mahesh Babu) & Higher Health Directorate',
       verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
-      verifiedTimestamp: Date.now() - 3600000 * 7.5,
-      assignedWorker: 'Sanitation Squad 4 (Lead: Ramesh K.)',
-      assignedTimestamp: Date.now() - 3600000 * 7,
-      workerStatus: 'Dispatched & On-Site Waste Clearing',
-      isSlaBreached: false,
-      lat: 17.0005,
-      lng: 81.8040,
+      verifiedTimestamp: Date.now() - 3600000 * 56,
+      assignedWorker: 'Sanitation Rapid Fleet 3 (Lead: P. Ramesh)',
+      assignedTimestamp: Date.now() - 3600000 * 54,
+      workerStatus: 'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Desk for Urgent Action',
+      lat: 17.0012,
+      lng: 81.8048,
       reportedBy: 'KRISH',
       userId: 'user-101',
-      upvotes: 24,
+      upvotes: 84,
       upvotedBy: ['user-101'],
       imageBefore: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
       imageAfter: null,
-      recommendedResource: 'Tractor / Bulk Compactor',
+      recommendedResource: 'Heavy Hydraulic Compactor & 10-Ton Tipper Fleet',
       rewardIssued: false,
       fineLevied: 0,
       comments: [
-        { author: 'System Watchdog', role: 'system', text: '48h SLA timer initiated. Automated vehicle allocated.', time: '8h ago' },
-        { author: 'Consultant Officer K. Mukundha', role: 'admin', text: 'Grievance verified. Squad 4 dispatched.', time: '7h ago' },
-        { author: 'Krish Varma (Citizen)', role: 'citizen', text: 'Garbage dump is overflowing onto main pedestrian footpath. High stench and school children transit blocked.', time: '7h ago' }
+        { author: 'System SLA Monitor', text: '⏱️ 48-Hour SLA Breached! Grievance unaddressed after 48h limit.', time: '10h ago' },
+        { author: 'Auto-Escalation Gateway', text: '🚨 Escalated to Higher Authority: Zonal Municipal Commissioner (Dr. Mahesh Babu) & Urban Health Directorate.', time: '10h ago' },
+        { author: 'Municipal Commissioner Red Desk', text: 'Ticket received with Critical Priority 1. Direct disciplinary summons and immediate heavy squad deployed.', time: '8h ago' }
       ]
     },
+
+    // REPORT 4: Category: Smart Electricity Department, Status: RESOLVED / COMPLETED, SLA: Resolved successfully
+    {
+      isDemo: true,
+      id: 'ISS-2026-00130',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      street: 'Gandhi Statue Junction',
+      department: 'electricity',
+      deptName: 'Smart Electricity Department',
+      deptIcon: '⚡',
+      title: 'Streetlight Failure Near Ward 12',
+      description: 'Twin-arm LED streetlights completely non-operational near Gandhi Statue junction, leading to low visibility at night. Replaced faulty ballast and LED driver unit. Full illumination restored.',
+      location: 'Ward 12 (Market Zone), Gandhi Statue Junction, Surampalem',
+      category: 'electricity',
+      categoryName: 'Smart Electricity Department',
+      categoryIcon: '💡',
+      severity: 'medium',
+      severityLabel: 'RESOLVED IN 28 HOURS',
+      status: 'resolved',
+      timestamp: Date.now() - 3600000 * 36,
+      slaDeadline: Date.now() + 3600000 * 12,
+      resolvedTimestamp: Date.now() - 3600000 * 8,
+      slaHoursLeft: 0,
+      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedTimestamp: Date.now() - 3600000 * 34,
+      assignedWorker: 'Lineman Squad B (Lead: Suresh Kumar)',
+      assignedTimestamp: Date.now() - 3600000 * 32,
+      workerStatus: 'Completed & Verified On-Site',
+      isSlaBreached: false,
+      lat: 17.0022,
+      lng: 81.8035,
+      reportedBy: 'KRISH',
+      userId: 'user-101',
+      upvotes: 22,
+      upvotedBy: ['user-101'],
+      imageBefore: 'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=800&auto=format&fit=crop&q=80',
+      imageAfter: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800&auto=format&fit=crop&q=80',
+      recommendedResource: 'Lineman Bucket Van (AP-05-EB)',
+      rewardIssued: true,
+      fineLevied: 0,
+      comments: [
+        { author: 'Consultant Officer K. Mukundha', role: 'admin', text: 'Electrical inspector assigned.', time: '34h ago' },
+        { author: 'Lineman Squad B', role: 'worker', text: 'Replaced driver unit. All streetlights operational.', time: '8h ago' }
+      ]
+    },
+
+    // REPORT 5: Category: Water Leakage / Water Supply, Status: IN PROGRESS, SLA: Normal / active SLA window
+    {
+      isDemo: true,
+      id: 'ISS-2026-00131',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      street: 'Market Road Pavement',
+      department: 'water_supply',
+      deptName: 'Water Leakage / Water Supply',
+      deptIcon: '💧',
+      title: 'Water Pipeline Leakage Near Ward 12',
+      description: 'Pressurized municipal water distribution main leaking clean drinking water onto Market Road pavement. Isolation valve inspection underway.',
+      location: 'Ward 12 (Market Zone), Market Road Pavement, Surampalem',
+      category: 'water_leakage',
+      categoryName: 'Water Leakage / Water Supply',
+      categoryIcon: '🚰',
+      severity: 'medium',
+      severityLabel: 'ACTIVE SLA (38H LEFT)',
+      status: 'in_progress',
+      timestamp: Date.now() - 3600000 * 10,
+      slaDeadline: Date.now() + 3600000 * 38,
+      resolvedTimestamp: null,
+      slaHoursLeft: 38,
+      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedTimestamp: Date.now() - 3600000 * 8,
+      assignedWorker: 'Public Works Water Squad 2 (Lead: Anita Roy)',
+      assignedTimestamp: Date.now() - 3600000 * 6,
+      workerStatus: 'On Site - Conducting Work',
+      isSlaBreached: false,
+      lat: 17.0016,
+      lng: 81.8040,
+      reportedBy: 'KRISH',
+      userId: 'user-101',
+      upvotes: 9,
+      upvotedBy: ['user-101'],
+      imageBefore: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80',
+      imageAfter: null,
+      recommendedResource: 'Valve Repair Utility Van',
+      rewardIssued: false,
+      fineLevied: 0,
+      comments: [
+        { author: 'Consultant Officer K. Mukundha', role: 'admin', text: 'Water Board division alerted. Utility squad dispatched.', time: '8h ago' },
+        { author: 'Public Works Water Squad 2', role: 'worker', text: 'Pressure isolated. Excavating service collar for replacement.', time: '2h ago' }
+      ]
+    },
+
     {
       isDemo: true,
       id: 'ISS-2026-00124',
@@ -1424,100 +1616,7 @@
         { author: 'Lineman Dispatch', text: 'Feeder isolated. Replacement bushing in transit.', time: '2h ago' }
       ]
     },
-    {
-      isDemo: true,
-      id: 'ISS-2026-00128',
-      state: 'Andhra Pradesh',
-      city: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      street: 'Gandhi Statue Main Road',
-      department: 'sanitation',
-      deptName: 'Sanitation & Waste Management',
-      deptIcon: '🏢',
-      title: '🚨 SLA Breached: Massive Solid Waste & Garbage Dump Overflow',
-      description: 'Over 3 tons of rotten municipal garbage overflowing onto main pedestrian road. Exceeded mandatory 48-Hour SLA period without field clearance. Automatically escalated to Municipal Commissioner Dr. Mahesh Babu & Zonal Health Directorate.',
-      location: 'Ward 12 (Market Zone), Gandhi Statue Main Road, Surampalem',
-      category: 'garbage',
-      categoryName: 'Uncollected Municipal Solid Waste & Garbage Dump',
-      categoryIcon: '🗑️',
-      severity: 'bulk',
-      severityLabel: 'SLA BREACHED (>48H)',
-      status: 'escalated',
-      timestamp: Date.now() - 3600000 * 62,
-      slaDeadline: Date.now() - 3600000 * 14,
-      resolvedTimestamp: null,
-      slaHoursLeft: 0,
-      isSlaBreached: true,
-      escalatedTo: 'Zonal Municipal Commissioner (Dr. Mahesh Babu) & Higher Health Directorate',
-      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
-      verifiedTimestamp: Date.now() - 3600000 * 61.5,
-      assignedWorker: 'Sanitation Rapid Fleet 3 (Lead: P. Ramesh)',
-      assignedTimestamp: Date.now() - 3600000 * 60,
-      workerStatus: 'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Desk for Urgent Action',
-      lat: 17.0012,
-      lng: 81.8048,
-      reportedBy: 'KRISH',
-      userId: 'user-101',
-      upvotes: 84,
-      upvotedBy: ['user-101'],
-      imageBefore: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
-      imageAfter: null,
-      recommendedResource: 'Heavy Hydraulic Compactor & 10-Ton Tipper Fleet',
-      rewardIssued: false,
-      fineLevied: 0,
-      comments: [
-        { author: 'System SLA Monitor', text: '⏱️ 48-Hour SLA Breached! Grievance unaddressed after 48h limit.', time: '14h ago' },
-        { author: 'Auto-Escalation Gateway', text: '🚨 Escalated to Higher Authority: Zonal Municipal Commissioner (Dr. Mahesh Babu) & Urban Health Directorate.', time: '14h ago' },
-        { author: 'Municipal Commissioner Red Desk', text: 'Ticket received with Critical Priority 1. Direct disciplinary summons and immediate heavy squad deployed.', time: '12h ago' },
-        { author: 'KRISH (Citizen)', text: 'Garbage dump is emitting toxic odor and blocking school children. Thank you for forwarding to the Commissioner.', time: '4h ago' }
-      ]
-    },
-    {
-      isDemo: true,
-      id: 'ISS-2026-00127',
-      state: 'Andhra Pradesh',
-      city: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      street: 'Old Bus Stand Cross',
-      department: 'sanitation',
-      deptName: 'Sanitation & Waste Management',
-      deptIcon: '🏢',
-      title: 'Overflowing Sewage Drain near Old Bus Stand',
-      description: 'Blocked underground storm drain overflowing with foul sludge. Exceeded 48h resolution SLA.',
-      location: 'Ward 12 (Market Zone), Old Bus Stand Cross, Surampalem',
-      category: 'garbage',
-      categoryName: 'Sewage Overflow Hazard',
-      categoryIcon: '🚯',
-      severity: 'bulk',
-      severityLabel: 'SLA BREACHED (>48H)',
-      status: 'escalated',
-      timestamp: Date.now() - 3600000 * 54,
-      slaDeadline: Date.now() - 3600000 * 6,
-      resolvedTimestamp: null,
-      slaHoursLeft: 0,
-      isSlaBreached: true,
-      escalatedTo: 'Zonal Municipal Commissioner (Dr. Mahesh Babu) & Urban Health Director',
-      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
-      verifiedTimestamp: Date.now() - 3600000 * 53.5,
-      assignedWorker: 'Special Drain Heavy Squad (Lead: B. Satyanarayana)',
-      assignedTimestamp: Date.now() - 3600000 * 52,
-      workerStatus: 'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Queue',
-      lat: 17.0018,
-      lng: 81.8052,
-      reportedBy: 'KRISH',
-      userId: 'user-101',
-      upvotes: 63,
-      upvotedBy: ['user-101'],
-      imageBefore: 'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=800&auto=format&fit=crop&q=80',
-      imageAfter: null,
-      recommendedResource: 'Hydraulic Suction & Jetting Tanker',
-      rewardIssued: false,
-      fineLevied: 0,
-      comments: [
-        { author: 'System Watchdog', text: '48-Hour SLA countdown expired without field sign-off.', time: '6h ago' },
-        { author: 'Auto-Escalation Engine', text: 'Grievance automatically forwarded to Zonal Municipal Commissioner Red Priority Queue.', time: '6h ago' }
-      ]
-    },
+
     {
       isDemo: true,
       id: 'ISS-2026-00125',
@@ -1565,6 +1664,7 @@
         { author: 'Dr. Lakshmi Prasad (FSO)', text: 'Statutory 7-Day Improvement Notice issued with ₹500 fine.', time: '4h ago' }
       ]
     },
+
     {
       isDemo: true,
       id: 'ISS-2026-00128',
@@ -1612,52 +1712,9 @@
         { author: 'Dr. Lakshmi Prasad (FSO)', text: 'Critical Violation notice issued under Section 56. ₹2,000 fine levied.', time: '10h ago' }
       ]
     },
+
     {
-      isDemo: true,
-      id: 'ISS-2026-00120',
-      state: 'Andhra Pradesh',
-      city: 'Surampalem',
-      ward: 'Ward 11 (Lake View Zone)',
-      street: 'Lake View Road',
-      department: 'sanitation',
-      deptName: 'Sanitation & Waste Management',
-      deptIcon: '🏢',
-      title: 'Commercial Debris Cleared at Lake Road',
-      description: 'Illegally dumped construction debris cleaned and surface sanitized.',
-      location: 'Ward 11 (Lake View Zone), Lake View Road, Surampalem',
-      category: 'garbage',
-      categoryName: 'Urban Garbage Overflow',
-      categoryIcon: '🗑️',
-      severity: 'bulk',
-      severityLabel: 'RESOLVED',
-      status: 'resolved',
-      timestamp: Date.now() - 3600000 * 36,
-      slaDeadline: Date.now() + 3600000 * 12,
-      resolvedTimestamp: Date.now() - 3600000 * 8,
-      slaHoursLeft: 0,
-      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
-      verifiedTimestamp: Date.now() - 3600000 * 35.5,
-      assignedWorker: 'Sanitation Squad 1 (Lead: Officer Ramesh)',
-      assignedTimestamp: Date.now() - 3600000 * 34,
-      workerStatus: 'Field Execution Completed & Cleaned Proof Uploaded',
-      isSlaBreached: false,
-      lat: 17.0050,
-      lng: 81.8010,
-      reportedBy: 'KRISH',
-      userId: 'user-101',
-      upvotes: 56,
-      upvotedBy: ['user-101'],
-      imageBefore: 'https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?w=800&auto=format&fit=crop&q=80',
-      imageAfter: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
-      recommendedResource: 'Tractor / Bulk Compactor',
-      rewardIssued: true,
-      fineLevied: 500,
-      comments: [
-        { author: 'Officer Ramesh', text: 'Cleaned, sanitized, and ₹500 fine levied on offender.', time: '12h ago' }
-      ]
-    },
-    {
-      id: 'ISS-2026-00130',
+      id: 'ISS-2026-00135',
       state: 'Andhra Pradesh',
       city: 'Kakinada',
       ward: 'Smart City Zone 1',
@@ -1692,6 +1749,7 @@
         { author: 'Smart City Cell', text: 'Emergency valve closure dispatched.', time: '4h ago' }
       ]
     },
+
     {
       id: 'ISS-2026-00132',
       state: 'Andhra Pradesh',
@@ -1729,7 +1787,6 @@
       ]
     },
 
-    // --- TELANGANA ---
     {
       isDemo: true,
       id: 'ISS-2026-00126',
@@ -1767,6 +1824,7 @@
         { author: 'GHMC Portal', text: 'Ticket routed to GHMC South Zone.', time: '1h ago' }
       ]
     },
+
     {
       id: 'ISS-2026-00134',
       state: 'Telangana',
@@ -1804,7 +1862,6 @@
       ]
     },
 
-    // --- MAHARASHTRA ---
     {
       id: 'ISS-2026-00136',
       state: 'Maharashtra',
@@ -1841,6 +1898,7 @@
         { author: 'PMC Control Room', text: 'Collection truck rerouted.', time: '3h ago' }
       ]
     },
+
     {
       id: 'ISS-2026-00137',
       state: 'Maharashtra',
@@ -1878,7 +1936,6 @@
       ]
     },
 
-    // --- KARNATAKA ---
     {
       id: 'ISS-2026-00139',
       state: 'Karnataka',
@@ -1915,6 +1972,7 @@
         { author: 'BBMP Portal', text: 'Automated challan inspection assigned.', time: '7h ago' }
       ]
     },
+
     {
       id: 'ISS-2026-00140',
       state: 'Karnataka',
@@ -1952,7 +2010,6 @@
       ]
     },
 
-    // --- TAMIL NADU ---
     {
       id: 'ISS-2026-00141',
       state: 'Tamil Nadu',
@@ -1989,6 +2046,7 @@
         { author: 'GCC Smart Control', text: 'Night compactor scheduled.', time: '4h ago' }
       ]
     },
+
     {
       id: 'ISS-2026-00142',
       state: 'Tamil Nadu',
@@ -2028,59 +2086,7 @@
         { author: 'TN FDA Officer', text: 'Critical Seizure Notice issued under Section 59. ₹5,000 fine levied.', time: '5h ago' }
       ]
     },
-    {
-      isDemo: true,
-      id: 'ISS-2026-00145',
-      state: 'Tamil Nadu',
-      city: 'Chennai',
-      ward: 'Marina Beach Coastal Zone',
-      street: 'Kamarajar Promenade',
-      department: 'sanitation',
-      deptName: 'Greater Chennai Corporation (GCC)',
-      deptIcon: '🏢',
-      title: 'Plastic & Marine Debris Pile on Marina Beach Promenade',
-      description: 'Logged by citizen Krish Varma while on inter-state visit in Chennai. Uncollected plastic waste along beach promenade creating public health and marine hazard. Automatically allocated to Greater Chennai Corporation (GCC).',
-      location: 'Marina Beach Coastal Zone, Kamarajar Promenade, Chennai',
-      category: 'garbage',
-      categoryName: 'Coastal Plastic Pollution',
-      categoryIcon: '🏖️',
-      severity: 'high',
-      severityLabel: 'HIGH PRIORITY',
-      status: 'pending',
-      timestamp: Date.now() - 3600000 * 5,
-      slaDeadline: Date.now() + 3600000 * 43,
-      resolvedTimestamp: null,
-      slaHoursLeft: 43,
-      verifiedByOfficer: 'Zonal Health Officer (GCC Zone 9)',
-      verifiedTimestamp: Date.now() - 3600000 * 4,
-      assignedWorker: 'GCC Coastal Cleanup Squad 2',
-      assignedTimestamp: Date.now() - 3600000 * 3,
-      workerStatus: 'En Route with Beach Cleaner Equipment',
-      isSlaBreached: false,
-      lat: 13.0500,
-      lng: 80.2824,
-      reportedBy: 'KRISH',
-      userId: 'user-101',
-      upvotes: 38,
-      upvotedBy: ['user-101'],
-      imageBefore: 'https://images.unsplash.com/photo-1528323273322-d81458248d40?w=800&auto=format&fit=crop&q=80',
-      imageAfter: null,
-      recommendedResource: 'GCC Beach Cleaning Tractor',
-      rewardIssued: false,
-      fineLevied: 0,
-      comments: [
-        { author: 'System Watchdog', role: 'system', text: 'Cross-city incident registered. Incident GPS routed to Greater Chennai Corporation.', time: '5h ago' },
-        { author: 'Zonal Health Officer (GCC Zone 9)', role: 'admin', text: 'Grievance verified under Inter-State Citizen Protocol. GCC Coastal Squad dispatched.', time: '4h ago' },
-        {
-          author: 'Krish Varma (Citizen)',
-          role: 'citizen',
-          text: 'Reported while traveling in Chennai. Permanent residence: Surampalem (AP). Glad to see nationwide municipal routing active!',
-          time: '4h ago'
-        }
-      ]
-    },
 
-    // --- DELHI NCR ---
     {
       id: 'ISS-2026-00143',
       state: 'Delhi NCR',
@@ -2117,6 +2123,7 @@
         { author: 'NDMC Smart Portal', text: 'Work order allocated for repaving.', time: '2h ago' }
       ]
     },
+
     {
       id: 'ISS-2026-00144',
       state: 'Delhi NCR',
@@ -2155,7 +2162,6 @@
     }
   ];
 
-  // Full Registry of Both Certified & Violated Establishments
   const INITIAL_VENDORS = [
     // 🟢 Certified Vendors
     {
@@ -2273,7 +2279,7 @@
 
   class DatabaseManager {
     constructor() {
-      this.issues = this.loadFromStorage('clean_safe_issues_v10', INITIAL_ISSUES);
+      this.issues = this.loadFromStorage('clean_safe_issues_v11', INITIAL_ISSUES);
       this.vendors = this.loadFromStorage('clean_safe_vendors_v10', INITIAL_VENDORS);
       this.finesCollected = this.loadFromStorage('clean_safe_fines_v9', 2500);
       this.listeners = [];
@@ -2291,7 +2297,7 @@
           const data = await res.json();
           if (data.issues && data.issues.length > 0) {
             this.issues = data.issues;
-            this.saveToStorage('clean_safe_issues_v10', this.issues);
+            this.saveToStorage('clean_safe_issues_v11', this.issues);
             this.notify();
           }
         }
@@ -2435,7 +2441,7 @@
       };
 
       this.issues.unshift(newIssue);
-      this.saveToStorage('clean_safe_issues_v10', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_CREATED', newIssue);
 
@@ -2465,7 +2471,7 @@
         time: 'Just now'
       });
 
-      this.saveToStorage('clean_safe_issues_v10', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
 
       // Award +50 Civic Credits and record transaction in ledger
       if (typeof addCitizenCreditTransaction === 'function') {
@@ -2517,7 +2523,7 @@
         }
       }
 
-      this.saveToStorage('clean_safe_issues_v10', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.saveToStorage('clean_safe_vendors_v10', this.vendors);
       this.notify();
       broadcastRealtimeEvent('FOOD_RECTIFIED', issue);
@@ -2547,7 +2553,7 @@
         timestamp: Date.now()
       };
       issue.comments.push(newComment);
-      this.saveToStorage('clean_safe_issues_v10', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.notify();
       broadcastRealtimeEvent('COMMENT_ADDED', { issueId, comment: newComment });
 
@@ -2654,7 +2660,7 @@
         issue.upvotes = (issue.upvotes || 0) + 1;
       }
 
-      this.saveToStorage('clean_safe_issues_v10', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_UPVOTED', issue);
       return issue;
@@ -2964,7 +2970,7 @@
       const existing = db.issues.find(i => i.id === issue.id);
       if (!existing) {
         db.issues.unshift(issue);
-        db.saveToStorage('clean_safe_issues_v10', db.issues);
+        db.saveToStorage('clean_safe_issues_v11', db.issues);
         db.notify();
       }
       showToast(`🚨 New Complaint #${issue.id} reported in ${issue.ward || 'Ward'}!`, 'info', '📢');
@@ -2980,7 +2986,7 @@
       } else {
         db.issues.unshift(updated);
       }
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
       showToast(`✅ Complaint #${updated.id} resolved by field team!`, 'reward', '🎉');
       playNotificationSound('chime');
@@ -2995,7 +3001,7 @@
       } else {
         db.issues.unshift(assigned);
       }
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
       showToast(`🚛 Squad Assigned to Ticket #${assigned.id} (${assigned.assignedWorker})`, 'info', '👷');
       playNotificationSound('chime');
@@ -3013,7 +3019,7 @@
       } else {
         db.issues.unshift(transitioned);
       }
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
       const isEnRoute = transitioned.workerStatus && transitioned.workerStatus.includes('En Route');
       const statusIcon = isEnRoute ? '🚗' : '📍';
@@ -5668,7 +5674,7 @@
       issue.imageOfficerOverrideReason = null;
       issue.verifiedByOfficer = officerName;
       issue.verifiedTimestamp = Date.now();
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       showToast('✅ Visual evidence verified by Officer!', 'reward', '🛡️');
@@ -5713,7 +5719,7 @@
       issue.imageOfficerOverrideReason = reason.trim();
       issue.verifiedByOfficer = officerName;
       issue.verifiedTimestamp = Date.now();
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       showToast('⚠️ Officer override registered with audit justification.', 'reward', '📝');
@@ -7857,7 +7863,7 @@
       if (idx !== -1) {
         db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
       }
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       window.closeModal('assignSquadModal');
@@ -8906,7 +8912,7 @@
       if (idx !== -1) {
         db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
       }
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       showToast(`🚗 Squad is now en route to #${issueId}!`, 'info', '🚗');
@@ -8955,7 +8961,7 @@
       if (idx !== -1) {
         db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
       }
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       showToast(`📍 Squad marked arrived on site for #${issueId}! Remediation underway.`, 'reward', '📍');
