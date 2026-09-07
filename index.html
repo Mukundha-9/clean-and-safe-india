@@ -2588,6 +2588,112 @@
     </div>
   </div>
 
+  <!-- =========================================================================
+       FIRST-TIME CITIZEN PROFILE SETUP ONBOARDING POPUP MODAL
+       ========================================================================= -->
+  <div class="modal-overlay" id="citizenProfileSetupModal" style="background: rgba(4, 8, 20, 0.88); backdrop-filter: blur(8px); z-index: 9999;">
+    <div class="modal-box" style="max-width: 580px; width: 92%; background: linear-gradient(135deg, #0b1329 0%, #0f172a 100%); border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(16, 185, 129, 0.15); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;">
+      <!-- Modal Header -->
+      <div style="background: linear-gradient(135deg, rgba(6, 78, 59, 0.4), rgba(15, 23, 42, 0.95)); padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(16, 185, 129, 0.3); display: flex; align-items: center; gap: 0.85rem;">
+        <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);">
+          🛡️
+        </div>
+        <div>
+          <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: #34d399; font-weight: 800;">
+            First-Time Onboarding • Smart Civic Connect
+          </div>
+          <h3 style="margin: 0; color: white; font-size: 1.2rem; font-weight: 800;">
+            Complete Your Citizen Profile
+          </h3>
+        </div>
+      </div>
+
+      <!-- Modal Body Form -->
+      <div class="modal-body" style="padding: 1.4rem 1.5rem; max-height: 75vh; overflow-y: auto;">
+        <p style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5; margin-top: 0; margin-bottom: 1.15rem;">
+          To route your civic grievances directly to authorized municipal squads and guarantee our <strong>48-Hour SLA resolution</strong>, please verify your permanent residential credentials.
+        </p>
+
+        <!-- Validation Error Message Alert Strip -->
+        <div id="setupProfileErrorMsg" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 0.65rem 0.85rem; margin-bottom: 1rem; color: #fca5a5; font-size: 0.8rem; align-items: center; gap: 0.5rem;">
+          <span>⚠️</span>
+          <span id="setupProfileErrorText">Please fill in all required fields.</span>
+        </div>
+
+        <form id="citizenProfileSetupForm" onsubmit="window.handleSaveCitizenProfile(event)">
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label class="form-label" style="font-size: 0.8rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
+              <span>Full Name <span style="color: #ef4444;">*</span></span>
+              <span style="color: #64748b; font-size: 0.72rem; font-weight: 400;">Official Citizen Name</span>
+            </label>
+            <input type="text" id="setupCitizenName" class="form-input" placeholder="e.g. Krish Varma" required style="border-radius: 8px; font-size: 0.88rem; padding: 0.55rem 0.85rem;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label class="form-label" style="font-size: 0.8rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
+              <span>Email Address</span>
+              <span style="color: #10b981; font-size: 0.72rem; font-weight: 600;">✓ Verified Account</span>
+            </label>
+            <input type="email" id="setupCitizenEmail" class="form-input" readonly style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); color: #94a3b8; cursor: not-allowed; border-radius: 8px; font-size: 0.88rem; padding: 0.55rem 0.85rem;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label class="form-label" style="font-size: 0.8rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
+              <span>Phone Number <span style="color: #ef4444;">*</span></span>
+              <span style="color: #64748b; font-size: 0.72rem; font-weight: 400;">For SLA squad updates</span>
+            </label>
+            <input type="tel" id="setupCitizenPhone" class="form-input" placeholder="e.g. +91 94401 88421" required style="border-radius: 8px; font-size: 0.88rem; padding: 0.55rem 0.85rem;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label class="form-label" style="font-size: 0.8rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.35rem;">
+              Permanent Residential Address <span style="color: #ef4444;">*</span>
+            </label>
+            <textarea id="setupCitizenAddress" class="form-input" rows="2" placeholder="e.g. Plot 18, Gandhi Nagar Main Road" required style="border-radius: 8px; font-size: 0.88rem; padding: 0.55rem 0.85rem; resize: vertical; min-height: 54px;"></textarea>
+          </div>
+
+          <!-- Jurisdictional Geocoding Cascading Selects -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-size: 0.78rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.3rem;">
+                State <span style="color: #ef4444;">*</span>
+              </label>
+              <select id="setupCitizenState" class="form-select" onchange="window.handleSetupStateChange(this.value)" required style="border-radius: 8px; font-size: 0.82rem; padding: 0.5rem 0.65rem;">
+              </select>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-size: 0.78rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.3rem;">
+                City <span style="color: #ef4444;">*</span>
+              </label>
+              <select id="setupCitizenCity" class="form-select" onchange="window.handleSetupCityChange(this.value)" required style="border-radius: 8px; font-size: 0.82rem; padding: 0.5rem 0.65rem;">
+              </select>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-size: 0.78rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.3rem;">
+                Home Ward <span style="color: #ef4444;">*</span>
+              </label>
+              <select id="setupCitizenWard" class="form-select" required style="border-radius: 8px; font-size: 0.82rem; padding: 0.5rem 0.65rem;">
+              </select>
+            </div>
+          </div>
+
+          <!-- Modal Action Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem;">
+            <div style="font-size: 0.72rem; color: #64748b; display: flex; align-items: center; gap: 0.35rem;">
+              <span>🔒</span>
+              <span>Encrypted Domicile Record</span>
+            </div>
+            <button type="submit" class="btn btn-primary" id="setupProfileSubmitBtn" style="padding: 0.55rem 1.25rem; font-size: 0.88rem; font-weight: 700; border-radius: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); cursor: pointer;">
+              <span>Save & Complete Profile</span> <span>&rarr;</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Cache Invalidation & Direct Refresh Script -->
@@ -2599,7 +2705,7 @@
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => {
-            if (name !== 'clean-safe-india-v34.0.0') {
+            if (name !== 'clean-safe-india-v35.0.0') {
               caches.delete(name);
             }
           });
@@ -2609,6 +2715,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=34.0.0"></script>
+  <script src="js/bundle.js?v=35.0.0"></script>
 </body>
 </html>

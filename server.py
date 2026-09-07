@@ -176,6 +176,12 @@ def get_authenticated_user(handler, conn=None):
         now_ms = int(time.time() * 1000)
         cursor.execute('''
             SELECT s.*, 
+                   u.name as u_name,
+                   u.avatar as u_avatar,
+                   u.phone as u_phone,
+                   u.permanentAddress as u_address,
+                   u.profileCompleted as u_completed,
+                   u.civicCredits as u_credits,
                    u.jurisdictionState as u_state, 
                    u.jurisdictionCity as u_city, 
                    u.jurisdictionWard as u_ward
@@ -187,6 +193,17 @@ def get_authenticated_user(handler, conn=None):
         if row:
             d = dict(row)
             # Favor current users table authoritative values if set
+            if d.get('u_name'):
+                d['name'] = d['u_name']
+            if d.get('u_avatar'):
+                d['avatar'] = d['u_avatar']
+            if d.get('u_phone'):
+                d['phone'] = d['u_phone']
+            if d.get('u_address'):
+                d['permanentAddress'] = d['u_address']
+            d['profileCompleted'] = 1 if d.get('u_completed') == 1 else 0
+            if d.get('u_credits') is not None:
+                d['civicCredits'] = d['u_credits']
             if d.get('u_state'):
                 d['jurisdictionState'] = d['u_state']
             if d.get('u_city'):
@@ -452,7 +469,10 @@ def init_database():
     user_cols_to_add = [
         ('jurisdictionState', 'TEXT'),
         ('jurisdictionCity', 'TEXT'),
-        ('jurisdictionWard', 'TEXT')
+        ('jurisdictionWard', 'TEXT'),
+        ('phone', 'TEXT'),
+        ('permanentAddress', 'TEXT'),
+        ('profileCompleted', 'INTEGER DEFAULT 0')
     ]
     for col_name, col_type in user_cols_to_add:
         if col_name not in existing_user_cols:
@@ -496,7 +516,10 @@ def init_database():
         VALUES ('worker4@municipality.gov.in', 'user-104', 'Ramesh (Squad 4 Leader)', 'password123', 'worker', 'Field Response Squad Lead', 'SQUAD-04-LEAD', 'SQ', 0, 0, strftime('%s', 'now'), 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)')
     ''')
 
-    # Authoritatively backfill/update official jurisdictions in users table
+    # Authoritatively backfill/update official jurisdictions & default profiles in users table
+    cursor.execute("UPDATE users SET phone = '+91 94401 88421', permanentAddress = 'Plot 18, Gandhi Nagar Main Road, Ward 12, Surampalem, Andhra Pradesh - 533437', profileCompleted = 1 WHERE LOWER(email) = 'citizen@civictech.in'")
+    cursor.execute("UPDATE users SET profileCompleted = 1 WHERE department IN ('municipal', 'food', 'worker')")
+    cursor.execute("UPDATE users SET profileCompleted = 1 WHERE jurisdictionWard IS NOT NULL AND jurisdictionWard != '' AND permanentAddress IS NOT NULL AND permanentAddress != ''")
     cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'Ward 12 (Market Zone)' WHERE LOWER(email) IN ('admin@municipality.gov.in', 'zonal.officer@andhra.gov.in') AND (jurisdictionState IS NULL OR jurisdictionState = '')")
     cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'ALL' WHERE LOWER(email) IN ('fso.officer@foodsafety.gov.in', 'inspector.sharma@fssai.gov.in') AND (jurisdictionState IS NULL OR jurisdictionState = '')")
     cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'Ward 12 (Market Zone)' WHERE LOWER(email) = 'worker4@municipality.gov.in' AND (jurisdictionState IS NULL OR jurisdictionState = '')")
@@ -1141,6 +1164,28 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'civicCreditsPaid': '150 Pts',
                 'finesCollected': f'₹{int(fines):,}'
             })
+        # REST API: GET /api/citizen/profile (Authoritative Server-Side Identity Resolution)
+        if path == '/api/citizen/profile':
+            conn = get_db_connection()
+            auth_user = get_authenticated_user(self, conn)
+            if not auth_user:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Unauthorized. Please login.'}, status=401)
+                return
+
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM users WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))', (auth_user['email'],))
+            user_row = cursor.fetchone()
+            conn.close()
+
+            if not user_row:
+                self.send_json_response({'success': False, 'error': 'Citizen account record not found.'}, status=404)
+                return
+
+            user_dict = dict(user_row)
+            safe_user = {k: v for k, v in user_dict.items() if k != 'password'}
+            safe_user['profileCompleted'] = 1 if safe_user.get('profileCompleted') == 1 else 0
+            self.send_json_response({'success': True, 'user': safe_user})
             return
 
         # 6. Static Asset Serving
@@ -2032,6 +2077,13 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             streak = existing['activeStreakWeeks'] if existing else 1
             created_at = existing['createdAt'] if (existing and 'createdAt' in existing.keys() and existing['createdAt']) else int(time.time() * 1000)
 
+            phone = existing['phone'] if (existing and 'phone' in existing.keys() and existing['phone']) else ''
+            perm_addr = existing['permanentAddress'] if (existing and 'permanentAddress' in existing.keys() and existing['permanentAddress']) else ''
+            prof_comp = existing['profileCompleted'] if (existing and 'profileCompleted' in existing.keys() and existing['profileCompleted']) else 0
+            u_state = existing['jurisdictionState'] if (existing and 'jurisdictionState' in existing.keys()) else None
+            u_city = existing['jurisdictionCity'] if (existing and 'jurisdictionCity' in existing.keys()) else None
+            u_ward = existing['jurisdictionWard'] if (existing and 'jurisdictionWard' in existing.keys()) else None
+
             user_data = {
                 'email': email,
                 'id': user_id,
@@ -2043,12 +2095,18 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'avatar': avatar,
                 'civicCredits': credits,
                 'activeStreakWeeks': streak,
-                'createdAt': created_at
+                'createdAt': created_at,
+                'phone': phone,
+                'permanentAddress': perm_addr,
+                'profileCompleted': prof_comp,
+                'jurisdictionState': u_state,
+                'jurisdictionCity': u_city,
+                'jurisdictionWard': u_ward
             }
 
             cursor.execute('''
-                INSERT OR REPLACE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt)
-                VALUES (:email, :id, :name, :password, :department, :roleTitle, :officialId, :avatar, :civicCredits, :activeStreakWeeks, :createdAt)
+                INSERT OR REPLACE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt, phone, permanentAddress, profileCompleted, jurisdictionState, jurisdictionCity, jurisdictionWard)
+                VALUES (:email, :id, :name, :password, :department, :roleTitle, :officialId, :avatar, :civicCredits, :activeStreakWeeks, :createdAt, :phone, :permanentAddress, :profileCompleted, :jurisdictionState, :jurisdictionCity, :jurisdictionWard)
             ''', user_data)
             token = create_session(user_data, conn)
             conn.close()
@@ -2058,6 +2116,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 del ACTIVE_OTPS[email]
 
             safe_user = {k: v for k, v in user_data.items() if k != 'password'}
+            safe_user['profileCompleted'] = 1 if safe_user.get('profileCompleted') == 1 else 0
             session_payload = {
                 'success': True,
                 'token': token,
@@ -2066,6 +2125,104 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'message': 'Citizen account successfully registered with 20 Welcome Civic Credits!'
             }
             self.send_json_response(session_payload)
+            return
+
+        # 6b. REST API: POST /api/citizen/profile (Authoritative Citizen Profile Onboarding & Setup)
+        if path == '/api/citizen/profile':
+            conn = get_db_connection()
+            auth_user = get_authenticated_user(self, conn)
+            if not auth_user:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Unauthorized. Please login to complete your profile.'}, status=401)
+                return
+
+            if auth_user.get('department') != 'citizen':
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Forbidden. Profile onboarding is for citizen accounts.'}, status=403)
+                return
+
+            name = (body.get('name') or '').strip()
+            phone = (body.get('phone') or '').strip()
+            address = (body.get('permanentAddress') or body.get('address') or '').strip()
+            state = (body.get('state') or body.get('jurisdictionState') or '').strip()
+            city = (body.get('city') or body.get('jurisdictionCity') or '').strip()
+            ward = (body.get('ward') or body.get('jurisdictionWard') or '').strip()
+
+            if not name or len(name) < 2:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Please enter your Full Name (minimum 2 characters).'}, status=400)
+                return
+
+            clean_digits = ''.join(c for c in phone if c.isdigit())
+            if not phone or len(clean_digits) < 10:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Please enter a valid 10-digit contact Phone Number.'}, status=400)
+                return
+
+            if not address or len(address) < 5:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Please enter your complete Permanent Residential Address (House/Plot, Street).'}, status=400)
+                return
+
+            if not state:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Please select your State.'}, status=400)
+                return
+
+            if not city:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Please select your City.'}, status=400)
+                return
+
+            if not ward:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Please select your Home Ward / Jurisdiction.'}, status=400)
+                return
+
+            name_words = [w.capitalize() for w in name.split() if w]
+            display_name = ' '.join(name_words) if name_words else name
+            avatar = ''.join([w[0] for w in name_words[:2]]).upper() if name_words else 'CZ'
+
+            email = auth_user['email']
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE users SET
+                    name = ?,
+                    phone = ?,
+                    permanentAddress = ?,
+                    jurisdictionState = ?,
+                    jurisdictionCity = ?,
+                    jurisdictionWard = ?,
+                    avatar = ?,
+                    profileCompleted = 1
+                WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))
+            ''', (display_name, phone, address, state, city, ward, avatar, email))
+
+            auth_token = auth_user.get('token')
+            if auth_token:
+                cursor.execute('''
+                    UPDATE sessions SET
+                        name = ?,
+                        jurisdictionState = ?,
+                        jurisdictionCity = ?,
+                        jurisdictionWard = ?
+                    WHERE token = ?
+                ''', (display_name, state, city, ward, auth_token))
+
+            cursor.execute('SELECT * FROM users WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))', (email,))
+            updated_user = cursor.fetchone()
+            conn.commit()
+            conn.close()
+
+            user_dict = dict(updated_user) if updated_user else {}
+            safe_user = {k: v for k, v in user_dict.items() if k != 'password'}
+            safe_user['profileCompleted'] = 1
+
+            self.send_json_response({
+                'success': True,
+                'user': safe_user,
+                'message': 'Citizen profile successfully completed!'
+            })
             return
 
         # ---------------------------------------------------------------------
@@ -2805,6 +2962,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             sess_conn.close()
 
             safe_user = {k: v for k, v in user_dict.items() if k != 'password'}
+            safe_user['profileCompleted'] = 1 if safe_user.get('profileCompleted') == 1 else 0
             session_payload = {
                 'success': True,
                 'token': token,

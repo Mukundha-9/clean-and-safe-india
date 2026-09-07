@@ -351,6 +351,9 @@
 
     logout() {
       this.saveSession(null);
+      if (typeof window !== 'undefined' && window.closeModal) {
+        window.closeModal('citizenProfileSetupModal');
+      }
     }
 
     subscribe(cb) {
@@ -3328,6 +3331,185 @@
     wardSelect.innerHTML = wardNames.map(w => `<option value="${w}">${w}</option>`).join('');
   };
 
+  // Setup Modal State / City / Ward cascading handlers
+  window.handleSetupStateChange = function(state) {
+    const citySelect = document.getElementById('setupCitizenCity');
+    const wardSelect = document.getElementById('setupCitizenWard');
+    if (!citySelect || !wardSelect) return;
+
+    const cities = GEOSPATIAL_DIRECTORY[state] || {};
+    const cityNames = Object.keys(cities);
+    citySelect.innerHTML = cityNames.map(c => `<option value="${c}">${c}</option>`).join('');
+    window.handleSetupCityChange(cityNames[0]);
+  };
+
+  window.handleSetupCityChange = function(city) {
+    const stateEl = document.getElementById('setupCitizenState');
+    const state = stateEl ? stateEl.value : 'Andhra Pradesh';
+    const wardSelect = document.getElementById('setupCitizenWard');
+    if (!wardSelect) return;
+
+    const cityData = (GEOSPATIAL_DIRECTORY[state] || {})[city];
+    const wardNames = Object.keys(cityData ? cityData.wards : {});
+    wardSelect.innerHTML = wardNames.map(w => `<option value="${w}">${w}</option>`).join('');
+  };
+
+  function initSetupGeoDropdowns(defaultState = 'Andhra Pradesh', defaultCity = 'Surampalem', defaultWard = 'Ward 12 (Market Zone)') {
+    const stateSelect = document.getElementById('setupCitizenState');
+    if (!stateSelect) return;
+
+    const stateNames = Object.keys(GEOSPATIAL_DIRECTORY);
+    stateSelect.innerHTML = stateNames.map(s => `<option value="${s}" ${s === defaultState ? 'selected' : ''}>${s}</option>`).join('');
+    
+    window.handleSetupStateChange(defaultState);
+    const citySelect = document.getElementById('setupCitizenCity');
+    if (citySelect && defaultCity) citySelect.value = defaultCity;
+    window.handleSetupCityChange(defaultCity);
+    const wardSelect = document.getElementById('setupCitizenWard');
+    if (wardSelect && defaultWard) wardSelect.value = defaultWard;
+  }
+
+  function openCitizenProfileSetup(currentUser) {
+    const modal = document.getElementById('citizenProfileSetupModal');
+    if (!modal) return;
+
+    const nameInput = document.getElementById('setupCitizenName');
+    const emailInput = document.getElementById('setupCitizenEmail');
+    const phoneInput = document.getElementById('setupCitizenPhone');
+    const addressInput = document.getElementById('setupCitizenAddress');
+    const errBox = document.getElementById('setupProfileErrorMsg');
+    if (errBox) errBox.style.display = 'none';
+
+    if (emailInput && currentUser) {
+      emailInput.value = currentUser.email || '';
+    }
+    if (nameInput && currentUser && currentUser.name && currentUser.name !== 'Citizen User' && currentUser.name !== 'KRISH') {
+      nameInput.value = currentUser.name;
+    } else if (nameInput && !nameInput.value && currentUser) {
+      nameInput.value = currentUser.name || '';
+    }
+
+    if (phoneInput && currentUser && currentUser.phone) {
+      phoneInput.value = currentUser.phone;
+    }
+    if (addressInput && currentUser && currentUser.permanentAddress) {
+      addressInput.value = currentUser.permanentAddress;
+    }
+
+    const defState = currentUser?.jurisdictionState || 'Andhra Pradesh';
+    const defCity = currentUser?.jurisdictionCity || 'Surampalem';
+    const defWard = currentUser?.jurisdictionWard || 'Ward 12 (Market Zone)';
+    initSetupGeoDropdowns(defState, defCity, defWard);
+
+    window.openModal('citizenProfileSetupModal');
+  }
+
+  window.handleSaveCitizenProfile = async function(event) {
+    if (event) event.preventDefault();
+
+    const nameInput = document.getElementById('setupCitizenName');
+    const phoneInput = document.getElementById('setupCitizenPhone');
+    const addressInput = document.getElementById('setupCitizenAddress');
+    const stateSelect = document.getElementById('setupCitizenState');
+    const citySelect = document.getElementById('setupCitizenCity');
+    const wardSelect = document.getElementById('setupCitizenWard');
+    const errBox = document.getElementById('setupProfileErrorMsg');
+    const errText = document.getElementById('setupProfileErrorText');
+    const submitBtn = document.getElementById('setupProfileSubmitBtn');
+
+    const name = (nameInput ? nameInput.value : '').trim();
+    const phone = (phoneInput ? phoneInput.value : '').trim();
+    const address = (addressInput ? addressInput.value : '').trim();
+    const state = stateSelect ? stateSelect.value : '';
+    const city = citySelect ? citySelect.value : '';
+    const ward = wardSelect ? wardSelect.value : '';
+
+    const showError = (msg) => {
+      if (errBox && errText) {
+        errText.textContent = msg;
+        errBox.style.display = 'flex';
+      }
+      showToast(msg, 'error', '⚠️');
+    };
+
+    if (!name || name.length < 2) {
+      showError('Please enter your full official name (minimum 2 characters).');
+      if (nameInput) nameInput.focus();
+      return;
+    }
+
+    const cleanDigits = phone.replace(/[^0-9]/g, '');
+    if (!phone || cleanDigits.length < 10) {
+      showError('Please enter a valid 10-digit mobile contact number.');
+      if (phoneInput) phoneInput.focus();
+      return;
+    }
+
+    if (!address || address.length < 5) {
+      showError('Please enter your complete permanent residential address.');
+      if (addressInput) addressInput.focus();
+      return;
+    }
+
+    if (!state || !city || !ward) {
+      showError('Please select your state, city, and home ward.');
+      return;
+    }
+
+    if (errBox) errBox.style.display = 'none';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>⏳</span> Saving Profile...';
+    }
+
+    try {
+      const res = await fetch('/api/citizen/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.getToken()}`
+        },
+        body: JSON.stringify({
+          name: name,
+          phone: phone,
+          permanentAddress: address,
+          state: state,
+          city: city,
+          ward: ward
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to save profile. Please try again.');
+      }
+
+      // Update local session with updated persistent user profile
+      if (auth.session && data.user) {
+        auth.session.user = {
+          ...auth.session.user,
+          ...data.user,
+          profileCompleted: 1
+        };
+        auth.saveSession(auth.session);
+      }
+
+      playNotificationSound('chime');
+      showToast('🎉 Citizen profile verified and completed!', 'reward', '🛡️');
+      window.closeModal('citizenProfileSetupModal');
+
+      // Refresh auth elements & route to home dashboard
+      checkAuthAndRoute();
+    } catch (err) {
+      showError(err.message || 'Error saving profile. Please check connection.');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Save & Complete Profile</span> <span>&rarr;</span>';
+      }
+    }
+  };
+
   // =========================================================================
   // 6. UI RENDERER & ROUTER
   // =========================================================================
@@ -4485,6 +4667,22 @@
     if (sessionDept === 'citizen') {
       const cView = document.getElementById('citizenMasterView');
       if (cView) cView.classList.add('active');
+
+      // Check whether citizen profile is completed
+      const isProfileComplete = Boolean(
+        currentUser &&
+        (currentUser.profileCompleted === 1 || currentUser.profileCompleted === true) &&
+        currentUser.phone &&
+        currentUser.permanentAddress &&
+        currentUser.jurisdictionWard
+      );
+
+      if (!isProfileComplete) {
+        openCitizenProfileSetup(currentUser);
+      } else {
+        window.closeModal('citizenProfileSetupModal');
+      }
+
       renderCitizenDashboard();
     } else if (sessionDept === 'municipal') {
       const mView = document.getElementById('municipalMasterView');
@@ -6305,47 +6503,67 @@
   }
 
   function getIssueReporterProfile(issue) {
+    const currentUser = auth.getUser();
     if (!issue) {
-      issue = (db.issues || []).find(i => (i.reportedBy || '').toLowerCase().includes('krish')) || {
-        reportedBy: 'Krish Varma',
-        userId: 'user-101'
+      issue = (db.issues || []).find(i => 
+        (currentUser && (i.userId === currentUser.id || i.reportedBy === currentUser.name)) ||
+        (i.reportedBy || '').toLowerCase().includes('krish')
+      ) || {
+        reportedBy: currentUser?.name || 'Krish Varma',
+        userId: currentUser?.id || 'user-101'
       };
     }
     if (issue.reporterProfile) return issue.reporterProfile;
 
-    const isKrish = Boolean(
-      !issue.reportedBy ||
-      (issue.reportedBy && issue.reportedBy.toLowerCase().includes('krish')) ||
-      (issue.userId && issue.userId === 'user-101') ||
-      (auth.getUser() && auth.getUser().name === issue.reportedBy)
+    const isCurrentUser = Boolean(
+      currentUser &&
+      (
+        !issue.reportedBy ||
+        (issue.reportedBy && issue.reportedBy.toLowerCase().includes('krish') && (currentUser.email === 'citizen@civictech.in' || (currentUser.name && currentUser.name.toLowerCase().includes('krish')))) ||
+        (issue.userId && issue.userId === currentUser.id) ||
+        (issue.reportedBy && issue.reportedBy === currentUser.name)
+      )
     );
 
-    if (isKrish) {
+    if (isCurrentUser && currentUser) {
+      const isDefaultKrish = !currentUser.email || currentUser.email === 'citizen@civictech.in';
+      const fullName = currentUser.name || (isDefaultKrish ? 'Krish Varma' : 'Citizen Reporter');
+      const email = currentUser.email || (isDefaultKrish ? 'krish.varma@cleanindia.gov.in' : 'citizen@cleanindia.gov.in');
+      const phone = currentUser.phone || (isDefaultKrish ? '+91 94401 88421' : '+91 98480 22334');
+      const state = currentUser.jurisdictionState || 'Andhra Pradesh';
+      const city = currentUser.jurisdictionCity || 'Surampalem';
+      const ward = currentUser.jurisdictionWard || 'Ward 12 (Market Zone)';
+      const address = currentUser.permanentAddress || (isDefaultKrish ? 'Plot 18, Gandhi Nagar Main Road, Ward 12, Surampalem, Andhra Pradesh - 533437' : `${ward}, ${city}, ${state}`);
+      const avatar = currentUser.avatar || (fullName ? fullName.substring(0, 2).toUpperCase() : 'KR');
+      const officialId = currentUser.officialId || ('CIT-IND-2026-' + (currentUser.id ? String(currentUser.id).replace(/[^0-9]/g, '').slice(-4) || '8941' : '8941'));
+      const credits = currentUser.civicCredits || 150;
+      const maskedAadhaar = 'XXXX-XXXX-' + (officialId ? String(officialId).slice(-4) : '8941');
+
       return {
-        name: 'KRISH',
-        fullName: 'Krish Varma',
-        email: 'krish.varma@cleanindia.gov.in',
-        phone: '+91 94401 88421',
-        permanentAddress: 'Plot 18, Gandhi Nagar Main Road, Ward 12, Surampalem, Andhra Pradesh - 533437',
+        name: avatar,
+        fullName: fullName,
+        email: email,
+        phone: phone,
+        permanentAddress: address,
         homeGps: {
           lat: 17.0042,
           lng: 81.8021,
-          landmark: 'Gandhi Nagar Main Road, Ward 12',
-          city: 'Surampalem',
-          district: 'Kakinada',
-          state: 'Andhra Pradesh'
+          landmark: `${address.split(',')[0] || 'Residence'}, ${ward}`,
+          city: city,
+          district: city,
+          state: state
         },
-        homeWard: 'Ward 12 (Market Zone)',
-        homeCity: 'Surampalem',
-        homeState: 'Andhra Pradesh',
+        homeWard: ward,
+        homeCity: city,
+        homeState: state,
         kycStatus: 'Verified via Aadhaar / Civic DigiLocker',
         kycVerified: true,
-        aadhaarMasked: 'XXXX-XXXX-8941',
-        reliabilityScore: '98% (High Credibility - 4 Verified Grievances)',
-        officialId: 'CIT-IND-2026-8941',
-        avatar: 'KR',
+        aadhaarMasked: maskedAadhaar,
+        reliabilityScore: '98% (High Credibility - Verified Citizen)',
+        officialId: officialId,
+        avatar: avatar,
         guardianLevel: 'Level 3: Silver Civic Guardian',
-        civicCredits: 150
+        civicCredits: credits
       };
     }
 
@@ -6388,15 +6606,19 @@
       issue = db.getIssueById(issueId);
     }
 
+    const currentUser = auth.getUser();
     if (!issue) {
-      const krishIssue = (db.issues || []).find(i => (i.reportedBy || '').toLowerCase().includes('krish'));
-      issue = krishIssue || {
-        id: 'CIT-IND-2026-8941',
-        reportedBy: 'Krish Varma',
-        location: 'Gandhi Nagar Main Road, Ward 12, Surampalem',
-        ward: 'Ward 12 (Market Zone)',
-        city: 'Surampalem',
-        state: 'Andhra Pradesh',
+      const myIssue = (db.issues || []).find(i => 
+        (currentUser && (i.userId === currentUser.id || i.reportedBy === currentUser.name)) ||
+        (i.reportedBy || '').toLowerCase().includes('krish')
+      );
+      issue = myIssue || {
+        id: currentUser?.officialId || 'CIT-IND-2026-8941',
+        reportedBy: currentUser?.name || 'Krish Varma',
+        location: currentUser?.permanentAddress || 'Gandhi Nagar Main Road, Ward 12, Surampalem',
+        ward: currentUser?.jurisdictionWard || 'Ward 12 (Market Zone)',
+        city: currentUser?.jurisdictionCity || 'Surampalem',
+        state: currentUser?.jurisdictionState || 'Andhra Pradesh',
         lat: 17.0042,
         lng: 81.8021,
         deptName: 'Municipal Administration & Urban Development'
