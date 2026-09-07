@@ -2779,6 +2779,7 @@
   let selectedWard = 'all';
   let selectedStreet = 'all';
   let citizenCategoryFilter = 'all';
+  let citizenFeedSegment = 'my_reports';
   let foodFilter = 'all';
   let vendorFilter = 'all';
   let searchQuery = '';
@@ -3337,6 +3338,61 @@
         </div>`;
     }
 
+    // Dynamic SLA Gauge Calculation
+    const slaHoursLeft = Math.max(0, Number(issue.slaHoursLeft) || 0);
+    const slaPercent = Math.min(100, Math.max(0, Math.round((slaHoursLeft / 48) * 100)));
+    const slaGaugeFillClass = isResolved ? 'sla-healthy' : isEscalated ? 'sla-critical' : (slaHoursLeft <= 12 ? 'sla-critical' : (slaHoursLeft <= 24 ? 'sla-warning' : 'sla-healthy'));
+
+    const slaGaugeHTML = isResolved ? `
+      <div class="sla-gauge-wrapper">
+        <div class="sla-gauge-header">
+          <span style="color: #34d399; font-weight: 700;">✓ SLA Resolution Guarantee Met</span>
+          <span style="color: #cbd5e1; font-family: var(--font-mono); font-size: 0.7rem;">${turnaroundStr || 'On Schedule'}</span>
+        </div>
+        <div class="sla-gauge-track">
+          <div class="sla-gauge-fill sla-healthy" style="width: 100%;"></div>
+        </div>
+      </div>
+    ` : isEscalated ? `
+      <div class="sla-gauge-wrapper" style="border-color: rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.05);">
+        <div class="sla-gauge-header">
+          <span style="color: #f87171; font-weight: 800;">🚨 48h SLA Window Breached</span>
+          <span style="color: #f87171; font-family: var(--font-mono); font-weight: 800; font-size: 0.7rem;">Escalated</span>
+        </div>
+        <div class="sla-gauge-track">
+          <div class="sla-gauge-fill sla-critical" style="width: 100%;"></div>
+        </div>
+      </div>
+    ` : `
+      <div class="sla-gauge-wrapper">
+        <div class="sla-gauge-header">
+          <span style="color: #94a3b8;">48-Hour SLA Guarantee</span>
+          <span style="color: #38bdf8; font-family: var(--font-mono); font-weight: 700; font-size: 0.7rem;">${slaHoursLeft}h left (${slaPercent}%)</span>
+        </div>
+        <div class="sla-gauge-track">
+          <div class="sla-gauge-fill ${slaGaugeFillClass}" style="width: ${slaPercent}%;"></div>
+        </div>
+      </div>
+    `;
+
+    // Field Squad Telemetry Pill
+    const squadTelemetryHTML = (issue.workerStatus === 'On Site - Conducting Work' || issue.arrivedTimestamp) ? `
+      <div class="squad-telemetry-pill squad-arrived">
+        <span class="pulse-dot"></span>
+        <span>📍 Squad arrived on-site • Work in progress</span>
+      </div>
+    ` : (issue.workerStatus === 'En Route to Site' || issue.enRouteTimestamp) ? `
+      <div class="squad-telemetry-pill">
+        <span class="pulse-dot"></span>
+        <span>🚗 Field squad en route to location (${issue.assignedWorker || 'AP-05-TX'})</span>
+      </div>
+    ` : issue.assignedWorker ? `
+      <div class="squad-telemetry-pill" style="border-color: rgba(251, 191, 36, 0.3); color: #fbbf24; background: rgba(251, 191, 36, 0.06);">
+        <span class="pulse-dot" style="background: #fbbf24;"></span>
+        <span>👷 Assigned: ${issue.assignedWorker}</span>
+      </div>
+    ` : '';
+
     return `
       <div class="issue-card ${isMyReport ? 'is-my-report' : ''}" onclick="window.viewIssueDetail('${issue.id}')">
         ${ownershipBannerHTML}
@@ -3348,39 +3404,27 @@
           </div>
         </div>
         <div class="issue-card-body">
-          <div class="issue-meta-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <div class="issue-meta-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
             <div style="display: flex; align-items: center; gap: 0.4rem;">
               <span class="cat-badge">${issue.deptIcon || '🏢'} ${issue.deptName || 'Civic'}</span>
               <span class="badge sev-${issue.severity}">${(issue.severity || 'medium').toUpperCase()}</span>
             </div>
             ${aiMetaBadgeHTML}
           </div>
-          <h3 class="issue-title">${issue.title}</h3>
-          <p class="issue-desc">${issue.description}</p>
+          <h3 class="issue-title" style="font-size: 0.98rem; line-height: 1.35; margin-bottom: 0.35rem;">${issue.title}</h3>
+          <p class="issue-desc" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 0.5rem; font-size: 0.8rem; color: #94a3b8;">${issue.description}</p>
           
-          <div class="issue-location-row">
+          <div class="issue-location-row" style="margin-bottom: 0.5rem; font-size: 0.76rem;">
             <span>📍</span>
             <span>${issue.location}</span>
           </div>
 
-          ${aiSnippetHTML}
+          ${slaGaugeHTML}
+          ${squadTelemetryHTML}
 
-          <!-- Exact Date & Time Tracking Grid -->
-          <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 0.5rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.76rem; color: #cbd5e1; margin-bottom: 0.85rem; line-height: 1.45;">
-            <div>📅 <strong>Reported:</strong> ${reportedTimeStr}</div>
-            ${isResolved ? `
-              <div style="color: #34d399;">✓ <strong>Resolved:</strong> ${resolvedTimeStr} (${turnaroundStr})</div>
-            ` : isEscalated ? `
-              <div style="color: #f87171; font-weight: 700;">⚠️ <strong>SLA Breached:</strong> Forwarded to Zonal Commissioner</div>
-            ` : (issue.workerStatus === 'On Site - Conducting Work' || issue.arrivedTimestamp) ? `
-              <div style="color: #34d399; font-weight: 600;">📍 <strong>Field squad has arrived on site</strong></div>
-            ` : (issue.workerStatus === 'En Route to Site' || issue.enRouteTimestamp) ? `
-              <div style="color: #38bdf8; font-weight: 600;">🚗 <strong>Field squad is travelling to your location</strong></div>
-            ` : issue.assignedWorker ? `
-              <div style="color: #fbbf24;">👷 <strong>Field Squad Assigned:</strong> ${issue.assignedWorker}</div>
-            ` : `
-              <div style="color: #38bdf8;">⏱️ <strong>48h Deadline:</strong> ${deadlineTimeStr}</div>
-            `}
+          <div style="font-size: 0.72rem; color: #64748b; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; justify-content: space-between;">
+            <span>📅 Reported: ${reportedTimeStr}</span>
+            ${isResolved ? `<span style="color: #34d399; font-weight: 700;">✓ Resolved</span>` : ''}
           </div>
 
           <div class="issue-card-footer">
@@ -3590,14 +3634,34 @@
     user.wallet_points = totalCredits;
     updateCitizenCreditsUI(totalCredits);
 
-    // 1. My Active Reports Grid (Pending/In-Progress reports submitted by Krish)
+    // Synchronize Civic Passport Stats
+    const myAllIssues = issues.filter(i => 
+      i.reportedBy?.toLowerCase().includes('krish') || i.userId === user.id || i.reportedBy === user.name
+    );
+    const myActiveCount = myAllIssues.filter(i => i.status !== 'resolved').length;
+    const myResolvedCount = myAllIssues.filter(i => i.status === 'resolved').length;
+
+    const elActiveStat = document.getElementById('citizenStatActiveReports');
+    const elResolvedStat = document.getElementById('citizenStatResolvedReports');
+    const elCreditsStat = document.getElementById('citizenStatCredits');
+    const elQuotaStat = document.getElementById('citizenStatDailyQuota');
+
+    if (elActiveStat) elActiveStat.textContent = myActiveCount;
+    if (elResolvedStat) elResolvedStat.textContent = myResolvedCount;
+    if (elCreditsStat) elCreditsStat.textContent = totalCredits;
+    const quota = db.getCitizenDailyReportsUsage();
+    if (elQuotaStat) elQuotaStat.textContent = quota.isLimitReached ? '0/3 (Full)' : `${quota.remaining}/3 Left`;
+
+    // Segment Controller Count Badges
+    const segCountMy = document.getElementById('segCountMyReports');
+    const segCountComm = document.getElementById('segCountCommunity');
+    if (segCountMy) segCountMy.textContent = `${Math.min(4, myAllIssues.length)}`;
+    if (segCountComm) segCountComm.textContent = `Top 3`;
+
+    // 1. My Active Reports Grid (Kept for compatibility if element exists)
     const activeGrid = document.getElementById('citizenActiveReportsGrid');
     if (activeGrid) {
-      const myActive = issues.filter(i => 
-        i.status !== 'resolved' && 
-        (i.reportedBy?.toLowerCase().includes('krish') || i.userId === user.id || i.reportedBy === user.name)
-      );
-      // Deterministic sort: Newest first
+      const myActive = myAllIssues.filter(i => i.status !== 'resolved');
       myActive.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
       if (myActive.length > 0) {
@@ -3613,14 +3677,10 @@
     // 2. Dedicated "My Reports" Tab Grid
     const myReportsGrid = document.getElementById('citizenMyReportsGrid');
     if (myReportsGrid) {
-      const myAll = issues.filter(i => 
-        i.reportedBy?.toLowerCase().includes('krish') || i.userId === user.id || i.reportedBy === user.name
-      );
-
       // Update Subfilter badge counts
-      const countAll = myAll.length;
-      const countActive = myAll.filter(i => i.status !== 'resolved').length;
-      const countResolved = myAll.filter(i => i.status === 'resolved').length;
+      const countAll = myAllIssues.length;
+      const countActive = myActiveCount;
+      const countResolved = myResolvedCount;
 
       const badgeAll = document.getElementById('myReportsCountAll');
       const badgeActive = document.getElementById('myReportsCountActive');
@@ -3630,11 +3690,11 @@
       if (badgeResolved) badgeResolved.textContent = countResolved;
 
       const currentSub = window._currentMyReportsSubfilter || 'all';
-      let displayedReports = myAll;
+      let displayedReports = myAllIssues;
       if (currentSub === 'active') {
-        displayedReports = myAll.filter(i => i.status !== 'resolved');
+        displayedReports = myAllIssues.filter(i => i.status !== 'resolved');
       } else if (currentSub === 'resolved') {
-        displayedReports = myAll.filter(i => i.status === 'resolved');
+        displayedReports = myAllIssues.filter(i => i.status === 'resolved');
       }
 
       // Deterministic sort: Active first, then newest timestamp descending
@@ -3659,48 +3719,69 @@
       }
     }
 
+    // 3. Streamlined Citizen Home Feed Grid (Strictly 3-4 Reports Focus)
     const feedGrid = document.getElementById('citizenIssuesFeedGrid');
     if (feedGrid) {
-      let filtered = issues;
+      let displayItems = [];
 
-      // 4-Tier Geospatial Filter
-      if (selectedState !== 'all') {
-        filtered = filtered.filter(i => (i.state || 'Andhra Pradesh') === selectedState);
-      }
-      if (selectedCity !== 'all') {
-        filtered = filtered.filter(i => (i.city || 'Surampalem') === selectedCity);
-      }
-      if (selectedWard !== 'all') {
-        filtered = filtered.filter(i => (i.ward || '') === selectedWard);
-      }
-      if (selectedStreet !== 'all') {
-        filtered = filtered.filter(i => (i.street || '') === selectedStreet || i.location.includes(selectedStreet));
+      if (citizenFeedSegment === 'my_reports') {
+        // STRICTLY Krish's 3-4 reports!
+        let myReports = [...myAllIssues];
+        // Sort: Active/Escalated first, then newest timestamp descending
+        myReports.sort((a, b) => {
+          const aActive = a.status !== 'resolved';
+          const bActive = b.status !== 'resolved';
+          if (aActive && !bActive) return -1;
+          if (!aActive && bActive) return 1;
+          return (b.timestamp || 0) - (a.timestamp || 0);
+        });
+
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          myReports = myReports.filter(i => i.title.toLowerCase().includes(q) || i.location.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
+        }
+
+        // Cap strictly at 3-4 reports to prevent clumsy cluttered view
+        displayItems = myReports.slice(0, 4);
+
+      } else {
+        // Ward Community Feed (Top 3 curated ward reports)
+        let commReports = issues.filter(i => 
+          !(i.reportedBy?.toLowerCase().includes('krish') || i.userId === user.id || i.reportedBy === user.name)
+        );
+
+        // 4-Tier Geospatial Filter
+        if (selectedState !== 'all') commReports = commReports.filter(i => (i.state || 'Andhra Pradesh') === selectedState);
+        if (selectedCity !== 'all') commReports = commReports.filter(i => (i.city || 'Surampalem') === selectedCity);
+        if (selectedWard !== 'all') commReports = commReports.filter(i => (i.ward || '') === selectedWard);
+
+        // Sort: Active first, then newest timestamp descending
+        commReports.sort((a, b) => {
+          const aActive = a.status !== 'resolved';
+          const bActive = b.status !== 'resolved';
+          if (aActive && !bActive) return -1;
+          if (!aActive && bActive) return 1;
+          return (b.timestamp || 0) - (a.timestamp || 0);
+        });
+
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          commReports = commReports.filter(i => i.title.toLowerCase().includes(q) || i.location.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
+        }
+
+        // Cap strictly at top 3 reports
+        displayItems = commReports.slice(0, 3);
       }
 
-      // Department / Category / Ownership Filter
-      if (citizenCategoryFilter === 'sanitation') filtered = filtered.filter(i => i.department === 'sanitation');
-      else if (citizenCategoryFilter === 'food') filtered = filtered.filter(i => i.department === 'food_safety');
-      else if (citizenCategoryFilter === 'electricity') filtered = filtered.filter(i => i.department === 'electricity');
-      else if (citizenCategoryFilter === 'my_reports') filtered = filtered.filter(i => i.reportedBy?.toLowerCase().includes('krish') || i.reportedBy === user.name || i.userId === user.id);
-      else if (citizenCategoryFilter === 'community') filtered = filtered.filter(i => !(i.reportedBy?.toLowerCase().includes('krish') || i.reportedBy === user.name || i.userId === user.id));
-      else if (citizenCategoryFilter === 'in_progress') filtered = filtered.filter(i => i.status !== 'resolved');
-      else if (citizenCategoryFilter === 'resolved') filtered = filtered.filter(i => i.status === 'resolved');
-
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        filtered = filtered.filter(i => i.title.toLowerCase().includes(q) || i.location.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
-      }
-
-      // Deterministic Feed Ordering: Active / In-Progress first, newest report timestamp descending
-      filtered.sort((a, b) => {
-        const aActive = a.status !== 'resolved';
-        const bActive = b.status !== 'resolved';
-        if (aActive && !bActive) return -1;
-        if (!aActive && bActive) return 1;
-        return (b.timestamp || 0) - (a.timestamp || 0);
-      });
-
-      feedGrid.innerHTML = filtered.length ? filtered.map(renderCardHTML).join('') : '<p style="grid-column: 1/-1; text-align: center; padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-lg); color: var(--text-muted); border: 1px dashed var(--border);">No complaints registered in this location division. You can be the first to report!</p>';
+      feedGrid.innerHTML = displayItems.length 
+        ? displayItems.map(renderCardHTML).join('') 
+        : `
+          <div style="grid-column: 1/-1; padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-lg); text-align: center; color: var(--text-muted); border: 1px dashed var(--border);">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📋</div>
+            <div style="font-size: 1rem; font-weight: 700; color: white; margin-bottom: 0.25rem;">No grievances found in this view</div>
+            <p style="font-size: 0.82rem; margin-bottom: 1rem;">No reports match your current filter. You can log a new grievance anytime!</p>
+            <button class="btn btn-primary btn-sm" onclick="window.openReportModal()">+ Report New Issue</button>
+          </div>`;
     }
 
     const ledgerList = document.getElementById('citizenWalletLedger');
@@ -4978,6 +5059,13 @@
     }
   };
 
+  window.startVoiceGrievanceDictation = function() {
+    window.openReportModal();
+    setTimeout(() => {
+      window.toggleVoiceRecording();
+    }, 350);
+  };
+
   // =========================================================================
   // 8.1 LIVE GPS GEOLOCATION & IMAGE EVIDENCE SUBMISSION ENGINE
   // =========================================================================
@@ -5903,6 +5991,40 @@
     auth.logout();
     checkAuthAndRoute();
     showToast("Logged out successfully.", "info", "🔒");
+  };
+
+  window.setCitizenFeedSegment = function(segment, btn) {
+    citizenFeedSegment = segment;
+    document.querySelectorAll('.citizen-segment-btn').forEach(b => b.classList.remove('active'));
+    const targetBtn = btn || (segment === 'my_reports' ? document.getElementById('segBtnMyReports') : document.getElementById('segBtnCommunity'));
+    if (targetBtn) targetBtn.classList.add('active');
+
+    const prompt = document.getElementById('citizenFeedFooterPrompt');
+    if (prompt) {
+      if (segment === 'my_reports') {
+        prompt.innerHTML = `
+          <div style="font-size: 0.82rem; color: #94a3b8; display: flex; align-items: center; gap: 0.5rem;">
+            <span>ℹ️</span>
+            <span>Showing your top 3–4 active & recent grievances. All reports are backed by 48h SLA response.</span>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline" onclick="window.switchCitizenSubTab('my_reports')" style="font-size: 0.8rem; border-radius: 20px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.35); padding: 0.35rem 0.85rem; cursor: pointer;">
+            <span>View Full Grievance History</span> <span>&rarr;</span>
+          </button>
+        `;
+      } else {
+        prompt.innerHTML = `
+          <div style="font-size: 0.82rem; color: #94a3b8; display: flex; align-items: center; gap: 0.5rem;">
+            <span>ℹ️</span>
+            <span>Showing top 3 local community grievances in Ward 12. Switch to 'My Grievances' to track your complaints.</span>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline" onclick="window.setCitizenFeedSegment('my_reports')" style="font-size: 0.8rem; border-radius: 20px; color: #34d399; border-color: rgba(16, 185, 129, 0.35); padding: 0.35rem 0.85rem; cursor: pointer;">
+            <span>Back to My Reports (3–4)</span> <span>&rarr;</span>
+          </button>
+        `;
+      }
+    }
+
+    renderCitizenDashboard();
   };
 
   window.filterMyReports = function(subfilter, btn) {

@@ -27,7 +27,7 @@
 
   <!-- Design System & Stylesheets with Cache-Busting -->
   <link rel="stylesheet" href="css/main.css?v=8.0">
-  <link rel="stylesheet" href="css/components.css?v=28.0.0">
+  <link rel="stylesheet" href="css/components.css?v=29.0.0">
   <link rel="stylesheet" href="css/command-center.css?v=26.0.0">
   <link rel="stylesheet" href="css/electricity.css?v=7.0">
   <link rel="stylesheet" href="css/iot-simulation.css?v=7.0">
@@ -379,70 +379,88 @@
         </select>
       </div>
 
-      <!-- Subview 1: Feed -->
+      <!-- Subview 1: Streamlined Citizen Command Hub (3-4 Reports Focus) -->
       <div id="citizenTab_feed" class="citizen-subview">
-        <!-- Citizen Minimalist Hero Header -->
-        <div class="citizen-welcome-hero" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 78, 59, 0.25)); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 14px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <div>
-            <div style="font-size: 0.78rem; color: #34d399; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">📍 Ward 12 (Market Zone), Surampalem</div>
-            <h2 style="color: white; font-size: 1.35rem; margin: 0.2rem 0 0.3rem; font-weight: 800;">Namaste, Krish</h2>
-            <p style="color: #cbd5e1; font-size: 0.84rem; margin: 0; line-height: 1.45;">Report civic problems directly to field squads with guaranteed 48-hour SLA resolution.</p>
-          </div>
-          <button class="btn btn-primary" onclick="window.openReportModal()" style="font-weight: 800; font-size: 0.92rem; padding: 0.75rem 1.4rem; border-radius: 10px; background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-            <span style="font-size: 1.1rem; font-weight: 900;">+</span> <span>REPORT A CIVIC ISSUE</span>
-          </button>
-        </div>
-
-        <!-- WhatsApp Grievance Bot Quick-Launch Banner -->
-        <div class="wa-quick-banner" onclick="window.switchCitizenSubTab('support')" style="cursor: pointer; background: linear-gradient(135deg, rgba(18, 140, 126, 0.22), rgba(7, 94, 84, 0.35)); border: 1px solid rgba(37, 211, 102, 0.35); border-radius: 12px; padding: 0.9rem 1.25rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; transition: all 0.2s;" onmouseover="this.style.borderColor='#25d366'" onmouseout="this.style.borderColor='rgba(37, 211, 102, 0.35)'">
-          <div style="display: flex; align-items: center; gap: 0.85rem;">
-            <div style="width: 42px; height: 42px; border-radius: 50%; background: #25d366; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);">💬</div>
-            <div>
-              <div style="display: flex; align-items: center; gap: 0.4rem;">
-                <h4 style="color: white; font-size: 0.98rem; margin: 0; font-weight: 800;">Official WhatsApp AI Grievance Bot</h4>
-                <span class="wa-verified-badge" style="background: #25d366; color: white; border-radius: 50%; font-size: 0.65rem; padding: 1px 4px; font-weight: 900;">✓</span>
+        <!-- Citizen Civic Passport & Command Hero -->
+        <div class="citizen-command-hero">
+          <div class="hero-identity-row">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <div class="citizen-avatar-badge">
+                <span class="avatar-icon">🛡️</span>
+                <span class="live-dot" title="Active Citizen Resident"></span>
               </div>
-              <p style="color: #cbd5e1; font-size: 0.78rem; margin: 2px 0 0 0;">Report hazards instantly, send GPS photos, or track complaint status via official WhatsApp AI.</p>
+              <div>
+                <div class="hero-kicker">📍 WARD 12 (MARKET ZONE) • SURAMPALEM</div>
+                <h2 class="hero-title">Namaste, Krish</h2>
+                <p class="hero-subtitle">Smart Civic Hub with Guaranteed 48-Hour SLA Rapid Squad Resolution.</p>
+              </div>
+            </div>
+            <div class="hero-actions">
+              <button type="button" class="btn-hero-report" onclick="window.openReportModal()">
+                <span>+</span> <span>Report Grievance</span>
+              </button>
+              <button type="button" class="btn-hero-voice" onclick="window.startVoiceGrievanceDictation()" title="Voice AI Report">
+                <span>🎙️ Voice AI</span>
+              </button>
+              <button type="button" class="btn-hero-wa" onclick="window.switchCitizenSubTab('support')" title="Official WhatsApp Bot">
+                <span>💬 WhatsApp Bot</span>
+              </button>
             </div>
           </div>
-          <button type="button" class="btn btn-sm" style="background: #25d366; color: #075e54; font-weight: 800; border: none; padding: 0.45rem 0.95rem; border-radius: 8px; display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
-            <span>Open WhatsApp Bot</span> <span>&rarr;</span>
-          </button>
+
+          <!-- Civic Passport Live Metrics Strip -->
+          <div class="citizen-passport-bar">
+            <div class="passport-chip" onclick="window.setCitizenFeedSegment('my_reports')" title="Click to view personal active grievances">
+              <div class="passport-chip-val" id="citizenStatActiveReports">3</div>
+              <div class="passport-chip-lbl">⚡ Active Grievances</div>
+            </div>
+            <div class="passport-chip" onclick="window.setCitizenFeedSegment('my_reports')" title="Click to view resolved grievances">
+              <div class="passport-chip-val" id="citizenStatResolvedReports" style="color: #34d399;">1</div>
+              <div class="passport-chip-lbl">✅ Resolved (Proof)</div>
+            </div>
+            <div class="passport-chip" onclick="window.switchCitizenSubTab('wallet')" title="Click to open civic rewards wallet">
+              <div class="passport-chip-val" id="citizenStatCredits" style="color: #fbbf24;">250</div>
+              <div class="passport-chip-lbl">🎖️ Civic Credits</div>
+            </div>
+            <div class="passport-chip" onclick="window.openReportModal()" title="Daily limit: 3 reports/day">
+              <div class="passport-chip-val" id="citizenStatDailyQuota" style="color: #38bdf8;">3/3 Left</div>
+              <div class="passport-chip-lbl">⚡ Daily Quota</div>
+            </div>
+          </div>
         </div>
 
-        <!-- Section: Active Reports (In Progress) -->
-        <div id="citizenActiveReportsSection" style="margin-bottom: 1.5rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
-            <h3 style="font-size: 1.05rem; color: white; margin: 0; display: flex; align-items: center; gap: 0.4rem;">
-              <span>⚡</span> My Active Grievances (In Progress)
-            </h3>
-            <button type="button" class="btn btn-sm btn-link" onclick="window.switchCitizenSubTab('my_reports')" style="color: #38bdf8; font-size: 0.76rem; text-decoration: none; padding: 0; background: none; border: none; cursor: pointer;">
-              View all my reports →
+        <!-- Clean Segmented View Controller -->
+        <div class="feed-control-bar">
+          <div class="feed-segments">
+            <button type="button" class="citizen-segment-btn active" id="segBtnMyReports" onclick="window.setCitizenFeedSegment('my_reports', this)">
+              <span>👤</span>
+              <span>My Grievances</span>
+              <span class="segment-badge" id="segCountMyReports">3–4</span>
+            </button>
+            <button type="button" class="citizen-segment-btn" id="segBtnCommunity" onclick="window.setCitizenFeedSegment('community', this)">
+              <span>🌐</span>
+              <span>Ward 12 Community</span>
+              <span class="segment-badge" id="segCountCommunity">Top 3</span>
             </button>
           </div>
-          <div id="citizenActiveReportsGrid" class="grid-3"></div>
-        </div>
-
-        <div class="section-header">
-          <div>
-            <h2 class="section-title"><span>📢</span> Ward & Community Grievances Feed</h2>
-            <p class="section-desc">Real-time civic issues logged in your jurisdiction with response countdown.</p>
+          <div class="feed-tools">
+            <input type="text" id="citizenSearchInput" class="form-input form-input-sm" placeholder="🔍 Search street or Ticket ID..." style="width: 240px; font-size: 0.8rem; border-radius: 20px; padding: 0.4rem 0.85rem;">
           </div>
-          <input type="text" id="citizenSearchInput" class="form-input" placeholder="🔍 Search street, area, or Ticket ID..." style="width: 260px; font-size: 0.85rem; padding: 0.45rem 0.75rem;">
         </div>
 
-        <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.75rem; margin-bottom: 1.5rem;" class="citizen-feed-filter-bar">
-          <button class="btn btn-sm btn-outline citizen-filter-chip active" data-filter="all">All Ward Reports</button>
-          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="my_reports">👤 My Reports Only</button>
-          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="community">👥 Community Reports</button>
-          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="in_progress">⚡ In Progress (48h SLA)</button>
-          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="sanitation">🏢 Sanitation</button>
-          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="food">🍲 Food Safety</button>
-          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="electricity">⚡ Electricity</button>
-          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="resolved">✅ Resolved</button>
-        </div>
-
+        <!-- Curated Grievances Grid (Strictly 3-4 Cards) -->
         <div id="citizenIssuesFeedGrid" class="grid-3"></div>
+
+        <!-- Streamlined Feed Footer Prompt -->
+        <div id="citizenFeedFooterPrompt" class="feed-footer-prompt">
+          <div style="font-size: 0.82rem; color: #94a3b8; display: flex; align-items: center; gap: 0.5rem;">
+            <span>ℹ️</span>
+            <span>Showing your top 3–4 active & recent grievances. All reports are backed by 48h SLA response.</span>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline" onclick="window.switchCitizenSubTab('my_reports')" style="font-size: 0.8rem; border-radius: 20px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.35); padding: 0.35rem 0.85rem; cursor: pointer;">
+            <span>View Full Grievance History</span> <span>&rarr;</span>
+          </button>
+        </div>
       </div>
 
       <!-- Subview: Dedicated My Reports -->
@@ -2658,7 +2676,7 @@
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => {
-            if (name !== 'clean-safe-india-v28.0.0') {
+            if (name !== 'clean-safe-india-v29.0.0') {
               caches.delete(name);
             }
           });
@@ -2668,6 +2686,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=28.0.0"></script>
+  <script src="js/bundle.js?v=29.0.0"></script>
 </body>
 </html>
