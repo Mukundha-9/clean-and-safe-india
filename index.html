@@ -309,7 +309,7 @@
         </div>
       </div>
 
-      <!-- Shallow Navigation Pills (Citizen: Home, My Reports, WhatsApp Bot, Profile & Credits) -->
+      <!-- Shallow Navigation Pills (Citizen: Home, My Reports, WhatsApp Bot, Credits) -->
       <ul class="dashboard-nav-pills">
         <li class="dash-nav-pill citizen-nav-btn active" data-tab="feed" onclick="window.switchCitizenSubTab('feed')">
           <span>🏠</span> Home
@@ -321,7 +321,7 @@
           <span>💬</span> WhatsApp Bot
         </li>
         <li class="dash-nav-pill citizen-nav-btn" data-tab="wallet" onclick="window.switchCitizenSubTab('wallet')">
-          <span>👤</span> Profile & Credits
+          <span>🏅</span> Credits
         </li>
       </ul>
 
@@ -333,7 +333,7 @@
         <button class="btn btn-primary btn-sm" id="citizenTopReportBtn" onclick="window.openReportModal()">
           <span>+</span> Report Issue
         </button>
-        <div class="user-avatar-btn" id="citizenTopAvatar" title="Citizen Profile: KRISH">KR</div>
+        <div class="user-avatar-btn" id="citizenTopAvatar" title="Citizen Profile (Click to inspect verified identity)" onclick="window.openCitizenProfileModal()" style="cursor: pointer;">KR</div>
         <button class="btn-switch-portal" onclick="window.handleLogout()">
           <span>🔒</span> Logout
         </button>
@@ -343,77 +343,6 @@
     <main class="app-container">
       <!-- Subview 1: Streamlined Citizen Command Hub (3-4 Reports Focus) -->
       <div id="citizenTab_feed" class="citizen-subview">
-        <!-- 4-Tier Hierarchical Geospatial Filter Bar -->
-        <div class="location-filter-bar">
-          <div class="location-filter-title">
-            <span>📍</span> <strong>Jurisdiction:</strong>
-          </div>
-          <select id="geoStateSelect" class="location-select" onchange="window.handleGeoStateChange(this.value)">
-            <option value="all">🇮🇳 All States</option>
-            <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
-            <option value="Telangana">Telangana</option>
-            <option value="Maharashtra">Maharashtra</option>
-            <option value="Karnataka">Karnataka</option>
-            <option value="Tamil Nadu">Tamil Nadu</option>
-            <option value="Delhi NCR">Delhi NCR</option>
-          </select>
-          <select id="geoCitySelect" class="location-select" onchange="window.handleGeoCityChange(this.value)">
-            <option value="all">All Cities</option>
-            <option value="Surampalem" selected>Surampalem</option>
-            <option value="Kakinada">Kakinada</option>
-            <option value="Visakhapatnam">Visakhapatnam</option>
-          </select>
-          <select id="geoWardSelect" class="location-select" onchange="window.handleGeoWardChange(this.value)">
-            <option value="all">All Wards / Zones</option>
-            <option value="Ward 12 (Market Zone)" selected>Ward 12 (Market Zone)</option>
-            <option value="Ward 11 (Lake View Zone)">Ward 11 (Lake View Zone)</option>
-            <option value="Ward 14 (Campus Zone)">Ward 14 (Campus Zone)</option>
-          </select>
-          <select id="geoStreetSelect" class="location-select" onchange="window.handleGeoStreetChange(this.value)">
-            <option value="all">All Streets / Landmarks</option>
-            <option value="Gandhi Statue Main Road">Gandhi Statue Main Road</option>
-            <option value="Market Gate Cross">Market Gate Cross</option>
-            <option value="College Road Food Court">College Road Food Court</option>
-          </select>
-        </div>
-
-        <!-- Citizen Civic Passport & Command Hero -->
-        <div class="citizen-command-hero">
-          <div class="hero-identity-row">
-            <div style="display: flex; align-items: center; gap: 0.85rem;">
-              <div class="citizen-avatar-badge">
-                <span class="avatar-icon">🛡️</span>
-                <span class="live-dot" title="Active Citizen Resident"></span>
-              </div>
-              <div>
-                <div class="hero-kicker">📍 WARD 12 (MARKET ZONE) • SURAMPALEM</div>
-                <h2 class="hero-title">Namaste, Krish</h2>
-                <p class="hero-subtitle">Smart Civic Hub with Guaranteed 48-Hour SLA Rapid Squad Resolution.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Civic Passport Live Metrics Strip -->
-          <div class="citizen-passport-bar">
-            <div class="passport-chip" onclick="window.setCitizenFeedSegment('my_reports')" title="Click to view personal active grievances">
-              <div class="passport-chip-val" id="citizenStatActiveReports">3</div>
-              <div class="passport-chip-lbl">⚡ Active Grievances</div>
-            </div>
-            <div class="passport-chip" onclick="window.setCitizenFeedSegment('my_reports')" title="Click to view resolved grievances">
-              <div class="passport-chip-val" id="citizenStatResolvedReports" style="color: #34d399;">1</div>
-              <div class="passport-chip-lbl">✅ Resolved (Proof)</div>
-            </div>
-            <div class="passport-chip" onclick="window.switchCitizenSubTab('wallet')" title="Click to open civic rewards wallet">
-              <div class="passport-chip-val" id="citizenStatCredits" style="color: #fbbf24;">250</div>
-              <div class="passport-chip-lbl">🎖️ Civic Credits</div>
-            </div>
-            <div class="passport-chip" onclick="window.openReportModal()" title="Daily limit: 3 reports/day">
-              <div class="passport-chip-val" id="citizenStatDailyQuota" style="color: #38bdf8;">3/3 Left</div>
-              <div class="passport-chip-lbl">⚡ Daily Quota</div>
-            </div>
-          </div>
-        </div>
-
         <!-- Clean Segmented View Controller -->
         <div class="feed-control-bar">
           <div class="feed-segments">
@@ -519,7 +448,7 @@
               </p>
             </div>
             <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.6rem 0.9rem; border-radius: var(--radius-sm); font-size: 0.8rem; color: #34d399;">
-              ✅ <strong>KRISH</strong> has contributed to 3 verified resolutions this month.
+              ✅ <strong id="citizenVerifiedName">Citizen</strong> has contributed to verified resolutions this month.
             </div>
           </div>
         </div>
@@ -668,7 +597,7 @@
               </div>
 
               <div class="wa-msg bot">
-                👋 Namaste <strong>KRISH</strong>! Welcome to the official <strong>Clean & Safe India WhatsApp Grievance Bot</strong>.<br><br>
+                👋 Namaste <strong id="waBotGreetingName">Citizen</strong>! Welcome to the official <strong>Clean & Safe India WhatsApp Grievance Bot</strong>.<br><br>
                 Send a photo, type your issue, or tap one of the quick buttons above to register an official <strong>48h SLA ticket</strong>!
                 <div class="wa-msg-meta">
                   <span>10:30 AM</span>
@@ -1829,7 +1758,7 @@
           <div class="cert-sub-title">MINISTRY OF HOUSING & URBAN AFFAIRS • SMART CITIES MISSION</div>
 
           <p style="font-size: 0.95rem; color: #cbd5e1; margin-top: 1rem;">This is officially presented to</p>
-          <div class="cert-recipient-name">KRISH</div>
+          <div class="cert-recipient-name" id="certModalRecipientName">Citizen</div>
           <p style="font-size: 0.88rem; color: #94a3b8; max-width: 540px; margin: 0.5rem auto 1.5rem; line-height: 1.6;">
             In recognition of outstanding civic duty, maintaining a <strong>4-Week Active Streak</strong>, and reporting verified civic hazards leading to prompt 48h resolution in <strong>Andhra Pradesh (Surampalem Circle)</strong>.
           </p>
@@ -1841,7 +1770,7 @@
             </div>
             <div>
               <div style="color: #34d399; font-weight: 800;">VERIFIED BY QR</div>
-              <div>ID: CIT-IND-2026-8941</div>
+              <div id="certModalOfficialId">ID: CIT-IND-2026-8941</div>
             </div>
             <div>
               <div style="color: #f59e0b; font-weight: 800;">DR. MAHESH BABU</div>
@@ -2721,6 +2650,112 @@
     </div>
   </div>
 
+  <!-- =========================================================================
+       FIRST-TIME CITIZEN PROFILE SETUP ONBOARDING POPUP MODAL
+       ========================================================================= -->
+  <div class="modal-overlay" id="citizenProfileSetupModal" style="background: rgba(4, 8, 20, 0.88); backdrop-filter: blur(8px); z-index: 9999;">
+    <div class="modal-box" style="max-width: 580px; width: 92%; background: linear-gradient(135deg, #0b1329 0%, #0f172a 100%); border: 1px solid rgba(16, 185, 129, 0.4); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(16, 185, 129, 0.15); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;">
+      <!-- Modal Header -->
+      <div style="background: linear-gradient(135deg, rgba(6, 78, 59, 0.4), rgba(15, 23, 42, 0.95)); padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(16, 185, 129, 0.3); display: flex; align-items: center; gap: 0.85rem;">
+        <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);">
+          🛡️
+        </div>
+        <div>
+          <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: #34d399; font-weight: 800;">
+            First-Time Onboarding • Smart Civic Connect
+          </div>
+          <h3 style="margin: 0; color: white; font-size: 1.2rem; font-weight: 800;">
+            Complete Your Citizen Profile
+          </h3>
+        </div>
+      </div>
+
+      <!-- Modal Body Form -->
+      <div class="modal-body" style="padding: 1.4rem 1.5rem; max-height: 75vh; overflow-y: auto;">
+        <p style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5; margin-top: 0; margin-bottom: 1.15rem;">
+          To route your civic grievances directly to authorized municipal squads and guarantee our <strong>48-Hour SLA resolution</strong>, please verify your permanent residential credentials.
+        </p>
+
+        <!-- Validation Error Message Alert Strip -->
+        <div id="setupProfileErrorMsg" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 0.65rem 0.85rem; margin-bottom: 1rem; color: #fca5a5; font-size: 0.8rem; align-items: center; gap: 0.5rem;">
+          <span>⚠️</span>
+          <span id="setupProfileErrorText">Please fill in all required fields.</span>
+        </div>
+
+        <form id="citizenProfileSetupForm" onsubmit="window.handleSaveCitizenProfile(event)">
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label class="form-label" style="font-size: 0.8rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
+              <span>Full Name <span style="color: #ef4444;">*</span></span>
+              <span style="color: #64748b; font-size: 0.72rem; font-weight: 400;">Official Citizen Name</span>
+            </label>
+            <input type="text" id="setupCitizenName" class="form-input" placeholder="e.g. Krish Varma" required style="border-radius: 8px; font-size: 0.88rem; padding: 0.55rem 0.85rem;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label class="form-label" style="font-size: 0.8rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
+              <span>Email Address</span>
+              <span style="color: #10b981; font-size: 0.72rem; font-weight: 600;">✓ Verified Account</span>
+            </label>
+            <input type="email" id="setupCitizenEmail" class="form-input" readonly style="background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); color: #94a3b8; cursor: not-allowed; border-radius: 8px; font-size: 0.88rem; padding: 0.55rem 0.85rem;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label class="form-label" style="font-size: 0.8rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
+              <span>Phone Number <span style="color: #ef4444;">*</span></span>
+              <span style="color: #64748b; font-size: 0.72rem; font-weight: 400;">For SLA squad updates</span>
+            </label>
+            <input type="tel" id="setupCitizenPhone" class="form-input" placeholder="e.g. +91 94401 88421" required style="border-radius: 8px; font-size: 0.88rem; padding: 0.55rem 0.85rem;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.9rem;">
+            <label class="form-label" style="font-size: 0.8rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.35rem;">
+              Permanent Residential Address <span style="color: #ef4444;">*</span>
+            </label>
+            <textarea id="setupCitizenAddress" class="form-input" rows="2" placeholder="e.g. Plot 18, Gandhi Nagar Main Road" required style="border-radius: 8px; font-size: 0.88rem; padding: 0.55rem 0.85rem; resize: vertical; min-height: 54px;"></textarea>
+          </div>
+
+          <!-- Jurisdictional Geocoding Cascading Selects -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-size: 0.78rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.3rem;">
+                State <span style="color: #ef4444;">*</span>
+              </label>
+              <select id="setupCitizenState" class="form-select" onchange="window.handleSetupStateChange(this.value)" required style="border-radius: 8px; font-size: 0.82rem; padding: 0.5rem 0.65rem;">
+              </select>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-size: 0.78rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.3rem;">
+                City <span style="color: #ef4444;">*</span>
+              </label>
+              <select id="setupCitizenCity" class="form-select" onchange="window.handleSetupCityChange(this.value)" required style="border-radius: 8px; font-size: 0.82rem; padding: 0.5rem 0.65rem;">
+              </select>
+            </div>
+
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label" style="font-size: 0.78rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.3rem;">
+                Home Ward <span style="color: #ef4444;">*</span>
+              </label>
+              <select id="setupCitizenWard" class="form-select" required style="border-radius: 8px; font-size: 0.82rem; padding: 0.5rem 0.65rem;">
+              </select>
+            </div>
+          </div>
+
+          <!-- Modal Action Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1rem;">
+            <div style="font-size: 0.72rem; color: #64748b; display: flex; align-items: center; gap: 0.35rem;">
+              <span>🔒</span>
+              <span>Encrypted Domicile Record</span>
+            </div>
+            <button type="submit" class="btn btn-primary" id="setupProfileSubmitBtn" style="padding: 0.55rem 1.25rem; font-size: 0.88rem; font-weight: 700; border-radius: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35); cursor: pointer;">
+              <span>Save & Complete Profile</span> <span>&rarr;</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Cache Invalidation & Direct Refresh Script -->
@@ -2732,7 +2767,7 @@
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => {
-            if (name !== 'clean-safe-india-v32.0.0') {
+            if (name !== 'clean-safe-india-v37.0.0') {
               caches.delete(name);
             }
           });
@@ -2742,6 +2777,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=33.0.0"></script>
+  <script src="js/bundle.js?v=38.0.0"></script>
 </body>
 </html>

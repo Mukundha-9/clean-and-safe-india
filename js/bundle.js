@@ -351,6 +351,9 @@
 
     logout() {
       this.saveSession(null);
+      if (typeof window !== 'undefined' && window.closeModal) {
+        window.closeModal('citizenProfileSetupModal');
+      }
     }
 
     subscribe(cb) {
@@ -1330,8 +1333,104 @@
   // =========================================================================
   // 3. MOCK DATABASE WITH 100% UNIQUE HIGH-QUALITY INCIDENT IMAGES
   // =========================================================================
-  const INITIAL_ISSUES = [
-    // --- ANDHRA PRADESH ---
+    const INITIAL_ISSUES = [
+    // --- ANDHRA PRADESH: CITIZEN KRISH VERIFIED REPORTS (EXACT 5 REPORTS) ---
+    // REPORT 1: Category: Sanitation & Waste Management, Status: RESOLVED / COMPLETED, SLA: Resolved successfully
+    {
+      isDemo: true,
+      id: 'ISS-2026-00121',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      street: 'Canteen Gate Cross',
+      department: 'sanitation',
+      deptName: 'Sanitation & Waste Management',
+      deptIcon: '🏢',
+      title: 'Overflowing Waste Bins Near Canteen Gate',
+      description: 'Commercial waste bins overflowing near the canteen entrance causing pedestrian obstruction and hygiene concerns. Bins cleared, sanitized and relocated to designated waste bay.',
+      location: 'Ward 12 (Market Zone), Canteen Gate Cross, Surampalem',
+      category: 'garbage_overflow',
+      categoryName: 'Sanitation & Waste Management',
+      categoryIcon: '🗑️',
+      severity: 'medium',
+      severityLabel: 'RESOLVED IN 26 HOURS',
+      status: 'resolved',
+      timestamp: Date.now() - 3600000 * 30,
+      slaDeadline: Date.now() + 3600000 * 18,
+      resolvedTimestamp: Date.now() - 3600000 * 4,
+      slaHoursLeft: 0,
+      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedTimestamp: Date.now() - 3600000 * 28,
+      assignedWorker: 'Sanitation Rapid Fleet 1 (Lead: Ravi Kumar)',
+      assignedTimestamp: Date.now() - 3600000 * 26,
+      workerStatus: 'Completed & Verified On-Site',
+      isSlaBreached: false,
+      lat: 17.0015,
+      lng: 81.8042,
+      reportedBy: 'KRISH',
+      userId: 'user-101',
+      upvotes: 14,
+      upvotedBy: ['user-101', 'user-102'],
+      imageBefore: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
+      imageAfter: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
+      recommendedResource: 'Compactor Fleet',
+      rewardIssued: true,
+      fineLevied: 0,
+      comments: [
+        { author: 'System Watchdog', role: 'system', text: 'Live GPS Geotag logged: 17.0015° N, 81.8042° E. 48h SLA timer active.', time: '30h ago' },
+        { author: 'Consultant Officer K. Mukundha', role: 'admin', text: 'Grievance verified. Heavy hydraulic tipper assigned.', time: '28h ago' },
+        { author: 'Sanitation Rapid Fleet 1', role: 'worker', text: 'Site cleared and sanitized with lime powder.', time: '4h ago' }
+      ]
+    },
+
+    // REPORT 2: Category: Sanitation & Waste Management, Status: RESOLVED / COMPLETED, SLA: Resolved successfully
+    {
+      isDemo: true,
+      id: 'ISS-2026-00128',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      street: 'Market Road Corner',
+      department: 'sanitation',
+      deptName: 'Sanitation & Waste Management',
+      deptIcon: '🏢',
+      title: 'Open Garbage Dumping Near Market Road',
+      description: 'Illegal dumping of commercial cartons and household solid waste along Market Road corner. Entire stretch cleared, disinfected, and anti-dumping signage erected.',
+      location: 'Ward 12 (Market Zone), Market Road Corner, Surampalem',
+      category: 'garbage_overflow',
+      categoryName: 'Sanitation & Waste Management',
+      categoryIcon: '🗑️',
+      severity: 'medium',
+      severityLabel: 'RESOLVED IN 18 HOURS',
+      status: 'resolved',
+      timestamp: Date.now() - 3600000 * 24,
+      slaDeadline: Date.now() + 3600000 * 24,
+      resolvedTimestamp: Date.now() - 3600000 * 6,
+      slaHoursLeft: 0,
+      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedTimestamp: Date.now() - 3600000 * 22,
+      assignedWorker: 'Municipal Rapid Squad 4 (Lead: Ramesh)',
+      assignedTimestamp: Date.now() - 3600000 * 20,
+      workerStatus: 'Completed & Verified On-Site',
+      isSlaBreached: false,
+      lat: 17.0018,
+      lng: 81.8038,
+      reportedBy: 'KRISH',
+      userId: 'user-101',
+      upvotes: 18,
+      upvotedBy: ['user-101'],
+      imageBefore: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=800&auto=format&fit=crop&q=80',
+      imageAfter: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
+      recommendedResource: 'Tipper Truck',
+      rewardIssued: true,
+      fineLevied: 0,
+      comments: [
+        { author: 'Consultant Officer K. Mukundha', role: 'admin', text: 'Sanitation supervisor notified and squad deployed.', time: '22h ago' },
+        { author: 'Municipal Rapid Squad 4', role: 'worker', text: 'Waste cleared and bins repositioned.', time: '6h ago' }
+      ]
+    },
+
+    // REPORT 3: Category: Sanitation & Waste Management, Status: IN PROGRESS, SLA: 48-HOUR SLA BREACHED / ESCALATED
     {
       isDemo: true,
       id: 'ISS-2026-00123',
@@ -1342,42 +1441,138 @@
       department: 'sanitation',
       deptName: 'Sanitation & Waste Management',
       deptIcon: '🏢',
-      title: 'Severe Garbage Overflow at Market Gate',
-      description: 'Overfilled municipal waste bin spilling onto pedestrian footpath. High stench and public hygiene risk.',
+      title: 'Severe Commercial Waste Overflow at Market Gate',
+      description: 'Over 3 tons of rotten municipal and commercial garbage overflowing onto main pedestrian road. Exceeded mandatory 48-Hour SLA period without field clearance. Automatically escalated to Municipal Commissioner Dr. Mahesh Babu & Zonal Health Directorate.',
       location: 'Ward 12 (Market Zone), Gandhi Statue Main Road, Surampalem',
-      category: 'garbage',
-      categoryName: 'Urban Garbage Overflow',
+      category: 'garbage_overflow',
+      categoryName: 'Sanitation & Waste Management',
       categoryIcon: '🗑️',
       severity: 'bulk',
-      severityLabel: 'BULK HAZARD',
-      status: 'pending',
-      timestamp: Date.now() - 3600000 * 8,
-      slaDeadline: Date.now() + 3600000 * 40,
+      severityLabel: 'SLA BREACHED (>48H)',
+      status: 'in_progress',
+      timestamp: Date.now() - 3600000 * 58,
+      slaDeadline: Date.now() - 3600000 * 10,
       resolvedTimestamp: null,
-      slaHoursLeft: 40,
+      slaHoursLeft: 0,
+      isSlaBreached: true,
+      escalatedTo: 'Zonal Municipal Commissioner (Dr. Mahesh Babu) & Higher Health Directorate',
       verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
-      verifiedTimestamp: Date.now() - 3600000 * 7.5,
-      assignedWorker: 'Sanitation Squad 4 (Lead: Ramesh K.)',
-      assignedTimestamp: Date.now() - 3600000 * 7,
-      workerStatus: 'Dispatched & On-Site Waste Clearing',
-      isSlaBreached: false,
-      lat: 17.0005,
-      lng: 81.8040,
+      verifiedTimestamp: Date.now() - 3600000 * 56,
+      assignedWorker: 'Sanitation Rapid Fleet 3 (Lead: P. Ramesh)',
+      assignedTimestamp: Date.now() - 3600000 * 54,
+      workerStatus: 'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Desk for Urgent Action',
+      lat: 17.0012,
+      lng: 81.8048,
       reportedBy: 'KRISH',
       userId: 'user-101',
-      upvotes: 24,
+      upvotes: 84,
       upvotedBy: ['user-101'],
       imageBefore: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
       imageAfter: null,
-      recommendedResource: 'Tractor / Bulk Compactor',
+      recommendedResource: 'Heavy Hydraulic Compactor & 10-Ton Tipper Fleet',
       rewardIssued: false,
       fineLevied: 0,
       comments: [
-        { author: 'System Watchdog', role: 'system', text: '48h SLA timer initiated. Automated vehicle allocated.', time: '8h ago' },
-        { author: 'Consultant Officer K. Mukundha', role: 'admin', text: 'Grievance verified. Squad 4 dispatched.', time: '7h ago' },
-        { author: 'Krish Varma (Citizen)', role: 'citizen', text: 'Garbage dump is overflowing onto main pedestrian footpath. High stench and school children transit blocked.', time: '7h ago' }
+        { author: 'System SLA Monitor', text: '⏱️ 48-Hour SLA Breached! Grievance unaddressed after 48h limit.', time: '10h ago' },
+        { author: 'Auto-Escalation Gateway', text: '🚨 Escalated to Higher Authority: Zonal Municipal Commissioner (Dr. Mahesh Babu) & Urban Health Directorate.', time: '10h ago' },
+        { author: 'Municipal Commissioner Red Desk', text: 'Ticket received with Critical Priority 1. Direct disciplinary summons and immediate heavy squad deployed.', time: '8h ago' }
       ]
     },
+
+    // REPORT 4: Category: Smart Electricity Department, Status: RESOLVED / COMPLETED, SLA: Resolved successfully
+    {
+      isDemo: true,
+      id: 'ISS-2026-00130',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      street: 'Gandhi Statue Junction',
+      department: 'electricity',
+      deptName: 'Smart Electricity Department',
+      deptIcon: '⚡',
+      title: 'Streetlight Failure Near Ward 12',
+      description: 'Twin-arm LED streetlights completely non-operational near Gandhi Statue junction, leading to low visibility at night. Replaced faulty ballast and LED driver unit. Full illumination restored.',
+      location: 'Ward 12 (Market Zone), Gandhi Statue Junction, Surampalem',
+      category: 'electricity',
+      categoryName: 'Smart Electricity Department',
+      categoryIcon: '💡',
+      severity: 'medium',
+      severityLabel: 'RESOLVED IN 28 HOURS',
+      status: 'resolved',
+      timestamp: Date.now() - 3600000 * 36,
+      slaDeadline: Date.now() + 3600000 * 12,
+      resolvedTimestamp: Date.now() - 3600000 * 8,
+      slaHoursLeft: 0,
+      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedTimestamp: Date.now() - 3600000 * 34,
+      assignedWorker: 'Lineman Squad B (Lead: Suresh Kumar)',
+      assignedTimestamp: Date.now() - 3600000 * 32,
+      workerStatus: 'Completed & Verified On-Site',
+      isSlaBreached: false,
+      lat: 17.0022,
+      lng: 81.8035,
+      reportedBy: 'KRISH',
+      userId: 'user-101',
+      upvotes: 22,
+      upvotedBy: ['user-101'],
+      imageBefore: 'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=800&auto=format&fit=crop&q=80',
+      imageAfter: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800&auto=format&fit=crop&q=80',
+      recommendedResource: 'Lineman Bucket Van (AP-05-EB)',
+      rewardIssued: true,
+      fineLevied: 0,
+      comments: [
+        { author: 'Consultant Officer K. Mukundha', role: 'admin', text: 'Electrical inspector assigned.', time: '34h ago' },
+        { author: 'Lineman Squad B', role: 'worker', text: 'Replaced driver unit. All streetlights operational.', time: '8h ago' }
+      ]
+    },
+
+    // REPORT 5: Category: Water Leakage / Water Supply, Status: IN PROGRESS, SLA: Normal / active SLA window
+    {
+      isDemo: true,
+      id: 'ISS-2026-00131',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      street: 'Market Road Pavement',
+      department: 'water_supply',
+      deptName: 'Water Leakage / Water Supply',
+      deptIcon: '💧',
+      title: 'Water Pipeline Leakage Near Ward 12',
+      description: 'Pressurized municipal water distribution main leaking clean drinking water onto Market Road pavement. Isolation valve inspection underway.',
+      location: 'Ward 12 (Market Zone), Market Road Pavement, Surampalem',
+      category: 'water_leakage',
+      categoryName: 'Water Leakage / Water Supply',
+      categoryIcon: '🚰',
+      severity: 'medium',
+      severityLabel: 'ACTIVE SLA (38H LEFT)',
+      status: 'in_progress',
+      timestamp: Date.now() - 3600000 * 10,
+      slaDeadline: Date.now() + 3600000 * 38,
+      resolvedTimestamp: null,
+      slaHoursLeft: 38,
+      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedTimestamp: Date.now() - 3600000 * 8,
+      assignedWorker: 'Public Works Water Squad 2 (Lead: Anita Roy)',
+      assignedTimestamp: Date.now() - 3600000 * 6,
+      workerStatus: 'On Site - Conducting Work',
+      isSlaBreached: false,
+      lat: 17.0016,
+      lng: 81.8040,
+      reportedBy: 'KRISH',
+      userId: 'user-101',
+      upvotes: 9,
+      upvotedBy: ['user-101'],
+      imageBefore: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80',
+      imageAfter: null,
+      recommendedResource: 'Valve Repair Utility Van',
+      rewardIssued: false,
+      fineLevied: 0,
+      comments: [
+        { author: 'Consultant Officer K. Mukundha', role: 'admin', text: 'Water Board division alerted. Utility squad dispatched.', time: '8h ago' },
+        { author: 'Public Works Water Squad 2', role: 'worker', text: 'Pressure isolated. Excavating service collar for replacement.', time: '2h ago' }
+      ]
+    },
+
     {
       isDemo: true,
       id: 'ISS-2026-00124',
@@ -1422,100 +1617,7 @@
         { author: 'Lineman Dispatch', text: 'Feeder isolated. Replacement bushing in transit.', time: '2h ago' }
       ]
     },
-    {
-      isDemo: true,
-      id: 'ISS-2026-00128',
-      state: 'Andhra Pradesh',
-      city: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      street: 'Gandhi Statue Main Road',
-      department: 'sanitation',
-      deptName: 'Sanitation & Waste Management',
-      deptIcon: '🏢',
-      title: '🚨 SLA Breached: Massive Solid Waste & Garbage Dump Overflow',
-      description: 'Over 3 tons of rotten municipal garbage overflowing onto main pedestrian road. Exceeded mandatory 48-Hour SLA period without field clearance. Automatically escalated to Municipal Commissioner Dr. Mahesh Babu & Zonal Health Directorate.',
-      location: 'Ward 12 (Market Zone), Gandhi Statue Main Road, Surampalem',
-      category: 'garbage',
-      categoryName: 'Uncollected Municipal Solid Waste & Garbage Dump',
-      categoryIcon: '🗑️',
-      severity: 'bulk',
-      severityLabel: 'SLA BREACHED (>48H)',
-      status: 'escalated',
-      timestamp: Date.now() - 3600000 * 62,
-      slaDeadline: Date.now() - 3600000 * 14,
-      resolvedTimestamp: null,
-      slaHoursLeft: 0,
-      isSlaBreached: true,
-      escalatedTo: 'Zonal Municipal Commissioner (Dr. Mahesh Babu) & Higher Health Directorate',
-      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
-      verifiedTimestamp: Date.now() - 3600000 * 61.5,
-      assignedWorker: 'Sanitation Rapid Fleet 3 (Lead: P. Ramesh)',
-      assignedTimestamp: Date.now() - 3600000 * 60,
-      workerStatus: 'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Desk for Urgent Action',
-      lat: 17.0012,
-      lng: 81.8048,
-      reportedBy: 'KRISH',
-      userId: 'user-101',
-      upvotes: 84,
-      upvotedBy: ['user-101'],
-      imageBefore: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
-      imageAfter: null,
-      recommendedResource: 'Heavy Hydraulic Compactor & 10-Ton Tipper Fleet',
-      rewardIssued: false,
-      fineLevied: 0,
-      comments: [
-        { author: 'System SLA Monitor', text: '⏱️ 48-Hour SLA Breached! Grievance unaddressed after 48h limit.', time: '14h ago' },
-        { author: 'Auto-Escalation Gateway', text: '🚨 Escalated to Higher Authority: Zonal Municipal Commissioner (Dr. Mahesh Babu) & Urban Health Directorate.', time: '14h ago' },
-        { author: 'Municipal Commissioner Red Desk', text: 'Ticket received with Critical Priority 1. Direct disciplinary summons and immediate heavy squad deployed.', time: '12h ago' },
-        { author: 'KRISH (Citizen)', text: 'Garbage dump is emitting toxic odor and blocking school children. Thank you for forwarding to the Commissioner.', time: '4h ago' }
-      ]
-    },
-    {
-      isDemo: true,
-      id: 'ISS-2026-00127',
-      state: 'Andhra Pradesh',
-      city: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      street: 'Old Bus Stand Cross',
-      department: 'sanitation',
-      deptName: 'Sanitation & Waste Management',
-      deptIcon: '🏢',
-      title: 'Overflowing Sewage Drain near Old Bus Stand',
-      description: 'Blocked underground storm drain overflowing with foul sludge. Exceeded 48h resolution SLA.',
-      location: 'Ward 12 (Market Zone), Old Bus Stand Cross, Surampalem',
-      category: 'garbage',
-      categoryName: 'Sewage Overflow Hazard',
-      categoryIcon: '🚯',
-      severity: 'bulk',
-      severityLabel: 'SLA BREACHED (>48H)',
-      status: 'escalated',
-      timestamp: Date.now() - 3600000 * 54,
-      slaDeadline: Date.now() - 3600000 * 6,
-      resolvedTimestamp: null,
-      slaHoursLeft: 0,
-      isSlaBreached: true,
-      escalatedTo: 'Zonal Municipal Commissioner (Dr. Mahesh Babu) & Urban Health Director',
-      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
-      verifiedTimestamp: Date.now() - 3600000 * 53.5,
-      assignedWorker: 'Special Drain Heavy Squad (Lead: B. Satyanarayana)',
-      assignedTimestamp: Date.now() - 3600000 * 52,
-      workerStatus: 'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Queue',
-      lat: 17.0018,
-      lng: 81.8052,
-      reportedBy: 'KRISH',
-      userId: 'user-101',
-      upvotes: 63,
-      upvotedBy: ['user-101'],
-      imageBefore: 'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=800&auto=format&fit=crop&q=80',
-      imageAfter: null,
-      recommendedResource: 'Hydraulic Suction & Jetting Tanker',
-      rewardIssued: false,
-      fineLevied: 0,
-      comments: [
-        { author: 'System Watchdog', text: '48-Hour SLA countdown expired without field sign-off.', time: '6h ago' },
-        { author: 'Auto-Escalation Engine', text: 'Grievance automatically forwarded to Zonal Municipal Commissioner Red Priority Queue.', time: '6h ago' }
-      ]
-    },
+
     {
       isDemo: true,
       id: 'ISS-2026-00125',
@@ -1563,6 +1665,7 @@
         { author: 'Dr. Lakshmi Prasad (FSO)', text: 'Statutory 7-Day Improvement Notice issued with ₹500 fine.', time: '4h ago' }
       ]
     },
+
     {
       isDemo: true,
       id: 'ISS-2026-00128',
@@ -1610,52 +1713,9 @@
         { author: 'Dr. Lakshmi Prasad (FSO)', text: 'Critical Violation notice issued under Section 56. ₹2,000 fine levied.', time: '10h ago' }
       ]
     },
+
     {
-      isDemo: true,
-      id: 'ISS-2026-00120',
-      state: 'Andhra Pradesh',
-      city: 'Surampalem',
-      ward: 'Ward 11 (Lake View Zone)',
-      street: 'Lake View Road',
-      department: 'sanitation',
-      deptName: 'Sanitation & Waste Management',
-      deptIcon: '🏢',
-      title: 'Commercial Debris Cleared at Lake Road',
-      description: 'Illegally dumped construction debris cleaned and surface sanitized.',
-      location: 'Ward 11 (Lake View Zone), Lake View Road, Surampalem',
-      category: 'garbage',
-      categoryName: 'Urban Garbage Overflow',
-      categoryIcon: '🗑️',
-      severity: 'bulk',
-      severityLabel: 'RESOLVED',
-      status: 'resolved',
-      timestamp: Date.now() - 3600000 * 36,
-      slaDeadline: Date.now() + 3600000 * 12,
-      resolvedTimestamp: Date.now() - 3600000 * 8,
-      slaHoursLeft: 0,
-      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
-      verifiedTimestamp: Date.now() - 3600000 * 35.5,
-      assignedWorker: 'Sanitation Squad 1 (Lead: Officer Ramesh)',
-      assignedTimestamp: Date.now() - 3600000 * 34,
-      workerStatus: 'Field Execution Completed & Cleaned Proof Uploaded',
-      isSlaBreached: false,
-      lat: 17.0050,
-      lng: 81.8010,
-      reportedBy: 'KRISH',
-      userId: 'user-101',
-      upvotes: 56,
-      upvotedBy: ['user-101'],
-      imageBefore: 'https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?w=800&auto=format&fit=crop&q=80',
-      imageAfter: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
-      recommendedResource: 'Tractor / Bulk Compactor',
-      rewardIssued: true,
-      fineLevied: 500,
-      comments: [
-        { author: 'Officer Ramesh', text: 'Cleaned, sanitized, and ₹500 fine levied on offender.', time: '12h ago' }
-      ]
-    },
-    {
-      id: 'ISS-2026-00130',
+      id: 'ISS-2026-00135',
       state: 'Andhra Pradesh',
       city: 'Kakinada',
       ward: 'Smart City Zone 1',
@@ -1690,6 +1750,7 @@
         { author: 'Smart City Cell', text: 'Emergency valve closure dispatched.', time: '4h ago' }
       ]
     },
+
     {
       id: 'ISS-2026-00132',
       state: 'Andhra Pradesh',
@@ -1727,7 +1788,6 @@
       ]
     },
 
-    // --- TELANGANA ---
     {
       isDemo: true,
       id: 'ISS-2026-00126',
@@ -1765,6 +1825,7 @@
         { author: 'GHMC Portal', text: 'Ticket routed to GHMC South Zone.', time: '1h ago' }
       ]
     },
+
     {
       id: 'ISS-2026-00134',
       state: 'Telangana',
@@ -1802,7 +1863,6 @@
       ]
     },
 
-    // --- MAHARASHTRA ---
     {
       id: 'ISS-2026-00136',
       state: 'Maharashtra',
@@ -1839,6 +1899,7 @@
         { author: 'PMC Control Room', text: 'Collection truck rerouted.', time: '3h ago' }
       ]
     },
+
     {
       id: 'ISS-2026-00137',
       state: 'Maharashtra',
@@ -1876,7 +1937,6 @@
       ]
     },
 
-    // --- KARNATAKA ---
     {
       id: 'ISS-2026-00139',
       state: 'Karnataka',
@@ -1913,6 +1973,7 @@
         { author: 'BBMP Portal', text: 'Automated challan inspection assigned.', time: '7h ago' }
       ]
     },
+
     {
       id: 'ISS-2026-00140',
       state: 'Karnataka',
@@ -1950,7 +2011,6 @@
       ]
     },
 
-    // --- TAMIL NADU ---
     {
       id: 'ISS-2026-00141',
       state: 'Tamil Nadu',
@@ -1987,6 +2047,7 @@
         { author: 'GCC Smart Control', text: 'Night compactor scheduled.', time: '4h ago' }
       ]
     },
+
     {
       id: 'ISS-2026-00142',
       state: 'Tamil Nadu',
@@ -2026,59 +2087,7 @@
         { author: 'TN FDA Officer', text: 'Critical Seizure Notice issued under Section 59. ₹5,000 fine levied.', time: '5h ago' }
       ]
     },
-    {
-      isDemo: true,
-      id: 'ISS-2026-00145',
-      state: 'Tamil Nadu',
-      city: 'Chennai',
-      ward: 'Marina Beach Coastal Zone',
-      street: 'Kamarajar Promenade',
-      department: 'sanitation',
-      deptName: 'Greater Chennai Corporation (GCC)',
-      deptIcon: '🏢',
-      title: 'Plastic & Marine Debris Pile on Marina Beach Promenade',
-      description: 'Logged by citizen Krish Varma while on inter-state visit in Chennai. Uncollected plastic waste along beach promenade creating public health and marine hazard. Automatically allocated to Greater Chennai Corporation (GCC).',
-      location: 'Marina Beach Coastal Zone, Kamarajar Promenade, Chennai',
-      category: 'garbage',
-      categoryName: 'Coastal Plastic Pollution',
-      categoryIcon: '🏖️',
-      severity: 'high',
-      severityLabel: 'HIGH PRIORITY',
-      status: 'pending',
-      timestamp: Date.now() - 3600000 * 5,
-      slaDeadline: Date.now() + 3600000 * 43,
-      resolvedTimestamp: null,
-      slaHoursLeft: 43,
-      verifiedByOfficer: 'Zonal Health Officer (GCC Zone 9)',
-      verifiedTimestamp: Date.now() - 3600000 * 4,
-      assignedWorker: 'GCC Coastal Cleanup Squad 2',
-      assignedTimestamp: Date.now() - 3600000 * 3,
-      workerStatus: 'En Route with Beach Cleaner Equipment',
-      isSlaBreached: false,
-      lat: 13.0500,
-      lng: 80.2824,
-      reportedBy: 'KRISH',
-      userId: 'user-101',
-      upvotes: 38,
-      upvotedBy: ['user-101'],
-      imageBefore: 'https://images.unsplash.com/photo-1528323273322-d81458248d40?w=800&auto=format&fit=crop&q=80',
-      imageAfter: null,
-      recommendedResource: 'GCC Beach Cleaning Tractor',
-      rewardIssued: false,
-      fineLevied: 0,
-      comments: [
-        { author: 'System Watchdog', role: 'system', text: 'Cross-city incident registered. Incident GPS routed to Greater Chennai Corporation.', time: '5h ago' },
-        { author: 'Zonal Health Officer (GCC Zone 9)', role: 'admin', text: 'Grievance verified under Inter-State Citizen Protocol. GCC Coastal Squad dispatched.', time: '4h ago' },
-        {
-          author: 'Krish Varma (Citizen)',
-          role: 'citizen',
-          text: 'Reported while traveling in Chennai. Permanent residence: Surampalem (AP). Glad to see nationwide municipal routing active!',
-          time: '4h ago'
-        }
-      ]
-    },
 
-    // --- DELHI NCR ---
     {
       id: 'ISS-2026-00143',
       state: 'Delhi NCR',
@@ -2115,6 +2124,7 @@
         { author: 'NDMC Smart Portal', text: 'Work order allocated for repaving.', time: '2h ago' }
       ]
     },
+
     {
       id: 'ISS-2026-00144',
       state: 'Delhi NCR',
@@ -2153,7 +2163,6 @@
     }
   ];
 
-  // Full Registry of Both Certified & Violated Establishments
   const INITIAL_VENDORS = [
     // 🟢 Certified Vendors
     {
@@ -2271,7 +2280,7 @@
 
   class DatabaseManager {
     constructor() {
-      this.issues = this.loadFromStorage('clean_safe_issues_v10', INITIAL_ISSUES);
+      this.issues = this.loadFromStorage('clean_safe_issues_v11', INITIAL_ISSUES);
       this.vendors = this.loadFromStorage('clean_safe_vendors_v10', INITIAL_VENDORS);
       this.finesCollected = this.loadFromStorage('clean_safe_fines_v9', 2500);
       this.listeners = [];
@@ -2289,7 +2298,7 @@
           const data = await res.json();
           if (data.issues && data.issues.length > 0) {
             this.issues = data.issues;
-            this.saveToStorage('clean_safe_issues_v10', this.issues);
+            this.saveToStorage('clean_safe_issues_v11', this.issues);
             this.notify();
           }
         }
@@ -2396,32 +2405,7 @@
           : (issueData.severity === 'bulk' ? 'Sanitation Compactor Squad 4 (Lead: Ramesh K.)' : 'Collection Squad 2 (AP-05-TX)');
 
       const currentUser = auth.getUser() || SYSTEM_ACCOUNTS.citizen;
-      const reporterProfile = {
-        name: currentUser.name || 'KRISH',
-        fullName: currentUser.fullName || (currentUser.name === 'KRISH' ? 'Krish Varma' : currentUser.name),
-        email: currentUser.email || 'citizen@civictech.in',
-        phone: currentUser.phone || '+91 98480 22334',
-        permanentAddress: currentUser.permanentAddress || 'Plot 42, Sri Rama Nagar, Surampalem, Gandepalli Mandal, Kakinada District, Andhra Pradesh - 533437',
-        homeGps: currentUser.homeGps || {
-          lat: 17.0042,
-          lng: 81.8021,
-          landmark: 'Near Sri Rama Temple & Community Center',
-          city: 'Surampalem',
-          district: 'Kakinada',
-          state: 'Andhra Pradesh'
-        },
-        homeWard: currentUser.ward || 'Ward 12 (Market Zone)',
-        homeCity: 'Surampalem',
-        homeState: 'Andhra Pradesh',
-        kycStatus: currentUser.kycStatus || 'Verified via Aadhaar / Civic DigiLocker',
-        kycVerified: true,
-        aadhaarMasked: currentUser.aadhaarMasked || 'XXXX-XXXX-8941',
-        reliabilityScore: currentUser.reliabilityScore || '98% (High Credibility - 4 Verified Grievances)',
-        officialId: currentUser.officialId || 'CIT-IND-2026-8941',
-        avatar: currentUser.avatar || 'KR',
-        guardianLevel: currentUser.guardianLevel || 'Level 3: Silver Civic Guardian',
-        civicCredits: currentUser.civicCredits || 150
-      };
+      const reporterProfile = buildCitizenProfileObject(currentUser);
 
       const newIssue = {
         id: id,
@@ -2458,7 +2442,7 @@
       };
 
       this.issues.unshift(newIssue);
-      this.saveToStorage('clean_safe_issues_v10', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_CREATED', newIssue);
 
@@ -2492,7 +2476,7 @@
         time: 'Just now'
       });
 
-      this.saveToStorage('clean_safe_issues_v10', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_RESOLVED', issue);
 
@@ -2537,7 +2521,7 @@
         }
       }
 
-      this.saveToStorage('clean_safe_issues_v10', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.saveToStorage('clean_safe_vendors_v10', this.vendors);
       this.notify();
       broadcastRealtimeEvent('FOOD_RECTIFIED', issue);
@@ -2567,7 +2551,7 @@
         timestamp: Date.now()
       };
       issue.comments.push(newComment);
-      this.saveToStorage('clean_safe_issues_v10', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.notify();
       broadcastRealtimeEvent('COMMENT_ADDED', { issueId, comment: newComment });
 
@@ -2674,7 +2658,7 @@
         issue.upvotes = (issue.upvotes || 0) + 1;
       }
 
-      this.saveToStorage('clean_safe_issues_v10', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_UPVOTED', issue);
       return issue;
@@ -2985,7 +2969,7 @@
       const existing = db.issues.find(i => i.id === issue.id);
       if (!existing) {
         db.issues.unshift(issue);
-        db.saveToStorage('clean_safe_issues_v10', db.issues);
+        db.saveToStorage('clean_safe_issues_v11', db.issues);
         db.notify();
       }
       showToast(`🚨 New Complaint #${issue.id} reported in ${issue.ward || 'Ward'}!`, 'info', '📢');
@@ -3001,7 +2985,7 @@
       } else {
         db.issues.unshift(updated);
       }
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
       showToast(`✅ Complaint #${updated.id} resolved by field team!`, 'reward', '🎉');
       playNotificationSound('chime');
@@ -3016,7 +3000,7 @@
       } else {
         db.issues.unshift(assigned);
       }
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
       showToast(`🚛 Squad Assigned to Ticket #${assigned.id} (${assigned.assignedWorker})`, 'info', '👷');
       playNotificationSound('chime');
@@ -3034,7 +3018,7 @@
       } else {
         db.issues.unshift(transitioned);
       }
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
       const isEnRoute = transitioned.workerStatus && transitioned.workerStatus.includes('En Route');
       const statusIcon = isEnRoute ? '🚗' : '📍';
@@ -3210,10 +3194,10 @@
   // Cascading Dropdown Populators for Citizen, Municipal & Food Safety Portals
   function updateAllGeoSelects(type, html, value) {
     const ids = {
-      state: ['geoStateSelect', 'geoStateSelect_mun', 'geoStateSelect_food'],
-      city: ['geoCitySelect', 'geoCitySelect_mun', 'geoCitySelect_food'],
-      ward: ['geoWardSelect', 'geoWardSelect_mun', 'geoWardSelect_food'],
-      street: ['geoStreetSelect', 'geoStreetSelect_mun', 'geoStreetSelect_food']
+      state: ['geoStateSelect_mun', 'geoStateSelect_food'],
+      city: ['geoCitySelect_mun', 'geoCitySelect_food'],
+      ward: ['geoWardSelect_mun', 'geoWardSelect_food'],
+      street: ['geoStreetSelect_mun', 'geoStreetSelect_food']
     };
 
     (ids[type] || []).forEach(id => {
@@ -3327,6 +3311,194 @@
     wardSelect.innerHTML = wardNames.map(w => `<option value="${w}">${w}</option>`).join('');
   };
 
+  // Setup Modal State / City / Ward cascading handlers
+  window.handleSetupStateChange = function(state) {
+    const citySelect = document.getElementById('setupCitizenCity');
+    const wardSelect = document.getElementById('setupCitizenWard');
+    if (!citySelect || !wardSelect) return;
+
+    const cities = GEOSPATIAL_DIRECTORY[state] || {};
+    const cityNames = Object.keys(cities);
+    citySelect.innerHTML = cityNames.map(c => `<option value="${c}">${c}</option>`).join('');
+    window.handleSetupCityChange(cityNames[0]);
+  };
+
+  window.handleSetupCityChange = function(city) {
+    const stateEl = document.getElementById('setupCitizenState');
+    const state = stateEl ? stateEl.value : 'Andhra Pradesh';
+    const wardSelect = document.getElementById('setupCitizenWard');
+    if (!wardSelect) return;
+
+    const cityData = (GEOSPATIAL_DIRECTORY[state] || {})[city];
+    const wardNames = Object.keys(cityData ? cityData.wards : {});
+    wardSelect.innerHTML = wardNames.map(w => `<option value="${w}">${w}</option>`).join('');
+  };
+
+  function initSetupGeoDropdowns(defaultState = 'Andhra Pradesh', defaultCity = 'Surampalem', defaultWard = 'Ward 12 (Market Zone)') {
+    const stateSelect = document.getElementById('setupCitizenState');
+    if (!stateSelect) return;
+
+    const stateNames = Object.keys(GEOSPATIAL_DIRECTORY);
+    stateSelect.innerHTML = stateNames.map(s => `<option value="${s}" ${s === defaultState ? 'selected' : ''}>${s}</option>`).join('');
+    
+    window.handleSetupStateChange(defaultState);
+    const citySelect = document.getElementById('setupCitizenCity');
+    if (citySelect && defaultCity) citySelect.value = defaultCity;
+    window.handleSetupCityChange(defaultCity);
+    const wardSelect = document.getElementById('setupCitizenWard');
+    if (wardSelect && defaultWard) wardSelect.value = defaultWard;
+  }
+
+  function openCitizenProfileSetup(currentUser) {
+    const modal = document.getElementById('citizenProfileSetupModal');
+    if (!modal) return;
+
+    const nameInput = document.getElementById('setupCitizenName');
+    const emailInput = document.getElementById('setupCitizenEmail');
+    const phoneInput = document.getElementById('setupCitizenPhone');
+    const addressInput = document.getElementById('setupCitizenAddress');
+    const errBox = document.getElementById('setupProfileErrorMsg');
+    if (errBox) errBox.style.display = 'none';
+
+    if (emailInput && currentUser) {
+      emailInput.value = currentUser.email || '';
+    }
+    if (nameInput && currentUser && currentUser.name && currentUser.name !== 'Citizen User' && currentUser.name !== 'KRISH') {
+      nameInput.value = currentUser.name;
+    } else if (nameInput && !nameInput.value && currentUser) {
+      nameInput.value = currentUser.name || '';
+    }
+
+    if (phoneInput && currentUser && currentUser.phone) {
+      phoneInput.value = currentUser.phone;
+    }
+    if (addressInput && currentUser && currentUser.permanentAddress) {
+      addressInput.value = currentUser.permanentAddress;
+    }
+
+    const defState = currentUser?.jurisdictionState || 'Andhra Pradesh';
+    const defCity = currentUser?.jurisdictionCity || 'Surampalem';
+    const defWard = currentUser?.jurisdictionWard || 'Ward 12 (Market Zone)';
+    initSetupGeoDropdowns(defState, defCity, defWard);
+
+    window.openModal('citizenProfileSetupModal');
+  }
+
+  window.handleSaveCitizenProfile = async function(event) {
+    if (event) event.preventDefault();
+
+    const nameInput = document.getElementById('setupCitizenName');
+    const phoneInput = document.getElementById('setupCitizenPhone');
+    const addressInput = document.getElementById('setupCitizenAddress');
+    const stateSelect = document.getElementById('setupCitizenState');
+    const citySelect = document.getElementById('setupCitizenCity');
+    const wardSelect = document.getElementById('setupCitizenWard');
+    const errBox = document.getElementById('setupProfileErrorMsg');
+    const errText = document.getElementById('setupProfileErrorText');
+    const submitBtn = document.getElementById('setupProfileSubmitBtn');
+
+    const name = (nameInput ? nameInput.value : '').trim();
+    const phone = (phoneInput ? phoneInput.value : '').trim();
+    const address = (addressInput ? addressInput.value : '').trim();
+    const state = stateSelect ? stateSelect.value : '';
+    const city = citySelect ? citySelect.value : '';
+    const ward = wardSelect ? wardSelect.value : '';
+
+    const showError = (msg) => {
+      if (errBox && errText) {
+        errText.textContent = msg;
+        errBox.style.display = 'flex';
+      }
+      showToast(msg, 'error', '⚠️');
+    };
+
+    if (!name || name.length < 2) {
+      showError('Please enter your full official name (minimum 2 characters).');
+      if (nameInput) nameInput.focus();
+      return;
+    }
+
+    const cleanDigits = phone.replace(/[^0-9]/g, '');
+    if (!phone || cleanDigits.length < 10) {
+      showError('Please enter a valid 10-digit mobile contact number.');
+      if (phoneInput) phoneInput.focus();
+      return;
+    }
+
+    if (!address || address.length < 5) {
+      showError('Please enter your complete permanent residential address.');
+      if (addressInput) addressInput.focus();
+      return;
+    }
+
+    if (!state || !city || !ward) {
+      showError('Please select your state, city, and home ward.');
+      return;
+    }
+
+    if (errBox) errBox.style.display = 'none';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>⏳</span> Saving Profile...';
+    }
+
+    try {
+      const res = await fetch('/api/citizen/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.getToken()}`
+        },
+        body: JSON.stringify({
+          name: name,
+          phone: phone,
+          permanentAddress: address,
+          state: state,
+          city: city,
+          ward: ward
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to save profile. Please try again.');
+      }
+
+      // Update local session with updated persistent user profile
+      if (auth.session && data.user) {
+        auth.session.user = {
+          ...auth.session.user,
+          ...data.user,
+          profileCompleted: 1
+        };
+        auth.saveSession(auth.session);
+      }
+
+      const cAvatar = document.getElementById('citizenTopAvatar');
+      if (cAvatar && data.user) {
+        const dName = data.user.name || 'Citizen';
+        const parts = dName.split(' ').filter(Boolean);
+        const initials = data.user.avatar || (parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : dName.slice(0, 2).toUpperCase());
+        cAvatar.textContent = initials;
+        cAvatar.title = `Citizen Profile: ${dName} (${data.user.officialId || ''})`;
+      }
+
+      playNotificationSound('chime');
+      showToast('🎉 Citizen profile verified and completed!', 'reward', '🛡️');
+      window.closeModal('citizenProfileSetupModal');
+
+      // Refresh auth elements & route to home dashboard
+      checkAuthAndRoute();
+    } catch (err) {
+      showError(err.message || 'Error saving profile. Please check connection.');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Save & Complete Profile</span> <span>&rarr;</span>';
+      }
+    }
+  };
+
   // =========================================================================
   // 6. UI RENDERER & ROUTER
   // =========================================================================
@@ -3366,13 +3538,6 @@
         <div style="display: flex; align-items: center; gap: 0.35rem;">
           <span>${isMyReport ? '👤' : '👥'}</span>
           <span><strong>${isMyReport ? 'MY REPORT (KRISH)' : 'COMMUNITY GRIEVANCE'}</strong></span>
-        </div>
-        <div class="ownership-reporter clickable-reporter-block" onclick="event.stopPropagation(); window.openReporterProfile('${issue.id}')" title="Click to view verified citizen profile, permanent address & home GPS">
-          <span class="reporter-pill-interactive">
-            <span>👤</span>
-            <span>${isMyReport ? 'Krish Varma (Author)' : safeReporterName}</span>
-            <span class="reporter-profile-badge">Profile ↗</span>
-          </span>
         </div>
       </div>
     ` : `
@@ -3734,6 +3899,16 @@
     if (certStanding) {
       certStanding.textContent = tierInfo.standingBadge;
     }
+
+    const user = auth.getUser();
+    if (user) {
+      const verifiedNameEl = document.getElementById('citizenVerifiedName');
+      if (verifiedNameEl) verifiedNameEl.textContent = user.name || 'Citizen';
+      const certRecipient = document.getElementById('certModalRecipientName');
+      if (certRecipient) certRecipient.textContent = user.name || 'Citizen';
+      const certId = document.getElementById('certModalOfficialId');
+      if (certId) certId.textContent = `ID: ${user.officialId || 'CIT-IND-2026-8941'}`;
+    }
   }
 
   function renderCitizenDashboard() {
@@ -3751,8 +3926,9 @@
     updateCitizenCreditsUI(totalCredits);
 
     // Synchronize Civic Passport Stats
+    const isKrishUser = user.email === 'citizen@civictech.in' || (user.name && user.name.toLowerCase().includes('krish'));
     const myAllIssues = issues.filter(i => 
-      i.reportedBy?.toLowerCase().includes('krish') || i.userId === user.id || i.reportedBy === user.name
+      (isKrishUser && i.reportedBy?.toLowerCase().includes('krish')) || (i.userId && i.userId === user.id) || (i.reportedBy && i.reportedBy === user.name)
     );
     const myActiveCount = myAllIssues.filter(i => i.status !== 'resolved').length;
     const myResolvedCount = myAllIssues.filter(i => i.status === 'resolved').length;
@@ -4490,9 +4666,15 @@
       // 1. Citizen Avatar & Name
       const cAvatar = document.getElementById('citizenTopAvatar');
       if (cAvatar) {
-        cAvatar.textContent = currentUser.avatar || 'KR';
-        cAvatar.title = `Citizen Profile: ${currentUser.name} (${currentUser.officialId || ''})`;
+        const parts = (currentUser.name || '').split(' ').filter(Boolean);
+        const initials = currentUser.avatar || (parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (currentUser.name ? currentUser.name.slice(0, 2).toUpperCase() : 'KR'));
+        cAvatar.textContent = initials;
+        cAvatar.title = `Citizen Profile: ${currentUser.name || 'Citizen'} (${currentUser.officialId || ''})`;
       }
+      const vName = document.getElementById('citizenVerifiedName');
+      if (vName) vName.textContent = currentUser.name || 'Citizen';
+      const waGreeting = document.getElementById('waBotGreetingName');
+      if (waGreeting) waGreeting.textContent = currentUser.name || 'Citizen';
 
       // 2. Municipal Admin Badge
       const mBadge = document.getElementById('munTopAdminBadge');
@@ -4525,6 +4707,22 @@
     if (sessionDept === 'citizen') {
       const cView = document.getElementById('citizenMasterView');
       if (cView) cView.classList.add('active');
+
+      // Check whether citizen profile is completed
+      const isProfileComplete = Boolean(
+        currentUser &&
+        (currentUser.profileCompleted === 1 || currentUser.profileCompleted === true) &&
+        currentUser.phone &&
+        currentUser.permanentAddress &&
+        currentUser.jurisdictionWard
+      );
+
+      if (!isProfileComplete) {
+        openCitizenProfileSetup(currentUser);
+      } else {
+        window.closeModal('citizenProfileSetupModal');
+      }
+
       renderCitizenDashboard();
     } else if (sessionDept === 'municipal') {
       const mView = document.getElementById('municipalMasterView');
@@ -5510,7 +5708,7 @@
       issue.imageOfficerOverrideReason = null;
       issue.verifiedByOfficer = officerName;
       issue.verifiedTimestamp = Date.now();
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       showToast('✅ Visual evidence verified by Officer!', 'reward', '🛡️');
@@ -5555,7 +5753,7 @@
       issue.imageOfficerOverrideReason = reason.trim();
       issue.verifiedByOfficer = officerName;
       issue.verifiedTimestamp = Date.now();
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       showToast('⚠️ Officer override registered with audit justification.', 'reward', '📝');
@@ -6345,86 +6543,154 @@
     return Math.round(R * c * 10) / 10;
   }
 
-  function getIssueReporterProfile(issue) {
-    if (!issue) return null;
-    if (issue.reporterProfile) return issue.reporterProfile;
+  function buildCitizenProfileObject(user, issue = null) {
+    if (!user) {
+      user = auth.getUser() || SYSTEM_ACCOUNTS.citizen;
+    }
+    const isDefaultKrish = !user.email || user.email === 'citizen@civictech.in';
+    const fullName = (isDefaultKrish && (!user.name || user.name === 'KRISH' || user.name.toLowerCase() === 'krish')) ? 'Krish Varma' : (user.name || 'Citizen Reporter');
+    const email = user.email || (isDefaultKrish ? 'krish.varma@cleanindia.gov.in' : 'citizen@cleanindia.gov.in');
+    const phone = user.phone || (isDefaultKrish ? '+91 94401 88421' : '+91 98480 22334');
+    const state = user.jurisdictionState || 'Andhra Pradesh';
+    const city = user.jurisdictionCity || 'Surampalem';
+    const ward = user.jurisdictionWard || 'Ward 12 (Market Zone)';
+    const address = user.permanentAddress || (isDefaultKrish ? 'Plot 18, Gandhi Nagar Main Road, Ward 12, Surampalem, Andhra Pradesh - 533437' : `${ward}, ${city}, ${state}`);
 
-    const isKrish = Boolean(
-      (issue.reportedBy && issue.reportedBy.toLowerCase().includes('krish')) ||
-      (issue.userId && issue.userId === 'user-101') ||
-      (auth.getUser() && auth.getUser().name === issue.reportedBy)
-    );
+    // Compute initials from full name
+    let avatar = user.avatar;
+    if (!avatar || (avatar === 'KR' && !isDefaultKrish)) {
+      const parts = fullName.split(' ').filter(Boolean);
+      avatar = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : fullName.slice(0, 2).toUpperCase();
+    }
+    if (!avatar) avatar = isDefaultKrish ? 'KR' : 'CZ';
 
-    if (isKrish) {
-      return {
-        name: 'KRISH',
-        fullName: 'Krish Varma',
-        email: 'citizen@civictech.in',
-        phone: '+91 98480 22334',
-        permanentAddress: 'Plot 42, Sri Rama Nagar, Surampalem, Gandepalli Mandal, Kakinada District, Andhra Pradesh - 533437',
-        homeGps: {
-          lat: 17.0042,
-          lng: 81.8021,
-          landmark: 'Near Sri Rama Temple & Community Center',
-          city: 'Surampalem',
-          district: 'Kakinada',
-          state: 'Andhra Pradesh'
-        },
-        homeWard: 'Ward 12 (Market Zone)',
-        homeCity: 'Surampalem',
-        homeState: 'Andhra Pradesh',
-        kycStatus: 'Verified via Aadhaar / Civic DigiLocker',
-        kycVerified: true,
-        aadhaarMasked: 'XXXX-XXXX-8941',
-        reliabilityScore: '98% (High Credibility - 4 Verified Grievances)',
-        officialId: 'CIT-IND-2026-8941',
-        avatar: 'KR',
-        guardianLevel: 'Level 3: Silver Civic Guardian',
-        civicCredits: 150
-      };
+    const officialId = user.officialId || ('CIT-IND-2026-' + (user.id ? String(user.id).replace(/[^0-9]/g, '').slice(-4) || '8941' : '8941'));
+    const credits = (user.civicCredits !== undefined && user.civicCredits !== null) ? user.civicCredits : (isDefaultKrish ? 150 : 20);
+    const maskedAadhaar = 'XXXX-XXXX-' + (officialId ? String(officialId).slice(-4) : '8941');
+
+    // Geo coordinates lookup based on city
+    let homeLat = 17.0042;
+    let homeLng = 81.8021;
+    const cityLower = (city || '').toLowerCase();
+    if (cityLower.includes('kakinada')) {
+      homeLat = 16.9891; homeLng = 82.2475;
+    } else if (cityLower.includes('visakhapatnam') || cityLower.includes('vizag')) {
+      homeLat = 17.7126; homeLng = 83.3235;
+    } else if (cityLower.includes('hyderabad')) {
+      homeLat = 17.3850; homeLng = 78.4867;
+    } else if (cityLower.includes('chennai')) {
+      homeLat = 13.0827; homeLng = 80.2707;
+    } else if (cityLower.includes('delhi')) {
+      homeLat = 28.6139; homeLng = 77.2090;
+    } else if (cityLower.includes('bangalore') || cityLower.includes('bengaluru')) {
+      homeLat = 12.9716; homeLng = 77.5946;
+    } else if (cityLower.includes('mumbai') || cityLower.includes('pune')) {
+      homeLat = 19.0760; homeLng = 72.8777;
     }
 
-    const name = issue.reportedBy || 'Ward Resident';
-    const city = issue.city || (issue.location && issue.location.includes('Chennai') ? 'Chennai' : issue.location && issue.location.includes('New Delhi') ? 'New Delhi' : 'Surampalem');
-    const state = issue.state || (city === 'Chennai' ? 'Tamil Nadu' : city === 'New Delhi' ? 'Delhi NCR' : 'Andhra Pradesh');
+    return {
+      name: avatar,
+      fullName: fullName,
+      email: email,
+      phone: phone,
+      permanentAddress: address,
+      homeGps: {
+        lat: homeLat,
+        lng: homeLng,
+        landmark: `${address.split(',')[0] || 'Residence'}, ${ward}`,
+        city: city,
+        district: city,
+        state: state
+      },
+      homeWard: ward,
+      homeCity: city,
+      homeState: state,
+      kycStatus: 'Verified via Aadhaar / Civic DigiLocker',
+      kycVerified: true,
+      aadhaarMasked: maskedAadhaar,
+      reliabilityScore: '98% (High Credibility - Verified Citizen)',
+      officialId: officialId,
+      avatar: avatar,
+      guardianLevel: credits >= 100 ? 'Level 3: Silver Civic Guardian' : 'Level 1: Civic Contributor',
+      civicCredits: credits
+    };
+  }
+
+  function getIssueReporterProfile(issue) {
+    const currentUser = auth.getUser();
+    if (!issue) {
+      const myIssue = (db.issues || []).find(i => 
+        currentUser && (i.userId === currentUser.id || i.reportedBy === currentUser.name)
+      );
+      if (!issue && !myIssue) {
+        return buildCitizenProfileObject(currentUser);
+      }
+      issue = myIssue;
+    }
+    if (issue && issue.reporterProfile) return issue.reporterProfile;
+
+    const isCurrentUser = Boolean(
+      currentUser && issue &&
+      (
+        (issue.userId && currentUser.id && issue.userId === currentUser.id) ||
+        (issue.reportedBy && currentUser.name && issue.reportedBy.toLowerCase().trim() === currentUser.name.toLowerCase().trim()) ||
+        (!issue.reportedBy && !issue.userId) ||
+        (issue.reportedBy && issue.reportedBy.toLowerCase().includes('krish') && (currentUser.email === 'citizen@civictech.in' || (currentUser.name && currentUser.name.toLowerCase().includes('krish'))))
+      )
+    );
+
+    if (isCurrentUser && currentUser) {
+      return buildCitizenProfileObject(currentUser, issue);
+    }
+
+    const name = (issue && issue.reportedBy) || 'Ward Resident';
+    const city = (issue && issue.city) || (issue && issue.location && issue.location.includes('Chennai') ? 'Chennai' : issue && issue.location && issue.location.includes('New Delhi') ? 'New Delhi' : 'Surampalem');
+    const state = (issue && issue.state) || (city === 'Chennai' ? 'Tamil Nadu' : city === 'New Delhi' ? 'Delhi NCR' : 'Andhra Pradesh');
     
     return {
       name: name,
       fullName: name.includes('(') ? name.split('(')[0].trim() : name,
       email: `${name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'resident'}@cleanindia.gov.in`,
       phone: '+91 94401 88421',
-      permanentAddress: `Plot 18, Gandhi Nagar Main Road, ${issue.ward || 'Central Ward'}, ${city}, ${state} - 533437`,
+      permanentAddress: `Plot 18, Gandhi Nagar Main Road, ${(issue && issue.ward) || 'Central Ward'}, ${city}, ${state} - 533437`,
       homeGps: {
-        lat: Number(issue.lat || 17.0042),
-        lng: Number(issue.lng || 81.8021),
+        lat: Number((issue && issue.lat) || 17.0042),
+        lng: Number((issue && issue.lng) || 81.8021),
         city: city,
         district: city,
         state: state
       },
-      homeWard: issue.ward || 'Central Ward',
+      homeWard: (issue && issue.ward) || 'Central Ward',
       homeCity: city,
       homeState: state,
       kycStatus: 'Verified via Civic DigiLocker',
       kycVerified: true,
       aadhaarMasked: 'XXXX-XXXX-3419',
       reliabilityScore: '95% (Verified Citizen)',
-      officialId: 'CIT-IND-2026-' + (issue.userId ? String(issue.userId).replace(/[^0-9]/g, '') || '5401' : '5401'),
+      officialId: 'CIT-IND-2026-' + ((issue && issue.userId) ? String(issue.userId).replace(/[^0-9]/g, '') || '5401' : '5401'),
       avatar: name.substring(0, 2).toUpperCase(),
       guardianLevel: 'Active Ward Contributor',
       civicCredits: 100
     };
   }
 
-  window.openReporterProfile = function(issueId) {
-    const issue = db.getIssueById(issueId);
-    if (!issue) {
-      showToast('Grievance ticket details not found.', 'error', '⚠️');
-      return;
-    }
-
-    const profile = getIssueReporterProfile(issue);
+  function renderReporterProfileModal(profile, issue) {
     const modalBody = document.getElementById('reporterProfileModalBody');
     if (!modalBody) return;
+
+    if (!issue) {
+      issue = {
+        id: profile.officialId,
+        reportedBy: profile.fullName,
+        location: profile.permanentAddress,
+        ward: profile.homeWard,
+        city: profile.homeCity,
+        state: profile.homeState,
+        lat: profile.homeGps.lat,
+        lng: profile.homeGps.lng,
+        deptName: 'Municipal Administration & Urban Development'
+      };
+    }
 
     // Dual-Location Logic: Compare Citizen Permanent Residence vs Incident Reporting GPS
     const homeLat = Number(profile.homeGps?.lat || 17.0042);
@@ -6568,7 +6834,7 @@
               <span>📍</span> 2. INCIDENT SITE (TICKET ALLOCATION)
             </div>
             <div style="font-size: 0.82rem; font-weight: 700; color: white; margin-bottom: 0.3rem;">
-              ${issue.location}
+              ${issue.location || profile.permanentAddress}
             </div>
             <div class="gps-coords-badge">
               📍 ${incidentLat.toFixed(4)}° N, ${incidentLng.toFixed(4)}° E
@@ -6587,6 +6853,103 @@
     `;
 
     window.openModal('reporterProfileModal');
+  }
+
+  window.openReporterProfile = function(issueId) {
+    let issue = null;
+    if (issueId && typeof issueId === 'object') {
+      issue = issueId;
+    } else if (issueId) {
+      issue = db.getIssueById(issueId);
+    }
+
+    const currentUser = auth.getUser();
+    if (!issue) {
+      const myIssue = (db.issues || []).find(i => 
+        currentUser && (i.userId === currentUser.id || i.reportedBy === currentUser.name)
+      );
+      const profile = buildCitizenProfileObject(currentUser);
+      issue = myIssue || {
+        id: profile.officialId,
+        reportedBy: profile.fullName,
+        location: profile.permanentAddress,
+        ward: profile.homeWard,
+        city: profile.homeCity,
+        state: profile.homeState,
+        lat: profile.homeGps.lat,
+        lng: profile.homeGps.lng,
+        deptName: 'Municipal Administration & Urban Development'
+      };
+      return renderReporterProfileModal(profile, issue);
+    }
+
+    const profile = getIssueReporterProfile(issue);
+    renderReporterProfileModal(profile, issue);
+  };
+
+  window.openCitizenProfileModal = async function() {
+    let currentUser = auth.getUser();
+    const token = auth.getToken();
+
+    if (token) {
+      try {
+        const controller = new AbortController();
+        const tId = setTimeout(() => controller.abort(), 2000);
+        const res = await fetch('/api/citizen/profile', {
+          headers: { 'Authorization': `Bearer ${token}` },
+          signal: controller.signal
+        });
+        clearTimeout(tId);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.success && data.user) {
+            currentUser = {
+              ...(auth.session?.user || {}),
+              ...data.user
+            };
+            if (auth.session) {
+              auth.session.user = currentUser;
+              auth.saveSession(auth.session);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Could not refresh citizen profile from server:', e);
+      }
+    }
+
+    if (!currentUser) {
+      currentUser = SYSTEM_ACCOUNTS.citizen;
+    }
+
+    // Refresh dynamic user avatar element on top bar
+    const cAvatar = document.getElementById('citizenTopAvatar');
+    if (cAvatar) {
+      const parts = (currentUser.name || '').split(' ').filter(Boolean);
+      const initials = currentUser.avatar || (parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (currentUser.name ? currentUser.name.slice(0, 2).toUpperCase() : 'KR'));
+      cAvatar.textContent = initials;
+      cAvatar.title = `Citizen Profile: ${currentUser.name || 'Citizen'} (${currentUser.officialId || ''})`;
+    }
+
+    const profile = buildCitizenProfileObject(currentUser);
+
+    const userIssue = (db.issues || []).find(i => 
+      currentUser && (i.userId === currentUser.id || i.reportedBy === currentUser.name)
+    );
+
+    const issue = userIssue || {
+      id: profile.officialId,
+      reportedBy: profile.fullName,
+      location: profile.permanentAddress,
+      ward: profile.homeWard,
+      city: profile.homeCity,
+      state: profile.homeState,
+      lat: profile.homeGps.lat,
+      lng: profile.homeGps.lng,
+      deptName: 'Municipal Administration & Urban Development'
+    };
+
+    renderReporterProfileModal(profile, issue);
   };
 
   window.viewIssueDetail = async function(issueId) {
@@ -7620,7 +7983,7 @@
       if (idx !== -1) {
         db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
       }
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       window.closeModal('assignSquadModal');
@@ -8918,7 +9281,7 @@
       if (idx !== -1) {
         db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
       }
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       showToast(`🚗 Squad is now en route to #${issueId}!`, 'info', '🚗');
@@ -8967,7 +9330,7 @@
       if (idx !== -1) {
         db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
       }
-      db.saveToStorage('clean_safe_issues_v10', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       showToast(`📍 Squad marked arrived on site for #${issueId}! Remediation underway.`, 'reward', '📍');

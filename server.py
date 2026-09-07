@@ -176,6 +176,12 @@ def get_authenticated_user(handler, conn=None):
         now_ms = int(time.time() * 1000)
         cursor.execute('''
             SELECT s.*, 
+                   u.name as u_name,
+                   u.avatar as u_avatar,
+                   u.phone as u_phone,
+                   u.permanentAddress as u_address,
+                   u.profileCompleted as u_completed,
+                   u.civicCredits as u_credits,
                    u.jurisdictionState as u_state, 
                    u.jurisdictionCity as u_city, 
                    u.jurisdictionWard as u_ward
@@ -187,6 +193,17 @@ def get_authenticated_user(handler, conn=None):
         if row:
             d = dict(row)
             # Favor current users table authoritative values if set
+            if d.get('u_name'):
+                d['name'] = d['u_name']
+            if d.get('u_avatar'):
+                d['avatar'] = d['u_avatar']
+            if d.get('u_phone'):
+                d['phone'] = d['u_phone']
+            if d.get('u_address'):
+                d['permanentAddress'] = d['u_address']
+            d['profileCompleted'] = 1 if d.get('u_completed') == 1 else 0
+            if d.get('u_credits') is not None:
+                d['civicCredits'] = d['u_credits']
             if d.get('u_state'):
                 d['jurisdictionState'] = d['u_state']
             if d.get('u_city'):
@@ -456,7 +473,10 @@ def init_database():
     user_cols_to_add = [
         ('jurisdictionState', 'TEXT'),
         ('jurisdictionCity', 'TEXT'),
-        ('jurisdictionWard', 'TEXT')
+        ('jurisdictionWard', 'TEXT'),
+        ('phone', 'TEXT'),
+        ('permanentAddress', 'TEXT'),
+        ('profileCompleted', 'INTEGER DEFAULT 0')
     ]
     for col_name, col_type in user_cols_to_add:
         if col_name not in existing_user_cols:
@@ -500,7 +520,10 @@ def init_database():
         VALUES ('worker4@municipality.gov.in', 'user-104', 'Ramesh (Squad 4 Leader)', 'password123', 'worker', 'Field Response Squad Lead', 'SQUAD-04-LEAD', 'SQ', 0, 0, strftime('%s', 'now'), 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)')
     ''')
 
-    # Authoritatively backfill/update official jurisdictions in users table
+    # Authoritatively backfill/update official jurisdictions & default profiles in users table
+    cursor.execute("UPDATE users SET phone = '+91 94401 88421', permanentAddress = 'Plot 18, Gandhi Nagar Main Road, Ward 12, Surampalem, Andhra Pradesh - 533437', profileCompleted = 1 WHERE LOWER(email) = 'citizen@civictech.in'")
+    cursor.execute("UPDATE users SET profileCompleted = 1 WHERE department IN ('municipal', 'food', 'worker')")
+    cursor.execute("UPDATE users SET profileCompleted = 1 WHERE jurisdictionWard IS NOT NULL AND jurisdictionWard != '' AND permanentAddress IS NOT NULL AND permanentAddress != ''")
     cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'Ward 12 (Market Zone)' WHERE LOWER(email) IN ('admin@municipality.gov.in', 'zonal.officer@andhra.gov.in') AND (jurisdictionState IS NULL OR jurisdictionState = '')")
     cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'ALL' WHERE LOWER(email) IN ('fso.officer@foodsafety.gov.in', 'inspector.sharma@fssai.gov.in') AND (jurisdictionState IS NULL OR jurisdictionState = '')")
     cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'Ward 12 (Market Zone)' WHERE LOWER(email) = 'worker4@municipality.gov.in' AND (jurisdictionState IS NULL OR jurisdictionState = '')")
@@ -603,24 +626,135 @@ def seed_initial_data(conn):
 
     # Initial Issues
     seed_issues = [
+        # KRISH REPORT 1: Category: Sanitation & Waste Management, Status: RESOLVED / COMPLETED, SLA: Resolved successfully
         (
-            'ISS-2026-00123', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Market Gate Cross',
+            'ISS-2026-00121', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Canteen Gate Cross',
             'sanitation', 'Sanitation & Waste Management', '🏢',
-            'Overflowing Commercial Waste at Market Gate',
-            'High volume wet & dry waste pile obstructing market walkway. Threat of vector-borne contamination.',
-            'Surampalem • Ward 12 (Market Zone), Market Gate Cross',
-            'garbage_overflow', 'Garbage Overflow', '🗑️', 'bulk', 'HIGH RISK BULK HAZARD', 'pending',
-            now - (8 * 3600 * 1000), now + (40 * 3600 * 1000), 39.9, None, 0,
-            'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80', None,
-            'Krish (Civic Guardian)', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (7 * 3600 * 1000),
-            'Municipal Rapid Squad 4', now - (6 * 3600 * 1000), 'Squad Dispatched with Hydraulic Compactor',
-            'Tractor / Heavy Squad', 14, json.dumps(['user-101', 'user-102']),
+            'Overflowing Waste Bins Near Canteen Gate',
+            'Commercial waste bins overflowing near the canteen entrance causing pedestrian obstruction and hygiene concerns. Bins cleared, sanitized and relocated to designated waste bay.',
+            'Surampalem • Ward 12 (Market Zone), Canteen Gate Cross',
+            'garbage_overflow', 'Sanitation & Waste Management', '🗑️',
+            'medium', 'RESOLVED IN 26 HOURS', 'resolved',
+            now - (30 * 3600 * 1000), now + (18 * 3600 * 1000), 0.0, now - (4 * 3600 * 1000),
+            0,
+            'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
+            'KRISH', 'user-101',
+            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (28 * 3600 * 1000),
+            'Sanitation Rapid Fleet 1 (Lead: Ravi Kumar)', now - (26 * 3600 * 1000),
+            'Completed & Verified On-Site', 'Compactor Fleet',
+            14, json.dumps(['user-101', 'user-102']),
             json.dumps([
-                {'author': 'System Watchdog', 'text': 'Live GPS Geotag logged: 17.0010° N, 81.8045° E (±4m). 48h SLA timer active.', 'time': '8h ago'},
-                {'author': 'Consultant Officer K. Mukundha', 'text': 'Grievance verified. Heavy hydraulic tipper assigned.', 'time': '7h ago'}
+                {'author': 'System Watchdog', 'text': 'Live GPS Geotag logged: 17.0015° N, 81.8042° E. 48h SLA timer active.', 'time': '30h ago'},
+                {'author': 'Consultant Officer K. Mukundha', 'text': 'Grievance verified. Heavy hydraulic tipper assigned.', 'time': '28h ago'},
+                {'author': 'Sanitation Rapid Fleet 1', 'text': 'Site cleared and sanitized with lime powder.', 'time': '4h ago'}
             ]),
-            0, 0, 17.0010, 81.8045, None, None, None
+            1, 0.0, 17.0015, 81.8042, None, None, None
         ),
+
+        # KRISH REPORT 2: Category: Sanitation & Waste Management, Status: RESOLVED / COMPLETED, SLA: Resolved successfully
+        (
+            'ISS-2026-00128', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Market Road Corner',
+            'sanitation', 'Sanitation & Waste Management', '🏢',
+            'Open Garbage Dumping Near Market Road',
+            'Illegal dumping of commercial cartons and household solid waste along Market Road corner. Entire stretch cleared, disinfected, and anti-dumping signage erected.',
+            'Surampalem • Ward 12 (Market Zone), Market Road Corner',
+            'garbage_overflow', 'Sanitation & Waste Management', '🗑️',
+            'medium', 'RESOLVED IN 18 HOURS', 'resolved',
+            now - (24 * 3600 * 1000), now + (24 * 3600 * 1000), 0.0, now - (6 * 3600 * 1000),
+            0,
+            'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
+            'KRISH', 'user-101',
+            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (22 * 3600 * 1000),
+            'Municipal Rapid Squad 4 (Lead: Ramesh)', now - (20 * 3600 * 1000),
+            'Completed & Verified On-Site', 'Tipper Truck',
+            18, json.dumps(['user-101']),
+            json.dumps([
+                {'author': 'Consultant Officer K. Mukundha', 'text': 'Sanitation supervisor notified and squad deployed.', 'time': '22h ago'},
+                {'author': 'Municipal Rapid Squad 4', 'text': 'Waste cleared and bins repositioned.', 'time': '6h ago'}
+            ]),
+            1, 0.0, 17.0018, 81.8038, None, None, None
+        ),
+
+        # KRISH REPORT 3: Category: Sanitation & Waste Management, Status: IN PROGRESS, SLA: 48-HOUR SLA BREACHED / ESCALATED
+        (
+            'ISS-2026-00123', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Gandhi Statue Main Road',
+            'sanitation', 'Sanitation & Waste Management', '🏢',
+            'Severe Commercial Waste Overflow at Market Gate',
+            'Over 3 tons of rotten municipal and commercial garbage overflowing onto main pedestrian road. Exceeded mandatory 48-Hour SLA period without field clearance. Automatically escalated to Municipal Commissioner Dr. Mahesh Babu & Zonal Health Directorate.',
+            'Surampalem • Ward 12 (Market Zone), Gandhi Statue Main Road',
+            'garbage_overflow', 'Sanitation & Waste Management', '🗑️',
+            'bulk', 'SLA BREACHED (>48H)', 'in_progress',
+            now - (58 * 3600 * 1000), now - (10 * 3600 * 1000), 0.0, None,
+            1,
+            'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
+            None,
+            'KRISH', 'user-101',
+            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (56 * 3600 * 1000),
+            'Sanitation Rapid Fleet 3 (Lead: P. Ramesh)', now - (54 * 3600 * 1000),
+            'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Desk for Urgent Action',
+            'Heavy Hydraulic Compactor & 10-Ton Tipper Fleet',
+            84, json.dumps(['user-101']),
+            json.dumps([
+                {'author': 'System SLA Monitor', 'text': '⏱️ 48-Hour SLA Breached! Grievance unaddressed after 48h limit.', 'time': '10h ago'},
+                {'author': 'Auto-Escalation Gateway', 'text': '🚨 Escalated to Higher Authority: Zonal Municipal Commissioner (Dr. Mahesh Babu) & Urban Health Directorate.', 'time': '10h ago'},
+                {'author': 'Municipal Commissioner Red Desk', 'text': 'Ticket received with Critical Priority 1. Direct disciplinary summons and immediate heavy squad deployed.', 'time': '8h ago'}
+            ]),
+            0, 0.0, 17.0012, 81.8048, None, None, None
+        ),
+
+        # KRISH REPORT 4: Category: Smart Electricity Department, Status: RESOLVED / COMPLETED, SLA: Resolved successfully
+        (
+            'ISS-2026-00130', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Gandhi Statue Junction',
+            'electricity', 'Smart Electricity Department', '⚡',
+            'Streetlight Failure Near Ward 12',
+            'Twin-arm LED streetlights completely non-operational near Gandhi Statue junction, leading to low visibility at night. Replaced faulty ballast and LED driver unit. Full illumination restored.',
+            'Surampalem • Ward 12 (Market Zone), Gandhi Statue Junction',
+            'electricity', 'Smart Electricity Department', '💡',
+            'medium', 'RESOLVED IN 28 HOURS', 'resolved',
+            now - (36 * 3600 * 1000), now + (12 * 3600 * 1000), 0.0, now - (8 * 3600 * 1000),
+            0,
+            'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=800&auto=format&fit=crop&q=80',
+            'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800&auto=format&fit=crop&q=80',
+            'KRISH', 'user-101',
+            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (34 * 3600 * 1000),
+            'Lineman Squad B (Lead: Suresh Kumar)', now - (32 * 3600 * 1000),
+            'Completed & Verified On-Site', 'Lineman Bucket Van (AP-05-EB)',
+            22, json.dumps(['user-101']),
+            json.dumps([
+                {'author': 'Consultant Officer K. Mukundha', 'text': 'Electrical inspector assigned.', 'time': '34h ago'},
+                {'author': 'Lineman Squad B', 'text': 'Replaced driver unit. All streetlights operational.', 'time': '8h ago'}
+            ]),
+            1, 0.0, 17.0022, 81.8035, None, None, None
+        ),
+
+        # KRISH REPORT 5: Category: Water Leakage / Water Supply, Status: IN PROGRESS, SLA: Normal / active SLA window
+        (
+            'ISS-2026-00131', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Market Road Pavement',
+            'water_supply', 'Water Leakage / Water Supply', '💧',
+            'Water Pipeline Leakage Near Ward 12',
+            'Pressurized municipal water distribution main leaking clean drinking water onto Market Road pavement. Isolation valve inspection underway.',
+            'Surampalem • Ward 12 (Market Zone), Market Road Pavement',
+            'water_leakage', 'Water Leakage / Water Supply', '🚰',
+            'medium', 'ACTIVE SLA (38H LEFT)', 'in_progress',
+            now - (10 * 3600 * 1000), now + (38 * 3600 * 1000), 38.0, None,
+            0,
+            'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80',
+            None,
+            'KRISH', 'user-101',
+            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (8 * 3600 * 1000),
+            'Public Works Water Squad 2 (Lead: Anita Roy)', now - (6 * 3600 * 1000),
+            'On Site - Conducting Work', 'Valve Repair Utility Van',
+            9, json.dumps(['user-101']),
+            json.dumps([
+                {'author': 'Consultant Officer K. Mukundha', 'text': 'Water Board division alerted. Utility squad dispatched.', 'time': '8h ago'},
+                {'author': 'Public Works Water Squad 2', 'text': 'Pressure isolated. Excavating service collar for replacement.', 'time': '2h ago'}
+            ]),
+            0, 0.0, 17.0016, 81.8040, None, None, None
+        ),
+
+        # Other Community & Official Seed Records
         (
             'ISS-2026-00124', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Gandhi Statue Main Road',
             'electricity', 'Smart Electricity Department', '⚡',
@@ -632,7 +766,7 @@ def seed_initial_data(conn):
             'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=800&auto=format&fit=crop&q=80', None,
             'R. Venkatesh (Citizen)', 'user-103', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (17 * 3600 * 1000),
             'Lineman Squad B (Suresh Kumar)', now - (16 * 3600 * 1000), 'Feeder Isolated & Line Repair Crew Active',
-            'Lineman Bucket Van (AP-05-EB)', 28, json.dumps(['user-101', 'user-104', 'user-105']),
+            'Lineman Bucket Van (AP-05-EB)', 28, json.dumps(['user-103', 'user-104', 'user-105']),
             json.dumps([
                 {'author': 'System Watchdog', 'text': 'Critical Priority Alert triggered. Feeder #4 SCADA alert mapped.', 'time': '18h ago'},
                 {'author': 'Consultant Officer K. Mukundha', 'text': 'SCADA auto-tripped feeder. Lineman Suresh Kumar on site with insulated ladder.', 'time': '17h ago'}
@@ -650,33 +784,12 @@ def seed_initial_data(conn):
             'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80', None,
             'FoodGuard AI Sensor', 'system-fso', 'Dr. Lakshmi Prasad (FSO)', now - (5 * 3600 * 1000),
             'Food Safety Officer (Dr. Lakshmi Prasad)', now - (5 * 3600 * 1000), 'Statutory Notice FSSAI-AP-2026-V09 Served',
-            'FSO Inspection Squad', 19, json.dumps(['user-101']),
+            'FSO Inspection Squad', 19, json.dumps(['user-103']),
             json.dumps([
                 {'author': 'FoodGuard AI Sensor', 'text': 'Automated IoT Gas Spike: 360 PPM Ammonia detected.', 'time': '6h ago'},
                 {'author': 'Dr. Lakshmi Prasad (FSO)', 'text': 'Notice served under Sec 56 FSS Act. Penalty: ₹2,500. 7 days rectification period.', 'time': '5h ago'}
             ]),
             0, 2500, 17.0040, 81.8020, 'FSSAI-AP-2026-V09', 'Swagath Grand Fast Food', 360
-        ),
-        (
-            'ISS-2026-00128', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', 'Gandhi Statue Main Road',
-            'sanitation', 'Sanitation & Waste Management', '🏢',
-            '🚨 SLA Breached: Massive Solid Waste & Garbage Dump Overflow',
-            'Over 3 tons of rotten municipal garbage overflowing onto main pedestrian road. Exceeded mandatory 48-Hour SLA period without field clearance. Automatically escalated to Municipal Commissioner Dr. Mahesh Babu & Zonal Health Directorate.',
-            'Surampalem • Ward 12 (Market Zone), Gandhi Statue Main Road',
-            'garbage_overflow', 'Garbage Overflow', '🗑️', 'bulk', 'SLA BREACHED (>48H)', 'escalated',
-            now - (62 * 3600 * 1000), now - (14 * 3600 * 1000), 0, None, 1,
-            'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80', None,
-            'KRISH (Civic Guardian)', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (61.5 * 3600 * 1000),
-            'Sanitation Rapid Fleet 3 (Lead: P. Ramesh)', now - (60 * 3600 * 1000),
-            'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Desk for Urgent Action',
-            'Heavy Hydraulic Compactor & 10-Ton Tipper Fleet', 84, json.dumps(['user-101']),
-            json.dumps([
-                {'author': 'System SLA Monitor', 'text': '⏱️ 48-Hour SLA Breached! Grievance unaddressed after 48h limit.', 'time': '14h ago'},
-                {'author': 'Auto-Escalation Gateway', 'text': '🚨 Escalated to Higher Authority: Zonal Municipal Commissioner (Dr. Mahesh Babu) & Urban Health Directorate.', 'time': '14h ago'},
-                {'author': 'Municipal Commissioner Red Desk', 'text': 'Ticket received with Critical Priority 1. Direct disciplinary summons and immediate heavy squad deployed.', 'time': '12h ago'},
-                {'author': 'KRISH (Citizen)', 'text': 'Garbage dump is emitting toxic odor and blocking school children. Thank you for forwarding to the Commissioner.', 'time': '4h ago'}
-            ]),
-            0, 0, 17.0012, 81.8048, None, None, None
         ),
         (
             'ISS-2026-00122', 'Andhra Pradesh', 'Surampalem', 'Ward 11 (Lake View Zone)', 'Lake View Road',
@@ -690,7 +803,7 @@ def seed_initial_data(conn):
             'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
             'S. Rajesh (Citizen)', 'user-106', 'Consultant Officer K. Mukundha', now - (35 * 3600 * 1000),
             'Public Works Squad 2', now - (34 * 3600 * 1000), 'Field Execution Completed & Cleaned Proof Uploaded',
-            'Collection Truck', 22, json.dumps(['user-101', 'user-106']),
+            'Collection Truck', 22, json.dumps(['user-106']),
             json.dumps([
                 {'author': 'Consultant Officer K. Mukundha', 'text': 'Grievance verified. PW squad closed repair within 26 hours.', 'time': '10h ago'}
             ]),
@@ -1152,6 +1265,28 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'civicCreditsPaid': '150 Pts',
                 'finesCollected': f'₹{int(fines):,}'
             })
+        # REST API: GET /api/citizen/profile (Authoritative Server-Side Identity Resolution)
+        if path == '/api/citizen/profile':
+            conn = get_db_connection()
+            auth_user = get_authenticated_user(self, conn)
+            if not auth_user:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Unauthorized. Please login.'}, status=401)
+                return
+
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM users WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))', (auth_user['email'],))
+            user_row = cursor.fetchone()
+            conn.close()
+
+            if not user_row:
+                self.send_json_response({'success': False, 'error': 'Citizen account record not found.'}, status=404)
+                return
+
+            user_dict = dict(user_row)
+            safe_user = {k: v for k, v in user_dict.items() if k != 'password'}
+            safe_user['profileCompleted'] = 1 if safe_user.get('profileCompleted') == 1 else 0
+            self.send_json_response({'success': True, 'user': safe_user})
             return
 
         # 6. Static Asset Serving
@@ -2255,6 +2390,13 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             streak = existing['activeStreakWeeks'] if existing else 1
             created_at = existing['createdAt'] if (existing and 'createdAt' in existing.keys() and existing['createdAt']) else int(time.time() * 1000)
 
+            phone = existing['phone'] if (existing and 'phone' in existing.keys() and existing['phone']) else ''
+            perm_addr = existing['permanentAddress'] if (existing and 'permanentAddress' in existing.keys() and existing['permanentAddress']) else ''
+            prof_comp = existing['profileCompleted'] if (existing and 'profileCompleted' in existing.keys() and existing['profileCompleted']) else 0
+            u_state = existing['jurisdictionState'] if (existing and 'jurisdictionState' in existing.keys()) else None
+            u_city = existing['jurisdictionCity'] if (existing and 'jurisdictionCity' in existing.keys()) else None
+            u_ward = existing['jurisdictionWard'] if (existing and 'jurisdictionWard' in existing.keys()) else None
+
             user_data = {
                 'email': email,
                 'id': user_id,
@@ -2266,12 +2408,18 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'avatar': avatar,
                 'civicCredits': credits,
                 'activeStreakWeeks': streak,
-                'createdAt': created_at
+                'createdAt': created_at,
+                'phone': phone,
+                'permanentAddress': perm_addr,
+                'profileCompleted': prof_comp,
+                'jurisdictionState': u_state,
+                'jurisdictionCity': u_city,
+                'jurisdictionWard': u_ward
             }
 
             cursor.execute('''
-                INSERT OR REPLACE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt)
-                VALUES (:email, :id, :name, :password, :department, :roleTitle, :officialId, :avatar, :civicCredits, :activeStreakWeeks, :createdAt)
+                INSERT OR REPLACE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt, phone, permanentAddress, profileCompleted, jurisdictionState, jurisdictionCity, jurisdictionWard)
+                VALUES (:email, :id, :name, :password, :department, :roleTitle, :officialId, :avatar, :civicCredits, :activeStreakWeeks, :createdAt, :phone, :permanentAddress, :profileCompleted, :jurisdictionState, :jurisdictionCity, :jurisdictionWard)
             ''', user_data)
             token = create_session(user_data, conn)
             conn.close()
@@ -2281,6 +2429,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 del ACTIVE_OTPS[email]
 
             safe_user = {k: v for k, v in user_data.items() if k != 'password'}
+            safe_user['profileCompleted'] = 1 if safe_user.get('profileCompleted') == 1 else 0
             session_payload = {
                 'success': True,
                 'token': token,
@@ -2289,6 +2438,104 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'message': 'Citizen account successfully registered with 20 Welcome Civic Credits!'
             }
             self.send_json_response(session_payload)
+            return
+
+        # 6b. REST API: POST /api/citizen/profile (Authoritative Citizen Profile Onboarding & Setup)
+        if path == '/api/citizen/profile':
+            conn = get_db_connection()
+            auth_user = get_authenticated_user(self, conn)
+            if not auth_user:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Unauthorized. Please login to complete your profile.'}, status=401)
+                return
+
+            if auth_user.get('department') != 'citizen':
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Forbidden. Profile onboarding is for citizen accounts.'}, status=403)
+                return
+
+            name = (body.get('name') or '').strip()
+            phone = (body.get('phone') or '').strip()
+            address = (body.get('permanentAddress') or body.get('address') or '').strip()
+            state = (body.get('state') or body.get('jurisdictionState') or '').strip()
+            city = (body.get('city') or body.get('jurisdictionCity') or '').strip()
+            ward = (body.get('ward') or body.get('jurisdictionWard') or '').strip()
+
+            if not name or len(name) < 2:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Please enter your Full Name (minimum 2 characters).'}, status=400)
+                return
+
+            clean_digits = ''.join(c for c in phone if c.isdigit())
+            if not phone or len(clean_digits) < 10:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Please enter a valid 10-digit contact Phone Number.'}, status=400)
+                return
+
+            if not address or len(address) < 5:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Please enter your complete Permanent Residential Address (House/Plot, Street).'}, status=400)
+                return
+
+            if not state:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Please select your State.'}, status=400)
+                return
+
+            if not city:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Please select your City.'}, status=400)
+                return
+
+            if not ward:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Please select your Home Ward / Jurisdiction.'}, status=400)
+                return
+
+            name_words = [w.capitalize() for w in name.split() if w]
+            display_name = ' '.join(name_words) if name_words else name
+            avatar = ''.join([w[0] for w in name_words[:2]]).upper() if name_words else 'CZ'
+
+            email = auth_user['email']
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE users SET
+                    name = ?,
+                    phone = ?,
+                    permanentAddress = ?,
+                    jurisdictionState = ?,
+                    jurisdictionCity = ?,
+                    jurisdictionWard = ?,
+                    avatar = ?,
+                    profileCompleted = 1
+                WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))
+            ''', (display_name, phone, address, state, city, ward, avatar, email))
+
+            auth_token = auth_user.get('token')
+            if auth_token:
+                cursor.execute('''
+                    UPDATE sessions SET
+                        name = ?,
+                        jurisdictionState = ?,
+                        jurisdictionCity = ?,
+                        jurisdictionWard = ?
+                    WHERE token = ?
+                ''', (display_name, state, city, ward, auth_token))
+
+            cursor.execute('SELECT * FROM users WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))', (email,))
+            updated_user = cursor.fetchone()
+            conn.commit()
+            conn.close()
+
+            user_dict = dict(updated_user) if updated_user else {}
+            safe_user = {k: v for k, v in user_dict.items() if k != 'password'}
+            safe_user['profileCompleted'] = 1
+
+            self.send_json_response({
+                'success': True,
+                'user': safe_user,
+                'message': 'Citizen profile successfully completed!'
+            })
             return
 
         # ---------------------------------------------------------------------
@@ -3028,6 +3275,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             sess_conn.close()
 
             safe_user = {k: v for k, v in user_dict.items() if k != 'password'}
+            safe_user['profileCompleted'] = 1 if safe_user.get('profileCompleted') == 1 else 0
             session_payload = {
                 'success': True,
                 'token': token,
