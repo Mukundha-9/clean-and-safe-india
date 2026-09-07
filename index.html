@@ -309,7 +309,7 @@
         </div>
       </div>
 
-      <!-- Shallow Navigation Pills (Citizen: Home, My Reports, WhatsApp Bot, Profile & Credits) -->
+      <!-- Shallow Navigation Pills (Citizen: Home, My Reports, WhatsApp Bot, Credits) -->
       <ul class="dashboard-nav-pills">
         <li class="dash-nav-pill citizen-nav-btn active" data-tab="feed" onclick="window.switchCitizenSubTab('feed')">
           <span>🏠</span> Home
@@ -321,7 +321,7 @@
           <span>💬</span> WhatsApp Bot
         </li>
         <li class="dash-nav-pill citizen-nav-btn" data-tab="wallet" onclick="window.switchCitizenSubTab('wallet')">
-          <span>👤</span> Profile & Credits
+          <span>🏅</span> Credits
         </li>
       </ul>
 
@@ -2705,7 +2705,7 @@
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => {
-            if (name !== 'clean-safe-india-v36.0.0') {
+            if (name !== 'clean-safe-india-v36.1.0') {
               caches.delete(name);
             }
           });
@@ -2715,6 +2715,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=36.0.0"></script>
+  <script src="js/bundle.js?v=36.1.0"></script>
 </body>
 </html>
