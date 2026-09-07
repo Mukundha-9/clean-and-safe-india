@@ -3211,10 +3211,10 @@
   // Cascading Dropdown Populators for Citizen, Municipal & Food Safety Portals
   function updateAllGeoSelects(type, html, value) {
     const ids = {
-      state: ['geoStateSelect', 'geoStateSelect_mun', 'geoStateSelect_food'],
-      city: ['geoCitySelect', 'geoCitySelect_mun', 'geoCitySelect_food'],
-      ward: ['geoWardSelect', 'geoWardSelect_mun', 'geoWardSelect_food'],
-      street: ['geoStreetSelect', 'geoStreetSelect_mun', 'geoStreetSelect_food']
+      state: ['geoStateSelect_mun', 'geoStateSelect_food'],
+      city: ['geoCitySelect_mun', 'geoCitySelect_food'],
+      ward: ['geoWardSelect_mun', 'geoWardSelect_food'],
+      street: ['geoStreetSelect_mun', 'geoStreetSelect_food']
     };
 
     (ids[type] || []).forEach(id => {
