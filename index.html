@@ -333,7 +333,7 @@
         <button class="btn btn-primary btn-sm" id="citizenTopReportBtn" onclick="window.openReportModal()">
           <span>+</span> Report Issue
         </button>
-        <div class="user-avatar-btn" id="citizenTopAvatar" title="Citizen Profile: KRISH">KR</div>
+        <div class="user-avatar-btn" id="citizenTopAvatar" title="Citizen Profile: KRISH (Click to inspect verified identity)" onclick="window.openCitizenProfileModal()" style="cursor: pointer;">KR</div>
         <button class="btn-switch-portal" onclick="window.handleLogout()">
           <span>🔒</span> Logout
         </button>
@@ -343,43 +343,6 @@
     <main class="app-container">
       <!-- Subview 1: Streamlined Citizen Command Hub (3-4 Reports Focus) -->
       <div id="citizenTab_feed" class="citizen-subview">
-        <!-- Citizen Civic Passport & Command Hero -->
-        <div class="citizen-command-hero">
-          <div class="hero-identity-row">
-            <div style="display: flex; align-items: center; gap: 0.85rem;">
-              <div class="citizen-avatar-badge">
-                <span class="avatar-icon">🛡️</span>
-                <span class="live-dot" title="Active Citizen Resident"></span>
-              </div>
-              <div>
-                <div class="hero-kicker">📍 WARD 12 (MARKET ZONE) • SURAMPALEM</div>
-                <h2 class="hero-title">Namaste, Krish</h2>
-                <p class="hero-subtitle">Smart Civic Hub with Guaranteed 48-Hour SLA Rapid Squad Resolution.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Civic Passport Live Metrics Strip -->
-          <div class="citizen-passport-bar">
-            <div class="passport-chip" onclick="window.setCitizenFeedSegment('my_reports')" title="Click to view personal active grievances">
-              <div class="passport-chip-val" id="citizenStatActiveReports">3</div>
-              <div class="passport-chip-lbl">⚡ Active Grievances</div>
-            </div>
-            <div class="passport-chip" onclick="window.setCitizenFeedSegment('my_reports')" title="Click to view resolved grievances">
-              <div class="passport-chip-val" id="citizenStatResolvedReports" style="color: #34d399;">1</div>
-              <div class="passport-chip-lbl">✅ Resolved (Proof)</div>
-            </div>
-            <div class="passport-chip" onclick="window.switchCitizenSubTab('wallet')" title="Click to open civic rewards wallet">
-              <div class="passport-chip-val" id="citizenStatCredits" style="color: #fbbf24;">250</div>
-              <div class="passport-chip-lbl">🎖️ Civic Credits</div>
-            </div>
-            <div class="passport-chip" onclick="window.openReportModal()" title="Daily limit: 3 reports/day">
-              <div class="passport-chip-val" id="citizenStatDailyQuota" style="color: #38bdf8;">3/3 Left</div>
-              <div class="passport-chip-lbl">⚡ Daily Quota</div>
-            </div>
-          </div>
-        </div>
-
         <!-- Clean Segmented View Controller -->
         <div class="feed-control-bar">
           <div class="feed-segments">
@@ -2636,7 +2599,7 @@
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => {
-            if (name !== 'clean-safe-india-v32.0.0') {
+            if (name !== 'clean-safe-india-v33.0.0') {
               caches.delete(name);
             }
           });
@@ -2646,6 +2609,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=32.0.0"></script>
+  <script src="js/bundle.js?v=33.0.0"></script>
 </body>
 </html>

@@ -6312,10 +6312,16 @@
   }
 
   function getIssueReporterProfile(issue) {
-    if (!issue) return null;
+    if (!issue) {
+      issue = (db.issues || []).find(i => (i.reportedBy || '').toLowerCase().includes('krish')) || {
+        reportedBy: 'Krish Varma',
+        userId: 'user-101'
+      };
+    }
     if (issue.reporterProfile) return issue.reporterProfile;
 
     const isKrish = Boolean(
+      !issue.reportedBy ||
       (issue.reportedBy && issue.reportedBy.toLowerCase().includes('krish')) ||
       (issue.userId && issue.userId === 'user-101') ||
       (auth.getUser() && auth.getUser().name === issue.reportedBy)
@@ -6325,13 +6331,13 @@
       return {
         name: 'KRISH',
         fullName: 'Krish Varma',
-        email: 'citizen@civictech.in',
-        phone: '+91 98480 22334',
-        permanentAddress: 'Plot 42, Sri Rama Nagar, Surampalem, Gandepalli Mandal, Kakinada District, Andhra Pradesh - 533437',
+        email: 'krish.varma@cleanindia.gov.in',
+        phone: '+91 94401 88421',
+        permanentAddress: 'Plot 18, Gandhi Nagar Main Road, Ward 12, Surampalem, Andhra Pradesh - 533437',
         homeGps: {
           lat: 17.0042,
           lng: 81.8021,
-          landmark: 'Near Sri Rama Temple & Community Center',
+          landmark: 'Gandhi Nagar Main Road, Ward 12',
           city: 'Surampalem',
           district: 'Kakinada',
           state: 'Andhra Pradesh'
@@ -6382,10 +6388,26 @@
   }
 
   window.openReporterProfile = function(issueId) {
-    const issue = db.getIssueById(issueId);
+    let issue = null;
+    if (issueId && typeof issueId === 'object') {
+      issue = issueId;
+    } else if (issueId) {
+      issue = db.getIssueById(issueId);
+    }
+
     if (!issue) {
-      showToast('Grievance ticket details not found.', 'error', '⚠️');
-      return;
+      const krishIssue = (db.issues || []).find(i => (i.reportedBy || '').toLowerCase().includes('krish'));
+      issue = krishIssue || {
+        id: 'CIT-IND-2026-8941',
+        reportedBy: 'Krish Varma',
+        location: 'Gandhi Nagar Main Road, Ward 12, Surampalem',
+        ward: 'Ward 12 (Market Zone)',
+        city: 'Surampalem',
+        state: 'Andhra Pradesh',
+        lat: 17.0042,
+        lng: 81.8021,
+        deptName: 'Municipal Administration & Urban Development'
+      };
     }
 
     const profile = getIssueReporterProfile(issue);
@@ -6553,6 +6575,10 @@
     `;
 
     window.openModal('reporterProfileModal');
+  };
+
+  window.openCitizenProfileModal = function() {
+    window.openReporterProfile();
   };
 
   window.viewIssueDetail = async function(issueId) {
