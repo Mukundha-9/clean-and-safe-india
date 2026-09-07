@@ -3368,13 +3368,6 @@
           <span>${isMyReport ? '👤' : '👥'}</span>
           <span><strong>${isMyReport ? 'MY REPORT (KRISH)' : 'COMMUNITY GRIEVANCE'}</strong></span>
         </div>
-        <div class="ownership-reporter clickable-reporter-block" onclick="event.stopPropagation(); window.openReporterProfile('${issue.id}')" title="Click to view verified citizen profile, permanent address & home GPS">
-          <span class="reporter-pill-interactive">
-            <span>👤</span>
-            <span>${isMyReport ? 'Krish Varma (Author)' : safeReporterName}</span>
-            <span class="reporter-profile-badge">Profile ↗</span>
-          </span>
-        </div>
       </div>
     ` : `
       <div class="officer-reporter-bar" onclick="event.stopPropagation(); window.openReporterProfile('${issue.id}')" title="Click to inspect reporter's permanent address and verified identity" style="display: flex; align-items: center; justify-content: space-between; font-size: 0.74rem; background: rgba(56, 189, 248, 0.06); border-bottom: 1px solid rgba(56, 189, 248, 0.2); padding: 0.35rem 0.75rem; cursor: pointer; transition: all 0.2s;">
