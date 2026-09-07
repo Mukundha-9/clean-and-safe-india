@@ -105,6 +105,12 @@
        ENTRY GATEWAY: SECURE 3-DEPARTMENT LOGIN PORTAL (STANDALONE ISOLATED SCREEN)
        ========================================================================= -->
   <div id="authGatewayView" class="master-dashboard-view active auth-hero-wrapper" style="position: relative;">
+    <!-- Top Right App Download / Install Pill -->
+    <div class="pwa-install-element" id="pwaAuthTopInstallBtn" style="position: absolute; top: 1.25rem; right: 1.5rem; z-index: 100;">
+      <button class="btn btn-outline btn-sm btn-install-pwa" onclick="window.triggerPWAInstall()" style="border-color: #10b981; color: #34d399; background: rgba(6, 11, 20, 0.85); backdrop-filter: blur(10px); padding: 0.5rem 1.1rem; box-shadow: 0 0 20px rgba(16, 185, 129, 0.35); font-size: 0.85rem;" title="Download & Install Smart Civic App">
+        <span>📲</span> <strong>Download / Install App</strong>
+      </button>
+    </div>
 
     <!-- Emblem & Official Project Logo Header -->
     <div class="auth-emblem-bar">
@@ -268,7 +274,19 @@
         </button>
       </div>
 
-
+      <!-- 📲 Prominent Desktop / Mobile App Download Banner -->
+      <div class="pwa-install-element" id="pwaAuthBottomInstallBanner" style="margin-top: 1rem; padding: 0.85rem 1rem; background: rgba(16, 185, 129, 0.1); border: 1px dashed rgba(16, 185, 129, 0.45); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem; text-align: left;">
+          <span style="font-size: 1.5rem;">💻</span>
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 800; color: #34d399;">Download / Install App on PC & Phone</div>
+            <div style="font-size: 0.73rem; color: #94a3b8;">Runs as standalone app without browser URL bar</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-install-pwa" onclick="window.triggerPWAInstall()" style="font-size: 0.78rem; padding: 0.45rem 0.85rem; background: #10b981; color: #060911; font-weight: 800; border-radius: 8px; border: none; cursor: pointer; white-space: nowrap;">
+          📲 Download App
+        </button>
+      </div>
 
       <div class="auth-security-badge" style="margin-top: 1rem;">
         <span>🔒</span> 256-Bit Encrypted National Smart City Network
@@ -2126,10 +2144,106 @@
     </div>
   </div>
 
+  <!-- Universal App Download & Installation Modal (PC, Android & iOS) -->
+  <div class="modal-overlay" id="appInstallHelpModal">
+    <div class="modal-box" style="max-width: 520px; text-align: center;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.2rem; color: white;">📲 Download & Install Smart Civic App</h3>
+        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('appInstallHelpModal')">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem 1.25rem;">
+        <div style="font-size: 2.75rem; margin-bottom: 0.25rem;">🚀</div>
+        <h4 style="color: white; font-size: 1.15rem; margin-bottom: 0.35rem;">Clean & Safe India Application</h4>
+        <p style="font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-bottom: 1.25rem;">
+          Run as a standalone full-screen app on Windows, Mac, Android, and iPhone with live real-time synchronization and offline support.
+        </p>
 
+        <!-- Platform Options -->
+        <div style="display: flex; flex-direction: column; gap: 0.85rem; text-align: left;">
+          <!-- 1. PC / Desktop Direct Install -->
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 1rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+              <div style="font-weight: 800; color: #34d399; font-size: 0.92rem;">🖥️ Windows PC & Mac Desktop</div>
+              <button class="btn btn-sm btn-primary" onclick="window.executeDirectPWAInstall()" style="font-size: 0.78rem; padding: 0.35rem 0.75rem;">
+                Install PWA App ⚡
+              </button>
+            </div>
+            <div style="font-size: 0.78rem; color: #cbd5e1; line-height: 1.45;">
+              Look for the <strong>Install icon <span style="color: #38bdf8; font-weight: 900;">(⊕)</span></strong> on the right side of your Chrome / Edge address bar, or click above.
+            </div>
+            <div style="margin-top: 0.6rem; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 0.75rem; color: #94a3b8;">Want a 1-click Desktop Shortcut?</span>
+              <button class="btn btn-sm btn-outline" onclick="window.downloadDesktopShortcut()" style="font-size: 0.72rem; padding: 0.25rem 0.6rem; border-color: #38bdf8; color: #38bdf8;">
+                💾 Download Shortcut (.url)
+              </button>
+            </div>
+          </div>
 
-  <!-- =========================================================================
-       CIVIC CREDIT UTILITY BENEFITS REDEMPTION MODAL
+          <!-- 2. Android Phone / Tablet -->
+          <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 1rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+              <div style="font-weight: 800; color: #38bdf8; font-size: 0.92rem;">📱 Android Phone / Tablet</div>
+              <button class="btn btn-sm" onclick="window.executeDirectPWAInstall()" style="background: #38bdf8; color: #060911; font-weight: 800; font-size: 0.78rem; padding: 0.35rem 0.75rem; border: none; border-radius: 6px; cursor: pointer;">
+                Install APK 📲
+              </button>
+            </div>
+            <div style="font-size: 0.78rem; color: #cbd5e1; line-height: 1.45;">
+              In Chrome, tap the 3 dots <strong>(⋮)</strong> in the top right → select <strong>'Install app'</strong> or <strong>'Add to Home screen'</strong>.
+            </div>
+          </div>
+
+          <!-- 3. iPhone / iPad (iOS Safari) -->
+          <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 1rem;">
+            <div style="font-weight: 800; color: #fbbf24; font-size: 0.92rem; margin-bottom: 0.4rem;">🍎 iPhone / iPad (iOS Safari)</div>
+            <div style="font-size: 0.78rem; color: #cbd5e1; line-height: 1.45;">
+              Tap the Safari <strong>Share</strong> button <span style="font-size: 1rem;">⎋</span> at the bottom → scroll down and tap <strong>'Add to Home Screen'</strong> ➕.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="window.closeModal('appInstallHelpModal')" style="width: 100%;">
+          Close Window
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- iOS Safari Install Guidance Sheet -->
+  <div class="modal-overlay" id="iosInstallModal">
+    <div class="modal-box" style="max-width: 420px; text-align: center;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; color: white;">📲 Install on iPhone / iPad</h3>
+        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('iosInstallModal')">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem 1.25rem;">
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📱</div>
+        <h4 style="color: white; font-size: 1.1rem; margin-bottom: 0.75rem;">Install Clean & Safe India App</h4>
+        <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 1.25rem;">
+          To install this Progressive Web App on your iPhone or iPad:
+        </p>
+        <div style="text-align: left; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; font-size: 0.88rem; color: #e2e8f0; display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="background: #10b981; color: #060911; font-weight: 800; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">1</span>
+            <span>Tap the <strong>Share</strong> button <span style="font-size: 1.1rem;">⎋</span> at the bottom of Safari.</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="background: #10b981; color: #060911; font-weight: 800; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">2</span>
+            <span>Scroll down and select <strong>'Add to Home Screen'</strong> ➕.</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="background: #10b981; color: #060911; font-weight: 800; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">3</span>
+            <span>Tap <strong>'Add'</strong> in the top right corner.</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="window.closeModal('iosInstallModal')" style="width: 100%;">
+          Got it! 👍
+        </button>
+      </div>
+    </div>
+  </div>
        ========================================================================= -->
   <div class="modal-overlay" id="utilityRebateModal">
     <div class="modal-box modal-lg" style="max-width: 650px;">
@@ -2556,7 +2670,7 @@
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => {
-            if (name !== 'clean-safe-india-v31.0.0') {
+            if (name !== 'clean-safe-india-v32.0.0') {
               caches.delete(name);
             }
           });
@@ -2566,6 +2680,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=31.0.0"></script>
+  <script src="js/bundle.js?v=32.0.0"></script>
 </body>
 </html>
