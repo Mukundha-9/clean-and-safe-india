@@ -27,7 +27,7 @@
 
   <!-- Design System & Stylesheets with Cache-Busting -->
   <link rel="stylesheet" href="css/main.css?v=8.0">
-  <link rel="stylesheet" href="css/components.css?v=8.0">
+  <link rel="stylesheet" href="css/components.css?v=28.0.0">
   <link rel="stylesheet" href="css/command-center.css?v=26.0.0">
   <link rel="stylesheet" href="css/electricity.css?v=7.0">
   <link rel="stylesheet" href="css/iot-simulation.css?v=7.0">
@@ -310,13 +310,16 @@
         </div>
       </div>
 
-      <!-- Shallow Navigation Pills (Citizen: Home, My Reports, Profile & Credits) -->
+      <!-- Shallow Navigation Pills (Citizen: Home, My Reports, WhatsApp Bot, Profile & Credits) -->
       <ul class="dashboard-nav-pills">
         <li class="dash-nav-pill citizen-nav-btn active" data-tab="feed" onclick="window.switchCitizenSubTab('feed')">
           <span>🏠</span> Home
         </li>
         <li class="dash-nav-pill citizen-nav-btn" data-tab="my_reports" onclick="window.switchCitizenSubTab('my_reports')">
           <span>📋</span> My Reports
+        </li>
+        <li class="dash-nav-pill citizen-nav-btn" data-tab="support" onclick="window.switchCitizenSubTab('support')">
+          <span>💬</span> WhatsApp Bot
         </li>
         <li class="dash-nav-pill citizen-nav-btn" data-tab="wallet" onclick="window.switchCitizenSubTab('wallet')">
           <span>👤</span> Profile & Credits
@@ -390,14 +393,31 @@
           </button>
         </div>
 
+        <!-- WhatsApp Grievance Bot Quick-Launch Banner -->
+        <div class="wa-quick-banner" onclick="window.switchCitizenSubTab('support')" style="cursor: pointer; background: linear-gradient(135deg, rgba(18, 140, 126, 0.22), rgba(7, 94, 84, 0.35)); border: 1px solid rgba(37, 211, 102, 0.35); border-radius: 12px; padding: 0.9rem 1.25rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; transition: all 0.2s;" onmouseover="this.style.borderColor='#25d366'" onmouseout="this.style.borderColor='rgba(37, 211, 102, 0.35)'">
+          <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <div style="width: 42px; height: 42px; border-radius: 50%; background: #25d366; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);">💬</div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <h4 style="color: white; font-size: 0.98rem; margin: 0; font-weight: 800;">Official WhatsApp AI Grievance Bot</h4>
+                <span class="wa-verified-badge" style="background: #25d366; color: white; border-radius: 50%; font-size: 0.65rem; padding: 1px 4px; font-weight: 900;">✓</span>
+              </div>
+              <p style="color: #cbd5e1; font-size: 0.78rem; margin: 2px 0 0 0;">Report hazards instantly, send GPS photos, or track complaint status via official WhatsApp AI.</p>
+            </div>
+          </div>
+          <button type="button" class="btn btn-sm" style="background: #25d366; color: #075e54; font-weight: 800; border: none; padding: 0.45rem 0.95rem; border-radius: 8px; display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+            <span>Open WhatsApp Bot</span> <span>&rarr;</span>
+          </button>
+        </div>
+
         <!-- Section: Active Reports (In Progress) -->
         <div id="citizenActiveReportsSection" style="margin-bottom: 1.5rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
             <h3 style="font-size: 1.05rem; color: white; margin: 0; display: flex; align-items: center; gap: 0.4rem;">
-              <span>⚡</span> My Active Reports
+              <span>⚡</span> My Active Grievances (In Progress)
             </h3>
             <button type="button" class="btn btn-sm btn-link" onclick="window.switchCitizenSubTab('my_reports')" style="color: #38bdf8; font-size: 0.76rem; text-decoration: none; padding: 0; background: none; border: none; cursor: pointer;">
-              View all reports →
+              View all my reports →
             </button>
           </div>
           <div id="citizenActiveReportsGrid" class="grid-3"></div>
@@ -405,18 +425,20 @@
 
         <div class="section-header">
           <div>
-            <h2 class="section-title"><span>📢</span> Nearby Civic Issues & Status</h2>
-            <p class="section-desc">Civic issues logged in your jurisdiction with response countdown.</p>
+            <h2 class="section-title"><span>📢</span> Ward & Community Grievances Feed</h2>
+            <p class="section-desc">Real-time civic issues logged in your jurisdiction with response countdown.</p>
           </div>
           <input type="text" id="citizenSearchInput" class="form-input" placeholder="🔍 Search street, area, or Ticket ID..." style="width: 260px; font-size: 0.85rem; padding: 0.45rem 0.75rem;">
         </div>
 
-        <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
-          <button class="btn btn-sm btn-outline citizen-filter-chip active" data-filter="all">All Incidents</button>
-          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="sanitation">🏢 Sanitation & Roads</button>
-          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="food">🍲 Food Hygiene</button>
-          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="electricity">⚡ Smart Electricity</button>
-          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="my_reports">👤 My Reports</button>
+        <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.75rem; margin-bottom: 1.5rem;" class="citizen-feed-filter-bar">
+          <button class="btn btn-sm btn-outline citizen-filter-chip active" data-filter="all">All Ward Reports</button>
+          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="my_reports">👤 My Reports Only</button>
+          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="community">👥 Community Reports</button>
+          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="in_progress">⚡ In Progress (48h SLA)</button>
+          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="sanitation">🏢 Sanitation</button>
+          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="food">🍲 Food Safety</button>
+          <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="electricity">⚡ Electricity</button>
           <button class="btn btn-sm btn-outline citizen-filter-chip" data-filter="resolved">✅ Resolved</button>
         </div>
 
@@ -425,7 +447,7 @@
 
       <!-- Subview: Dedicated My Reports -->
       <div id="citizenTab_my_reports" class="citizen-subview" style="display: none;">
-        <div class="section-header">
+        <div class="section-header" style="margin-bottom: 0.75rem;">
           <div>
             <h2 class="section-title"><span>📋</span> My Submitted Civic Reports</h2>
             <p class="section-desc">Track status, field squad assignment, and resolution proof for your grievances.</p>
@@ -434,6 +456,20 @@
             <span>+</span> Report New Issue
           </button>
         </div>
+
+        <!-- My Reports Sub-Filter Chips -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+          <button class="btn btn-sm btn-outline my-reports-subfilter active" onclick="window.filterMyReports('all', this)" style="border-radius: 20px; font-size: 0.8rem; padding: 0.35rem 0.85rem;">
+            All My Reports (<span id="myReportsCountAll">0</span>)
+          </button>
+          <button class="btn btn-sm btn-outline my-reports-subfilter" onclick="window.filterMyReports('active', this)" style="border-radius: 20px; font-size: 0.8rem; padding: 0.35rem 0.85rem;">
+            ⚡ In Progress (<span id="myReportsCountActive">0</span>)
+          </button>
+          <button class="btn btn-sm btn-outline my-reports-subfilter" onclick="window.filterMyReports('resolved', this)" style="border-radius: 20px; font-size: 0.8rem; padding: 0.35rem 0.85rem;">
+            ✅ Resolved (<span id="myReportsCountResolved">0</span>)
+          </button>
+        </div>
+
         <div id="citizenMyReportsGrid" class="grid-3"></div>
       </div>
 
@@ -684,6 +720,12 @@
           <span>📢 <strong>N. Ramya Spoorthi</strong> (Communications & Public Safety)</span>
         </div>
       </footer>
+      <!-- Floating Quick-Launch WhatsApp Button -->
+      <button class="floating-wa-btn" onclick="window.switchCitizenSubTab('support')" title="Open WhatsApp AI Grievance Bot">
+        <span class="wa-fab-icon">💬</span>
+        <span class="wa-fab-text">WhatsApp AI</span>
+        <span class="wa-fab-badge">1</span>
+      </button>
     </main>
 
     <!-- Mobile App Bottom Navigation Bar (iOS/Android Native Style) -->
@@ -699,6 +741,10 @@
       <button class="mobile-nav-tab mobile-nav-fab" onclick="window.openReportModal()" title="Report Issue">
         <span class="mobile-fab-icon">+</span>
         <span class="mobile-nav-label">Report</span>
+      </button>
+      <button class="mobile-nav-tab" data-tab="support" onclick="window.switchCitizenSubTab('support')">
+        <span class="mobile-nav-icon">💬</span>
+        <span class="mobile-nav-label">WhatsApp</span>
       </button>
       <button class="mobile-nav-tab" data-tab="wallet" onclick="window.switchCitizenSubTab('wallet')">
         <span class="mobile-nav-icon">👤</span>
@@ -2612,7 +2658,7 @@
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => {
-            if (name !== 'clean-safe-india-v27.0.0') {
+            if (name !== 'clean-safe-india-v28.0.0') {
               caches.delete(name);
             }
           });
@@ -2622,6 +2668,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=27.0.0"></script>
+  <script src="js/bundle.js?v=28.0.0"></script>
 </body>
 </html>

@@ -3250,6 +3250,24 @@
     let aiMetaBadgeHTML = '';
 
     const isCitizenView = auth.getDepartment() === 'citizen';
+    const currentUser = auth.getUser() || {};
+    const isMyReport = Boolean(
+      (issue.reportedBy && (issue.reportedBy.toLowerCase().includes('krish') || issue.reportedBy === currentUser.name)) ||
+      (currentUser.id && issue.userId === currentUser.id)
+    );
+
+    const safeReporterName = (issue.reportedBy || 'Ward Resident').replace(/[&<>"']/g, '');
+    const ownershipBannerHTML = isCitizenView ? `
+      <div class="issue-ownership-banner ${isMyReport ? 'my-report-banner' : 'community-report-banner'}">
+        <div style="display: flex; align-items: center; gap: 0.35rem;">
+          <span>${isMyReport ? '👤' : '👥'}</span>
+          <span><strong>${isMyReport ? 'MY REPORT (KRISH)' : 'COMMUNITY GRIEVANCE'}</strong></span>
+        </div>
+        <div class="ownership-reporter">
+          ${isMyReport ? '<span class="ownership-tag">Author</span>' : `Reported by: <strong>${safeReporterName}</strong>`}
+        </div>
+      </div>
+    ` : '';
 
     if (isCitizenView) {
       // Clean, Human Citizen-Facing Language (Constraint #2)
@@ -3320,7 +3338,8 @@
     }
 
     return `
-      <div class="issue-card" onclick="window.viewIssueDetail('${issue.id}')">
+      <div class="issue-card ${isMyReport ? 'is-my-report' : ''}" onclick="window.viewIssueDetail('${issue.id}')">
+        ${ownershipBannerHTML}
         <div class="issue-card-media">
           <img src="${issue.imageBefore}" class="issue-card-img" alt="${issue.title}" loading="lazy">
           <div class="issue-floating-badges">
@@ -3576,8 +3595,11 @@
     if (activeGrid) {
       const myActive = issues.filter(i => 
         i.status !== 'resolved' && 
-        (i.reportedBy?.includes('Krish') || i.userId === user.id || i.reportedBy === user.name)
+        (i.reportedBy?.toLowerCase().includes('krish') || i.userId === user.id || i.reportedBy === user.name)
       );
+      // Deterministic sort: Newest first
+      myActive.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
       if (myActive.length > 0) {
         activeGrid.innerHTML = myActive.map(renderCardHTML).join('');
       } else {
@@ -3592,17 +3614,47 @@
     const myReportsGrid = document.getElementById('citizenMyReportsGrid');
     if (myReportsGrid) {
       const myAll = issues.filter(i => 
-        i.reportedBy?.includes('Krish') || i.userId === user.id || i.reportedBy === user.name
+        i.reportedBy?.toLowerCase().includes('krish') || i.userId === user.id || i.reportedBy === user.name
       );
-      if (myAll.length > 0) {
-        myReportsGrid.innerHTML = myAll.map(renderCardHTML).join('');
+
+      // Update Subfilter badge counts
+      const countAll = myAll.length;
+      const countActive = myAll.filter(i => i.status !== 'resolved').length;
+      const countResolved = myAll.filter(i => i.status === 'resolved').length;
+
+      const badgeAll = document.getElementById('myReportsCountAll');
+      const badgeActive = document.getElementById('myReportsCountActive');
+      const badgeResolved = document.getElementById('myReportsCountResolved');
+      if (badgeAll) badgeAll.textContent = countAll;
+      if (badgeActive) badgeActive.textContent = countActive;
+      if (badgeResolved) badgeResolved.textContent = countResolved;
+
+      const currentSub = window._currentMyReportsSubfilter || 'all';
+      let displayedReports = myAll;
+      if (currentSub === 'active') {
+        displayedReports = myAll.filter(i => i.status !== 'resolved');
+      } else if (currentSub === 'resolved') {
+        displayedReports = myAll.filter(i => i.status === 'resolved');
+      }
+
+      // Deterministic sort: Active first, then newest timestamp descending
+      displayedReports.sort((a, b) => {
+        const aActive = a.status !== 'resolved';
+        const bActive = b.status !== 'resolved';
+        if (aActive && !bActive) return -1;
+        if (!aActive && bActive) return 1;
+        return (b.timestamp || 0) - (a.timestamp || 0);
+      });
+
+      if (displayedReports.length > 0) {
+        myReportsGrid.innerHTML = displayedReports.map(renderCardHTML).join('');
       } else {
         myReportsGrid.innerHTML = `
           <div style="grid-column: 1/-1; padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-lg); text-align: center; color: var(--text-muted); border: 1px dashed var(--border);">
             <div style="font-size: 2rem; margin-bottom: 0.5rem;">📋</div>
-            <div style="font-size: 1rem; font-weight: 700; color: white; margin-bottom: 0.25rem;">No reports filed yet</div>
-            <p style="font-size: 0.82rem; margin-bottom: 1rem;">You haven't submitted any civic complaints yet. Help keep your neighborhood clean & safe!</p>
-            <button class="btn btn-primary btn-sm" onclick="window.openReportModal()">+ Report First Issue</button>
+            <div style="font-size: 1rem; font-weight: 700; color: white; margin-bottom: 0.25rem;">No reports found in this view</div>
+            <p style="font-size: 0.82rem; margin-bottom: 1rem;">${currentSub === 'resolved' ? 'No resolved reports yet.' : currentSub === 'active' ? 'You have no active pending grievances.' : 'You haven\'t submitted any civic complaints yet. Help keep your neighborhood clean & safe!'}</p>
+            <button class="btn btn-primary btn-sm" onclick="window.openReportModal()">+ Report Issue</button>
           </div>`;
       }
     }
@@ -3625,17 +3677,28 @@
         filtered = filtered.filter(i => (i.street || '') === selectedStreet || i.location.includes(selectedStreet));
       }
 
-      // Department / Category Filter
+      // Department / Category / Ownership Filter
       if (citizenCategoryFilter === 'sanitation') filtered = filtered.filter(i => i.department === 'sanitation');
       else if (citizenCategoryFilter === 'food') filtered = filtered.filter(i => i.department === 'food_safety');
       else if (citizenCategoryFilter === 'electricity') filtered = filtered.filter(i => i.department === 'electricity');
-      else if (citizenCategoryFilter === 'my_reports') filtered = filtered.filter(i => i.reportedBy?.includes('Krish') || i.reportedBy === user.name || i.userId === user.id);
+      else if (citizenCategoryFilter === 'my_reports') filtered = filtered.filter(i => i.reportedBy?.toLowerCase().includes('krish') || i.reportedBy === user.name || i.userId === user.id);
+      else if (citizenCategoryFilter === 'community') filtered = filtered.filter(i => !(i.reportedBy?.toLowerCase().includes('krish') || i.reportedBy === user.name || i.userId === user.id));
+      else if (citizenCategoryFilter === 'in_progress') filtered = filtered.filter(i => i.status !== 'resolved');
       else if (citizenCategoryFilter === 'resolved') filtered = filtered.filter(i => i.status === 'resolved');
 
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         filtered = filtered.filter(i => i.title.toLowerCase().includes(q) || i.location.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
       }
+
+      // Deterministic Feed Ordering: Active / In-Progress first, newest report timestamp descending
+      filtered.sort((a, b) => {
+        const aActive = a.status !== 'resolved';
+        const bActive = b.status !== 'resolved';
+        if (aActive && !bActive) return -1;
+        if (!aActive && bActive) return 1;
+        return (b.timestamp || 0) - (a.timestamp || 0);
+      });
 
       feedGrid.innerHTML = filtered.length ? filtered.map(renderCardHTML).join('') : '<p style="grid-column: 1/-1; text-align: center; padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-lg); color: var(--text-muted); border: 1px dashed var(--border);">No complaints registered in this location division. You can be the first to report!</p>';
     }
@@ -5842,6 +5905,13 @@
     showToast("Logged out successfully.", "info", "🔒");
   };
 
+  window.filterMyReports = function(subfilter, btn) {
+    window._currentMyReportsSubfilter = subfilter;
+    document.querySelectorAll('.my-reports-subfilter').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderCitizenDashboard();
+  };
+
   window.switchCitizenSubTab = function(tabName) {
     document.querySelectorAll('.citizen-subview').forEach(v => v.style.display = 'none');
     document.querySelectorAll('.citizen-nav-btn').forEach(b => b.classList.remove('active'));
@@ -5854,6 +5924,11 @@
     if (targetView) targetView.style.display = 'block';
     if (targetBtn) targetBtn.classList.add('active');
     if (mobileTargetBtn) mobileTargetBtn.classList.add('active');
+
+    if (tabName === 'support') {
+      const vp = document.getElementById('waMessagesViewport');
+      if (vp) setTimeout(() => { vp.scrollTop = vp.scrollHeight; }, 60);
+    }
 
     renderCitizenDashboard();
     window.scrollTo({ top: 0, behavior: 'smooth' });
