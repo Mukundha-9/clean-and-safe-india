@@ -323,42 +323,42 @@
     </header>
 
     <main class="app-container">
-      <!-- 4-Tier Hierarchical Geospatial Filter Bar -->
-      <div class="location-filter-bar">
-        <div class="location-filter-title">
-          <span>📍</span> <strong>Jurisdiction:</strong>
-        </div>
-        <select id="geoStateSelect" class="location-select" onchange="window.handleGeoStateChange(this.value)">
-          <option value="all">🇮🇳 All States</option>
-          <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
-          <option value="Telangana">Telangana</option>
-          <option value="Maharashtra">Maharashtra</option>
-          <option value="Karnataka">Karnataka</option>
-          <option value="Tamil Nadu">Tamil Nadu</option>
-          <option value="Delhi NCR">Delhi NCR</option>
-        </select>
-        <select id="geoCitySelect" class="location-select" onchange="window.handleGeoCityChange(this.value)">
-          <option value="all">All Cities</option>
-          <option value="Surampalem" selected>Surampalem</option>
-          <option value="Kakinada">Kakinada</option>
-          <option value="Visakhapatnam">Visakhapatnam</option>
-        </select>
-        <select id="geoWardSelect" class="location-select" onchange="window.handleGeoWardChange(this.value)">
-          <option value="all">All Wards / Zones</option>
-          <option value="Ward 12 (Market Zone)" selected>Ward 12 (Market Zone)</option>
-          <option value="Ward 11 (Lake View Zone)">Ward 11 (Lake View Zone)</option>
-          <option value="Ward 14 (Campus Zone)">Ward 14 (Campus Zone)</option>
-        </select>
-        <select id="geoStreetSelect" class="location-select" onchange="window.handleGeoStreetChange(this.value)">
-          <option value="all">All Streets / Landmarks</option>
-          <option value="Gandhi Statue Main Road">Gandhi Statue Main Road</option>
-          <option value="Market Gate Cross">Market Gate Cross</option>
-          <option value="College Road Food Court">College Road Food Court</option>
-        </select>
-      </div>
-
       <!-- Subview 1: Streamlined Citizen Command Hub (3-4 Reports Focus) -->
       <div id="citizenTab_feed" class="citizen-subview">
+        <!-- 4-Tier Hierarchical Geospatial Filter Bar -->
+        <div class="location-filter-bar">
+          <div class="location-filter-title">
+            <span>📍</span> <strong>Jurisdiction:</strong>
+          </div>
+          <select id="geoStateSelect" class="location-select" onchange="window.handleGeoStateChange(this.value)">
+            <option value="all">🇮🇳 All States</option>
+            <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
+            <option value="Telangana">Telangana</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Delhi NCR">Delhi NCR</option>
+          </select>
+          <select id="geoCitySelect" class="location-select" onchange="window.handleGeoCityChange(this.value)">
+            <option value="all">All Cities</option>
+            <option value="Surampalem" selected>Surampalem</option>
+            <option value="Kakinada">Kakinada</option>
+            <option value="Visakhapatnam">Visakhapatnam</option>
+          </select>
+          <select id="geoWardSelect" class="location-select" onchange="window.handleGeoWardChange(this.value)">
+            <option value="all">All Wards / Zones</option>
+            <option value="Ward 12 (Market Zone)" selected>Ward 12 (Market Zone)</option>
+            <option value="Ward 11 (Lake View Zone)">Ward 11 (Lake View Zone)</option>
+            <option value="Ward 14 (Campus Zone)">Ward 14 (Campus Zone)</option>
+          </select>
+          <select id="geoStreetSelect" class="location-select" onchange="window.handleGeoStreetChange(this.value)">
+            <option value="all">All Streets / Landmarks</option>
+            <option value="Gandhi Statue Main Road">Gandhi Statue Main Road</option>
+            <option value="Market Gate Cross">Market Gate Cross</option>
+            <option value="College Road Food Court">College Road Food Court</option>
+          </select>
+        </div>
+
         <!-- Citizen Civic Passport & Command Hero -->
         <div class="citizen-command-hero">
           <div class="hero-identity-row">
