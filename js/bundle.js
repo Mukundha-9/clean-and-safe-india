@@ -105,9 +105,9 @@
       roleTitle: 'Verified Citizen Reporter',
       officialId: 'CIT-IND-2026-8941',
       avatar: 'KR',
-      civicCredits: 20,
-      activeStreakWeeks: 1,
-      guardianLevel: 'Level 1: Bronze Civic Guardian'
+      civicCredits: 150,
+      activeStreakWeeks: 4,
+      guardianLevel: 'Level 3: Silver Civic Guardian'
     },
     municipal: {
       department: 'municipal',
@@ -319,7 +319,7 @@
           roleTitle: 'Verified Civic Citizen',
           officialId: 'CITIZEN-AP-' + Math.floor(1000 + Math.random() * 9000),
           avatar: formattedName.slice(0, 2).toUpperCase() || 'CU',
-          civicCredits: 20
+          civicCredits: 150
         };
       }
 
@@ -2387,21 +2387,9 @@
 
       this.saveToStorage('clean_safe_issues_v10', this.issues);
 
-      // Award +50 Civic Credits and update user session
-      const history = this.loadFromStorage('clean_safe_credits_history_v9', []);
-      history.unshift({
-        id: 'CRD-' + Date.now(),
-        title: 'Verified Resolution: ' + issue.title,
-        points: 50,
-        date: new Date().toLocaleDateString(),
-        status: 'Credited to Civic Standing'
-      });
-      this.saveToStorage('clean_safe_credits_history_v9', history);
-
-      if (auth.isAuthenticated() && auth.getDepartment() === 'citizen') {
-        const user = auth.getUser();
-        user.civicCredits = (user.civicCredits || 150) + 50;
-        auth.saveSession({ ...auth.session, user });
+      // Award +50 Civic Credits and record transaction in ledger
+      if (typeof addCitizenCreditTransaction === 'function') {
+        addCitizenCreditTransaction('Verified Resolution: ' + issue.title, 50, 'Credited to Civic Standing');
       }
 
       this.notify();
@@ -3469,6 +3457,106 @@
     }
   }
 
+  // =========================================================================
+  // CANONICAL CIVIC CREDITS & ACTIVITY LEDGER SYNCHRONIZATION ENGINE
+  // =========================================================================
+  const DEFAULT_CANONICAL_CREDITS_HISTORY = [
+    { id: 'CRD-1', title: 'Weekly Reporting Streak Bonus', points: 50, date: '20 Aug 2026', status: 'Credited' },
+    { id: 'CRD-2', title: 'Verified Resolution: Garbage at Lake Road', points: 50, date: '18 Aug 2026', status: 'Credited' },
+    { id: 'CRD-3', title: 'Civic Guardian Onboarding Bonus', points: 50, date: '15 Aug 2026', status: 'Credited' }
+  ];
+
+  function getCitizenCreditsHistory() {
+    return db.loadFromStorage('clean_safe_credits_history_v10', DEFAULT_CANONICAL_CREDITS_HISTORY);
+  }
+
+  function calculateCitizenCreditsBalance() {
+    const history = getCitizenCreditsHistory();
+    const sum = history.reduce((acc, item) => acc + (Number(item.points) || 0), 0);
+    return Math.max(0, sum);
+  }
+
+  function getGuardianTierInfo(points) {
+    if (points >= 200) {
+      return {
+        levelName: 'Level 4: Gold Civic Guardian',
+        subText: '🎖️ <strong>Level 4: Gold Civic Guardian</strong> (Target: Reached Elite Tier! 🏆)',
+        standingBadge: 'Standing: Gold Guardian'
+      };
+    } else if (points >= 100) {
+      return {
+        levelName: 'Level 3: Silver Civic Guardian',
+        subText: `🎖️ <strong>Level 3: Silver Civic Guardian</strong> (Target: 200 Pts for Gold Tier • ${200 - points} Pts needed)`,
+        standingBadge: 'Standing: Silver Guardian'
+      };
+    } else if (points >= 50) {
+      return {
+        levelName: 'Level 2: Bronze Civic Guardian',
+        subText: `🎖️ <strong>Level 2: Bronze Civic Guardian</strong> (Target: 100 Pts for Silver Tier • ${100 - points} Pts needed)`,
+        standingBadge: 'Standing: Bronze Guardian'
+      };
+    } else {
+      return {
+        levelName: 'Level 1: Civic Initiate',
+        subText: `🎖️ <strong>Level 1: Civic Initiate</strong> (Target: 50 Pts for Bronze Tier • ${50 - points} Pts needed)`,
+        standingBadge: 'Standing: Civic Initiate'
+      };
+    }
+  }
+
+  function addCitizenCreditTransaction(title, points, status = 'Credited') {
+    const history = getCitizenCreditsHistory();
+    const newTx = {
+      id: 'CRD-' + Date.now(),
+      title: title,
+      points: Number(points),
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      status: status
+    };
+    history.unshift(newTx);
+    db.saveToStorage('clean_safe_credits_history_v10', history);
+
+    const newBalance = calculateCitizenCreditsBalance();
+    const user = auth.getUser();
+    if (user) {
+      user.civicCredits = newBalance;
+      user.wallet_points = newBalance;
+      auth.saveSession({ ...auth.session, user });
+    }
+
+    updateCitizenCreditsUI(newBalance);
+    return newTx;
+  }
+
+  function updateCitizenCreditsUI(balance) {
+    if (balance === undefined) {
+      balance = calculateCitizenCreditsBalance();
+    }
+
+    const ptsEl = document.getElementById('citizenWalletPoints');
+    if (ptsEl) ptsEl.textContent = balance;
+
+    const walletNav = document.getElementById('citizenNavWallet');
+    if (walletNav) walletNav.textContent = `${balance} Civic Credits`;
+
+    const rebateModalBal = document.getElementById('rebateModalCurrentBalance');
+    if (rebateModalBal) rebateModalBal.textContent = balance;
+
+    const certCredits = document.getElementById('certModalCreditsNum');
+    if (certCredits) certCredits.textContent = `${balance} CIVIC CREDITS`;
+
+    const tierInfo = getGuardianTierInfo(balance);
+    const tierContainer = document.getElementById('citizenGuardianLevelContainer');
+    if (tierContainer) {
+      tierContainer.innerHTML = tierInfo.subText;
+    }
+
+    const certStanding = document.getElementById('certModalStandingTier');
+    if (certStanding) {
+      certStanding.textContent = tierInfo.standingBadge;
+    }
+  }
+
   function renderCitizenDashboard() {
     const user = auth.getUser();
     if (!user) return;
@@ -3477,11 +3565,11 @@
     // Synchronize Daily Quota UI
     updateCitizenDailyQuotaUI();
 
-    const walletNav = document.getElementById('citizenNavWallet');
-    if (walletNav) walletNav.textContent = `${user.civicCredits !== undefined ? user.civicCredits : 20} Civic Credits`;
-
-    const ptsEl = document.getElementById('citizenWalletPoints');
-    if (ptsEl) ptsEl.textContent = `${user.civicCredits !== undefined ? user.civicCredits : 20}`;
+    // Synchronize Civic Credits & Tier strictly from canonical activity ledger
+    const totalCredits = calculateCitizenCreditsBalance();
+    user.civicCredits = totalCredits;
+    user.wallet_points = totalCredits;
+    updateCitizenCreditsUI(totalCredits);
 
     // 1. My Active Reports Grid (Pending/In-Progress reports submitted by Krish)
     const activeGrid = document.getElementById('citizenActiveReportsGrid');
@@ -3554,23 +3642,31 @@
 
     const ledgerList = document.getElementById('citizenWalletLedger');
     if (ledgerList) {
-      const history = db.loadFromStorage('clean_safe_credits_history_v9', [
-        { id: 'CRD-1', title: 'Weekly Reporting Streak Bonus', points: 50, date: '20 Aug 2026', status: 'Credited' },
-        { id: 'CRD-2', title: 'Verified Resolution: Garbage at Lake Road', points: 50, date: '18 Aug 2026', status: 'Credited' },
-        { id: 'CRD-3', title: 'Civic Guardian Onboarding Bonus', points: 50, date: '15 Aug 2026', status: 'Credited' }
-      ]);
-      ledgerList.innerHTML = history.map(tx => `
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 0; border-bottom: 1px solid var(--border);">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); color: #34d399; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">🎖️</div>
-            <div>
-              <div style="font-weight: 700; font-size: 0.9rem; color: white;">${tx.title}</div>
-              <div style="font-size: 0.78rem; color: var(--text-muted);">${tx.date} • ${tx.status}</div>
+      const history = getCitizenCreditsHistory();
+      if (history.length === 0) {
+        ledgerList.innerHTML = `<div style="text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.85rem;">No points activity recorded yet.</div>`;
+      } else {
+        ledgerList.innerHTML = history.map(tx => {
+          const pts = Number(tx.points) || 0;
+          const isPositive = pts >= 0;
+          const icon = isPositive ? '🎖️' : '🎁';
+          const badgeBg = isPositive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)';
+          const color = isPositive ? '#34d399' : '#f87171';
+          const sign = isPositive ? '+' : '';
+          return `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 0; border-bottom: 1px solid var(--border);">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: ${badgeBg}; color: ${color}; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">${icon}</div>
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem; color: white;">${tx.title}</div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">${tx.date} • ${tx.status}</div>
+                </div>
+              </div>
+              <div style="font-size: 1.05rem; font-weight: 800; color: ${color}; font-family: var(--font-mono);">${sign}${pts} Pts</div>
             </div>
-          </div>
-          <div style="font-size: 1.05rem; font-weight: 800; color: #34d399; font-family: var(--font-mono);">+${tx.points} Pts</div>
-        </div>
-      `).join('');
+          `;
+        }).join('');
+      }
     }
   }
 
@@ -4442,7 +4538,7 @@
     // A. CITIZEN PORTAL CHATBOT REPLIES (PERSONA: CITIZEN HELPDESK)
     // =========================================================================
     if (dept === 'citizen') {
-      const userCredits = user && user.civicCredits !== undefined ? user.civicCredits : 20;
+      const userCredits = calculateCitizenCreditsBalance();
       if (q.match(/\b(hi|hello|hey|greetings|good morning|good afternoon|namaste)\b/)) {
         return `
           👋 Hello <strong>${userName}</strong>! I am your <strong>Citizen AI Helpdesk</strong>.<br><br>
@@ -4477,13 +4573,15 @@
       }
 
       if (q.includes('credit') || q.includes('point') || q.includes('reward') || q.includes('wallet') || q.includes('streak') || q.includes('standing')) {
+        const bal = calculateCitizenCreditsBalance();
+        const tier = getGuardianTierInfo(bal);
         return `
           🪙 <strong>Your Civic Standing & Rewards:</strong><br><br>
-          • <strong>Balance:</strong> <strong>${userCredits} Civic Credits</strong><br>
-          • <strong>Standing Tier:</strong> 🎖️ <em>Level 1 Bronze Civic Guardian</em> (Initial Welcome Bonus)<br>
-          • <strong>Active Streak:</strong> 🔥 <strong>1-Week Streak</strong> (Eligible for Mayor's Green Badge)<br>
+          • <strong>Balance:</strong> <strong>${bal} Civic Credit Points</strong> (Matched with Activity Ledger)<br>
+          • <strong>Standing Tier:</strong> 🎖️ <em>${tier.levelName}</em><br>
+          • <strong>Active Streak:</strong> 🔥 <strong>4-Week Streak</strong> (Eligible for Mayor's Green Badge)<br>
           • <strong>Earning Rule:</strong> Receive <strong>+50 Points</strong> for every verified hazard resolved within 48h.<br>
-          • <strong>Rebates:</strong> Redeem credits for a <strong>5% Electricity Bill Rebate</strong> or free Metro Smartcard passes!
+          • <strong>Rebates:</strong> Redeem credits for a <strong>5% Electricity Bill Rebate</strong> or free City Bus Smartcard passes!
         `;
       }
 
@@ -5343,12 +5441,13 @@
           }).join('')}
         `;
       } else if (q.includes('credit') || q.includes('point') || q.includes('streak') || q.includes('balance')) {
-        const user = auth.getUser();
+        const bal = calculateCitizenCreditsBalance();
+        const tier = getGuardianTierInfo(bal);
         replyContent = `
           🪙 <strong>Your Civic Standing:</strong><br>
-          • <strong>Total Credits:</strong> ${user ? user.civicCredits || 150 : 150} Civic Credits<br>
+          • <strong>Total Credits:</strong> <strong>${bal} Civic Credit Points</strong><br>
           • <strong>Active Streak:</strong> 🔥 4-Week Streak<br>
-          • <strong>Tier:</strong> Level 3 Silver Civic Guardian<br>
+          • <strong>Tier:</strong> ${tier.levelName}<br>
           • <em>You can view and print your Government Certificate in the Rewards tab!</em>
         `;
       } else {
@@ -7697,8 +7796,7 @@
   window._selectedRebate = { type: 'power', cost: 100 };
 
   window.openUtilityRebateModal = function() {
-    const user = auth.getUser();
-    const balance = user ? (user.civicCredits !== undefined ? user.civicCredits : (user.wallet_points || 150)) : 150;
+    const balance = calculateCitizenCreditsBalance();
     const balanceEl = document.getElementById('rebateModalCurrentBalance');
     if (balanceEl) balanceEl.textContent = balance;
 
@@ -7723,8 +7821,7 @@
   };
 
   window.confirmSelectedRebate = function() {
-    const user = auth.getUser();
-    let currentBalance = user ? (user.civicCredits !== undefined ? user.civicCredits : (user.wallet_points || 150)) : 150;
+    const currentBalance = calculateCitizenCreditsBalance();
     const { type, cost } = window._selectedRebate || { type: 'power', cost: 100 };
 
     if (currentBalance < cost) {
@@ -7732,16 +7829,10 @@
       return;
     }
 
-    const newBalance = currentBalance - cost;
-    if (user) {
-      user.civicCredits = newBalance;
-      user.wallet_points = newBalance;
-    }
+    const rebateTitle = type === 'power' ? '5% Electricity Bill Rebate' :
+                        type === 'bus' ? '30-Day City Bus Smartcard Pass' : 'Property Tax Municipal Waiver';
 
-    const modalBalEl = document.getElementById('rebateModalCurrentBalance');
-    if (modalBalEl) modalBalEl.textContent = newBalance;
-    const walletPointsEl = document.getElementById('citizenWalletPoints');
-    if (walletPointsEl) walletPointsEl.textContent = newBalance;
+    addCitizenCreditTransaction(`Utility Benefit Claim: ${rebateTitle}`, -cost, 'Redeemed Benefit Voucher');
 
     const code = `REB-2026-${type.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const voucher = document.getElementById('rebateSuccessVoucher');
@@ -7761,6 +7852,7 @@
       btn.innerHTML = '<span>✅</span> Benefit Voucher Claimed';
     }
 
+    renderCitizenDashboard();
     showToast(`Claimed! ${cost} Credits deducted. Voucher: ${code}`, 'reward', '🎁');
   };
 
