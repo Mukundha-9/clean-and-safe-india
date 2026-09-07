@@ -399,7 +399,11 @@ def init_database():
         ('imageOfficerOverrideReason', 'TEXT'),
         ('enRouteTimestamp', 'INTEGER'),
         ('arrivedTimestamp', 'INTEGER'),
-        ('supervisorNotes', 'TEXT')
+        ('supervisorNotes', 'TEXT'),
+        ('workCompletedTimestamp', 'INTEGER'),
+        ('workCompletedBy', 'TEXT'),
+        ('resolutionNotes', 'TEXT'),
+        ('rejectionReason', 'TEXT')
     ]
     for col_name, col_type in new_issue_cols:
         if col_name not in existing_issue_cols:
@@ -942,9 +946,16 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 item['upvotedBy'] = json.loads(item['upvotedBy'] or '[]')
                 item['comments'] = json.loads(item['comments'] or '[]')
 
-                # Public / Citizen data protection: redact internal officer supervisor notes
+                # Public / Citizen data protection: redact internal administrative & supervisor notes
                 if not auth_user or user_dept == 'citizen':
                     item['supervisorNotes'] = None
+                    item['rejectionReason'] = None
+                    item['aiRiskScore'] = None
+                    item['aiConfidence'] = None
+                    item['aiReasoning'] = None
+                    item['aiOverrideReason'] = None
+                    item['imageRiskModifier'] = None
+                    item['imageOfficerOverrideReason'] = None
 
                 issues.append(item)
             conn.close()
@@ -1272,6 +1283,36 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             placeholders = ', '.join([f":{k}" for k in new_issue.keys()])
             cursor.execute(f"INSERT INTO issues ({cols}) VALUES ({placeholders})", new_issue)
 
+            # Operational Audit Trail Logging (Phase D Requirement 8)
+            audit_id_rep = f"AUDIT-REP-{now}-{random.randint(100, 999)}"
+            reporter_actor = (new_issue.get('reportedBy') or 'Citizen').strip()
+            cursor.execute('''
+                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                audit_id_rep,
+                new_issue['id'],
+                reporter_actor,
+                'ISSUE_REPORTED',
+                None,
+                f"Citizen grievance registered: {new_issue.get('title')}",
+                now
+            ))
+
+            audit_id_tri = f"AUDIT-TRI-{now}-{random.randint(100, 999)}"
+            cursor.execute('''
+                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                audit_id_tri,
+                new_issue['id'],
+                'Smart Triage Engine',
+                'ISSUE_TRIAGED',
+                None,
+                f"Categorized as {new_issue.get('categoryName')} with severity {new_issue.get('severity')} ({new_issue.get('aiSuggestedSLA', 48)}h SLA)",
+                now
+            ))
+
             conn.commit()
             conn.close()
 
@@ -1484,7 +1525,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 audit_id,
                 issue_id,
                 official_officer_name,
-                'squad_assignment',
+                'ISSUE_ASSIGNED',
                 assigned_worker_name,
                 supervisor_notes or 'Standard municipal SOP dispatch',
                 now_ms
@@ -1550,7 +1591,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             else:
                 issue_id = path.split('/')[3].strip()
 
-            target_status = (body.get('status') or body.get('workerStatus') or '').strip()
+            target_status = (body.get('status') or body.get('targetStatus') or body.get('workerStatus') or '').strip()
             worker_id = (body.get('workerId') or '').strip()
             worker_email = (body.get('workerEmail') or '').strip().lower()
             worker_name_param = (body.get('workerName') or '').strip()
@@ -1559,12 +1600,12 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 self.send_json_response({'success': False, 'error': 'Issue ID is required.'}, status=400)
                 return
 
-            # Allowed Stage C transition targets
-            valid_statuses = ['En Route to Site', 'On Site - Conducting Work']
+            # Allowed Stage C & D transition targets
+            valid_statuses = ['En Route to Site', 'On Site - Conducting Work', 'Work Completed - Awaiting Verification']
             if target_status not in valid_statuses:
                 self.send_json_response({
                     'success': False,
-                    'error': f"Invalid status transition '{target_status}'. Stage C only permits: {', '.join(valid_statuses)}."
+                    'error': f"Invalid status transition '{target_status}'. Allowed transitions: {', '.join(valid_statuses)}."
                 }, status=400)
                 return
 
@@ -1634,7 +1675,13 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             worker_display_name = auth_user.get('name') or assigned_worker
 
             now_ms = int(time.time() * 1000)
-            audit_action = 'worker_en_route' if target_status == 'En Route to Site' else 'worker_arrived'
+            if target_status == 'En Route to Site':
+                audit_action = 'WORKER_EN_ROUTE'
+            elif target_status == 'On Site - Conducting Work':
+                audit_action = 'WORKER_ARRIVED'
+            else:
+                audit_action = 'WORK_COMPLETED'
+
             audit_id = f"AUDIT-WRK-{now_ms}-{random.randint(100, 999)}"
 
             comments = json.loads(issue_dict.get('comments') or '[]')
@@ -1700,6 +1747,56 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                     'time': 'Just now'
                 })
 
+            elif target_status == 'Work Completed - Awaiting Verification':
+                resolution_notes = (body.get('resolutionNotes') or body.get('notes') or body.get('description') or 'Remediation completed and site cleaned.').strip()
+                photo_after = body.get('photoAfter') or body.get('imageAfter') or None
+
+                cursor.execute('''
+                    UPDATE issues
+                    SET workerStatus = 'Work Completed - Awaiting Verification',
+                        status = 'work_completed',
+                        workCompletedTimestamp = ?,
+                        workCompletedBy = ?,
+                        resolutionNotes = ?,
+                        imageAfter = COALESCE(?, imageAfter)
+                    WHERE id = ?
+                ''', (now_ms, worker_display_name, resolution_notes, photo_after, issue_id))
+
+                log_notes = f"Work completed by field squad: {resolution_notes}"
+                cursor.execute('''
+                    INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    audit_id,
+                    issue_id,
+                    worker_display_name,
+                    'WORK_COMPLETED',
+                    assigned_worker,
+                    log_notes,
+                    now_ms
+                ))
+
+                if photo_after:
+                    audit_id_ev = f"AUDIT-EVD-{now_ms}-{random.randint(100, 999)}"
+                    cursor.execute('''
+                        INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ''', (
+                        audit_id_ev,
+                        issue_id,
+                        worker_display_name,
+                        'RESOLUTION_EVIDENCE_SUBMITTED',
+                        assigned_worker,
+                        f"Field resolution evidence photo submitted by {worker_display_name}",
+                        now_ms
+                    ))
+
+                comments.append({
+                    'author': worker_display_name,
+                    'text': f"✅ Work Completed: {resolution_notes}",
+                    'time': 'Just now'
+                })
+
             cursor.execute('UPDATE issues SET comments = ? WHERE id = ?', (json.dumps(comments), issue_id))
             conn.commit()
 
@@ -1714,8 +1811,12 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             sse_payload = {
                 'id': updated_issue['id'],
                 'workerStatus': updated_issue['workerStatus'],
-                'enRouteTimestamp': updated_issue['enRouteTimestamp'],
-                'arrivedTimestamp': updated_issue['arrivedTimestamp'],
+                'enRouteTimestamp': updated_issue.get('enRouteTimestamp'),
+                'arrivedTimestamp': updated_issue.get('arrivedTimestamp'),
+                'workCompletedTimestamp': updated_issue.get('workCompletedTimestamp'),
+                'workCompletedBy': updated_issue.get('workCompletedBy'),
+                'resolutionNotes': updated_issue.get('resolutionNotes'),
+                'imageAfter': updated_issue.get('imageAfter'),
                 'assignedWorker': updated_issue['assignedWorker'],
                 'assignedTimestamp': updated_issue['assignedTimestamp'],
                 'supervisorNotes': updated_issue['supervisorNotes'],
@@ -1727,6 +1828,8 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'comments': updated_issue.get('comments')
             }
             sse_hub.broadcast('ISSUE_TRANSITIONED', sse_payload)
+            if target_status == 'Work Completed - Awaiting Verification':
+                sse_hub.broadcast('WORK_COMPLETED', sse_payload)
 
             self.send_json_response({
                 'success': True,
@@ -1735,10 +1838,13 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             })
             return
 
-        # 2. REST API: POST /api/issues/resolve
-        if path.startswith('/api/issues/') and path.endswith('/resolve'):
-            parts = path.split('/')
-            issue_id = parts[3]
+        # 2. REST API: POST /api/issues/resolve (Officer Verification Endpoint)
+        if (path.startswith('/api/issues/') and path.endswith('/resolve')) or path == '/api/issues/resolve':
+            if path == '/api/issues/resolve':
+                issue_id = (body.get('issueId') or '').strip()
+            else:
+                parts = path.split('/')
+                issue_id = parts[3].strip()
 
             conn = get_db_connection()
             cursor = conn.cursor()
@@ -1749,7 +1855,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 conn.close()
                 self.send_json_response({
                     'success': False,
-                    'error': 'Authentication required to resolve grievance.'
+                    'error': 'Authentication required to verify and resolve grievance.'
                 }, status=401)
                 return
 
@@ -1758,12 +1864,12 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
 
             if not row:
                 conn.close()
-                self.send_json_response({'success': False, 'error': 'Issue not found'}, status=404)
+                self.send_json_response({'success': False, 'error': f'Issue {issue_id} not found'}, status=404)
                 return
 
             issue_dict = dict(row)
 
-            # 2. Department & Authority Check
+            # 2. Department & Authority Check (Workers CANNOT resolve issues!)
             if issue_dict.get('department') == 'food_safety':
                 if auth_user.get('department') not in ['food', 'food_safety']:
                     conn.close()
@@ -1773,11 +1879,11 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                     }, status=403)
                     return
             else:
-                if auth_user.get('department') not in ['municipal', 'worker']:
+                if auth_user.get('department') != 'municipal':
                     conn.close()
                     self.send_json_response({
                         'success': False,
-                        'error': 'Unauthorized. Only Municipal Officers or authorized workforce may resolve municipal grievances.'
+                        'error': 'Unauthorized. Only Municipal Officers may verify and resolve municipal grievances. Field workers cannot directly resolve issues.'
                     }, status=403)
                     return
 
@@ -1797,30 +1903,41 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                         self.send_json_response({'success': False, 'error': 'Resolution rejected: Incident is outside officer jurisdiction ward.'}, status=403)
                         return
 
-            notes = body.get('notes', 'Field execution verified and site cleaned.')
-            photo_after = body.get('photoAfter', 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80')
+            notes = (body.get('notes') or body.get('resolutionNotes') or 'Field execution verified and certified closed.').strip()
+            photo_after = body.get('photoAfter') or body.get('imageAfter') or None
             now = int(time.time() * 1000)
-            officer_name = auth_user.get('name') or 'Field Officer'
+            officer_name = auth_user.get('name') or 'Municipal Officer'
 
             comments = json.loads(row['comments'] or '[]')
-            comments.append({'author': officer_name, 'text': f'Issue resolved: {notes}', 'time': 'Just now'})
+            comments.append({'author': officer_name, 'text': f'Verified and officially closed: {notes}', 'time': 'Just now'})
 
             cursor.execute('''
                 UPDATE issues SET
                     status = "resolved",
                     resolvedTimestamp = ?,
+                    verifiedTimestamp = ?,
+                    verifiedByOfficer = ?,
                     slaHoursLeft = 0,
-                    imageAfter = ?,
                     workerStatus = "Field Execution Completed & Cleaned Proof Uploaded",
-                    rewardIssued = 1,
+                    imageAfter = COALESCE(?, imageAfter),
                     comments = ?
                 WHERE id = ?
-            ''', (now, photo_after, json.dumps(comments), issue_id))
+            ''', (now, now, officer_name, photo_after, json.dumps(comments), issue_id))
 
+            # Operational Audit Log: RESOLUTION_VERIFIED
+            audit_id_res = f"AUDIT-VERIFY-{now}-{random.randint(100, 999)}"
             cursor.execute('''
-                UPDATE users SET civicCredits = civicCredits + 50 
-                WHERE id = ? OR LOWER(name) = LOWER(?) OR LOWER(email) = LOWER(?)
-            ''', (row['reportedById'] or '', row['reportedBy'] or '', row['reportedById'] or ''))
+                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                audit_id_res,
+                issue_id,
+                officer_name,
+                'RESOLUTION_VERIFIED',
+                issue_dict.get('assignedWorker'),
+                f"Official resolution verified and certified by {officer_name}. {notes}",
+                now
+            ))
 
             conn.commit()
 
@@ -1830,8 +1947,114 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             updated_row['comments'] = json.loads(updated_row['comments'] or '[]')
             conn.close()
 
+            sse_hub.broadcast('RESOLUTION_VERIFIED', updated_row)
             sse_hub.broadcast('ISSUE_RESOLVED', updated_row)
-            self.send_json_response({'success': True, 'issue': updated_row})
+            self.send_json_response({'success': True, 'message': 'Resolution verified and ticket closed successfully.', 'issue': updated_row})
+            return
+
+        # 3. REST API: POST /api/issues/:id/reject-resolution (Officer Resolution Rejection)
+        if (path.startswith('/api/issues/') and path.endswith('/reject-resolution')) or path == '/api/issues/reject-resolution':
+            if path == '/api/issues/reject-resolution':
+                issue_id = (body.get('issueId') or '').strip()
+            else:
+                parts = path.split('/')
+                issue_id = parts[3].strip()
+
+            conn = get_db_connection()
+            cursor = conn.cursor()
+
+            # 1. Authoritative Authentication Check
+            auth_user = get_authenticated_user(self, conn)
+            if not auth_user:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Authentication required.'}, status=401)
+                return
+
+            cursor.execute('SELECT * FROM issues WHERE id = ?', (issue_id,))
+            row = cursor.fetchone()
+            if not row:
+                conn.close()
+                self.send_json_response({'success': False, 'error': f'Issue {issue_id} not found'}, status=404)
+                return
+
+            issue_dict = dict(row)
+
+            # 2. Authority Check
+            if auth_user.get('department') != 'municipal':
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Unauthorized. Only Municipal Officers may reject resolution and return tasks.'}, status=403)
+                return
+
+            # 3. Jurisdiction Check
+            if auth_user.get('jurisdictionState') and auth_user.get('jurisdictionState') != issue_dict.get('state'):
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Action rejected: Incident is outside officer jurisdiction state.'}, status=403)
+                return
+            if auth_user.get('jurisdictionCity') and auth_user.get('jurisdictionCity') != issue_dict.get('city'):
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Action rejected: Incident is outside officer jurisdiction city.'}, status=403)
+                return
+            if auth_user.get('jurisdictionWard') and auth_user.get('jurisdictionWard') != 'ALL':
+                if auth_user.get('jurisdictionWard') != issue_dict.get('ward'):
+                    conn.close()
+                    self.send_json_response({'success': False, 'error': 'Action rejected: Incident is outside officer jurisdiction ward.'}, status=403)
+                    return
+
+            # 4. Mandatory Justification Check
+            justification = (body.get('justification') or body.get('reason') or '').strip()
+            if not justification:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Justification is mandatory when rejecting field resolution.'}, status=400)
+                return
+
+            now_ms = int(time.time() * 1000)
+            officer_name = auth_user.get('name') or 'Municipal Officer'
+            comments = json.loads(issue_dict.get('comments') or '[]')
+            comments.append({
+                'author': officer_name,
+                'text': f"⚠️ Resolution Rejected & Returned to Worker: {justification}",
+                'time': 'Just now'
+            })
+
+            cursor.execute('''
+                UPDATE issues SET
+                    status = 'in_progress',
+                    workerStatus = 'On Site - Conducting Work',
+                    rejectionReason = ?,
+                    comments = ?
+                WHERE id = ?
+            ''', (justification, json.dumps(comments), issue_id))
+
+            # Operational Audit Log: RESOLUTION_REJECTED
+            audit_id_rej = f"AUDIT-REJ-{now_ms}-{random.randint(100, 999)}"
+            cursor.execute('''
+                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                audit_id_rej,
+                issue_id,
+                officer_name,
+                'RESOLUTION_REJECTED',
+                issue_dict.get('assignedWorker'),
+                f"Resolution returned to squad with reason: {justification}",
+                now_ms
+            ))
+
+            conn.commit()
+
+            cursor.execute('SELECT * FROM issues WHERE id = ?', (issue_id,))
+            updated_row = dict(cursor.fetchone())
+            updated_row['upvotedBy'] = json.loads(updated_row['upvotedBy'] or '[]')
+            updated_row['comments'] = json.loads(updated_row['comments'] or '[]')
+            conn.close()
+
+            sse_hub.broadcast('RESOLUTION_REJECTED', updated_row)
+            sse_hub.broadcast('ISSUE_TRANSITIONED', updated_row)
+            self.send_json_response({
+                'success': True,
+                'message': 'Field resolution rejected. Task returned to worker with instructions.',
+                'issue': updated_row
+            })
             return
 
         # 3. REST API: POST /api/food-violations

@@ -363,6 +363,7 @@
   }
 
   const auth = new AuthManager();
+  window.auth = auth;
 
   // =========================================================================
   // DATE & TIME FORMATTING & SLA TURNAROUND HELPERS
@@ -2475,29 +2476,27 @@
       const issue = this.getIssueById(issueId);
       if (!issue) return null;
 
+      const officerName = auth.getUser() ? auth.getUser().name : 'Municipal Officer';
+      const now = Date.now();
+
       issue.status = 'resolved';
-      issue.resolvedTimestamp = Date.now();
+      issue.resolvedTimestamp = now;
+      issue.verifiedTimestamp = now;
+      issue.verifiedByOfficer = officerName;
       issue.slaHoursLeft = 0;
       issue.workerStatus = 'Field Execution Completed & Cleaned Proof Uploaded';
-      issue.imageAfter = photoAfter || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80';
-      issue.rewardIssued = true;
+      if (photoAfter) issue.imageAfter = photoAfter;
       issue.comments.push({
-        author: auth.getUser() ? auth.getUser().name : 'Field Officer',
-        text: 'Issue resolved: ' + resolutionNotes,
+        author: officerName,
+        text: 'Verified and officially closed: ' + resolutionNotes,
         time: 'Just now'
       });
 
       this.saveToStorage('clean_safe_issues_v10', this.issues);
-
-      // Award +50 Civic Credits and record transaction in ledger
-      if (typeof addCitizenCreditTransaction === 'function') {
-        addCitizenCreditTransaction('Verified Resolution: ' + issue.title, 50, 'Credited to Civic Standing');
-      }
-
       this.notify();
       broadcastRealtimeEvent('ISSUE_RESOLVED', issue);
 
-      // Async persist resolution to SQLite Backend
+      // Async persist resolution to SQLite Backend with Authoritative Session
       const resolveHeaders = { 'Content-Type': 'application/json' };
       const resolveToken = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
       if (resolveToken) resolveHeaders['Authorization'] = `Bearer ${resolveToken}`;
@@ -2506,8 +2505,7 @@
         headers: resolveHeaders,
         body: JSON.stringify({
           notes: resolutionNotes,
-          photoAfter: issue.imageAfter,
-          officerName: auth.getUser() ? auth.getUser().name : 'Field Officer'
+          photoAfter: issue.imageAfter
         })
       }).catch(e => console.log('Backend resolve offline:', e));
 
@@ -2708,6 +2706,7 @@
   }
 
   const db = new DatabaseManager();
+  window.db = db;
 
   // =========================================================================
   // 4. GIS MAP MANAGER
@@ -4064,21 +4063,33 @@
       if (pending.length === 0) {
         workerGrid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #94a3b8; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border);">All field tasks completed for this jurisdiction!</p>`;
       } else {
-        workerGrid.innerHTML = pending.map(task => `
-          <div class="lineman-ticket-card">
-            <div style="display: flex; justify-content: space-between;">
-              <span class="badge badge-${task.status}">${task.status.toUpperCase()}</span>
-              <span style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8;">${task.id}</span>
+        workerGrid.innerHTML = pending.map(task => {
+          const isAwaitingVerification = task.workerStatus === 'Work Completed - Awaiting Verification' || task.status === 'work_completed';
+          return `
+            <div class="lineman-ticket-card" style="${isAwaitingVerification ? 'border: 1px solid rgba(234, 179, 8, 0.45); background: rgba(234, 179, 8, 0.03);' : ''}">
+              <div style="display: flex; justify-content: space-between;">
+                <span class="badge" style="${isAwaitingVerification ? 'background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid #eab308; font-weight: 700;' : ''}">
+                  ${isAwaitingVerification ? 'AWAITING VERIFICATION' : task.status.toUpperCase()}
+                </span>
+                <span style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8;">${task.id}</span>
+              </div>
+              <h3 style="font-size: 1.1rem; color: white; margin: 0.4rem 0;">${task.title}</h3>
+              <p style="font-size: 0.82rem; color: var(--text-muted);">${task.description}</p>
+              <div style="font-size: 0.75rem; color: #94a3b8; margin: 0.4rem 0;">📍 ${task.location}</div>
+              ${isAwaitingVerification ? `
+                <div style="margin: 0.5rem 0; padding: 0.45rem 0.6rem; background: rgba(234, 179, 8, 0.08); border-left: 3px solid #eab308; border-radius: 4px; font-size: 0.76rem; color: #fef08a;">
+                  <strong>Field Resolution Submitted:</strong> "${task.resolutionNotes || 'Remediation completed.'}"
+                </div>
+              ` : ''}
+              <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+                <button class="btn btn-sm btn-outline" style="flex: 1;" onclick="window.viewIssueDetail('${task.id}')">Review</button>
+                <button class="btn btn-sm btn-primary" style="flex: 1; ${isAwaitingVerification ? 'background: #10b981; border-color: #10b981; font-weight: 700;' : ''}" onclick="window.openResolveModal('${task.id}')">
+                  ${isAwaitingVerification ? 'Verify & Close' : 'Resolve'}
+                </button>
+              </div>
             </div>
-            <h3 style="font-size: 1.1rem; color: white; margin: 0.4rem 0;">${task.title}</h3>
-            <p style="font-size: 0.82rem; color: var(--text-muted);">${task.description}</p>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin: 0.4rem 0;">📍 ${task.location}</div>
-            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
-              <button class="btn btn-sm btn-outline" style="flex: 1;" onclick="window.viewIssueDetail('${task.id}')">Review</button>
-              <button class="btn btn-sm btn-primary" style="flex: 1;" onclick="window.openResolveModal('${task.id}')">Resolve</button>
-            </div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
       }
     }
 
@@ -4300,16 +4311,17 @@
           const deadlineTimeStr = formatReportDateTime(deadlineTimestamp);
           const isEscalated = issue.status === 'escalated' || issue.isSlaBreached;
           const currentWorkerStatus = issue.workerStatus || 'Assigned';
-          const isEnRoute = currentWorkerStatus === 'En Route to Site' || Boolean(issue.enRouteTimestamp && !issue.arrivedTimestamp && currentWorkerStatus !== 'On Site - Conducting Work');
-          const isOnSite = currentWorkerStatus === 'On Site - Conducting Work' || Boolean(issue.arrivedTimestamp);
+          const isCompletedAwaiting = currentWorkerStatus === 'Work Completed - Awaiting Verification' || issue.status === 'work_completed';
+          const isOnSite = (currentWorkerStatus === 'On Site - Conducting Work' || Boolean(issue.arrivedTimestamp)) && !isCompletedAwaiting;
+          const isEnRoute = (currentWorkerStatus === 'En Route to Site' || Boolean(issue.enRouteTimestamp && !issue.arrivedTimestamp)) && !isOnSite && !isCompletedAwaiting;
 
           return `
-            <div class="issue-card" style="border: 1px solid rgba(56, 189, 248, 0.35); background: #0c1322;">
+            <div class="issue-card" style="border: 1px solid ${isCompletedAwaiting ? 'rgba(234, 179, 8, 0.45)' : 'rgba(56, 189, 248, 0.35)'}; background: #0c1322;">
               <div class="issue-card-media">
                 <img src="${issue.imageBefore}" class="issue-card-img" alt="${issue.title}" loading="lazy">
                 <div class="issue-floating-badges">
-                  <span class="badge" style="background: ${isOnSite ? 'rgba(16, 185, 129, 0.2)' : isEnRoute ? 'rgba(14, 165, 233, 0.2)' : 'rgba(56, 189, 248, 0.2)'}; color: ${isOnSite ? '#34d399' : isEnRoute ? '#38bdf8' : '#38bdf8'}; border: 1px solid ${isOnSite ? '#10b981' : isEnRoute ? '#0284c7' : '#0284c7'}; font-weight: 700;">
-                    ${isOnSite ? 'ON SITE' : isEnRoute ? 'EN ROUTE' : 'ASSIGNED'}
+                  <span class="badge" style="background: ${isCompletedAwaiting ? 'rgba(234, 179, 8, 0.2)' : isOnSite ? 'rgba(16, 185, 129, 0.2)' : isEnRoute ? 'rgba(14, 165, 233, 0.2)' : 'rgba(56, 189, 248, 0.2)'}; color: ${isCompletedAwaiting ? '#facc15' : isOnSite ? '#34d399' : isEnRoute ? '#38bdf8' : '#38bdf8'}; border: 1px solid ${isCompletedAwaiting ? '#eab308' : isOnSite ? '#10b981' : isEnRoute ? '#0284c7' : '#0284c7'}; font-weight: 700;">
+                    ${isCompletedAwaiting ? 'AWAITING VERIFICATION' : isOnSite ? 'ON SITE' : isEnRoute ? 'EN ROUTE' : 'ASSIGNED'}
                   </span>
                   <span class="issue-sla-pill ${isEscalated ? 'text-danger' : ''}">${isEscalated ? '⚠️ SLA BREACHED' : '⏱️ ' + (issue.slaHoursLeft || 48) + 'h SLA left'}</span>
                 </div>
@@ -4328,11 +4340,17 @@
                 </div>
 
                 <div style="background: rgba(56, 189, 248, 0.06); border: 1px solid rgba(56, 189, 248, 0.2); padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.78rem; color: #cbd5e1; margin-bottom: 0.85rem;">
-                  <div>👷 <strong>Squad:</strong> ${issue.assignedWorker || 'Squad 4'} • <span style="color: ${isOnSite ? '#34d399' : isEnRoute ? '#38bdf8' : '#38bdf8'}; font-weight: 700;">Current status: ${currentWorkerStatus}</span></div>
+                  <div>👷 <strong>Squad:</strong> ${issue.assignedWorker || 'Squad 4'} • <span style="color: ${isCompletedAwaiting ? '#facc15' : isOnSite ? '#34d399' : isEnRoute ? '#38bdf8' : '#38bdf8'}; font-weight: 700;">Current status: ${currentWorkerStatus}</span></div>
                   <div style="color: #fbbf24; margin-top: 3px;">📅 <strong>Assigned Time:</strong> ${assignedTimeStr}</div>
                   ${issue.enRouteTimestamp ? `<div style="color: #38bdf8; margin-top: 3px;">🚗 <strong>Departed En Route:</strong> ${formatReportDateTime(issue.enRouteTimestamp)}</div>` : ''}
                   ${issue.arrivedTimestamp ? `<div style="color: #34d399; margin-top: 3px;">📍 <strong>Arrived On Site:</strong> ${formatReportDateTime(issue.arrivedTimestamp)}</div>` : ''}
+                  ${issue.workCompletedTimestamp ? `<div style="color: #facc15; margin-top: 3px;">🛠️ <strong>Work Completed:</strong> ${formatReportDateTime(issue.workCompletedTimestamp)}</div>` : ''}
                   <div style="color: #94a3b8; margin-top: 3px;">⏱️ <strong>Target SLA:</strong> ${deadlineTimeStr}</div>
+                  ${issue.resolutionNotes ? `
+                    <div style="margin-top: 5px; padding-top: 5px; border-top: 1px dashed rgba(255,255,255,0.1); color: #fef08a;">
+                      📝 <strong>Completion Note:</strong> "${issue.resolutionNotes}"
+                    </div>
+                  ` : ''}
                   ${issue.supervisorNotes ? `
                     <div style="margin-top: 5px; padding-top: 5px; border-top: 1px dashed rgba(255,255,255,0.1); color: #7dd3fc;">
                       📋 <strong>Supervisor Instruction:</strong> ${issue.supervisorNotes}
@@ -4341,9 +4359,19 @@
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 0.45rem;">
-                  ${isOnSite ? `
-                    <div style="width: 100%; padding: 0.55rem 0.65rem; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 4px; font-size: 0.78rem; color: #34d399; text-align: center; font-weight: 700;">
-                      🟢 On Site — Conducting Remediation (Awaiting Work & Proof - Stage D)
+                  ${isCompletedAwaiting ? `
+                    <div style="width: 100%; padding: 0.55rem 0.65rem; background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.35); border-radius: 4px; font-size: 0.78rem; color: #facc15; text-align: center; font-weight: 700;">
+                      🟡 Work Completed — Awaiting Officer Verification
+                    </div>
+                    <div style="width: 100%; padding: 0.35rem 0.5rem; background: rgba(234, 179, 8, 0.08); border: 1px solid rgba(234, 179, 8, 0.2); border-radius: 4px; font-size: 0.74rem; color: #fef08a; text-align: center;">
+                      Remediation notes & proof submitted • Municipal sign-off pending
+                    </div>
+                  ` : isOnSite ? `
+                    <button type="button" class="btn btn-primary btn-sm" onclick="window.openWorkerCompleteModal('${issue.id}')" style="width: 100%; background: linear-gradient(135deg, #059669, #10b981); font-weight: 700; cursor: pointer; padding: 0.55rem; color: white;">
+                      <span>🛠️</span> Complete Work & Submit Proof
+                    </button>
+                    <div style="width: 100%; padding: 0.35rem 0.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 4px; font-size: 0.74rem; color: #6ee7b7; text-align: center;">
+                      🟢 On Site • Conduct Remediation & Submit Proof
                     </div>
                   ` : isEnRoute ? `
                     <button type="button" class="btn btn-primary btn-sm" onclick="window.markWorkerTaskArrived('${issue.id}')" style="width: 100%; background: linear-gradient(135deg, #0284c7, #0ea5e9); font-weight: 700; cursor: pointer; padding: 0.55rem; color: white;">
@@ -4360,6 +4388,11 @@
                       📋 Work Order Assigned • Ready for Transit
                     </div>
                   `}
+                  ${issue.rejectionReason ? `
+                    <div style="margin-top: 4px; padding: 4px 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 4px; font-size: 0.74rem; color: #fca5a5;">
+                      ⚠️ Officer Feedback: ${issue.rejectionReason}
+                    </div>
+                  ` : ''}
                   <button type="button" class="btn btn-outline btn-sm" onclick="window.viewIssueDetail('${issue.id}')" title="Inspect Ticket Details" style="width: 100%; border-color: #64748b; color: #cbd5e1; cursor: pointer;">
                     <span>🔍</span> Inspect Work Order Details
                   </button>
@@ -4516,6 +4549,7 @@
 
     window.scrollTo(0, 0);
   }
+  window.checkAuthAndRoute = checkAuthAndRoute;
 
   // =========================================================================
   // 7. DEPARTMENT-SPECIFIC AI CHATBOT COPILOT ENGINE
@@ -6573,6 +6607,13 @@
       const resolvedTs = isResolved ? (issue.resolvedTimestamp || getRealisticResolvedTimestamp(issue)) : null;
       const resolvedTimeStr = isResolved ? formatReportDateTime(resolvedTs) : null;
       const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, resolvedTs, issue) : null;
+      let turnaroundDurationStr = null;
+      if (isResolved && resolvedTs && issue.timestamp) {
+        const diffMs = Math.max(0, resolvedTs - issue.timestamp);
+        const hours = Math.floor(diffMs / (3600 * 1000));
+        const mins = Math.floor((diffMs % (3600 * 1000)) / (60 * 1000));
+        turnaroundDurationStr = `${hours}h ${mins}m`;
+      }
       const deadlineTimestamp = issue.slaDeadline || ((issue.timestamp || Date.now()) + 48 * 3600 * 1000);
       const deadlineTimeStr = formatReportDateTime(deadlineTimestamp);
 
@@ -6591,7 +6632,10 @@
       const isSquadArrived = Boolean(issue.arrivedTimestamp || (issue.workerStatus && (issue.workerStatus.toLowerCase().includes('on site') || issue.workerStatus.toLowerCase().includes('arrived'))));
       const arrivedTimeStr = issue.arrivedTimestamp ? formatReportDateTime(issue.arrivedTimestamp) : null;
 
-      const workerStatus = issue.workerStatus || (isResolved ? 'Completed & Verified On-Site' : isEscalated ? 'Delayed (>48h) — Escalated' : (isSquadArrived ? 'On Site - Conducting Work' : isSquadEnRoute ? 'En Route to Site' : isSquadAssigned ? 'Assigned' : 'Pending Allocation'));
+      const isWorkCompleted = Boolean(issue.workCompletedTimestamp || (issue.workerStatus && issue.workerStatus.includes('Work Completed')) || isResolved);
+      const workCompletedTimeStr = issue.workCompletedTimestamp ? formatReportDateTime(issue.workCompletedTimestamp) : (isResolved && resolvedTs ? formatReportDateTime(resolvedTs) : null);
+
+      const workerStatus = issue.workerStatus || (isResolved ? 'Completed & Verified On-Site' : isEscalated ? 'Delayed (>48h) — Escalated' : (isWorkCompleted ? 'Work Completed - Awaiting Verification' : isSquadArrived ? 'On Site - Conducting Work' : isSquadEnRoute ? 'En Route to Site' : isSquadAssigned ? 'Assigned' : 'Pending Allocation'));
       const recommendedResource = issue.recommendedResource || 'Standard Municipal Service Unit';
       const deptIcon = issue.deptIcon || '🏢';
       const deptName = issue.deptName || 'Sanitation & Civic Works';
@@ -6766,17 +6810,17 @@
         },
         {
           stepNum: 9,
-          title: 'Remediation Work & Resolution Proof Upload',
+          title: 'Remediation Work & Resolution Proof',
           icon: '🛠️',
-          state: (isResolved || issue.imageAfter) ? 'completed' : (isSquadArrived ? 'active' : 'pending'),
-          timeStr: (isResolved && resolvedTs) ? formatReportDateTime(resolvedTs) : (isSquadArrived ? 'Work In Progress' : 'Pending Execution'),
-          desc: (isResolved || issue.imageAfter)
-            ? `Remediation executed on ground. Geotagged after-resolution photograph registered in municipal audit archive.`
+          state: isWorkCompleted ? 'completed' : (isSquadArrived ? 'active' : 'pending'),
+          timeStr: workCompletedTimeStr || (isSquadArrived ? 'Work In Progress' : 'Pending Execution'),
+          desc: isWorkCompleted
+            ? `Remediation executed on ground: <em>"${issue.resolutionNotes || 'Remediation completed and site restored.'}"</em>. Field resolution evidence registered in audit archive.`
             : (isSquadArrived
-              ? `Field squad is actively executing cleaning, repairs, or containment. After-photo proof required for closure.`
-              : `Awaiting on-site work completion and photographic proof upload.`),
+              ? `Field squad is actively executing cleaning, repairs, or containment. Resolution proof required for closure.`
+              : `Awaiting on-site work completion and photographic proof submission.`),
           subMeta: [
-            `📸 After-Proof: ${issue.imageAfter ? 'Uploaded' : 'Pending'}`,
+            `📸 After-Proof: ${issue.imageAfter ? 'Submitted' : 'Pending'}`,
             `📋 Protocol: Standard Municipal SOP`
           ]
         },
@@ -6785,29 +6829,29 @@
           title: 'Verified Resolution & Turnaround Sign-off',
           icon: '✅',
           state: isResolved ? 'completed' : (isEscalated ? 'breached' : 'pending'),
-          timeStr: isResolved ? formatReportDateTime(resolvedTs) : (isEscalated ? formatReportDateTime(deadlineTimestamp) : 'Expected by ' + deadlineTimeStr),
+          timeStr: isResolved ? (verifiedTimeStr || formatReportDateTime(resolvedTs)) : (isEscalated ? formatReportDateTime(deadlineTimestamp) : 'Expected by ' + deadlineTimeStr),
           desc: isResolved
-            ? `Official resolution verified and certified! Measured turnaround: <strong>${turnaroundStr}</strong> (Successfully resolved within 48h SLA).`
+            ? `Official resolution verified and certified closed by <strong>${verifiedOfficer || 'Municipal Officer'}</strong>. Measured turnaround: <strong>${turnaroundDurationStr || turnaroundStr}</strong>.`
             : (isEscalated
               ? `<strong>48H SLA BREACHED:</strong> Grievance exceeded guaranteed SLA resolution deadline. Automatically escalated to Municipal Commissioner Desk.`
               : `Grievance actively tracked within the 48-Hour SLA window. Turnaround will be certified upon verified resolution.`),
           subMeta: [
-            `⏱️ Turnaround: ${isResolved ? turnaroundStr : isEscalated ? 'Breached (>48h)' : `${issue.slaHoursLeft || 36}h Left`}`,
+            `⏱️ Turnaround: ${isResolved ? (turnaroundDurationStr || turnaroundStr) : isEscalated ? 'Breached (>48h)' : `${issue.slaHoursLeft || 36}h Left`}`,
             `Status: ${isResolved ? 'CLOSED & VERIFIED' : isEscalated ? 'ESCALATED' : 'ACTIVE'}`
           ]
         },
         {
           stepNum: 11,
-          title: 'Citizen Notification & Civic Incentive Credited',
-          icon: '🪙',
+          title: 'Citizen Notification & Civic Acknowledgement',
+          icon: '🏛️',
           state: isResolved ? 'completed' : 'pending',
-          timeStr: isResolved ? formatReportDateTime(resolvedTs) : 'Upon Verified Closure',
+          timeStr: isResolved ? (verifiedTimeStr || formatReportDateTime(resolvedTs)) : 'Upon Verified Closure',
           desc: isResolved
-            ? `Citizen notified of completed remediation with before/after visual comparison. <strong>+50 Civic Credits</strong> awarded to <strong>${issue.reportedBy || 'Citizen'}</strong>.`
-            : `Citizen will receive automated status notification and +50 Civic Credits once on-site work is verified.`,
+            ? `Citizen notification dispatched. Civic acknowledgement registered for <strong>${issue.reportedBy || 'Citizen'}</strong>.`
+            : `Citizen will receive automated status notification upon verified field closure.`,
           subMeta: [
-            `🪙 Reward: +50 Civic Credits`,
-            `📱 Notification: ${isResolved ? 'Delivered' : 'Queued'}`
+            `📢 Notice: ${isResolved ? 'Delivered' : 'Queued'}`,
+            `🛡️ Status: Civic Grievance Closed`
           ]
         },
         {
@@ -6826,24 +6870,95 @@
         }
       ];
 
-      const timelineStepsHtml = timelineSteps.map(step => `
+      // Simplified 5-Step Lifecycle for Citizen (Phase D Requirement 7)
+      const citizenTimelineSteps = [
+        {
+          stepNum: 1,
+          title: 'Reported',
+          icon: '📝',
+          state: 'completed',
+          timeStr: reportedTimeStr,
+          desc: 'Civic grievance registered with location and initial evidence.'
+        },
+        {
+          stepNum: 2,
+          title: 'Under Review',
+          icon: '🔍',
+          state: (isOfficerVerified || isSquadAssigned || isResolved) ? 'completed' : 'active',
+          timeStr: isOfficerVerified ? (verifiedTimeStr || 'Reviewed') : 'Under Review',
+          desc: (isOfficerVerified || isSquadAssigned || isResolved)
+            ? 'Grievance reviewed and validated by Municipal Command.'
+            : 'Pending officer review and priority classification.'
+        },
+        {
+          stepNum: 3,
+          title: 'Assigned',
+          icon: '👷',
+          state: (isSquadAssigned || isResolved) ? 'completed' : (isOfficerVerified ? 'active' : 'pending'),
+          timeStr: assignedTimeStr || 'Pending Dispatch',
+          desc: (isSquadAssigned || isResolved)
+            ? 'Assigned to field squad for on-ground remediation.'
+            : 'Field squad allocation queued.'
+        },
+        {
+          stepNum: 4,
+          title: 'Field Team Working',
+          icon: '🛠️',
+          state: (isWorkCompleted || isResolved) ? 'completed' : (isSquadArrived ? 'active' : isSquadEnRoute ? 'active' : 'pending'),
+          timeStr: workCompletedTimeStr || (isSquadArrived ? 'On Site' : isSquadEnRoute ? 'En Route' : 'Pending'),
+          desc: (isWorkCompleted || isResolved)
+            ? 'Remediation completed by field team.'
+            : (isSquadArrived
+              ? 'Field squad has arrived on site and is conducting work.'
+              : isSquadEnRoute
+                ? 'Field squad is travelling to your location.'
+                : 'Awaiting field squad transit.')
+        },
+        {
+          stepNum: 5,
+          title: 'Resolved',
+          icon: '✅',
+          state: isResolved ? 'completed' : 'pending',
+          timeStr: isResolved ? (verifiedTimeStr || formatReportDateTime(resolvedTs)) : 'Pending Sign-off',
+          desc: isResolved
+            ? 'Resolution verified and officially closed within guaranteed SLA.'
+            : 'Awaiting Municipal Officer verification and closure.'
+        }
+      ];
+
+      const stepsToRender = isCitizen ? citizenTimelineSteps : timelineSteps;
+      const timelineStepsHtml = stepsToRender.map(step => `
         <div class="timeline-step ${step.state}">
           <div class="timeline-node">${step.icon}</div>
           <div class="timeline-content">
             <div class="step-header-row">
-              <div class="step-title">Stage ${step.stepNum}: ${step.title}</div>
+              <div class="step-title">${isCitizen ? step.title : 'Stage ' + step.stepNum + ': ' + step.title}</div>
               <div class="step-time-pill">${step.timeStr}</div>
             </div>
             <div class="step-desc">${step.desc}</div>
-            <div class="step-sub-meta">
-              ${step.subMeta.map(m => `<span>${m}</span>`).join('')}
-            </div>
+            ${step.subMeta ? `
+              <div class="step-sub-meta">
+                ${step.subMeta.map(m => `<span>${m}</span>`).join('')}
+              </div>
+            ` : ''}
           </div>
         </div>
       `).join('');
 
       content.innerHTML = `
         <div>
+          ${(isCitizen && isResolved) ? `
+            <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; border-radius: var(--radius-md); padding: 1.1rem 1.25rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.9rem;">
+              <div style="font-size: 2.2rem; line-height: 1;">✅</div>
+              <div>
+                <div style="font-size: 1.15rem; font-weight: 800; color: #34d399;">Your civic issue has been resolved.</div>
+                <div style="font-size: 0.84rem; color: #cbd5e1; margin-top: 3px;">
+                  Field remediation completed and certified by Municipal Command. Total turnaround: <strong>${turnaroundDurationStr || turnaroundStr || 'Within 48h SLA'}</strong>.
+                </div>
+              </div>
+            </div>
+          ` : ''}
+
           <!-- Top Status & SLA Banner -->
           <div class="tracker-header-card">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
@@ -6863,7 +6978,7 @@
                 <div style="margin-top: 0.5rem;">
                   ${isResolved ? `
                     <div class="sla-live-badge sla-resolved">
-                      <span>✅</span> RESOLVED WITHIN 48H SLA (${turnaroundStr || '2h 30m Turnaround'})
+                      <span>✅</span> RESOLVED WITHIN 48H SLA (${turnaroundDurationStr || turnaroundStr || '2h 30m Turnaround'})
                     </div>
                   ` : isEscalated ? `
                     <div class="sla-live-badge sla-breached">
@@ -6892,12 +7007,12 @@
               <div class="tracker-meta-item">
                 ${isResolved ? '✅ Verified Resolution Date & Time:' : '⏱️ Operational Status:'}
                 <strong style="color: ${isResolved ? '#34d399' : isEscalated ? '#f87171' : isSquadArrived ? '#34d399' : isSquadEnRoute ? '#38bdf8' : isSquadAssigned ? '#fbbf24' : '#38bdf8'};">
-                  ${isResolved ? `${resolvedTimeStr} (${turnaroundStr})` : isEscalated ? '🚨 Auto-Escalated to Commissioner' : isSquadArrived ? '📍 Field squad has arrived on site' : isSquadEnRoute ? '🚗 Field squad is travelling to your location' : isSquadAssigned ? '👷 Field Squad Assigned' : `${issue.slaHoursLeft || 36} Hours Remaining`}
+                  ${isResolved ? `${resolvedTimeStr} (${turnaroundDurationStr || turnaroundStr})` : isEscalated ? '🚨 Auto-Escalated to Commissioner' : isWorkCompleted ? '🟡 Work Completed — Awaiting Verification' : isSquadArrived ? '📍 Field squad has arrived on site' : isSquadEnRoute ? '🚗 Field squad is travelling to your location' : isSquadAssigned ? '👷 Field Squad Assigned' : `${issue.slaHoursLeft || 36} Hours Remaining`}
                 </strong>
               </div>
               <div class="tracker-meta-item">
-                🪙 Civic Incentive Standing:
-                <strong style="color: #facc15;">${isResolved ? '✅ +50 Civic Credits Credited' : '+50 Civic Credits (On Verified Closure)'}</strong>
+                🛡️ Civic Protocol Status:
+                <strong style="color: ${isResolved ? '#34d399' : '#38bdf8'};">${isResolved ? 'Official Closure Verified' : 'Guaranteed 48H SLA Service'}</strong>
               </div>
             </div>
           </div>
@@ -6933,42 +7048,47 @@
             </div>
           </div>
 
-          <!-- Geotagged Photographic Audit Record (Before & After) -->
+          <!-- Field Resolution Evidence Record (Before & After) -->
           <div style="margin-bottom: 1.5rem;">
             <div style="font-size: 0.85rem; font-weight: 800; color: #38bdf8; margin-bottom: 0.6rem; display: flex; align-items: center; justify-content: space-between;">
               <span style="display: flex; align-items: center; gap: 0.4rem;">
-                <span>📸</span> GEOTAGGED PHOTOGRAPHIC AUDIT RECORD
+                <span>📸</span> FIELD RESOLUTION EVIDENCE RECORD
               </span>
               <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">
-                ${isResolved && issue.imageAfter ? 'Before & After Verification' : 'Initial Citizen Proof Registered'}
+                ${issue.imageAfter ? 'Before & After Photographic Comparison' : 'Initial Citizen Proof Registered'}
               </span>
             </div>
-            <div style="display: grid; grid-template-columns: ${isResolved && issue.imageAfter ? 'repeat(2, 1fr)' : '1fr'}; gap: 1rem;">
+            <div style="display: grid; grid-template-columns: ${issue.imageAfter ? 'repeat(2, 1fr)' : '1fr'}; gap: 1rem;">
               <div style="border-radius: var(--radius-lg); overflow: hidden; max-height: 230px; border: 1px solid var(--border); position: relative; background: #0f172a;">
                 <img src="${imgBefore}" style="width: 100%; height: 100%; object-fit: cover; min-height: 180px;" alt="Before Remediation">
                 <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #f43f5e; font-weight: 800; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(244, 63, 94, 0.4);">
-                  1. REPORTED HAZARD • ${reportedTimeStr}
+                  BEFORE • Citizen Evidence
                 </span>
                 <span style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.75); color: #cbd5e1; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px;">
-                  📍 GPS: ${issue.lat || 17.0010}° N, ${issue.lng || 81.8045}° E
+                  📍 ${reportedTimeStr}
                 </span>
               </div>
-              ${isResolved && issue.imageAfter ? `
+              ${issue.imageAfter ? `
                 <div style="border-radius: var(--radius-lg); overflow: hidden; max-height: 230px; border: 1px solid #10b981; position: relative; background: #0f172a;">
-                  <img src="${issue.imageAfter}" style="width: 100%; height: 100%; object-fit: cover; min-height: 180px;" alt="After Remediation">
+                  <img src="${issue.imageAfter}" style="width: 100%; height: 100%; object-fit: cover; min-height: 180px;" alt="Field Resolution Evidence">
                   <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #34d399; font-weight: 800; font-size: 0.72rem; padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.4);">
-                    2. VERIFIED RESOLUTION • ${resolvedTimeStr}
+                    AFTER • Field Resolution Evidence
                   </span>
                   <span style="position: absolute; top: 8px; right: 8px; background: rgba(16, 185, 129, 0.25); color: #34d399; font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; border: 1px solid #10b981;">
-                    ✅ Work Certified
+                    Submitted by assigned field worker
                   </span>
                 </div>
               ` : ''}
             </div>
+            ${issue.resolutionNotes ? `
+              <div style="margin-top: 0.6rem; padding: 0.6rem 0.85rem; background: rgba(56, 189, 248, 0.05); border-left: 3px solid #38bdf8; border-radius: 4px; font-size: 0.8rem; color: #cbd5e1;">
+                <strong>Field Squad Resolution Note:</strong> "${issue.resolutionNotes}"
+              </div>
+            ` : ''}
           </div>
 
-          <!-- Hotspot Association: Recurring Problem Context -->
-          ${wardForecast ? `
+          <!-- Hotspot Association: Recurring Problem Context (Administrative Staff Only) -->
+          ${(!isCitizen && wardForecast) ? `
             <div style="background: rgba(147, 51, 234, 0.08); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: var(--radius-md); padding: 0.9rem 1.15rem; margin-bottom: 1.25rem; box-shadow: 0 4px 16px rgba(147, 51, 234, 0.08);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.55rem; flex-wrap: wrap; gap: 0.4rem;">
                 <div style="font-weight: 700; font-size: 0.9rem; color: #d8b4fe; display: flex; align-items: center; gap: 0.45rem;">
@@ -7002,8 +7122,8 @@
             </div>
           ` : ''}
 
-          <!-- Related Reports: Deterministic Ward Corroboration -->
-          ${relatedIssues.length > 0 ? `
+          <!-- Related Reports: Deterministic Ward Corroboration (Administrative Staff Only) -->
+          ${!isCitizen ? (relatedIssues.length > 0 ? `
             <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-md); padding: 0.9rem 1.15rem; margin-bottom: 1.25rem;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.4rem;">
                 <div style="font-weight: 700; font-size: 0.88rem; color: #38bdf8; display: flex; align-items: center; gap: 0.4rem;">
@@ -7034,7 +7154,7 @@
               <span>ℹ️</span>
               <span>No concurrent related reports detected in <strong>${issue.ward || 'this ward'}</strong> for this category. Single isolated grievance.</span>
             </div>
-          `}
+          `) : ''}
 
           <!-- Citizen View: Clean Civic Governance Profile (No raw AI metrics) -->
           ${isCitizen ? `
@@ -7532,7 +7652,135 @@
     const titleEl = document.getElementById('resolveModalIssueTitle');
     if (titleEl) titleEl.textContent = `Resolving: #${issue.id} - ${issue.title}`;
 
+    const notesEl = document.getElementById('resolveModalWorkerNotesText');
+    if (notesEl) {
+      notesEl.textContent = issue.resolutionNotes ? `"${issue.resolutionNotes}"` : '(No specific notes recorded)';
+    }
+
+    const photoCont = document.getElementById('resolveModalPhotoAfterContainer');
+    const photoImg = document.getElementById('resolveModalPhotoAfterImg');
+    if (photoCont && photoImg) {
+      if (issue.imageAfter) {
+        photoImg.src = issue.imageAfter;
+        photoCont.style.display = 'block';
+      } else {
+        photoCont.style.display = 'none';
+      }
+    }
+
+    // Reset rejection section
+    const rejSection = document.getElementById('officerRejectionSection');
+    const rejInput = document.getElementById('officerRejectionReasonInput');
+    const rejBtn = document.getElementById('btnToggleRejection');
+    if (rejSection) rejSection.style.display = 'none';
+    if (rejInput) rejInput.value = '';
+    if (rejBtn) rejBtn.innerHTML = '<span>✕</span> Reject & Return';
+
     window.openModal('resolveIssueModal');
+  };
+
+  window.toggleOfficerRejectionView = function() {
+    const rejSection = document.getElementById('officerRejectionSection');
+    const rejBtn = document.getElementById('btnToggleRejection');
+    if (!rejSection) return;
+
+    if (rejSection.style.display === 'none' || rejSection.style.display === '') {
+      rejSection.style.display = 'block';
+      if (rejBtn) rejBtn.innerHTML = '<span>⚠️</span> Confirm Rejection';
+      const rejInput = document.getElementById('officerRejectionReasonInput');
+      if (rejInput) rejInput.focus();
+    } else {
+      window.rejectResolution();
+    }
+  };
+
+  window.rejectResolution = async function() {
+    if (!activeIssueIdForModal) return;
+    const rejInput = document.getElementById('officerRejectionReasonInput');
+    const reason = rejInput ? rejInput.value.trim() : '';
+    if (!reason) {
+      showToast('Please provide a mandatory rejection justification.', 'error', '⚠️');
+      if (rejInput) rejInput.focus();
+      return;
+    }
+
+    const rejBtn = document.getElementById('btnToggleRejection');
+    if (rejBtn) {
+      rejBtn.disabled = true;
+      rejBtn.innerHTML = '<span>⏳</span> Processing...';
+    }
+
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const resp = await fetch(`/api/issues/${activeIssueIdForModal}/reject-resolution`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({ justification: reason })
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.success) {
+        showToast(data.error || data.message || 'Failed to reject resolution.', 'error', '❌');
+        if (rejBtn) {
+          rejBtn.disabled = false;
+          rejBtn.innerHTML = '<span>⚠️</span> Confirm Rejection';
+        }
+        return;
+      }
+
+      const issue = db.getIssueById(activeIssueIdForModal);
+      if (issue) {
+        issue.status = 'in_progress';
+        issue.workerStatus = 'On Site - Conducting Work';
+        issue.rejectionReason = reason;
+        issue.comments = issue.comments || [];
+        issue.comments.push({
+          author: auth.getUser() ? auth.getUser().name : 'Municipal Officer',
+          text: `⚠️ Resolution Rejected & Returned to Worker: ${reason}`,
+          time: 'Just now'
+        });
+        db.saveToStorage('clean_safe_issues_v10', db.issues);
+        db.notify();
+      }
+
+      window.closeModal('resolveIssueModal');
+      showToast('Resolution rejected. Ticket returned to squad with instructions.', 'info', '↩️');
+      checkAuthAndRoute();
+    } catch (err) {
+      console.error('rejectResolution network error:', err);
+      showToast('Network error while rejecting resolution.', 'error', '❌');
+    } finally {
+      if (rejBtn) {
+        rejBtn.disabled = false;
+        rejBtn.innerHTML = '<span>✕</span> Reject & Return';
+      }
+    }
+  };
+
+  window.openWorkerCompleteModal = function(issueId) {
+    const issue = db.getIssueById(issueId);
+    if (!issue) return;
+
+    const modal = document.getElementById('workerCompleteTaskModal');
+    if (!modal) return;
+
+    const idInput = document.getElementById('workerCompleteIssueId');
+    if (idInput) idInput.value = issue.id;
+
+    const titleEl = document.getElementById('workerCompleteModalTitle');
+    if (titleEl) {
+      titleEl.textContent = `Remediation Work Order #${issue.id}: ${issue.title}`;
+    }
+
+    const notesInput = document.getElementById('workerResolutionNotesInput');
+    if (notesInput) notesInput.value = '';
+
+    const photoInput = document.getElementById('workerPhotoAfterInput');
+    if (photoInput) photoInput.value = 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80';
+
+    window.openModal('workerCompleteTaskModal');
   };
 
   window.toggleUpvote = function(issueId) {
@@ -7922,20 +8170,141 @@
       });
     }
 
-    // Municipal Resolve Form
+    // Municipal Officer Resolve & Closure Form (Phase D)
     const resolveForm = document.getElementById('resolveIssueForm');
     if (resolveForm) {
-      resolveForm.addEventListener('submit', (e) => {
+      resolveForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!activeIssueIdForModal) return;
 
-        const notes = document.getElementById('resolveNotesInput').value;
-        db.resolveIssue(activeIssueIdForModal, notes, 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80');
+        const notes = document.getElementById('resolveNotesInput')?.value || '';
+        const confirmBtn = document.getElementById('btnConfirmVerify');
+        if (confirmBtn) {
+          confirmBtn.disabled = true;
+          confirmBtn.innerHTML = '<span>⏳</span> Verifying & Closing...';
+        }
 
-        resolveForm.reset();
-        window.closeModal('resolveIssueModal');
-        showToast('Site resolved & verified! +50 Civic Credits issued.', 'reward', '🎖️');
-        checkAuthAndRoute();
+        try {
+          const headers = { 'Content-Type': 'application/json' };
+          const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+
+          const photoImg = document.getElementById('resolveModalPhotoAfterImg');
+          const photoSrc = photoImg && photoImg.src && !photoImg.src.endsWith('/') ? photoImg.src : 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80';
+
+          const resp = await fetch(`/api/issues/${activeIssueIdForModal}/resolve`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+              notes: notes,
+              photoAfter: photoSrc
+            })
+          });
+          const data = await resp.json();
+          if (!resp.ok || !data.success) {
+            showToast(data.error || data.message || 'Failed to verify and close issue.', 'error', '❌');
+            if (confirmBtn) {
+              confirmBtn.disabled = false;
+              confirmBtn.innerHTML = '<span>✓</span> Verify & Close Ticket';
+            }
+            return;
+          }
+
+          db.resolveIssue(activeIssueIdForModal, notes, data.issue?.imageAfter || photoSrc);
+
+          resolveForm.reset();
+          window.closeModal('resolveIssueModal');
+          showToast('Site remediation verified! Ticket officially closed.', 'reward', '✅');
+          checkAuthAndRoute();
+        } catch (err) {
+          console.error('Resolve issue error:', err);
+          showToast('Network error while verifying resolution.', 'error', '❌');
+        } finally {
+          if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<span>✓</span> Verify & Close Ticket';
+          }
+        }
+      });
+    }
+
+    // Worker Task Completion Form (Phase D)
+    const workerCompleteForm = document.getElementById('workerCompleteTaskForm');
+    if (workerCompleteForm) {
+      workerCompleteForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const issueId = document.getElementById('workerCompleteIssueId')?.value;
+        if (!issueId) return;
+
+        const resolutionNotes = document.getElementById('workerResolutionNotesInput')?.value?.trim();
+        const photoAfter = document.getElementById('workerPhotoAfterInput')?.value?.trim();
+
+        if (!resolutionNotes) {
+          showToast('Please enter remediation work description.', 'error', '⚠️');
+          return;
+        }
+
+        const submitBtn = workerCompleteForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span>⏳</span> Submitting Proof...';
+        }
+
+        try {
+          const headers = { 'Content-Type': 'application/json' };
+          const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+
+          const resp = await fetch('/api/issues/transition', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+              issueId: issueId,
+              status: 'Work Completed - Awaiting Verification',
+              targetStatus: 'Work Completed - Awaiting Verification',
+              resolutionNotes: resolutionNotes,
+              photoAfter: photoAfter || undefined
+            })
+          });
+          const data = await resp.json();
+          if (!resp.ok || !data.success) {
+            showToast(data.error || data.message || 'Failed to submit task completion.', 'error', '❌');
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<span>✓</span> Submit for Officer Verification';
+            }
+            return;
+          }
+
+          const issue = db.getIssueById(issueId);
+          if (issue) {
+            issue.status = 'work_completed';
+            issue.workerStatus = 'Work Completed - Awaiting Verification';
+            issue.lifecycleStage = 'Work Completed - Awaiting Verification';
+            issue.resolutionNotes = resolutionNotes;
+            if (photoAfter) issue.imageAfter = photoAfter;
+            if (data.issue && data.issue.workCompletedTimestamp) {
+              issue.workCompletedTimestamp = data.issue.workCompletedTimestamp;
+            }
+            db.saveToStorage('clean_safe_issues_v10', db.issues);
+            db.notify();
+          }
+
+          workerCompleteForm.reset();
+          window.closeModal('workerCompleteTaskModal');
+          showToast('Remediation completed! Submitted for officer verification.', 'reward', '✅');
+          renderWorkerDashboard();
+          renderMunicipalDashboard();
+          renderCitizenDashboard();
+        } catch (err) {
+          console.error('Worker complete task error:', err);
+          showToast('Network error while completing task.', 'error', '❌');
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>✓</span> Submit for Officer Verification';
+          }
+        }
       });
     }
 
