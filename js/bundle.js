@@ -5176,12 +5176,6 @@
     }
   };
 
-  window.startVoiceGrievanceDictation = function() {
-    window.openReportModal();
-    setTimeout(() => {
-      window.toggleVoiceRecording();
-    }, 350);
-  };
 
   // =========================================================================
   // 8.1 LIVE GPS GEOLOCATION & IMAGE EVIDENCE SUBMISSION ENGINE

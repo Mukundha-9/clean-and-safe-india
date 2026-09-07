@@ -2345,61 +2345,6 @@
   line-height: 1.4;
 }
 
-.hero-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.btn-hero-report {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  border: none;
-  font-weight: 800;
-  font-size: 0.85rem;
-  padding: 0.65rem 1.15rem;
-  border-radius: 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
-  transition: all var(--transition-fast);
-}
-
-.btn-hero-report:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
-  background: linear-gradient(135deg, #34d399 0%, #047857 100%);
-}
-
-.btn-hero-voice, .btn-hero-wa {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #cbd5e1;
-  font-weight: 700;
-  font-size: 0.82rem;
-  padding: 0.65rem 0.95rem;
-  border-radius: 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  transition: all var(--transition-fast);
-}
-
-.btn-hero-voice:hover {
-  background: rgba(56, 189, 248, 0.15);
-  border-color: #38bdf8;
-  color: #38bdf8;
-}
-
-.btn-hero-wa:hover {
-  background: rgba(37, 211, 102, 0.15);
-  border-color: #25d366;
-  color: #25d366;
-}
 
 /* Civic Passport Metrics Strip */
 .citizen-passport-bar {
