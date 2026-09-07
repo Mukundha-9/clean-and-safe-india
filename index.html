@@ -890,6 +890,9 @@
               <p style="color: #94a3b8; font-size: 0.84rem; margin-top: 0.35rem; max-width: 650px;">
                 Forecasting emerging civic hotspots over the <strong>Next 7 Days</strong> from historical incident frequency, recurrence signals, severity profiles, and SLA patterns.
               </p>
+              <div style="display: inline-block; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; color: #7dd3fc; margin-top: 4px; font-weight: 600;">
+                AI-Assisted Predictive Demo — Transparent Rule-Based Forecast (No ML Model Configured)
+              </div>
             </div>
             <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
               <button type="button" class="btn btn-sm btn-outline" onclick="window.refreshPredictiveForecasts()" style="border-color: #38bdf8; color: #38bdf8; font-size: 0.8rem; cursor: pointer;">
@@ -922,6 +925,22 @@
               <span class="stat-label">🛡️ Preventive Actions</span>
               <div class="cmd-metric-num" id="kpiPreventiveActionsCount" style="color: #10b981;">6</div>
               <span class="cmd-metric-sub">Advisory Recommendations</span>
+            </div>
+          </div>
+
+          <!-- 3-Tier Operational Governance Layout (Phase E) -->
+          <div style="display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.6rem 1rem; flex: 1; min-width: 180px;">
+              <div style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">1. CURRENT INCIDENTS</div>
+              <div style="font-size: 0.8rem; color: white; margin-top: 2px;">Active grievance tickets in progress</div>
+            </div>
+            <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 0.6rem 1rem; flex: 1; min-width: 180px;">
+              <div style="font-size: 0.7rem; color: #38bdf8; text-transform: uppercase; font-weight: 700;">2. RECURRING CIVIC HOTSPOTS</div>
+              <div style="font-size: 0.8rem; color: white; margin-top: 2px;">Multi-incident recurring zones</div>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 0.6rem 1rem; flex: 1; min-width: 180px;">
+              <div style="font-size: 0.7rem; color: #34d399; text-transform: uppercase; font-weight: 700;">3. PREVENTIVE CIVIC ACTIONS</div>
+              <div style="font-size: 0.8rem; color: white; margin-top: 2px;">Authorized root-cause interventions</div>
             </div>
           </div>
 
@@ -2543,6 +2562,27 @@
           </p>
         </div>
 
+        <!-- Multi-Category Root-Cause Recommendations (Phase E) -->
+        <div style="margin-bottom: 1.25rem;">
+          <h5 style="color: #38bdf8; font-size: 0.88rem; margin: 0 0 0.5rem; font-weight: 800;">
+            Root-Cause Preventive Recommendations (By Category)
+          </h5>
+          <div id="predModalRootCausesList" style="display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.8rem;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Recurrence Monitoring & Trend (Phase E) -->
+        <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span style="font-size: 0.74rem; font-weight: 800; color: #94a3b8; text-transform: uppercase;">Observed Recurrence Trend:</span>
+            <span class="badge" id="predModalRecurrenceTrendBadge" style="font-size: 0.72rem;">PENDING</span>
+          </div>
+          <div id="predModalTrendNotes" style="font-size: 0.78rem; color: #cbd5e1; line-height: 1.4;">
+            Monitoring active recurrence baseline.
+          </div>
+        </div>
+
         <!-- Human Review Governance Status -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.6rem 0.85rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;">
           <span style="font-size: 0.8rem; color: #94a3b8;">Human Authorization Status:</span>
@@ -2601,8 +2641,14 @@
           <button type="button" class="btn btn-sm btn-outline" onclick="window.promptModifyPredictiveAction()" style="border-color: #a855f7; color: #c084fc;">
             <span>✎</span> Modify Recommendation
           </button>
-          <button type="button" class="btn btn-sm btn-primary" onclick="window.approveCurrentPredictiveAction()" style="background: linear-gradient(135deg, #059669, #10b981);">
+          <button type="button" class="btn btn-sm btn-primary" id="btnPredApprove" onclick="window.approveCurrentPredictiveAction()" style="background: linear-gradient(135deg, #059669, #10b981);">
             <span>✓</span> Approve Preventive Action
+          </button>
+          <button type="button" class="btn btn-sm btn-outline" id="btnPredAssignSquad" onclick="window.promptAssignPredictiveAction()" style="display: none; border-color: #38bdf8; color: #38bdf8;">
+            <span>👷</span> Assign Squad
+          </button>
+          <button type="button" class="btn btn-sm btn-primary" id="btnPredImplement" onclick="window.promptImplementPredictiveAction()" style="display: none; background: linear-gradient(135deg, #2563eb, #38bdf8);">
+            <span>🛡️</span> Complete Field Action
           </button>
         </div>
       </div>

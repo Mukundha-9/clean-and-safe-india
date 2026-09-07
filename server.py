@@ -52,6 +52,7 @@ from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
 PORT = int(os.environ.get('PORT', 8000))
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'civic_database.db')
+PREDICTIVE_HONEST_LABEL = "AI-Assisted Predictive Demo — Transparent Rule-Based Forecast (No ML Model Configured)"
 
 # SMTP Mail Dispatcher Configuration (Optional: set environment variables or use default relay)
 SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
@@ -970,8 +971,11 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                     self.wfile.flush()
             except Exception:
                 sse_hub.unregister_client(self)
-        # Phase 4: Predictive Civic Intelligence Endpoints (GET)
-        if predictive_engine.handle_predictive_get(self, path, query):
+        # Phase 4/E: Predictive Civic Intelligence Endpoints (GET)
+        conn_pred = get_db_connection()
+        auth_user_pred = get_authenticated_user(self, conn_pred)
+        conn_pred.close()
+        if predictive_engine.handle_predictive_get(self, path, query, auth_user=auth_user_pred):
             return
 
         # 2. REST API: GET /api/issues
@@ -1068,7 +1072,17 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                     item['aiReasoning'] = None
                     item['aiOverrideReason'] = None
                     item['imageRiskModifier'] = None
-                    item['imageOfficerOverrideReason'] = None
+                # Phase E: Clean Zone citizen awareness notice
+                i_ward = str(item.get('ward') or '')
+                i_dept = str(item.get('department') or '').lower()
+                if 'ward 12' in i_ward.lower() and i_dept == 'sanitation':
+                    item['cleanZone'] = {
+                        'name': 'Market Canteen Gate, Ward 12',
+                        'status': 'UNDER PREVENTIVE MONITORING',
+                        'guidance': 'Please use designated waste collection points and avoid leaving waste outside collection areas.'
+                    }
+                else:
+                    item['cleanZone'] = None
 
                 issues.append(item)
             conn.close()
@@ -1303,8 +1317,11 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
         except Exception:
             body = {}
 
-        # Phase 4: Predictive Civic Intelligence Endpoints (POST)
-        if predictive_engine.handle_predictive_post(self, path, body, sse_hub):
+        # Phase 4/E: Predictive Civic Intelligence Endpoints (POST)
+        conn_pred = get_db_connection()
+        auth_user_pred = get_authenticated_user(self, conn_pred)
+        conn_pred.close()
+        if predictive_engine.handle_predictive_post(self, path, body, sse_hub, auth_user=auth_user_pred):
             return
 
         # 1. REST API: POST /api/issues

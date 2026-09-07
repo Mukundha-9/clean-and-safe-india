@@ -758,11 +758,14 @@
         };
       },
 
-      // Phase 4: Fetch active predictive hotspots from REST API
+      // Phase 4/E: Fetch active predictive hotspots from REST API (Server-side Authorized)
       getForecasts: async function(filterWard = null) {
         try {
           const url = filterWard ? `/api/predictive-hotspots?ward=${encodeURIComponent(filterWard)}` : '/api/predictive-hotspots';
-          const res = await fetch(url);
+          const headers = {};
+          const token = (window.CivicAuth && window.CivicAuth.getToken) ? window.CivicAuth.getToken() : localStorage.getItem('csi_auth_token');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+          const res = await fetch(url, { headers });
           if (res.ok) {
             return await res.json();
           }
@@ -772,12 +775,15 @@
         return { success: false, data: [] };
       },
 
-      // Phase 4: Recompute & refresh forecasts via AI endpoint
+      // Phase 4/E: Recompute & refresh forecasts via AI endpoint
       refreshForecasts: async function() {
         try {
+          const headers = { 'Content-Type': 'application/json' };
+          const token = (window.CivicAuth && window.CivicAuth.getToken) ? window.CivicAuth.getToken() : localStorage.getItem('csi_auth_token');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
           const res = await fetch('/api/ai/predictive-hotspots', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify({ triggered_by: 'municipal_dashboard' })
           });
           if (res.ok) {
@@ -789,10 +795,13 @@
         return { success: false };
       },
 
-      // Phase 4: Get forecast by ID
+      // Phase 4/E: Get forecast by ID
       getForecastById: async function(id) {
         try {
-          const res = await fetch(`/api/predictive-hotspots/${encodeURIComponent(id)}`);
+          const headers = {};
+          const token = (window.CivicAuth && window.CivicAuth.getToken) ? window.CivicAuth.getToken() : localStorage.getItem('csi_auth_token');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+          const res = await fetch(`/api/predictive-hotspots/${encodeURIComponent(id)}`, { headers });
           if (res.ok) {
             return await res.json();
           }
@@ -802,11 +811,14 @@
         return null;
       },
 
-      // Phase 4: Get preventive actions
+      // Phase 4/E: Get preventive actions
       getPreventiveActions: async function(status = null) {
         try {
           const url = status ? `/api/preventive-actions?status=${encodeURIComponent(status)}` : '/api/preventive-actions';
-          const res = await fetch(url);
+          const headers = {};
+          const token = (window.CivicAuth && window.CivicAuth.getToken) ? window.CivicAuth.getToken() : localStorage.getItem('csi_auth_token');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+          const res = await fetch(url, { headers });
           if (res.ok) {
             return await res.json();
           }
@@ -816,12 +828,15 @@
         return { success: false, data: [] };
       },
 
-      // Phase 4: Approve preventive action
+      // Phase 4/E: Approve preventive action (Mandatory Officer Session)
       approveAction: async function(actionId, forecastId, approvedBy = 'Municipal Officer', notes = '') {
         try {
+          const headers = { 'Content-Type': 'application/json' };
+          const token = (window.CivicAuth && window.CivicAuth.getToken) ? window.CivicAuth.getToken() : localStorage.getItem('csi_auth_token');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
           const res = await fetch('/api/preventive-actions/approve', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify({
               action_id: actionId,
               forecast_id: forecastId,
@@ -835,12 +850,15 @@
         }
       },
 
-      // Phase 4: Reject preventive action (mandatory justification)
+      // Phase 4/E: Reject preventive action (mandatory justification)
       rejectAction: async function(actionId, forecastId, rejectedBy = 'Municipal Officer', justification = '') {
         try {
+          const headers = { 'Content-Type': 'application/json' };
+          const token = (window.CivicAuth && window.CivicAuth.getToken) ? window.CivicAuth.getToken() : localStorage.getItem('csi_auth_token');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
           const res = await fetch('/api/preventive-actions/reject', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify({
               action_id: actionId,
               forecast_id: forecastId,
@@ -854,12 +872,15 @@
         }
       },
 
-      // Phase 4: Modify preventive action
+      // Phase 4/E: Modify preventive action
       modifyAction: async function(actionId, forecastId, modifiedBy = 'Municipal Officer', modifiedAction = '', priority = 'High', notes = '') {
         try {
+          const headers = { 'Content-Type': 'application/json' };
+          const token = (window.CivicAuth && window.CivicAuth.getToken) ? window.CivicAuth.getToken() : localStorage.getItem('csi_auth_token');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
           const res = await fetch('/api/preventive-actions/modify', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify({
               action_id: actionId,
               forecast_id: forecastId,
@@ -868,6 +889,40 @@
               priority: priority,
               notes: notes
             })
+          });
+          return await res.json();
+        } catch (err) {
+          return { success: false, error: err.message };
+        }
+      },
+
+      // Phase E: Assign approved preventive action to field squad (reuses Phase B/C/D worker squads)
+      assignAction: async function(actionId, squad = 'Municipal Rapid Squad 4') {
+        try {
+          const headers = { 'Content-Type': 'application/json' };
+          const token = (window.CivicAuth && window.CivicAuth.getToken) ? window.CivicAuth.getToken() : localStorage.getItem('csi_auth_token');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+          const res = await fetch('/api/preventive-actions/assign', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ action_id: actionId, squad: squad })
+          });
+          return await res.json();
+        } catch (err) {
+          return { success: false, error: err.message };
+        }
+      },
+
+      // Phase E: Complete field intervention & enter UNDER PREVENTIVE MONITORING
+      implementAction: async function(actionId, fieldNotes = 'Field intervention completed.') {
+        try {
+          const headers = { 'Content-Type': 'application/json' };
+          const token = (window.CivicAuth && window.CivicAuth.getToken) ? window.CivicAuth.getToken() : localStorage.getItem('csi_auth_token');
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+          const res = await fetch('/api/preventive-actions/implement', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ action_id: actionId, fieldNotes: fieldNotes })
           });
           return await res.json();
         } catch (err) {
@@ -7528,6 +7583,19 @@
                 </div>
                 <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.72rem;">Citizen Summary</span>
               </div>
+              ${(issue.cleanZone || (wardForecast && wardForecast.cleanZone)) ? `
+                <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: var(--radius-md); padding: 0.85rem 1rem; margin-bottom: 0.75rem;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 4px;">
+                    <div style="font-weight: 800; color: #34d399; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                      <span>🌱</span> CLEAN ZONE: ${(issue.cleanZone && issue.cleanZone.name) || (wardForecast && wardForecast.cleanZone && wardForecast.cleanZone.name) || 'Market Canteen Gate, Ward 12'}
+                    </div>
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.68rem;">UNDER PREVENTIVE MONITORING</span>
+                  </div>
+                  <div style="font-size: 0.78rem; color: #cbd5e1; line-height: 1.45;">
+                    Civic Guidance: Please use designated waste collection points and avoid leaving waste outside collection areas.
+                  </div>
+                </div>
+              ` : ''}
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.65rem; font-size: 0.8rem;">
                 <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
                   <div style="color: #94a3b8; font-size: 0.7rem;">Operational Priority:</div>
@@ -8810,13 +8878,17 @@
             let recBadge = `<span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.72rem;">${f.recurrence_pattern || 'MODERATE'}</span>`;
             if ((f.recurrence_pattern || '').includes('STRONG')) {
               recBadge = `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid #f87171; font-size: 0.72rem;">🔥 STRONG</span>`;
-            } else if ((f.recurrence_pattern || '').includes('INSUFFICIENT')) {
-              recBadge = `<span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid #94a3b8; font-size: 0.72rem;">ℹ️ INSUFFICIENT DATA</span>`;
+            } else if ((f.recurrence_pattern || '').includes('INSUFFICIENT') || (f.recurrenceTrend || '').includes('INSUFFICIENT')) {
+              recBadge = `<span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid #94a3b8; font-size: 0.72rem;">INSUFFICIENT HISTORICAL DATA</span>`;
             }
 
-            // Status indicator
+            // Status indicator (Phase E lifecycle)
             let statusBtn = `<button class="btn btn-sm btn-outline" style="border-color: #38bdf8; color: #38bdf8; font-size: 0.75rem;" onclick="window.openPredictiveDetailModal('${f.id}')">Review & Act</button>`;
-            if (status === 'approved') {
+            if (status === 'implemented') {
+              statusBtn = `<div style="display:flex; flex-direction:column; gap:3px;"><span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">🛡️ IMPLEMENTED</span><span style="font-size: 0.68rem; color: #38bdf8;">Monitoring Recurrence</span><button class="btn btn-sm btn-link" style="font-size: 0.7rem; color: #94a3b8; padding: 0;" onclick="window.openPredictiveDetailModal('${f.id}')">Details</button></div>`;
+            } else if (status === 'assigned') {
+              statusBtn = `<div style="display:flex; flex-direction:column; gap:3px;"><span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.72rem;">👷 ASSIGNED</span><button class="btn btn-sm btn-link" style="font-size: 0.7rem; color: #94a3b8; padding: 0;" onclick="window.openPredictiveDetailModal('${f.id}')">Details</button></div>`;
+            } else if (status === 'approved') {
               statusBtn = `<div style="display:flex; flex-direction:column; gap:3px;"><span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">✓ APPROVED</span><button class="btn btn-sm btn-link" style="font-size: 0.7rem; color: #94a3b8; padding: 0;" onclick="window.openPredictiveDetailModal('${f.id}')">Details</button></div>`;
             } else if (status === 'rejected') {
               statusBtn = `<div style="display:flex; flex-direction:column; gap:3px;"><span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid #ef4444; font-size: 0.72rem;">✕ REJECTED</span><button class="btn btn-sm btn-link" style="font-size: 0.7rem; color: #94a3b8; padding: 0;" onclick="window.openPredictiveDetailModal('${f.id}')">Details</button></div>`;
@@ -9046,6 +9118,82 @@
       }
     }
 
+    // Model capability honest label
+    const modelCapEl = document.getElementById('predModalModelCapability');
+    if (modelCapEl) modelCapEl.textContent = 'AI-Assisted Predictive Demo — Transparent Rule-Based Forecast (No ML Model Configured)';
+
+    // Phase E: Populate Root-Cause Recommendations by Category
+    const rcList = document.getElementById('predModalRootCausesList');
+    if (rcList) {
+      let rootCauses = f.rootCauses || {};
+      if (typeof rootCauses === 'string') {
+        try { rootCauses = JSON.parse(rootCauses); } catch (_) { rootCauses = {}; }
+      }
+      const categories = [
+        { key: 'SERVICE', icon: '🔄', label: 'Service & Collection' },
+        { key: 'INFRASTRUCTURE', icon: '🏗️', label: 'Infrastructure & Bins' },
+        { key: 'AWARENESS', icon: '📢', label: 'Cleanliness Awareness' },
+        { key: 'OPERATIONS', icon: '⚙️', label: 'Operational Review' },
+        { key: 'ENFORCEMENT_REFERRAL', icon: '⚖️', label: 'Enforcement Referral (Advisory)' }
+      ];
+      rcList.innerHTML = categories.map(c => {
+        const desc = rootCauses[c.key] || 'Routine monitoring active.';
+        return `
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 0.5rem 0.75rem;">
+            <div style="font-weight: 700; color: #38bdf8; font-size: 0.74rem; margin-bottom: 2px;">${c.icon} ${c.label}</div>
+            <div style="color: #cbd5e1; font-size: 0.78rem; line-height: 1.35;">${desc}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Phase E: Populate Recurrence Monitoring Trend
+    const trendBadge = document.getElementById('predModalRecurrenceTrendBadge');
+    const trendNotes = document.getElementById('predModalTrendNotes');
+    const trend = f.recurrenceTrend || (action ? action.recurrenceTrend : 'PENDING INTERVENTION');
+    const notes = f.trendNotes || (action ? action.trendNotes : 'Monitoring active recurrence against historical baseline.');
+    if (trendBadge) {
+      trendBadge.textContent = trend.replace(/_/g, ' ');
+      if (trend.includes('IMPROVING')) {
+        trendBadge.className = 'badge';
+        trendBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+        trendBadge.style.color = '#34d399';
+        trendBadge.style.border = '1px solid #10b981';
+      } else if (trend.includes('REVIEW') || trend.includes('HIGH_ATTENTION')) {
+        trendBadge.className = 'badge';
+        trendBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+        trendBadge.style.color = '#f87171';
+        trendBadge.style.border = '1px solid #ef4444';
+      } else if (trend.includes('INSUFFICIENT')) {
+        trendBadge.className = 'badge';
+        trendBadge.style.background = 'rgba(148, 163, 184, 0.2)';
+        trendBadge.style.color = '#cbd5e1';
+        trendBadge.style.border = '1px solid #94a3b8';
+      } else {
+        trendBadge.className = 'badge';
+        trendBadge.style.background = 'rgba(245, 158, 11, 0.2)';
+        trendBadge.style.color = '#fbbf24';
+        trendBadge.style.border = '1px solid #f59e0b';
+      }
+    }
+    if (trendNotes) {
+      trendNotes.textContent = notes;
+    }
+
+    // Phase E: Control Squad Assignment and Field Completion buttons
+    const btnAssign = document.getElementById('btnPredAssignSquad');
+    const btnImplement = document.getElementById('btnPredImplement');
+    const btnApprove = document.getElementById('btnPredApprove');
+    if (btnAssign) {
+      btnAssign.style.display = (actionStatus === 'approved' || actionStatus === 'modified') ? 'inline-flex' : 'none';
+    }
+    if (btnImplement) {
+      btnImplement.style.display = (actionStatus === 'assigned' || actionStatus === 'approved' || actionStatus === 'modified') ? 'inline-flex' : 'none';
+    }
+    if (btnApprove) {
+      btnApprove.style.display = (actionStatus === 'pending_review' || actionStatus === 'rejected') ? 'inline-flex' : 'none';
+    }
+
     // Reset sub-boxes
     const rejBox = document.getElementById('predRejectReasonBox');
     if (rejBox) rejBox.style.display = 'none';
@@ -9053,6 +9201,45 @@
     if (modBox) modBox.style.display = 'none';
 
     window.openModal('predictiveDetailModal');
+  };
+
+  // Phase E: Assign Field Squad Action Prompt & Execution
+  window.promptAssignPredictiveAction = async function() {
+    if (!activePredictiveForecastId) return;
+    const action = cachedPreventiveActions.find(a => a.forecast_id === activePredictiveForecastId);
+    if (!action) return;
+    const squad = prompt("Select Field Squad for Preventive Intervention:\n\n1. Municipal Rapid Squad 4\n2. Public Works Squad 2\n3. Pushcart Squad", "Municipal Rapid Squad 4");
+    if (!squad) return;
+
+    const res = await CivicAiEngine.PredictiveHotspots.assignAction(action.id, squad);
+    if (res && res.success) {
+      showToast(`👷 Preventive action assigned to ${squad}!`, 'reward', '🛡️');
+      await renderPredictiveHotspotsUI();
+      window.openPredictiveDetailModal(activePredictiveForecastId);
+    } else {
+      showToast(`Assignment failed: ${res ? res.error : 'Unknown'}`, 'error', '⚠️');
+    }
+  };
+
+  // Phase E: Record Field Intervention Completion & Enter Preventive Monitoring
+  window.promptImplementPredictiveAction = async function() {
+    if (!activePredictiveForecastId) return;
+    const action = cachedPreventiveActions.find(a => a.forecast_id === activePredictiveForecastId);
+    if (!action) return;
+    const notes = prompt("Enter field remediation notes (mandatory operational record):", "Clean Zone signage installed and commercial bin capacity reviewed with Market Guild.");
+    if (!notes) {
+      showToast('⚠️ Field completion notes are mandatory.', 'error', '❗');
+      return;
+    }
+
+    const res = await CivicAiEngine.PredictiveHotspots.implementAction(action.id, notes);
+    if (res && res.success) {
+      showToast('🛡️ Intervention recorded! Zone entered UNDER PREVENTIVE MONITORING.', 'reward', '🌱');
+      await renderPredictiveHotspotsUI();
+      window.openPredictiveDetailModal(activePredictiveForecastId);
+    } else {
+      showToast(`Implementation failed: ${res ? res.error : 'Unknown'}`, 'error', '⚠️');
+    }
   };
 
   window.approveCurrentPredictiveAction = async function() {
