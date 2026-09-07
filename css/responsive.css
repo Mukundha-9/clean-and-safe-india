@@ -9,9 +9,6 @@
 @media all and (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
   .pwa-install-element,
   .btn-install-pwa,
-  #pwaInstallBtn_citizen,
-  #pwaInstallBtn_mun,
-  #pwaInstallBtn_food,
   #pwaAuthTopInstallBtn,
   #pwaAuthBottomInstallBanner {
     display: none !important;
