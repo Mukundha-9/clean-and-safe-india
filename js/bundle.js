@@ -100,7 +100,22 @@
       email: 'citizen@civictech.in',
       password: 'password123',
       name: 'KRISH',
+      fullName: 'Krish Varma',
+      phone: '+91 98480 22334',
       ward: 'Ward 12 (Market Zone), Surampalem',
+      permanentAddress: 'Plot 42, Sri Rama Nagar, Surampalem, Gandepalli Mandal, Kakinada District, Andhra Pradesh - 533437',
+      homeGps: {
+        lat: 17.0042,
+        lng: 81.8021,
+        landmark: 'Near Sri Rama Temple & Community Center',
+        city: 'Surampalem',
+        district: 'Kakinada',
+        state: 'Andhra Pradesh'
+      },
+      kycStatus: 'Verified via Aadhaar / Civic DigiLocker',
+      kycVerified: true,
+      aadhaarMasked: 'XXXX-XXXX-8941',
+      reliabilityScore: '98% (High Credibility - 4 Verified Grievances)',
       role: 'citizen',
       roleTitle: 'Verified Citizen Reporter',
       officialId: 'CIT-IND-2026-8941',
@@ -1357,8 +1372,9 @@
       rewardIssued: false,
       fineLevied: 0,
       comments: [
-        { author: 'System Watchdog', text: '48h SLA timer initiated. Automated vehicle allocated.', time: '8h ago' },
-        { author: 'Consultant Officer K. Mukundha', text: 'Grievance verified. Squad 4 dispatched.', time: '7h ago' }
+        { author: 'System Watchdog', role: 'system', text: '48h SLA timer initiated. Automated vehicle allocated.', time: '8h ago' },
+        { author: 'Consultant Officer K. Mukundha', role: 'admin', text: 'Grievance verified. Squad 4 dispatched.', time: '7h ago' },
+        { author: 'Krish Varma (Citizen)', role: 'citizen', text: 'Garbage dump is overflowing onto main pedestrian footpath. High stench and school children transit blocked.', time: '7h ago' }
       ]
     },
     {
@@ -2009,6 +2025,57 @@
         { author: 'TN FDA Officer', text: 'Critical Seizure Notice issued under Section 59. ₹5,000 fine levied.', time: '5h ago' }
       ]
     },
+    {
+      isDemo: true,
+      id: 'ISS-2026-00145',
+      state: 'Tamil Nadu',
+      city: 'Chennai',
+      ward: 'Marina Beach Coastal Zone',
+      street: 'Kamarajar Promenade',
+      department: 'sanitation',
+      deptName: 'Greater Chennai Corporation (GCC)',
+      deptIcon: '🏢',
+      title: 'Plastic & Marine Debris Pile on Marina Beach Promenade',
+      description: 'Logged by citizen Krish Varma while on inter-state visit in Chennai. Uncollected plastic waste along beach promenade creating public health and marine hazard. Automatically allocated to Greater Chennai Corporation (GCC).',
+      location: 'Marina Beach Coastal Zone, Kamarajar Promenade, Chennai',
+      category: 'garbage',
+      categoryName: 'Coastal Plastic Pollution',
+      categoryIcon: '🏖️',
+      severity: 'high',
+      severityLabel: 'HIGH PRIORITY',
+      status: 'pending',
+      timestamp: Date.now() - 3600000 * 5,
+      slaDeadline: Date.now() + 3600000 * 43,
+      resolvedTimestamp: null,
+      slaHoursLeft: 43,
+      verifiedByOfficer: 'Zonal Health Officer (GCC Zone 9)',
+      verifiedTimestamp: Date.now() - 3600000 * 4,
+      assignedWorker: 'GCC Coastal Cleanup Squad 2',
+      assignedTimestamp: Date.now() - 3600000 * 3,
+      workerStatus: 'En Route with Beach Cleaner Equipment',
+      isSlaBreached: false,
+      lat: 13.0500,
+      lng: 80.2824,
+      reportedBy: 'KRISH',
+      userId: 'user-101',
+      upvotes: 38,
+      upvotedBy: ['user-101'],
+      imageBefore: 'https://images.unsplash.com/photo-1528323273322-d81458248d40?w=800&auto=format&fit=crop&q=80',
+      imageAfter: null,
+      recommendedResource: 'GCC Beach Cleaning Tractor',
+      rewardIssued: false,
+      fineLevied: 0,
+      comments: [
+        { author: 'System Watchdog', role: 'system', text: 'Cross-city incident registered. Incident GPS routed to Greater Chennai Corporation.', time: '5h ago' },
+        { author: 'Zonal Health Officer (GCC Zone 9)', role: 'admin', text: 'Grievance verified under Inter-State Citizen Protocol. GCC Coastal Squad dispatched.', time: '4h ago' },
+        {
+          author: 'Krish Varma (Citizen)',
+          role: 'citizen',
+          text: 'Reported while traveling in Chennai. Permanent residence: Surampalem (AP). Glad to see nationwide municipal routing active!',
+          time: '4h ago'
+        }
+      ]
+    },
 
     // --- DELHI NCR ---
     {
@@ -2327,6 +2394,34 @@
           ? 'Food Safety Officer (Dr. Lakshmi Prasad)'
           : (issueData.severity === 'bulk' ? 'Sanitation Compactor Squad 4 (Lead: Ramesh K.)' : 'Collection Squad 2 (AP-05-TX)');
 
+      const currentUser = auth.getUser() || SYSTEM_ACCOUNTS.citizen;
+      const reporterProfile = {
+        name: currentUser.name || 'KRISH',
+        fullName: currentUser.fullName || (currentUser.name === 'KRISH' ? 'Krish Varma' : currentUser.name),
+        email: currentUser.email || 'citizen@civictech.in',
+        phone: currentUser.phone || '+91 98480 22334',
+        permanentAddress: currentUser.permanentAddress || 'Plot 42, Sri Rama Nagar, Surampalem, Gandepalli Mandal, Kakinada District, Andhra Pradesh - 533437',
+        homeGps: currentUser.homeGps || {
+          lat: 17.0042,
+          lng: 81.8021,
+          landmark: 'Near Sri Rama Temple & Community Center',
+          city: 'Surampalem',
+          district: 'Kakinada',
+          state: 'Andhra Pradesh'
+        },
+        homeWard: currentUser.ward || 'Ward 12 (Market Zone)',
+        homeCity: 'Surampalem',
+        homeState: 'Andhra Pradesh',
+        kycStatus: currentUser.kycStatus || 'Verified via Aadhaar / Civic DigiLocker',
+        kycVerified: true,
+        aadhaarMasked: currentUser.aadhaarMasked || 'XXXX-XXXX-8941',
+        reliabilityScore: currentUser.reliabilityScore || '98% (High Credibility - 4 Verified Grievances)',
+        officialId: currentUser.officialId || 'CIT-IND-2026-8941',
+        avatar: currentUser.avatar || 'KR',
+        guardianLevel: currentUser.guardianLevel || 'Level 3: Silver Civic Guardian',
+        civicCredits: currentUser.civicCredits || 150
+      };
+
       const newIssue = {
         id: id,
         timestamp: now,
@@ -2336,8 +2431,9 @@
         slaHoursLeft: 48,
         upvotes: 1,
         upvotedBy: [auth.getUser() ? auth.getUser().id : 'user-101'],
-        reportedBy: auth.getUser() ? auth.getUser().name : 'KRISH',
+        reportedBy: currentUser.name || 'KRISH',
         userId: auth.getUser() ? auth.getUser().id : 'user-101',
+        reporterProfile: reporterProfile,
         verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
         verifiedTimestamp: now + (15 * 60 * 1000),
         assignedWorker: assignedSquad,
@@ -2345,8 +2441,14 @@
         workerStatus: 'Dispatched & En Route to Site',
         isSlaBreached: false,
         comments: [
-          { author: 'System Watchdog', text: 'Report logged with live GPS geotag. 48h SLA timer activated.', time: 'Just now' },
-          { author: 'Consultant Officer K. Mukundha', text: 'Grievance verified. Squad allocated and dispatched.', time: 'Just now' }
+          { author: 'System Watchdog', role: 'system', text: 'Report logged with live GPS geotag. 48h SLA timer activated.', time: 'Just now' },
+          { author: 'Consultant Officer K. Mukundha', role: 'admin', text: 'Grievance verified. Squad allocated and dispatched.', time: 'Just now' },
+          {
+            author: `${reporterProfile.fullName} (Reporter)`,
+            role: 'citizen',
+            text: `Incident reported from ground site (${issueData.lat || 17.0010}° N, ${issueData.lng || 81.8045}° E). Permanent resident: Surampalem (Ward 12).`,
+            time: 'Just now'
+          }
         ],
         recommendedResource: issueData.severity === 'bulk' ? 'Tractor / Heavy Squad' : issueData.severity === 'medium' ? 'Collection Truck' : 'Pushcart & Worker',
         rewardIssued: false,
@@ -2455,14 +2557,16 @@
       return issue;
     }
 
-    addComment(issueId, text, author) {
+    addComment(issueId, text, author, role = 'citizen') {
       const issue = this.getIssueById(issueId);
       if (!issue) return null;
       if (!issue.comments) issue.comments = [];
       const newComment = {
         author: author || (auth.getUser() ? auth.getUser().name : 'Citizen Resident'),
+        role: role,
         text: (text || '').trim(),
-        time: 'Just now'
+        time: 'Just now',
+        timestamp: Date.now()
       };
       issue.comments.push(newComment);
       this.saveToStorage('clean_safe_issues_v10', this.issues);
@@ -3264,11 +3368,24 @@
           <span>${isMyReport ? '👤' : '👥'}</span>
           <span><strong>${isMyReport ? 'MY REPORT (KRISH)' : 'COMMUNITY GRIEVANCE'}</strong></span>
         </div>
-        <div class="ownership-reporter">
-          ${isMyReport ? '<span class="ownership-tag">Author</span>' : `Reported by: <strong>${safeReporterName}</strong>`}
+        <div class="ownership-reporter clickable-reporter-block" onclick="event.stopPropagation(); window.openReporterProfile('${issue.id}')" title="Click to view verified citizen profile, permanent address & home GPS">
+          <span class="reporter-pill-interactive">
+            <span>👤</span>
+            <span>${isMyReport ? 'Krish Varma (Author)' : safeReporterName}</span>
+            <span class="reporter-profile-badge">Profile ↗</span>
+          </span>
         </div>
       </div>
-    ` : '';
+    ` : `
+      <div class="officer-reporter-bar" onclick="event.stopPropagation(); window.openReporterProfile('${issue.id}')" title="Click to inspect reporter's permanent address and verified identity" style="display: flex; align-items: center; justify-content: space-between; font-size: 0.74rem; background: rgba(56, 189, 248, 0.06); border-bottom: 1px solid rgba(56, 189, 248, 0.2); padding: 0.35rem 0.75rem; cursor: pointer; transition: all 0.2s;">
+        <span style="color: #cbd5e1; display: flex; align-items: center; gap: 0.35rem;">
+          <span>👤</span>
+          <span>Reporter: <strong style="color: #38bdf8;">${safeReporterName}</strong></span>
+          <span style="color: #34d399; font-size: 0.65rem; background: rgba(16,185,129,0.15); padding: 1px 5px; border-radius: 4px; border: 1px solid rgba(16,185,129,0.3); font-weight: 700;">✓ e-KYC</span>
+        </span>
+        <span style="color: #38bdf8; font-size: 0.7rem; font-weight: 700;">Inspect Profile ↗</span>
+      </div>
+    `;
 
     if (isCitizenView) {
       // Clean, Human Citizen-Facing Language (Constraint #2)
@@ -6185,6 +6302,265 @@
     }
   };
 
+  // =========================================================================
+  // DUAL-GPS & VERIFIED CITIZEN REPORTER IDENTITY ENGINE (v30.0.0)
+  // =========================================================================
+  function calculateHaversineDistanceKm(lat1, lon1, lat2, lon2) {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Math.round(R * c * 10) / 10;
+  }
+
+  function getIssueReporterProfile(issue) {
+    if (!issue) return null;
+    if (issue.reporterProfile) return issue.reporterProfile;
+
+    const isKrish = Boolean(
+      (issue.reportedBy && issue.reportedBy.toLowerCase().includes('krish')) ||
+      (issue.userId && issue.userId === 'user-101') ||
+      (auth.getUser() && auth.getUser().name === issue.reportedBy)
+    );
+
+    if (isKrish) {
+      return {
+        name: 'KRISH',
+        fullName: 'Krish Varma',
+        email: 'citizen@civictech.in',
+        phone: '+91 98480 22334',
+        permanentAddress: 'Plot 42, Sri Rama Nagar, Surampalem, Gandepalli Mandal, Kakinada District, Andhra Pradesh - 533437',
+        homeGps: {
+          lat: 17.0042,
+          lng: 81.8021,
+          landmark: 'Near Sri Rama Temple & Community Center',
+          city: 'Surampalem',
+          district: 'Kakinada',
+          state: 'Andhra Pradesh'
+        },
+        homeWard: 'Ward 12 (Market Zone)',
+        homeCity: 'Surampalem',
+        homeState: 'Andhra Pradesh',
+        kycStatus: 'Verified via Aadhaar / Civic DigiLocker',
+        kycVerified: true,
+        aadhaarMasked: 'XXXX-XXXX-8941',
+        reliabilityScore: '98% (High Credibility - 4 Verified Grievances)',
+        officialId: 'CIT-IND-2026-8941',
+        avatar: 'KR',
+        guardianLevel: 'Level 3: Silver Civic Guardian',
+        civicCredits: 150
+      };
+    }
+
+    const name = issue.reportedBy || 'Ward Resident';
+    const city = issue.city || (issue.location && issue.location.includes('Chennai') ? 'Chennai' : issue.location && issue.location.includes('New Delhi') ? 'New Delhi' : 'Surampalem');
+    const state = issue.state || (city === 'Chennai' ? 'Tamil Nadu' : city === 'New Delhi' ? 'Delhi NCR' : 'Andhra Pradesh');
+    
+    return {
+      name: name,
+      fullName: name.includes('(') ? name.split('(')[0].trim() : name,
+      email: `${name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'resident'}@cleanindia.gov.in`,
+      phone: '+91 94401 88421',
+      permanentAddress: `Plot 18, Gandhi Nagar Main Road, ${issue.ward || 'Central Ward'}, ${city}, ${state} - 533437`,
+      homeGps: {
+        lat: Number(issue.lat || 17.0042),
+        lng: Number(issue.lng || 81.8021),
+        city: city,
+        district: city,
+        state: state
+      },
+      homeWard: issue.ward || 'Central Ward',
+      homeCity: city,
+      homeState: state,
+      kycStatus: 'Verified via Civic DigiLocker',
+      kycVerified: true,
+      aadhaarMasked: 'XXXX-XXXX-3419',
+      reliabilityScore: '95% (Verified Citizen)',
+      officialId: 'CIT-IND-2026-' + (issue.userId ? String(issue.userId).replace(/[^0-9]/g, '') || '5401' : '5401'),
+      avatar: name.substring(0, 2).toUpperCase(),
+      guardianLevel: 'Active Ward Contributor',
+      civicCredits: 100
+    };
+  }
+
+  window.openReporterProfile = function(issueId) {
+    const issue = db.getIssueById(issueId);
+    if (!issue) {
+      showToast('Grievance ticket details not found.', 'error', '⚠️');
+      return;
+    }
+
+    const profile = getIssueReporterProfile(issue);
+    const modalBody = document.getElementById('reporterProfileModalBody');
+    if (!modalBody) return;
+
+    // Dual-Location Logic: Compare Citizen Permanent Residence vs Incident Reporting GPS
+    const homeLat = Number(profile.homeGps?.lat || 17.0042);
+    const homeLng = Number(profile.homeGps?.lng || 81.8021);
+    const incidentLat = Number(issue.lat || homeLat);
+    const incidentLng = Number(issue.lng || homeLng);
+
+    const distanceKm = calculateHaversineDistanceKm(homeLat, homeLng, incidentLat, incidentLng);
+    const isCrossCity = distanceKm >= 25;
+
+    // Determine Incident Municipal Jurisdiction
+    const incidentCity = issue.city || (issue.location && issue.location.includes('Chennai') ? 'Chennai' : issue.location && issue.location.includes('New Delhi') ? 'New Delhi' : profile.homeCity || 'Surampalem');
+    const deptName = issue.deptName || 'Municipal Administration & Urban Development';
+
+    const crossCityHTML = isCrossCity ? `
+      <div class="cross-city-routing-box">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.45rem; flex-wrap: wrap; gap: 0.4rem;">
+          <div style="font-weight: 800; display: flex; align-items: center; gap: 0.4rem; color: #fbbf24;">
+            <span>✈️</span> CROSS-CITY INCIDENT ROUTING (~${distanceKm} km from Home)
+          </div>
+          <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 0.7rem;">
+            Inter-District Grievance
+          </span>
+        </div>
+        <div style="color: #fef08a; font-size: 0.8rem; line-height: 1.45;">
+          <strong>Administrative Allocation:</strong> The citizen's permanent residence is verified in <strong>${profile.homeCity}, ${profile.homeState}</strong>, but this grievance was reported on-ground in <strong>${incidentCity}</strong>. Under the <em>National Civic Rights Protocol</em>, Indian citizens may report hazards anywhere in India. This ticket was automatically routed to <strong>${deptName} (${incidentCity})</strong> based on incident GPS.
+        </div>
+      </div>
+    ` : `
+      <div class="local-routing-box">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.45rem; flex-wrap: wrap; gap: 0.4rem;">
+          <div style="font-weight: 800; display: flex; align-items: center; gap: 0.4rem; color: #34d399;">
+            <span>📍</span> LOCAL JURISDICTION REPORT (${distanceKm} km from Residence)
+          </div>
+          <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.7rem;">
+            Home Circle Match
+          </span>
+        </div>
+        <div style="color: #d1fae5; font-size: 0.8rem; line-height: 1.45;">
+          <strong>Ward Coordination:</strong> The citizen is a permanent verified resident of this municipal sector. Incident GPS matches local ward radius (${issue.ward || profile.homeWard}). Assigned to <strong>${deptName}</strong>.
+        </div>
+      </div>
+    `;
+
+    modalBody.innerHTML = `
+      <div>
+        <!-- Hero Identity Block -->
+        <div class="reporter-id-hero">
+          <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div class="reporter-avatar-box">
+              ${profile.avatar || 'KR'}
+              <div class="reporter-kyc-check-dot">✓</div>
+            </div>
+            <div style="flex: 1; min-width: 220px;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.2rem;">
+                <h3 style="margin: 0; color: white; font-size: 1.25rem; font-weight: 800;">${profile.fullName}</h3>
+                <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.7rem; font-weight: 700;">
+                  ✓ Aadhaar e-KYC Verified
+                </span>
+              </div>
+              <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                <span>🆔 Official ID: <strong style="color: #38bdf8; font-family: var(--font-mono);">${profile.officialId}</strong></span>
+                <span>•</span>
+                <span>⭐ Trust Score: <strong style="color: #facc15;">${profile.reliabilityScore}</strong></span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span class="badge" style="background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); font-size: 0.72rem;">
+                  ${profile.guardianLevel || 'Level 3: Silver Civic Guardian'}
+                </span>
+                <span class="badge" style="background: rgba(250, 204, 21, 0.12); color: #facc15; border: 1px solid rgba(250, 204, 21, 0.35); font-size: 0.72rem;">
+                  🪙 ${profile.civicCredits || 150} Civic Credits
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verified Contact & Residential Credentials Grid -->
+        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 1.1rem; margin-bottom: 1.25rem;">
+          <div style="font-size: 0.76rem; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+            <span>🛡️</span> VERIFIED CITIZEN CREDENTIALS & PERMANENT RESIDENCE
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; font-size: 0.82rem;">
+            <div style="background: rgba(255,255,255,0.03); padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="color: #94a3b8; font-size: 0.7rem; margin-bottom: 3px;">📧 Verified Email Address:</div>
+              <div style="font-weight: 700; color: white; word-break: break-all;">${profile.email}</div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.03); padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="color: #94a3b8; font-size: 0.7rem; margin-bottom: 3px;">📞 Contact Phone Number:</div>
+              <div style="font-weight: 700; color: #38bdf8; display: flex; align-items: center; justify-content: space-between;">
+                <span>${profile.phone}</span>
+                <button type="button" class="btn btn-sm btn-outline" style="font-size: 0.68rem; padding: 2px 6px; border-color: rgba(56,189,248,0.4);" onclick="showToast('Connecting to citizen ${profile.phone}...', 'info', '📞')">Call</button>
+              </div>
+            </div>
+
+            <div style="grid-column: 1 / -1; background: rgba(255,255,255,0.03); padding: 0.75rem 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="color: #94a3b8; font-size: 0.7rem; margin-bottom: 3px;">🏠 Permanent Residential Address (Citizen Domicile):</div>
+              <div style="font-weight: 700; color: #f1f5f9; line-height: 1.4;">${profile.permanentAddress}</div>
+              <div style="font-size: 0.72rem; color: #64748b; margin-top: 4px;">
+                🏛️ Home Ward / Jurisdiction: <strong style="color: #94a3b8;">${profile.homeWard}</strong> • Masked Aadhaar: <span style="font-family: var(--font-mono); color: #cbd5e1;">${profile.aadhaarMasked}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cross-City vs Local Routing Status Banner -->
+        ${crossCityHTML}
+
+        <!-- Dual GPS Location Intelligence: Permanent Residence vs Incident Hazard Location -->
+        <div style="font-size: 0.78rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.65rem; display: flex; align-items: center; justify-content: space-between;">
+          <span style="display: flex; align-items: center; gap: 0.35rem;">
+            <span>🌐</span> DUAL-GPS AUDIT: RESIDENCE VS. INCIDENT
+          </span>
+          <span style="color: #94a3b8; font-size: 0.72rem; font-weight: 500;">
+            Real-Time Jurisdictional Separation
+          </span>
+        </div>
+
+        <div class="dual-gps-grid">
+          <!-- Card 1: Permanent Residence GPS -->
+          <div class="gps-info-card home-gps-card">
+            <div class="gps-tag-header" style="color: #34d399;">
+              <span>🏠</span> 1. CITIZEN HOME RESIDENCE (KYC)
+            </div>
+            <div style="font-size: 0.82rem; font-weight: 700; color: white; margin-bottom: 0.3rem;">
+              ${profile.homeCity}, ${profile.homeState}
+            </div>
+            <div class="gps-coords-badge">
+              📍 ${homeLat.toFixed(4)}° N, ${homeLng.toFixed(4)}° E
+            </div>
+            <div style="font-size: 0.72rem; color: #94a3b8; line-height: 1.4; margin-top: 0.35rem;">
+              <strong>Verification Baseline:</strong> Fixed domestic domicile on official record. Verifies identity and prevents anonymous spam.
+            </div>
+          </div>
+
+          <!-- Card 2: Incident Reporting GPS -->
+          <div class="gps-info-card incident-gps-card">
+            <div class="gps-tag-header" style="color: #38bdf8;">
+              <span>📍</span> 2. INCIDENT SITE (TICKET ALLOCATION)
+            </div>
+            <div style="font-size: 0.82rem; font-weight: 700; color: white; margin-bottom: 0.3rem;">
+              ${issue.location}
+            </div>
+            <div class="gps-coords-badge">
+              📍 ${incidentLat.toFixed(4)}° N, ${incidentLng.toFixed(4)}° E
+            </div>
+            <div style="font-size: 0.72rem; color: #94a3b8; line-height: 1.4; margin-top: 0.35rem;">
+              <strong>Operational Dispatch:</strong> Physical coordinates where hazard exists. Used to allocate work orders to local field squad.
+            </div>
+          </div>
+        </div>
+
+        <!-- Accountability Notice -->
+        <div style="padding: 0.7rem 0.95rem; background: rgba(56, 189, 248, 0.04); border: 1px dashed rgba(56, 189, 248, 0.25); border-radius: 8px; font-size: 0.75rem; color: #94a3b8; line-height: 1.45;">
+          ⚖️ <strong>Civic Integrity Note:</strong> The citizen is accountable via verified DigiLocker e-KYC. When traveling to other cities or circles, citizens may report public hazards freely; the ticket is routed to that specific municipal authority while maintaining complete reporter verification.
+        </div>
+      </div>
+    `;
+
+    window.openModal('reporterProfileModal');
+  };
+
   window.viewIssueDetail = async function(issueId) {
     try {
       const issue = db.getIssueById(issueId);
@@ -6228,6 +6604,16 @@
       const issueTitle = issue.title || 'Civic Grievance';
       const issueLocation = issue.location || 'Surampalem, Andhra Pradesh';
       const imgBefore = issue.imageBefore || 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80';
+
+      // 0. Dual-Location & Verified Reporter Profile Snapshot
+      const reporterProfile = getIssueReporterProfile(issue);
+      const homeLat = Number(reporterProfile.homeGps?.lat || 17.0042);
+      const homeLng = Number(reporterProfile.homeGps?.lng || 81.8021);
+      const incidentLat = Number(issue.lat || homeLat);
+      const incidentLng = Number(issue.lng || homeLng);
+      const distanceKm = calculateHaversineDistanceKm(homeLat, homeLng, incidentLat, incidentLng);
+      const isCrossCity = distanceKm >= 25;
+      const incidentCity = issue.city || (issue.location && issue.location.includes('Chennai') ? 'Chennai' : issue.location && issue.location.includes('New Delhi') ? 'New Delhi' : reporterProfile.homeCity || 'Surampalem');
 
       // 1. Deterministic Query: Related issues in same ward & category/department
       const relatedIssues = (db.issues || []).filter(other => {
@@ -6522,6 +6908,37 @@
             </div>
           </div>
 
+          <!-- Verified Citizen Reporter & Dual-Location Jurisdiction Section -->
+          <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: var(--radius-md); padding: 0.95rem 1.15rem; margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem; flex-wrap: wrap; gap: 0.4rem;">
+              <div style="display: flex; align-items: center; gap: 0.45rem;">
+                <span style="font-size: 1.1rem;">👤</span>
+                <span style="font-weight: 800; font-size: 0.88rem; color: #38bdf8;">REPORTED BY: ${reporterProfile.fullName}</span>
+                <span class="badge" style="background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid #10b981; font-size: 0.68rem; font-weight: 700;">✓ e-KYC Verified</span>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline" onclick="window.openReporterProfile('${issue.id}')" style="font-size: 0.74rem; color: #38bdf8; border-color: rgba(56, 189, 248, 0.4); padding: 0.25rem 0.65rem; cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
+                <span>🔍</span> Inspect Verified Identity Card
+              </button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem; font-size: 0.78rem;">
+              <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Permanent Residential Address:</span>
+                <strong style="color: white;">${reporterProfile.permanentAddress}</strong>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Home GPS vs Incident GPS:</span>
+                <strong style="color: #34d399;">Home: ${homeLat.toFixed(4)}° N, ${homeLng.toFixed(4)}° E</strong>
+                <span style="color: #38bdf8; display: block; margin-top: 2px;">Incident: ${incidentLat.toFixed(4)}° N, ${incidentLng.toFixed(4)}° E</span>
+              </div>
+            </div>
+
+            <div style="margin-top: 0.6rem; font-size: 0.74rem; color: #cbd5e1; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+              <span>${isCrossCity ? '✈️ Cross-City Grievance:' : '📍 Local Ward Grievance:'}</span>
+              <span>Ticket allocated to <strong>${deptName} (${incidentCity})</strong> based on incident GPS. Citizen verified at permanent residence in <strong>${reporterProfile.homeCity || 'Surampalem'}</strong>.</span>
+            </div>
+          </div>
+
           <!-- Geotagged Photographic Audit Record (Before & After) -->
           <div style="margin-bottom: 1.5rem;">
             <div style="font-size: 0.85rem; font-weight: 800; color: #38bdf8; margin-bottom: 0.6rem; display: flex; align-items: center; justify-content: space-between;">
@@ -6758,16 +7175,51 @@
             </div>
 
             <!-- Existing Comments List -->
-            <div class="comments-list" style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 240px; overflow-y: auto; margin-bottom: 1rem; padding-right: 4px;">
-              ${(issue.comments && issue.comments.length > 0) ? issue.comments.map(c => `
-                <div style="background: rgba(255, 255, 255, 0.04); border-left: 3px solid #38bdf8; border-radius: 6px; padding: 0.6rem 0.85rem; font-size: 0.82rem;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                    <strong style="color: #38bdf8;">${c.author || 'Civic Guardian'}</strong>
-                    <span style="font-size: 0.72rem; color: #94a3b8;">${c.time || 'Recently'}</span>
+            <div class="comments-list" style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 280px; overflow-y: auto; margin-bottom: 1rem; padding-right: 4px;">
+              ${(issue.comments && issue.comments.length > 0) ? issue.comments.map(c => {
+                const authorLower = (c.author || '').toLowerCase();
+                const isKrishComment = authorLower.includes('krish');
+                const isOfficerComment = authorLower.includes('mukundha') || authorLower.includes('officer') || authorLower.includes('prasad') || authorLower.includes('fso') || c.role === 'admin' || c.role === 'government_admin';
+                const isSquadComment = authorLower.includes('squad') || authorLower.includes('ramesh') || authorLower.includes('suresh') || c.role === 'worker';
+                const isWatchdog = authorLower.includes('watchdog') || authorLower.includes('system') || c.role === 'system';
+
+                const roleBadge = isOfficerComment
+                  ? '<span class="badge comment-role-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35);">🛡️ Municipal Command</span>'
+                  : isSquadComment
+                    ? '<span class="badge comment-role-badge" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.35);">👷 Field Squad Lead</span>'
+                    : isWatchdog
+                      ? '<span class="badge comment-role-badge" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3);">🤖 Civic AI Watchdog</span>'
+                      : '<span class="badge comment-role-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);">👤 Verified Citizen (✓ e-KYC)</span>';
+
+                const locationTag = (isKrishComment || (!isOfficerComment && !isWatchdog && !isSquadComment))
+                  ? `<div class="comment-loc-pill" style="margin-top: 4px;">
+                       <span>📍 Site: ${incidentLat.toFixed(4)}° N, ${incidentLng.toFixed(4)}° E</span>
+                       <span>•</span>
+                       <span>🏠 Resident: Surampalem (Ward 12)</span>
+                     </div>`
+                  : '';
+
+                const profileBtn = (isKrishComment || (!isOfficerComment && !isWatchdog && !isSquadComment))
+                  ? `<button type="button" class="btn btn-sm btn-outline" style="font-size: 0.68rem; padding: 1px 6px; color: #38bdf8; border-color: rgba(56,189,248,0.3); cursor: pointer;" onclick="event.stopPropagation(); window.openReporterProfile('${issue.id}')" title="Inspect this citizen's verified residential address">👤 Profile</button>`
+                  : '';
+
+                return `
+                  <div style="background: rgba(255, 255, 255, 0.04); border-left: 3px solid ${isOfficerComment ? '#38bdf8' : isSquadComment ? '#c084fc' : isWatchdog ? '#94a3b8' : '#10b981'}; border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.82rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem; flex-wrap: wrap; gap: 0.3rem;">
+                      <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+                        <strong style="color: ${isOfficerComment ? '#38bdf8' : isSquadComment ? '#c084fc' : isWatchdog ? '#cbd5e1' : '#34d399'};">${c.author || 'Civic Guardian'}</strong>
+                        ${roleBadge}
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 0.4rem;">
+                        <span style="font-size: 0.72rem; color: #94a3b8;">${c.time || 'Recently'}</span>
+                        ${profileBtn}
+                      </div>
+                    </div>
+                    <div style="color: #e2e8f0; line-height: 1.45;">${c.text}</div>
+                    ${locationTag}
                   </div>
-                  <div style="color: #e2e8f0; line-height: 1.45;">${c.text}</div>
-                </div>
-              `).join('') : `
+                `;
+              }).join('') : `
                 <div style="text-align: center; color: #64748b; font-size: 0.82rem; padding: 1rem;">No remarks yet. Be the first citizen to leave a comment!</div>
               `}
             </div>
@@ -6806,10 +7258,12 @@
       return;
     }
     const text = input.value.trim();
-    const author = auth.getUser() ? auth.getUser().name : 'Citizen Resident';
-    db.addComment(issueId, text, author);
+    const user = auth.getUser() || {};
+    const author = user.name === 'KRISH' ? 'Krish Varma (Citizen)' : (user.name || 'Citizen Resident');
+    const role = auth.getDepartment() || 'citizen';
+    db.addComment(issueId, text, author, role);
     input.value = '';
-    showToast('Comment posted to grievance log!', 'reward', '💬');
+    showToast('Comment posted with verified citizen badge!', 'reward', '💬');
     window.viewIssueDetail(issueId);
     renderCitizenDashboard();
   };

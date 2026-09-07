@@ -2665,6 +2665,45 @@
 
 
 
+  <!-- =========================================================================
+       VERIFIED CITIZEN REPORTER IDENTITY CARD & CROSS-JURISDICTION MODAL (v30.0.0)
+       ========================================================================= -->
+  <div class="modal-overlay" id="reporterProfileModal">
+    <div class="modal-box modal-lg" style="max-width: 680px; background: #0b1329; border: 1px solid rgba(56, 189, 248, 0.4); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;">
+      <!-- Top Holographic Civic Header -->
+      <div style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.25), rgba(15, 23, 42, 0.95)); padding: 1.15rem 1.4rem; border-bottom: 1px solid rgba(56, 189, 248, 0.3); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+            🇮🇳
+          </div>
+          <div>
+            <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: #38bdf8; font-weight: 800;">
+              Government of India • Smart Civic Connect
+            </div>
+            <h3 style="margin: 0; color: white; font-size: 1.15rem; font-weight: 800;">
+              Verified Citizen Reporter Identity Card
+            </h3>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline btn-icon-only" onclick="window.closeModal('reporterProfileModal')" style="border-radius: 8px; color: #cbd5e1; border-color: rgba(255,255,255,0.15);">✕</button>
+      </div>
+
+      <div class="modal-body" id="reporterProfileModalBody" style="padding: 1.35rem; max-height: 80vh; overflow-y: auto;">
+        <!-- Populated dynamically by window.openReporterProfile(issueId) -->
+      </div>
+
+      <div class="modal-footer" style="padding: 0.85rem 1.35rem; background: rgba(15, 23, 42, 0.85); border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <div style="font-size: 0.72rem; color: #94a3b8; display: flex; align-items: center; gap: 0.4rem;">
+          <span>🔒</span>
+          <span>Aadhaar Hash Encrypted • Cross-City Incident Routing Protocol Active</span>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="window.closeModal('reporterProfileModal')" style="padding: 0.45rem 1.1rem; font-size: 0.82rem;">
+          Close Verification Card
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Cache Invalidation & Direct Refresh Script -->
@@ -2676,7 +2715,7 @@
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => {
-            if (name !== 'clean-safe-india-v29.0.0') {
+            if (name !== 'clean-safe-india-v30.0.0') {
               caches.delete(name);
             }
           });
@@ -2686,6 +2725,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=29.0.0"></script>
+  <script src="js/bundle.js?v=30.0.0"></script>
 </body>
 </html>
