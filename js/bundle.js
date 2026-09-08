@@ -504,6 +504,14 @@
             catIcon = '⚡';
             suggestedTitle = 'Sparking Wire Hazard';
           }
+        } else if (q.includes('garbage') || q.includes('waste') || q.includes('trash') || q.includes('dump') || q.includes('litter') || q.includes('debris') || q.includes('rubbish') || q.includes('dustbin') || q.includes('bin overflow') || q.includes('solid waste') || q.includes('canteen waste') || q.includes('rotting waste') || q.includes('overflowing bins') || q.includes('open dump') || q.includes('compost') || q.includes('refuse')) {
+          dept = 'sanitation';
+          deptName = 'Sanitation & Waste Management';
+          deptIcon = '🏢';
+          cat = 'garbage_overflow';
+          catName = 'Garbage Overflow';
+          catIcon = '🗑️';
+          suggestedTitle = 'Garbage Overflow Report';
         } else if (q.includes('pothole') || q.includes('crater') || q.includes('asphalt') || q.includes('tar') || q.includes('road damage') || q.includes('broken road') || q.includes('footpath') || q.includes('pavement') || q.includes('paver') || q.includes('curb')) {
           dept = 'roads';
           deptName = 'Infrastructure / Roads';
@@ -7842,6 +7850,9 @@
       } else if (issue.category === 'pothole' || issue.department === 'roads') {
         recSquadId = 'WRK-ROA-03';
         recSquadReason = 'Heavy asphalt patching & culvert desilting team (Roads Squad 3)';
+      } else if (issue.category === 'water_leakage' || issue.department === 'water_supply') {
+        recSquadId = 'WRK-WAT-05';
+        recSquadReason = 'Municipal water pipeline repair & pressure valve maintenance crew (Water Squad 5)';
       } else if (issue.severity === 'low') {
         recSquadId = 'WRK-SAN-01';
         recSquadReason = 'Standard sanitation pushcart & routine collection squad (Squad 1)';
@@ -7866,7 +7877,8 @@
           { id: 'WRK-SAN-04', name: 'Squad 4 (Lead: Ramesh)', department: 'sanitation', specialization: 'Commercial Market Solid Waste Collection', currentStatus: 'available', phone: '+91 98661 77211' },
           { id: 'WRK-SAN-01', name: 'Squad 1 (Lead: Ravi Kumar)', department: 'sanitation', specialization: 'Garbage & Heavy Compactor Operations', currentStatus: 'available', phone: '+91 98480 22311' },
           { id: 'WRK-ELE-02', name: 'Lineman Squad B (Lead: Suresh Kumar)', department: 'electricity', specialization: '11KV Substation & Line Repair', currentStatus: 'available', phone: '+91 94401 55422' },
-          { id: 'WRK-ROA-03', name: 'Roads Squad 3 (Lead: Anita Roy)', department: 'sanitation', specialization: 'Asphalt Patching & Culvert Desilting', currentStatus: 'available', phone: '+91 99880 33411' }
+          { id: 'WRK-ROA-03', name: 'Roads Squad 3 (Lead: Anita Roy)', department: 'roads', specialization: 'Asphalt Patching & Culvert Desilting', currentStatus: 'available', phone: '+91 99880 33411' },
+          { id: 'WRK-WAT-05', name: 'Water Utility Squad 5 (Lead: K. Somaraju)', department: 'water_supply', specialization: 'Municipal Pipeline Repair & Pressure Valve Maintenance', currentStatus: 'available', phone: '+91 94402 66711' }
         ];
       }
 
@@ -8476,8 +8488,8 @@
             lat: currentDetectedGpsCoords.lat,
             lng: currentDetectedGpsCoords.lng,
             department: dept,
-            deptName: dept === 'electricity' ? 'Smart Electricity Department' : dept === 'food_safety' ? 'Food Safety Department' : 'Sanitation & Waste Management',
-            deptIcon: dept === 'electricity' ? '⚡' : dept === 'food_safety' ? '🍲' : '🏢',
+            deptName: dept === 'electricity' ? 'Smart Electricity Department' : dept === 'food_safety' ? 'Food Safety Department' : dept === 'roads' ? 'Infrastructure / Roads' : dept === 'water_supply' ? 'Water Supply' : 'Sanitation & Waste Management',
+            deptIcon: dept === 'electricity' ? '⚡' : dept === 'food_safety' ? '🍲' : dept === 'roads' ? '🛣️' : dept === 'water_supply' ? '💧' : '🏢',
             title: title,
             description: desc,
             location: `${ward}, ${street}, ${city}`,

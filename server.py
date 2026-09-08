@@ -534,7 +534,11 @@ def init_database():
     cursor.execute("UPDATE workers SET operationalState = 'Andhra Pradesh', operationalCity = 'Surampalem', operationalWards = '[\"Ward 12 (Market Zone)\", \"Ward 11 (Lake View Zone)\"]' WHERE id = 'WRK-SAN-04' AND (operationalState IS NULL OR operationalState = '')")
     cursor.execute("UPDATE workers SET operationalState = 'Andhra Pradesh', operationalCity = 'Surampalem', operationalWards = '[\"Ward 12 (Market Zone)\", \"Ward 14 (Campus Zone)\"]' WHERE id = 'WRK-SAN-01' AND (operationalState IS NULL OR operationalState = '')")
     cursor.execute("UPDATE workers SET operationalState = 'Andhra Pradesh', operationalCity = 'Surampalem', operationalWards = '[\"Ward 12 (Market Zone)\", \"Ward 11 (Lake View Zone)\", \"Ward 14 (Campus Zone)\"]' WHERE id = 'WRK-ELE-02' AND (operationalState IS NULL OR operationalState = '')")
-    cursor.execute("UPDATE workers SET operationalState = 'Andhra Pradesh', operationalCity = 'Surampalem', operationalWards = '[\"Ward 12 (Market Zone)\", \"Ward 11 (Lake View Zone)\"]' WHERE id = 'WRK-ROA-03' AND (operationalState IS NULL OR operationalState = '')")
+    cursor.execute("UPDATE workers SET department = 'roads', operationalState = 'Andhra Pradesh', operationalCity = 'Surampalem', operationalWards = '[\"Ward 12 (Market Zone)\", \"Ward 11 (Lake View Zone)\", \"Ward 7 (Railway Colony)\"]' WHERE id = 'WRK-ROA-03'")
+    cursor.execute('''
+        INSERT OR IGNORE INTO workers (id, name, phone, department, specialization, currentStatus, lat, lng, tasksCompleted, currentTaskId, operationalState, operationalCity, operationalWards)
+        VALUES ('WRK-WAT-05', 'Water Utility Squad 5 (Lead: K. Somaraju)', '+91 94402 66711', 'water_supply', 'Municipal Pipeline Repair & Pressure Valve Maintenance', 'available', 17.0018, 81.8032, 18, NULL, 'Andhra Pradesh', 'Surampalem', '[\"Ward 12 (Market Zone)\", \"Ward 11 (Lake View Zone)\", \"Ward 3 (Residential Colony)\"]')
+    ''')
 
     # Seed Out-of-Jurisdiction Test Accounts for Automated Security Verification
     cursor.execute('''
@@ -574,8 +578,9 @@ def init_database():
         seed_workers = [
             ('WRK-SAN-01', 'Squad 1 (Lead: Ravi Kumar)', '+91 98480 22311', 'sanitation', 'Garbage & Heavy Compactor Operations', 'available', 17.0012, 81.8048, 14, None, 'Andhra Pradesh', 'Surampalem', '["Ward 12 (Market Zone)", "Ward 14 (Campus Zone)"]'),
             ('WRK-ELE-02', 'Lineman Squad B (Lead: Suresh Kumar)', '+91 94401 55422', 'electricity', '11KV Substation & Line Repair', 'available', 17.0025, 81.8030, 22, None, 'Andhra Pradesh', 'Surampalem', '["Ward 12 (Market Zone)", "Ward 11 (Lake View Zone)", "Ward 14 (Campus Zone)"]'),
-            ('WRK-ROA-03', 'Roads Squad 3 (Lead: Anita Roy)', '+91 99880 33411', 'sanitation', 'Asphalt Patching & Culvert Desilting', 'available', 16.9995, 81.8060, 9, None, 'Andhra Pradesh', 'Surampalem', '["Ward 12 (Market Zone)", "Ward 11 (Lake View Zone)"]'),
-            ('WRK-SAN-04', 'Squad 4 (Lead: Ramesh)', '+91 98661 77211', 'sanitation', 'Commercial Market Solid Waste Collection', 'busy', 17.0030, 81.8010, 31, 'ISS-2026-00123', 'Andhra Pradesh', 'Surampalem', '["Ward 12 (Market Zone)", "Ward 11 (Lake View Zone)"]')
+            ('WRK-ROA-03', 'Roads Squad 3 (Lead: Anita Roy)', '+91 99880 33411', 'roads', 'Asphalt Patching & Culvert Desilting', 'available', 16.9995, 81.8060, 9, None, 'Andhra Pradesh', 'Surampalem', '["Ward 12 (Market Zone)", "Ward 11 (Lake View Zone)", "Ward 7 (Railway Colony)"]'),
+            ('WRK-SAN-04', 'Squad 4 (Lead: Ramesh)', '+91 98661 77211', 'sanitation', 'Commercial Market Solid Waste Collection', 'busy', 17.0030, 81.8010, 31, 'ISS-2026-00123', 'Andhra Pradesh', 'Surampalem', '["Ward 12 (Market Zone)", "Ward 11 (Lake View Zone)"]'),
+            ('WRK-WAT-05', 'Water Utility Squad 5 (Lead: K. Somaraju)', '+91 94402 66711', 'water_supply', 'Municipal Pipeline Repair & Pressure Valve Maintenance', 'available', 17.0018, 81.8032, 18, None, 'Andhra Pradesh', 'Surampalem', '["Ward 12 (Market Zone)", "Ward 11 (Lake View Zone)", "Ward 3 (Residential Colony)"]')
         ]
         cursor.executemany('''
             INSERT OR IGNORE INTO workers (id, name, phone, department, specialization, currentStatus, lat, lng, tasksCompleted, currentTaskId, operationalState, operationalCity, operationalWards)
@@ -1358,9 +1363,17 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             now = int(time.time() * 1000)
             deadline = now + (48 * 3600 * 1000)
 
-            assigned_squad = 'Municipal Rapid Squad 4' if body.get('department') == 'sanitation' else 'Lineman Squad B' if body.get('department') == 'electricity' else 'Food Safety Officer'
-            dept_icon = '🏢' if body.get('department') == 'sanitation' else '⚡' if body.get('department') == 'electricity' else '🍲'
-            dept_name = 'Sanitation & Waste Management' if body.get('department') == 'sanitation' else 'Smart Electricity Department' if body.get('department') == 'electricity' else 'Food Safety Department'
+            dept_key = body.get('department', 'sanitation')
+            dept_map = {
+                'sanitation': ('Sanitation & Waste Management', '🏢', 'Municipal Rapid Squad 4'),
+                'roads': ('Infrastructure / Roads', '🛣️', 'Roads Squad 3 (Lead: Anita Roy)'),
+                'electricity': ('Smart Electricity Department', '⚡', 'Lineman Squad B'),
+                'water_supply': ('Water Supply', '💧', 'Water Utility Squad 5 (Lead: K. Somaraju)'),
+                'food_safety': ('Food Safety Department', '🍲', 'Food Safety Officer')
+            }
+            dept_default_name, dept_default_icon, assigned_squad = dept_map.get(dept_key, ('Sanitation & Waste Management', '🏢', 'Municipal Rapid Squad 4'))
+            dept_name = body.get('deptName') or dept_default_name
+            dept_icon = body.get('deptIcon') or dept_default_icon
 
             comments = [
                 {'author': 'System Watchdog', 'text': 'Report logged with live GPS geotag. 48h SLA timer activated.', 'time': 'Just now'},
@@ -1373,7 +1386,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'city': body.get('city', 'Surampalem'),
                 'ward': body.get('ward', 'Ward 12 (Market Zone)'),
                 'street': body.get('street', 'Main Road'),
-                'department': body.get('department', 'sanitation'),
+                'department': dept_key,
                 'deptName': dept_name,
                 'deptIcon': dept_icon,
                 'title': body.get('title', 'Civic Hazard'),
@@ -1618,6 +1631,17 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                         'error': f"Squad '{assigned_worker_name}' is not authorized to operate in {issue_dict.get('ward')}. Permitted operational wards: {permitted_wards}."
                     }, status=400)
                     return
+
+            # Worker Department Eligibility Verification
+            w_dept = target_worker.get('department')
+            issue_dept = issue_dict.get('department')
+            if w_dept and issue_dept and w_dept != issue_dept:
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': f"Squad '{assigned_worker_name}' belongs to {w_dept.capitalize()} department and cannot be assigned to {issue_dept.capitalize()} issues."
+                }, status=400)
+                return
 
             # 4. Prevent Duplicate / Accidental Duplicate Assignment (Requirement 2 & TEST 6)
             existing_assigned = (issue_dict.get('assignedWorker') or '').strip()
@@ -2054,6 +2078,20 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                         conn.close()
                         self.send_json_response({'success': False, 'error': 'Resolution rejected: Incident is outside officer jurisdiction ward.'}, status=403)
                         return
+            elif auth_user.get('department') in ['food', 'food_safety']:
+                if auth_user.get('jurisdictionState') and auth_user.get('jurisdictionState') != issue_dict.get('state'):
+                    conn.close()
+                    self.send_json_response({'success': False, 'error': 'Resolution rejected: Food violation is outside officer jurisdiction state.'}, status=403)
+                    return
+                if auth_user.get('jurisdictionCity') and auth_user.get('jurisdictionCity') != issue_dict.get('city'):
+                    conn.close()
+                    self.send_json_response({'success': False, 'error': 'Resolution rejected: Food violation is outside officer jurisdiction city.'}, status=403)
+                    return
+                if auth_user.get('jurisdictionWard') and auth_user.get('jurisdictionWard') != 'ALL':
+                    if auth_user.get('jurisdictionWard') != issue_dict.get('ward'):
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Resolution rejected: Food violation is outside officer jurisdiction ward.'}, status=403)
+                        return
 
             notes = (body.get('notes') or body.get('resolutionNotes') or 'Field execution verified and certified closed.').strip()
             photo_after = body.get('photoAfter') or body.get('imageAfter') or None
@@ -2305,6 +2343,20 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
 
             cursor.execute('SELECT * FROM issues WHERE id = ?', (issue_id,))
             issue_row = cursor.fetchone()
+
+            if not issue_row:
+                conn.close()
+                self.send_json_response({'success': False, 'error': f'Issue {issue_id} not found.'}, status=404)
+                return
+
+            if auth_user.get('jurisdictionState') and auth_user.get('jurisdictionState') != issue_row['state']:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Rectification rejected: Violation is outside officer jurisdiction state.'}, status=403)
+                return
+            if auth_user.get('jurisdictionCity') and auth_user.get('jurisdictionCity') != issue_row['city']:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Rectification rejected: Violation is outside officer jurisdiction city.'}, status=403)
+                return
 
             if issue_row:
                 v_id = issue_row['vendorId']
@@ -2712,6 +2764,15 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                     cat_name = 'Sparking Wire'
                     cat_icon = '⚡'
                     suggested_title = 'Sparking Wire Hazard'
+
+            elif any(w in q_lower for w in ['garbage', 'waste', 'trash', 'dump', 'litter', 'debris', 'rubbish', 'dustbin', 'bin overflow', 'solid waste', 'canteen waste', 'rotting waste', 'overflowing bins', 'open dump', 'compost', 'refuse']):
+                dept = 'sanitation'
+                dept_name = 'Sanitation & Waste Management'
+                dept_icon = '🏢'
+                cat = 'garbage_overflow'
+                cat_name = 'Garbage Overflow'
+                cat_icon = '🗑️'
+                suggested_title = 'Garbage Overflow Report'
 
             elif any(w in q_lower for w in ['pothole', 'crater', 'asphalt', 'tar', 'road damage', 'broken road', 'footpath', 'pavement', 'paver', 'curb']):
                 dept = 'roads'
