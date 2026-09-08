@@ -8876,15 +8876,15 @@
       }
 
       const sigContainer = document.getElementById('identitySignalsContainer');
-      if (sigContainer) {
         sigContainer.innerHTML = (idData.signals || []).map(s => {
           let pillClass = 'identity-signal-pill';
-          if ((s.type && s.type.includes('EXACT')) || (s.type && s.type.includes('HASH'))) pillClass += ' pill-warning';
-          else if ((s.type && s.type.includes('SECTOR')) || (s.type && s.type.includes('WARD'))) pillClass += ' pill-info';
+          const sigName = s.signal || s.type || '';
+          if (sigName.includes('EXACT') || sigName.includes('HASH')) pillClass += ' pill-warning';
+          else if (sigName.includes('SECTOR') || sigName.includes('WARD')) pillClass += ' pill-info';
           else pillClass += ' pill-success';
-          return `<span class="${pillClass}">• ${s.label || s.type}</span>`;
+          const label = s.label || s.signal || s.type || s.description || 'Signal Match';
+          return `<span class="${pillClass}">• ${label}</span>`;
         }).join('');
-      }
 
       const rText = document.getElementById('identityReasoningText');
       if (rText) rText.textContent = idData.reasoning || 'Deterministic civic rule matching against active incidents.';
