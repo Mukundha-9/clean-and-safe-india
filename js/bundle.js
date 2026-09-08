@@ -4302,6 +4302,11 @@
       issues = issues.filter(i => (i.street || '') === selectedStreet || (i.location && i.location.includes(selectedStreet)));
     }
 
+    // Stage v43: Citizen Follow-ups filter toggle
+    if (window.filterFollowUpsActive) {
+      issues = issues.filter(i => i.status !== 'resolved' && Number(i.followUpCount) > 0);
+    }
+
     const totalReports = issues.length;
     const resolvedCount = issues.filter(i => i.status === 'resolved').length;
     const resolutionRate = totalReports > 0 ? Math.round((resolvedCount / totalReports) * 100) : 100;
@@ -4319,6 +4324,22 @@
     if (rateEl) rateEl.textContent = `${resolutionRate}%`;
     if (rewardsEl) rewardsEl.textContent = `${rewardsPaid} Pts`;
     if (finesEl) finesEl.textContent = `₹${finesCollected.toLocaleString('en-IN')}`;
+
+    // Stage v43: Unresolved Citizen Follow-ups Alert Banner in Tier 1
+    const allUnresolvedWithFollowUps = db.getAllIssues()
+      .filter(i => i.department !== 'food_safety')
+      .filter(i => i.status !== 'resolved' && Number(i.followUpCount) > 0);
+    const followUpBanner = document.getElementById('munFollowUpAttentionBanner');
+    const followUpCountEl = document.getElementById('munFollowUpUnresolvedCount');
+    if (followUpBanner && followUpCountEl) {
+      if (allUnresolvedWithFollowUps.length > 0) {
+        followUpBanner.style.display = 'flex';
+        followUpCountEl.textContent = allUnresolvedWithFollowUps.length;
+      } else {
+        followUpBanner.style.display = 'none';
+      }
+    }
+
     const attentionBadge = document.getElementById('munAttentionCountBadge');
     if (attentionBadge) {
       const needsAttention = issues.filter(i => 
@@ -4328,7 +4349,8 @@
           !i.assignedWorker || 
           i.assignedWorker === 'Unassigned' || 
           i.status === 'work_completed' || 
-          i.workerStatus === 'Work Completed - Awaiting Verification'
+          i.workerStatus === 'Work Completed - Awaiting Verification' ||
+          Number(i.followUpCount) > 0
         )
       );
       attentionBadge.textContent = `${needsAttention.length} NEED ATTENTION`;
@@ -4354,7 +4376,19 @@
                 <div style="font-size: 0.72rem; color: var(--command-text-muted);">📅 ${reportedTimeStr}</div>
               </td>
               <td>
-                <div style="font-weight: 700; color: white;">${issue.title}</div>
+                <div style="font-weight: 700; color: white; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                  <span>${issue.title}</span>
+                  ${Number(issue.followUpCount) > 0 ? `
+                    <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 0.65rem; padding: 2px 5px;">
+                      🔄 ${issue.followUpCount} Follow-up${Number(issue.followUpCount) > 1 ? 's' : ''}
+                    </span>
+                  ` : ''}
+                  ${issue.identityType && issue.identityType !== 'NEW_INCIDENT' ? `
+                    <span class="badge" style="background: rgba(147, 51, 234, 0.2); color: #d8b4fe; border: 1px solid #a855f7; font-size: 0.65rem; padding: 2px 5px;">
+                      ${issue.identityType.replace('_', ' ')}
+                    </span>
+                  ` : ''}
+                </div>
                 <div style="font-size: 0.75rem; color: var(--command-text-muted);">📍 ${issue.location}</div>
                 <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">👤 ${issue.reportedBy || 'Citizen'} • 👷 ${issue.assignedWorker || 'Squad'}</div>
               </td>
@@ -7649,6 +7683,64 @@
             ` : ''}
           </div>
 
+          <!-- Stage v43: Incident Identity & Civic Relationships Panel -->
+          <div class="identity-review-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.4rem;">
+              <div style="font-weight: 800; font-size: 0.88rem; color: #d8b4fe; display: flex; align-items: center; gap: 0.45rem;">
+                <span>🆔</span> INCIDENT IDENTITY &amp; CIVIC RELATIONSHIPS
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span class="badge" style="background: rgba(147, 51, 234, 0.2); color: #d8b4fe; border: 1px solid #a855f7; font-size: 0.7rem; font-weight: 800;">
+                  ${(issue.identityType || 'NEW_INCIDENT').replace('_', ' ')}
+                </span>
+                ${Number(issue.followUpCount) > 0 ? `
+                  <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 0.7rem; font-weight: 800;">
+                    🔄 ${issue.followUpCount} Follow-up${Number(issue.followUpCount) > 1 ? 's' : ''}
+                  </span>
+                ` : ''}
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.55rem; font-size: 0.78rem; margin-bottom: 0.75rem;">
+              <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Classification Score:</span>
+                <strong style="color: #38bdf8;">${issue.identityMatchScore ? Math.round(Number(issue.identityMatchScore) * 100) + '%' : '100% Unique'}</strong>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Parent / Corroborated Ticket:</span>
+                <strong style="color: white;">${issue.parentIssueId ? `<a href="javascript:void(0)" onclick="window.viewIssueDetail('${issue.parentIssueId}')" style="color: #38bdf8; text-decoration: underline;">#${issue.parentIssueId}</a>` : (issue.identityMatchedIssueId ? `<a href="javascript:void(0)" onclick="window.viewIssueDetail('${issue.identityMatchedIssueId}')" style="color: #38bdf8; text-decoration: underline;">#${issue.identityMatchedIssueId}</a>` : 'Root Ticket (Primary)')}</strong>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Evidence Fingerprint:</span>
+                <strong style="color: ${issue.evidenceHash ? '#34d399' : '#94a3b8'};">${issue.evidenceHash ? `SHA-256: ${issue.evidenceHash.substring(0, 10)}...` : 'Evidence similarity unavailable'}</strong>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Identity Review Status:</span>
+                <strong style="color: ${issue.identityReviewed ? '#34d399' : '#fbbf24'};">${issue.identityReviewed ? `✓ Confirmed by ${issue.identityReviewedBy || 'Officer'}` : 'Pending Officer Verification'}</strong>
+              </div>
+            </div>
+
+            ${issue.identityReasoning ? `
+              <div style="font-size: 0.76rem; color: #cbd5e1; background: rgba(147, 51, 234, 0.08); border-left: 3px solid #a855f7; padding: 0.45rem 0.65rem; border-radius: 4px; margin-bottom: 0.75rem;">
+                <strong>Identity Engine Reasoning:</strong> ${issue.identityReasoning}
+              </div>
+            ` : ''}
+
+            ${Number(issue.followUpCount) > 0 ? `
+              <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; padding: 0.6rem 0.75rem; margin-bottom: 0.75rem; font-size: 0.78rem; color: #fde68a;">
+                🔔 <strong>Citizen Follow-up Notice:</strong> ${issue.followUpCount} citizen follow-up(s) logged confirming this issue persists on-ground. Review latest citizen comments below.
+              </div>
+            ` : ''}
+
+            ${(!isCitizen && !issue.identityReviewed) ? `
+              <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.4rem;">
+                <button type="button" class="btn btn-sm btn-primary" onclick="window.reviewIncidentIdentity('${issue.id}', 'CONFIRMED')" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); font-weight: 700; font-size: 0.75rem;">
+                  ✓ Confirm Identity Classification
+                </button>
+              </div>
+            ` : ''}
+          </div>
+
           <!-- Hotspot Association: Recurring Problem Context (Administrative Staff Only) -->
           ${(!isCitizen && wardForecast) ? `
             <div style="background: rgba(147, 51, 234, 0.08); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: var(--radius-md); padding: 0.9rem 1.15rem; margin-bottom: 1.25rem; box-shadow: 0 4px 16px rgba(147, 51, 234, 0.08);">
@@ -8590,10 +8682,10 @@
       });
     }
 
-    // Citizen Report Form
+    // Citizen Report Form & v43 Civic Incident Identity Pre-flight Engine
     const reportForm = document.getElementById('reportIssueForm');
     if (reportForm) {
-      reportForm.addEventListener('submit', (e) => {
+      reportForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const title = document.getElementById('reportTitleInput').value;
         const desc = document.getElementById('reportDescInput').value;
@@ -8606,72 +8698,92 @@
         // Use user captured photo or default fallback
         const submittedImage = selectedReportImageBase64 || 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80';
 
-        try {
-          const aiMeta = window.currentAiAnalysisData || {};
-          const isAiConfirmed = aiMeta.aiDepartment ? (dept === aiMeta.aiDepartment ? 1 : 0) : 1;
+        const aiMeta = window.currentAiAnalysisData || {};
+        const isAiConfirmed = aiMeta.aiDepartment ? (dept === aiMeta.aiDepartment ? 1 : 0) : 1;
 
-          const newIssue = db.createIssue({
-            state: state,
-            city: city,
-            ward: ward,
-            street: street,
-            lat: currentDetectedGpsCoords.lat,
-            lng: currentDetectedGpsCoords.lng,
-            department: dept,
-            deptName: dept === 'electricity' ? 'Smart Electricity Department' : dept === 'food_safety' ? 'Food Safety Department' : dept === 'roads' ? 'Infrastructure / Roads' : dept === 'water_supply' ? 'Water Supply' : 'Sanitation & Waste Management',
-            deptIcon: dept === 'electricity' ? '⚡' : dept === 'food_safety' ? '🍲' : dept === 'roads' ? '🛣️' : dept === 'water_supply' ? '💧' : '🏢',
-            title: title,
-            description: desc,
-            location: `${ward}, ${street}, ${city}`,
-            category: aiMeta.aiCategory || 'garbage',
-            categoryName: aiMeta.aiCategoryName || 'Civic Report',
-            categoryIcon: aiMeta.aiCategoryIcon || '📢',
-            severity: document.getElementById('reportSeveritySelect').value,
-            severityLabel: 'ACTIVE',
-            imageBefore: submittedImage,
-            // Phase 2 AI Fields Persisted
-            aiRiskScore: (window.currentImageAiAccepted && window.currentImageAiData && window.currentImageAiData.finalRiskScore) ? window.currentImageAiData.finalRiskScore : (aiMeta.aiRiskScore || 50),
-            aiConfidence: aiMeta.aiConfidence || 0.0,
-            aiReasoning: aiMeta.aiReasoning || '',
-            aiSuggestedSLA: aiMeta.aiSuggestedSLA || 48.0,
-            slaBreachProb: aiMeta.slaBreachProb || 0.1,
-            aiSuggestedDepartment: aiMeta.aiDepartment || dept,
-            aiSuggestedCategory: aiMeta.aiCategory || 'garbage',
-            aiSuggestedSeverity: aiMeta.aiSeverity || 'Medium',
-            citizenConfirmedAI: isAiConfirmed,
-            aiOverrideReason: isAiConfirmed ? '' : 'Citizen adjusted department manually',
-            // Phase 3 Visual Evidence AI Fields Persisted
-            imageAiHazard: (window.currentImageAiData && window.currentImageAiData.detectedHazard) ? window.currentImageAiData.detectedHazard : null,
-            imageAiConfidence: (window.currentImageAiData && window.currentImageAiData.visualConfidence) ? window.currentImageAiData.visualConfidence : null,
-            imageTextConsistency: (window.currentImageAiData && window.currentImageAiData.consistency) ? window.currentImageAiData.consistency : null,
-            imageRiskModifier: (window.currentImageAiData && window.currentImageAiData.riskModifier !== undefined) ? window.currentImageAiData.riskModifier : 0,
-            imageAiReasoning: (window.currentImageAiData && window.currentImageAiData.observableReasoning) ? window.currentImageAiData.observableReasoning : null,
-            imageAiAccepted: window.currentImageAiAccepted ? 1 : 0,
-            imageOfficerVerified: 0,
-            imageOfficerOverrideReason: null
+        const baseIssuePayload = {
+          state: state,
+          city: city,
+          ward: ward,
+          street: street,
+          lat: currentDetectedGpsCoords.lat,
+          lng: currentDetectedGpsCoords.lng,
+          department: dept,
+          deptName: dept === 'electricity' ? 'Smart Electricity Department' : dept === 'food_safety' ? 'Food Safety Department' : dept === 'roads' ? 'Infrastructure / Roads' : dept === 'water_supply' ? 'Water Supply' : 'Sanitation & Waste Management',
+          deptIcon: dept === 'electricity' ? '⚡' : dept === 'food_safety' ? '🍲' : dept === 'roads' ? '🛣️' : dept === 'water_supply' ? '💧' : '🏢',
+          title: title,
+          description: desc,
+          location: `${ward}, ${street}, ${city}`,
+          category: aiMeta.aiCategory || 'garbage',
+          categoryName: aiMeta.aiCategoryName || 'Civic Report',
+          categoryIcon: aiMeta.aiCategoryIcon || '📢',
+          severity: document.getElementById('reportSeveritySelect').value,
+          severityLabel: 'ACTIVE',
+          imageBefore: submittedImage,
+          // Phase 2 AI Fields Persisted
+          aiRiskScore: (window.currentImageAiAccepted && window.currentImageAiData && window.currentImageAiData.finalRiskScore) ? window.currentImageAiData.finalRiskScore : (aiMeta.aiRiskScore || 50),
+          aiConfidence: aiMeta.aiConfidence || 0.0,
+          aiReasoning: aiMeta.aiReasoning || '',
+          aiSuggestedSLA: aiMeta.aiSuggestedSLA || 48.0,
+          slaBreachProb: aiMeta.slaBreachProb || 0.1,
+          aiSuggestedDepartment: aiMeta.aiDepartment || dept,
+          aiSuggestedCategory: aiMeta.aiCategory || 'garbage',
+          aiSuggestedSeverity: aiMeta.aiSeverity || 'Medium',
+          citizenConfirmedAI: isAiConfirmed,
+          aiOverrideReason: isAiConfirmed ? '' : 'Citizen adjusted department manually',
+          // Phase 3 Visual Evidence AI Fields Persisted
+          imageAiHazard: (window.currentImageAiData && window.currentImageAiData.detectedHazard) ? window.currentImageAiData.detectedHazard : null,
+          imageAiConfidence: (window.currentImageAiData && window.currentImageAiData.visualConfidence) ? window.currentImageAiData.visualConfidence : null,
+          imageTextConsistency: (window.currentImageAiData && window.currentImageAiData.consistency) ? window.currentImageAiData.consistency : null,
+          imageRiskModifier: (window.currentImageAiData && window.currentImageAiData.riskModifier !== undefined) ? window.currentImageAiData.riskModifier : 0,
+          imageAiReasoning: (window.currentImageAiData && window.currentImageAiData.observableReasoning) ? window.currentImageAiData.observableReasoning : null,
+          imageAiAccepted: window.currentImageAiAccepted ? 1 : 0,
+          imageOfficerVerified: 0,
+          imageOfficerOverrideReason: null
+        };
+
+        // v43 Pre-flight Civic Incident Identity Engine Check
+        try {
+          const authHeaders = { 'Content-Type': 'application/json' };
+          const token = auth.getToken();
+          if (token) authHeaders['Authorization'] = `Bearer ${token}`;
+
+          const identityRes = await fetch('/api/ai/incident-identity', {
+            method: 'POST',
+            headers: authHeaders,
+            body: JSON.stringify({
+              title: title,
+              description: desc,
+              street: street,
+              location: `${ward}, ${street}, ${city}`,
+              state: state,
+              city: city,
+              ward: ward,
+              department: dept,
+              category: baseIssuePayload.category,
+              lat: currentDetectedGpsCoords.lat,
+              lng: currentDetectedGpsCoords.lng,
+              image: submittedImage
+            })
           });
 
-          window.currentAiAnalysisData = null;
-          window.currentImageAiData = null;
-          window.currentImageAiAccepted = false;
-          window.currentSelectedPhotoPreset = null;
-
-          reportForm.reset();
-          const smartPill = document.getElementById('smartTriagePill');
-          if (smartPill) smartPill.style.display = 'none';
-          const titleField = document.getElementById('reportTitleInput');
-          if (titleField) delete titleField.dataset.autofilled;
-          const voiceStatus = document.getElementById('voiceStatusText');
-          if (voiceStatus) voiceStatus.textContent = '';
-          window.clearSelectedImage();
-          window.closeModal('reportIssueModal');
-
-          const quota = db.getCitizenDailyReportsUsage();
-          showToast(`Complaint #${newIssue.id} registered! (Daily Quota: ${quota.remaining} of ${quota.limit} remaining today)`, 'reward', '🎉');
-          checkAuthAndRoute();
-        } catch (err) {
-          showToast(err.message, 'error', '⚠️');
+          if (identityRes.ok) {
+            const idData = await identityRes.json();
+            if (idData && idData.success && idData.identityType !== 'NEW_INCIDENT' && Number(idData.matchScore) >= 0.5 && idData.existingIssue) {
+              window.pendingIncidentSubmission = {
+                payload: baseIssuePayload,
+                identity: idData
+              };
+              window.renderIdentityMatchModal(idData);
+              return;
+            }
+          }
+        } catch (checkErr) {
+          console.log('[Identity Engine] Pre-flight evaluation offline or skipped:', checkErr);
         }
+
+        // Direct creation fallback / new incident
+        window.executeDirectIssueCreation(baseIssuePayload);
       });
 
       // Real-time automatic triage on user input in complaint description
@@ -8692,6 +8804,237 @@
         });
       }
     }
+
+    // -----------------------------------------------------------------------
+    // Stage v43: Civic Incident Identity Engine Client Workflows & Actions
+    // -----------------------------------------------------------------------
+    window.renderIdentityMatchModal = function(idData) {
+      const existing = idData.existingIssue || {};
+      const modal = document.getElementById('civicIdentityMatchModal');
+      if (!modal) return;
+
+      const iconEl = document.getElementById('identityModalHeaderIcon');
+      const titleEl = document.getElementById('identityModalHeaderTitle');
+      const subEl = document.getElementById('identityModalHeaderSubtitle');
+      const badgeEl = document.getElementById('identityTypeBadge');
+      const scoreEl = document.getElementById('identityScoreText');
+      const recActionEl = document.getElementById('identityRecommendedActionLabel');
+
+      const pct = Math.round((Number(idData.matchScore) || 0.8) * 100);
+      if (scoreEl) scoreEl.textContent = `Match Confidence: ${pct}%`;
+
+      if (idData.identityType === 'POSSIBLE_DUPLICATE') {
+        if (iconEl) iconEl.textContent = '⚠️';
+        if (titleEl) titleEl.textContent = 'Possible Duplicate Incident Detected';
+        if (subEl) subEl.textContent = 'A highly similar civic complaint was recently reported at this exact location.';
+        if (badgeEl) {
+          badgeEl.textContent = 'POSSIBLE DUPLICATE';
+          badgeEl.style.background = '#f59e0b';
+        }
+        if (recActionEl) recActionEl.textContent = 'Action: Add Follow-up or Confirm New';
+      } else if (idData.identityType === 'FOLLOW_UP') {
+        if (iconEl) iconEl.textContent = '🔄';
+        if (titleEl) titleEl.textContent = 'Active Grievance In Progress at this Spot';
+        if (subEl) subEl.textContent = 'An existing complaint is currently active/unresolved on site. Submit a follow-up to escalate priority!';
+        if (badgeEl) {
+          badgeEl.textContent = 'FOLLOW UP';
+          badgeEl.style.background = '#0284c7';
+        }
+        if (recActionEl) recActionEl.textContent = 'Action: Attach Citizen Follow-up';
+      } else {
+        if (iconEl) iconEl.textContent = '🔗';
+        if (titleEl) titleEl.textContent = 'Related Incident in Immediate Area';
+        if (subEl) subEl.textContent = 'A related or adjacent civic condition exists nearby in this ward.';
+        if (badgeEl) {
+          badgeEl.textContent = 'RELATED INCIDENT';
+          badgeEl.style.background = '#8b5cf6';
+        }
+        if (recActionEl) recActionEl.textContent = 'Action: Link or File New';
+      }
+
+      const exTitleEl = document.getElementById('identityExistingTitle');
+      const exLocEl = document.getElementById('identityExistingLocation');
+      const exStatusEl = document.getElementById('identityExistingStatusBadge');
+      const exIdEl = document.getElementById('identityExistingId');
+      const exTimeEl = document.getElementById('identityExistingTime');
+      const exFollowUpsText = document.getElementById('identityExistingFollowUpsText');
+
+      if (exTitleEl) exTitleEl.textContent = existing.title || 'Civic Grievance';
+      if (exLocEl) exLocEl.textContent = `📍 ${existing.location || existing.ward || 'Surampalem'}`;
+      if (exStatusEl) {
+        const st = (existing.workerStatus || existing.status || 'ACTIVE').toUpperCase();
+        exStatusEl.textContent = st;
+        exStatusEl.className = `badge badge-${(existing.status || 'pending').toLowerCase()}`;
+      }
+      if (exIdEl) exIdEl.textContent = `#${existing.id || 'ISS-...'}`;
+      if (exTimeEl) exTimeEl.textContent = `Reported ${existing.hoursAgo || 2}h ago`;
+      if (exFollowUpsText) {
+        const flw = Number(existing.followUpCount) || 0;
+        exFollowUpsText.textContent = flw > 0
+          ? `This issue has received ${flw} citizen follow-up${flw > 1 ? 's' : ''} confirming persistent condition.`
+          : `This issue is currently active. You can add the first citizen follow-up.`;
+      }
+
+      const sigContainer = document.getElementById('identitySignalsContainer');
+      if (sigContainer) {
+        sigContainer.innerHTML = (idData.signals || []).map(s => {
+          let pillClass = 'identity-signal-pill';
+          if ((s.type && s.type.includes('EXACT')) || (s.type && s.type.includes('HASH'))) pillClass += ' pill-warning';
+          else if ((s.type && s.type.includes('SECTOR')) || (s.type && s.type.includes('WARD'))) pillClass += ' pill-info';
+          else pillClass += ' pill-success';
+          return `<span class="${pillClass}">• ${s.label || s.type}</span>`;
+        }).join('');
+      }
+
+      const rText = document.getElementById('identityReasoningText');
+      if (rText) rText.textContent = idData.reasoning || 'Deterministic civic rule matching against active incidents.';
+
+      window.openModal('civicIdentityMatchModal');
+    };
+
+    window.confirmSubmitFollowUp = async function() {
+      if (!window.pendingIncidentSubmission) return;
+      const { payload, identity } = window.pendingIncidentSubmission;
+      const parentId = identity.matchedIssueId || (identity.existingIssue && identity.existingIssue.id);
+
+      try {
+        const authHeaders = { 'Content-Type': 'application/json' };
+        const token = auth.getToken();
+        if (token) authHeaders['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch('/api/issues/follow-up', {
+          method: 'POST',
+          headers: authHeaders,
+          body: JSON.stringify({
+            parentIssueId: parentId,
+            reason: payload.description || payload.title || 'Citizen confirmed issue remains unresolved on site.',
+            image: payload.imageBefore
+          })
+        });
+
+        const resData = await res.json();
+        if (resData.success) {
+          showToast(`🎉 Citizen Follow-up successfully attached to incident #${parentId}!`, 'reward', '🔄');
+          playNotificationSound('chime');
+          window.closeModal('civicIdentityMatchModal');
+          window.closeModal('reportIssueModal');
+          const reportForm = document.getElementById('reportIssueForm');
+          if (reportForm) reportForm.reset();
+          window.clearSelectedImage();
+          window.pendingIncidentSubmission = null;
+
+          const cached = db.getIssueById(parentId);
+          if (cached) {
+            cached.followUpCount = Number(resData.followUpCount) || ((Number(cached.followUpCount) || 0) + 1);
+            if (resData.comment) {
+              cached.comments = cached.comments || [];
+              cached.comments.push(resData.comment);
+            }
+          }
+          checkAuthAndRoute();
+        } else {
+          showToast(resData.error || 'Failed to attach follow-up.', 'error', '⚠️');
+        }
+      } catch (err) {
+        showToast('Offline or network error attaching follow-up.', 'error', '⚠️');
+      }
+    };
+
+    window.confirmSubmitNewIncident = function() {
+      if (!window.pendingIncidentSubmission) return;
+      const { payload, identity } = window.pendingIncidentSubmission;
+      window.closeModal('civicIdentityMatchModal');
+      window.executeDirectIssueCreation({
+        ...payload,
+        identityType: identity.identityType,
+        identityMatchScore: identity.matchScore,
+        identityMatchedIssueId: identity.matchedIssueId,
+        identityReasoning: identity.reasoning
+      });
+      window.pendingIncidentSubmission = null;
+    };
+
+    window.viewMatchedExistingIssue = function() {
+      if (!window.pendingIncidentSubmission) return;
+      const { identity } = window.pendingIncidentSubmission;
+      const parentId = identity.matchedIssueId || (identity.existingIssue && identity.existingIssue.id);
+      if (parentId) {
+        window.closeModal('civicIdentityMatchModal');
+        window.viewIssueDetail(parentId);
+      }
+    };
+
+    window.executeDirectIssueCreation = function(issuePayload) {
+      try {
+        const newIssue = db.createIssue(issuePayload);
+        window.currentAiAnalysisData = null;
+        window.currentImageAiData = null;
+        window.currentImageAiAccepted = false;
+        window.currentSelectedPhotoPreset = null;
+
+        const reportForm = document.getElementById('reportIssueForm');
+        if (reportForm) reportForm.reset();
+        const smartPill = document.getElementById('smartTriagePill');
+        if (smartPill) smartPill.style.display = 'none';
+        const titleField = document.getElementById('reportTitleInput');
+        if (titleField) delete titleField.dataset.autofilled;
+        const voiceStatus = document.getElementById('voiceStatusText');
+        if (voiceStatus) voiceStatus.textContent = '';
+        window.clearSelectedImage();
+        window.closeModal('reportIssueModal');
+
+        const quota = db.getCitizenDailyReportsUsage();
+        showToast(`Complaint #${newIssue.id} registered! (Daily Quota: ${quota.remaining} of ${quota.limit} remaining today)`, 'reward', '🎉');
+        checkAuthAndRoute();
+      } catch (err) {
+        showToast(err.message, 'error', '⚠️');
+      }
+    };
+
+    window.filterFollowUpsActive = false;
+    window.filterIncidentsWithFollowUps = function() {
+      window.filterFollowUpsActive = !window.filterFollowUpsActive;
+      const btn = document.getElementById('btnFilterFollowUps');
+      if (btn) {
+        btn.textContent = window.filterFollowUpsActive ? 'Show All Issues' : 'Filter Follow-ups Only';
+        btn.style.background = window.filterFollowUpsActive ? '#f59e0b' : 'transparent';
+        btn.style.color = window.filterFollowUpsActive ? '#000' : '#f59e0b';
+      }
+      renderMunicipalDashboard();
+    };
+
+    window.reviewIncidentIdentity = async function(issueId, decision) {
+      try {
+        const authHeaders = { 'Content-Type': 'application/json' };
+        const token = auth.getToken();
+        if (token) authHeaders['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`/api/issues/${issueId}/review-identity`, {
+          method: 'POST',
+          headers: authHeaders,
+          body: JSON.stringify({
+            issueId: issueId,
+            decision: decision || 'CONFIRMED',
+            reason: 'Officer verified incident identity classification'
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`✅ Incident identity review recorded (${decision}).`, 'success', '🏛️');
+          const issue = db.getIssueById(issueId);
+          if (issue) {
+            issue.identityReviewed = 1;
+            issue.identityReviewedBy = auth.getUser() ? auth.getUser().name : 'Authorized Officer';
+          }
+          window.viewIssueDetail(issueId);
+          renderMunicipalDashboard();
+        } else {
+          showToast(data.error || 'Failed to review identity.', 'error', '⚠️');
+        }
+      } catch (e) {
+        showToast('Error reviewing incident identity.', 'error', '⚠️');
+      }
+    };
 
     // Food Safety Officer: Log Violation Notice Form
     const foodInspectionForm = document.getElementById('foodInspectionForm');

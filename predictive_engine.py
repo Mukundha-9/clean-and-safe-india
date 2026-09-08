@@ -185,7 +185,9 @@ def init_predictive_tables(cursor):
     pf_cols = [
         ('rootCauses', 'TEXT'),
         ('preventionStatus', "TEXT DEFAULT 'Improving'"),
-        ('cleanZoneName', 'TEXT')
+        ('cleanZoneName', 'TEXT'),
+        ('uniqueIncidentCount', 'INTEGER DEFAULT 0'),
+        ('citizenReportCount', 'INTEGER DEFAULT 0')
     ]
     for col, col_type in pf_cols:
         try:
@@ -449,9 +451,16 @@ def calculate_predictive_risk(ward, category_name, dept, all_issues):
         if hit:
             matched.append(iss)
 
+    unique_matched = [i for i in matched if not i.get('parentIssueId')]
+    unique_count = len(unique_matched)
+    total_followups = sum(int(i.get('followUpCount') or 0) for i in unique_matched)
+    citizen_report_count = len(matched) + total_followups
+
     hist_count = len(matched)
     recent_issues = [i for i in matched if (now_ms - (i.get('timestamp') or 0)) <= (30 * day_ms)]
     recent_count = len(recent_issues)
+    recent_unique = [i for i in unique_matched if (now_ms - (i.get('timestamp') or 0)) <= (30 * day_ms)]
+    recent_unique_count = len(recent_unique)
 
     if hist_count == 0:
         return {
@@ -462,6 +471,8 @@ def calculate_predictive_risk(ward, category_name, dept, all_issues):
             'confidenceLabel': 'Demo / Rule-Based — Insufficient Historical Data',
             'historicalIncidentCount': 0,
             'recentIncidentCount': 0,
+            'uniqueIncidentCount': 0,
+            'citizenReportCount': 0,
             'contributingFactors': [
                 'No historical incidents recorded in this zone',
                 'Baseline monitoring only',
@@ -513,8 +524,8 @@ def calculate_predictive_risk(ward, category_name, dept, all_issues):
     )
 
     factors = [
-        f"{hist_count} historical {category_name.lower()} incident(s) in {ward}",
-        f"{recent_count} incident(s) reported in the last 30-day evaluation window",
+        f"{unique_count} unique incident(s) with {citizen_report_count} citizen report(s) & follow-up(s) in {ward}",
+        f"{recent_unique_count} unique incident(s) ({recent_count} total reports) in last 30 days",
         f"{recurrence_indicator} pattern evaluated",
         sla_indicator,
         f"Historical severity profile ({'High/Critical' if has_bulk or has_high else 'Standard'})"
@@ -528,6 +539,8 @@ def calculate_predictive_risk(ward, category_name, dept, all_issues):
         'confidenceLabel': confidence_label,
         'historicalIncidentCount': hist_count,
         'recentIncidentCount': recent_count,
+        'uniqueIncidentCount': unique_count,
+        'citizenReportCount': citizen_report_count,
         'contributingFactors': factors
     }
 
@@ -659,13 +672,16 @@ def generate_deterministic_forecasts(conn=None):
                 id, hotspotId, ward, category, department, predictiveRiskScore, riskLevel,
                 forecastHorizon, historicalIncidentCount, recentIncidentCount, recurrenceIndicator,
                 slaBreachIndicator, contributingFactors, preventiveRecommendation, confidenceLabel,
-                source, status, createdAt, reviewedBy, reviewedAt, reviewReason, rootCauses, cleanZoneName
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                source, status, createdAt, reviewedBy, reviewedAt, reviewReason, rootCauses, cleanZoneName,
+                uniqueIncidentCount, citizenReportCount
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 predictiveRiskScore = excluded.predictiveRiskScore,
                 riskLevel = excluded.riskLevel,
                 historicalIncidentCount = excluded.historicalIncidentCount,
                 recentIncidentCount = excluded.recentIncidentCount,
+                uniqueIncidentCount = excluded.uniqueIncidentCount,
+                citizenReportCount = excluded.citizenReportCount,
                 recurrenceIndicator = excluded.recurrenceIndicator,
                 slaBreachIndicator = excluded.slaBreachIndicator,
                 contributingFactors = excluded.contributingFactors,
@@ -679,7 +695,9 @@ def generate_deterministic_forecasts(conn=None):
             analysis['recurrenceIndicator'], analysis['slaBreachIndicator'],
             factors_json, rec, analysis['confidenceLabel'],
             'Demo / Historical Incident Dataset', fst_status, now_ms,
-            reviewed_by, reviewed_at, review_reason, root_causes_json, clean_zone_name
+            reviewed_by, reviewed_at, review_reason, root_causes_json, clean_zone_name,
+            analysis.get('uniqueIncidentCount', analysis['historicalIncidentCount']),
+            analysis.get('citizenReportCount', analysis['historicalIncidentCount'])
         ))
 
         # Audit forecast generation
@@ -718,6 +736,8 @@ def generate_deterministic_forecasts(conn=None):
             'forecastHorizon': 'Next 7 Days',
             'historicalIncidentCount': analysis['historicalIncidentCount'],
             'recentIncidentCount': analysis['recentIncidentCount'],
+            'uniqueIncidentCount': analysis.get('uniqueIncidentCount', analysis['historicalIncidentCount']),
+            'citizenReportCount': analysis.get('citizenReportCount', analysis['historicalIncidentCount']),
             'recurrenceIndicator': analysis['recurrenceIndicator'],
             'slaBreachIndicator': analysis['slaBreachIndicator'],
             'contributingFactors': analysis['contributingFactors'],
@@ -838,6 +858,8 @@ def handle_predictive_get(handler, path, query, auth_user=None):
             item['forecast_horizon'] = item.get('forecastHorizon')
             item['historical_incident_count'] = item.get('historicalIncidentCount')
             item['recent_incident_count'] = item.get('recentIncidentCount')
+            item['unique_incident_count'] = item.get('uniqueIncidentCount') or item.get('historicalIncidentCount')
+            item['citizen_report_count'] = item.get('citizenReportCount') or item.get('historicalIncidentCount')
 
             if 'Ward 12' in w_str:
                 item['lat'], item['lng'] = 17.0010, 81.8045

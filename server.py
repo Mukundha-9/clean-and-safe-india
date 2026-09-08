@@ -12,6 +12,8 @@ import hashlib
 import secrets
 import hmac
 import random
+import math
+import base64
 import predictive_engine
 import ai_engine
 
@@ -208,7 +210,9 @@ ACTIVE_OTPS = {}
 # 1. DATABASE MANAGEMENT & SCHEMA INITIALIZATION
 # ------------------------------------------------------------------------------
 def get_db_connection():
-    conn = sqlite3.connect(DB_FILE, check_same_thread=False)
+    conn = sqlite3.connect(DB_FILE, check_same_thread=False, timeout=30.0)
+    conn.execute('PRAGMA journal_mode=WAL')
+    conn.execute('PRAGMA busy_timeout=30000')
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -314,6 +318,297 @@ def get_authenticated_user(handler, conn=None):
     finally:
         if close_conn:
             conn.close()
+
+# ------------------------------------------------------------------------------
+# CIVIC INCIDENT IDENTITY ENGINE (v43.0.0) — DETERMINISTIC MULTI-SIGNAL MATCHER
+# ------------------------------------------------------------------------------
+def compute_evidence_hash(img_str):
+    """Compute SHA-256 hash for genuine evidence verification."""
+    if not img_str:
+        return None
+    try:
+        if ',' in img_str and 'base64' in img_str:
+            b64_data = img_str.split(',', 1)[1]
+            raw_bytes = base64.b64decode(b64_data)
+        else:
+            raw_bytes = img_str.encode('utf-8')
+        return hashlib.sha256(raw_bytes).hexdigest()
+    except Exception:
+        return hashlib.sha256(str(img_str).encode('utf-8', errors='ignore')).hexdigest()
+
+def calculate_haversine_distance(lat1, lon1, lat2, lon2):
+    """Distance in meters between two lat/lon coordinates."""
+    if lat1 is None or lon1 is None or lat2 is None or lon2 is None:
+        return 999999.0
+    try:
+        lat1, lon1, lat2, lon2 = float(lat1), float(lon1), float(lat2), float(lon2)
+        R = 6371000.0  # Earth radius in meters
+        phi1 = math.radians(lat1)
+        phi2 = math.radians(lat2)
+        delta_phi = math.radians(lat2 - lat1)
+        delta_lambda = math.radians(lon2 - lon1)
+        a = math.sin(delta_phi / 2.0)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2.0)**2
+        c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
+        return R * c
+    except Exception:
+        return 999999.0
+
+def normalize_text_tokens(text):
+    """Normalize text into meaningful civic tokens (strip stopwords & punctuation)."""
+    if not text:
+        return set()
+    stopwords = {
+        'the', 'a', 'an', 'and', 'or', 'in', 'on', 'at', 'to', 'for', 'of', 'with',
+        'is', 'are', 'was', 'were', 'been', 'be', 'this', 'that', 'there', 'here',
+        'near', 'by', 'from', 'about', 'has', 'have', 'had', 'very', 'severe', 'please',
+        'urgent', 'issue', 'complaint', 'problem', 'reported', 'area', 'zone'
+    }
+    words = re.findall(r'[a-zA-Z0-9]+', str(text).lower())
+    return {w for w in words if len(w) > 2 and w not in stopwords}
+
+def evaluate_incident_identity(report_data, candidate_issues, auth_user=None):
+    """
+    Deterministically evaluates an incoming citizen submission against existing
+    active and recently resolved civic incidents within authorized jurisdiction.
+    """
+    now_ms = int(time.time() * 1000)
+    rep_title = report_data.get('title', '')
+    rep_desc = report_data.get('description', '')
+    rep_dept = str(report_data.get('department') or 'sanitation').lower()
+    rep_cat = str(report_data.get('category') or 'general').lower()
+    rep_ward = str(report_data.get('ward') or '')
+    rep_street = str(report_data.get('street') or report_data.get('location') or '')
+    rep_lat = report_data.get('lat')
+    rep_lng = report_data.get('lng')
+    rep_img = report_data.get('image') or report_data.get('imageBefore') or ''
+    rep_hash = compute_evidence_hash(rep_img) if rep_img else None
+
+    combined_text = f"{rep_title} {rep_desc}"
+    rep_tokens = normalize_text_tokens(combined_text)
+
+    # Department cross-dependency mapping
+    cross_dept_related = {
+        'water_supply': ['roads', 'sanitation'],
+        'roads': ['water_supply', 'electricity'],
+        'electricity': ['roads'],
+        'sanitation': ['food_safety'],
+        'food_safety': ['sanitation']
+    }
+
+    evaluated_matches = []
+
+    for cand in candidate_issues:
+        cand_id = cand.get('id')
+        cand_dept = str(cand.get('department') or '').lower()
+        cand_cat = str(cand.get('category') or '').lower()
+        cand_ward = str(cand.get('ward') or '')
+        cand_street = str(cand.get('street') or cand.get('location') or '')
+        cand_lat = cand.get('lat')
+        cand_lng = cand.get('lng')
+        cand_ts = cand.get('timestamp') or now_ms
+        cand_status = str(cand.get('status') or 'pending').lower()
+        cand_is_unresolved = cand_status not in ['resolved', 'verified', 'closed']
+        cand_img = cand.get('imageBefore') or ''
+        cand_hash = cand.get('evidenceHash') or (compute_evidence_hash(cand_img) if cand_img else None)
+
+        cand_tokens = normalize_text_tokens(f"{cand.get('title', '')} {cand.get('description', '')}")
+
+        # 1. Location Metrics
+        dist_m = calculate_haversine_distance(rep_lat, rep_lng, cand_lat, cand_lng)
+        ward_clean_rep = rep_ward.lower().split('(')[0].strip()
+        ward_clean_cand = cand_ward.lower().split('(')[0].strip()
+        same_ward = bool(ward_clean_rep and ward_clean_cand and ward_clean_rep == ward_clean_cand)
+        
+        # Street token overlap
+        street_tokens_rep = normalize_text_tokens(rep_street)
+        street_tokens_cand = normalize_text_tokens(cand_street)
+        same_street = bool(street_tokens_rep and street_tokens_cand and (street_tokens_rep & street_tokens_cand))
+
+        # 2. Category & Dept Metrics
+        same_dept = (rep_dept == cand_dept)
+        same_cat = (rep_cat == cand_cat) or ('garbage' in rep_cat and 'garbage' in cand_cat) or ('pothole' in rep_cat and 'pothole' in cand_cat) or ('electric' in rep_cat and 'electric' in cand_cat)
+        is_cross_dept_related = cand_dept in cross_dept_related.get(rep_dept, [])
+
+        # 3. Text Overlap
+        if rep_tokens and cand_tokens:
+            intersection = rep_tokens & cand_tokens
+            union = rep_tokens | cand_tokens
+            text_sim = len(intersection) / float(len(union)) if union else 0.0
+        else:
+            text_sim = 0.0
+
+        # 4. Evidence Hash Match
+        evidence_match = bool(rep_hash and cand_hash and rep_hash == cand_hash)
+
+        # 5. Time Difference
+        time_diff_hours = max(0.0, (now_ms - cand_ts) / (3600.0 * 1000.0))
+
+        # Collect signals
+        signals = []
+        if dist_m < 150:
+            signals.append({'type': 'LOCATION_EXACT', 'label': f'Same coordinates spot (~{int(dist_m)}m)'})
+        elif dist_m < 350:
+            signals.append({'type': 'LOCATION_PROXIMITY', 'label': f'Nearby spot (~{int(dist_m)}m)'})
+        elif same_ward:
+            signals.append({'type': 'WARD_MATCH', 'label': f'Same administrative ward ({cand_ward})'})
+
+        if same_street:
+            signals.append({'type': 'STREET_MATCH', 'label': 'Matching street/landmark corridor'})
+
+        if same_dept and same_cat:
+            signals.append({'type': 'SECTOR_MATCH', 'label': f'Same civic sector ({cand.get("deptName", cand_dept)})'})
+        elif same_dept:
+            signals.append({'type': 'DEPT_MATCH', 'label': f'Same municipal department ({cand_dept})'})
+        elif is_cross_dept_related:
+            signals.append({'type': 'CROSS_DEPT_RELATION', 'label': f'Cross-sector impact ({rep_dept} affecting {cand_dept})'})
+
+        if evidence_match:
+            signals.append({'type': 'EVIDENCE_HASH_MATCH', 'label': 'Exact Evidence File Match (SHA-256)'})
+        else:
+            signals.append({'type': 'EVIDENCE_STATUS', 'label': 'Evidence similarity unavailable'})
+
+        if text_sim >= 0.5:
+            signals.append({'type': 'TEXT_SIMILARITY_HIGH', 'label': f'High text token match ({int(text_sim * 100)}%)'})
+        elif text_sim >= 0.25:
+            signals.append({'type': 'TEXT_SIMILARITY_MOD', 'label': f'Moderate text token match ({int(text_sim * 100)}%)'})
+
+        if time_diff_hours < 2.0:
+            signals.append({'type': 'TIME_IMMEDIATE', 'label': f'Submitted within {int(time_diff_hours * 60)} mins of existing report'})
+        elif time_diff_hours <= 72.0:
+            signals.append({'type': 'TIME_ACTIVE_WINDOW', 'label': f'Reported {int(time_diff_hours)} hours ago (Active SLA)'})
+        else:
+            signals.append({'type': 'TIME_HISTORICAL', 'label': f'Reported {int(time_diff_hours / 24)} days ago'})
+
+        # RULE 1: POSSIBLE DUPLICATE
+        if same_dept and (same_ward or dist_m < 150):
+            if evidence_match and (dist_m < 200 or same_street):
+                match_score = 0.96
+                reasoning = f"Existing report #{cand_id} matches uploaded evidence file and location coordinates in {cand_ward}."
+                evaluated_matches.append({
+                    'type': 'POSSIBLE_DUPLICATE',
+                    'score': match_score,
+                    'cand': cand,
+                    'signals': signals,
+                    'reasoning': reasoning,
+                    'action': 'Use Existing Incident or Confirm as New'
+                })
+                continue
+            elif (dist_m < 100 or same_street) and text_sim >= 0.45 and time_diff_hours < 4.0:
+                match_score = 0.88
+                reasoning = f"Possible duplicate report detected. Incident #{cand_id} was submitted {int(time_diff_hours * 60)} mins ago with matching details at this location."
+                evaluated_matches.append({
+                    'type': 'POSSIBLE_DUPLICATE',
+                    'score': match_score,
+                    'cand': cand,
+                    'signals': signals,
+                    'reasoning': reasoning,
+                    'action': 'Use Existing Incident or Confirm as New'
+                })
+                continue
+
+        # RULE 2: FOLLOW_UP
+        if cand_is_unresolved and same_dept and (same_ward or dist_m < 250):
+            if (dist_m < 250 or same_street or (same_cat and text_sim >= 0.25)):
+                match_score = 0.85
+                status_label = (cand.get('workerStatus') or cand_status).upper()
+                reasoning = f"An existing civic incident (#{cand_id}) is currently {status_label} at this location. This report provides an operational citizen follow-up."
+                evaluated_matches.append({
+                    'type': 'FOLLOW_UP',
+                    'score': match_score,
+                    'cand': cand,
+                    'signals': signals,
+                    'reasoning': reasoning,
+                    'action': 'Add Follow-up to Existing Ticket'
+                })
+                continue
+
+        # RULE 3: RELATED_INCIDENT
+        if (dist_m < 350 or (same_ward and (same_street or text_sim >= 0.25))):
+            if same_dept and not same_cat:
+                match_score = 0.65
+                reasoning = f"Adjacent civic issue detected in {cand_ward} (#{cand_id}: {cand.get('title')}). Can be linked for coordinated field handling."
+                evaluated_matches.append({
+                    'type': 'RELATED_INCIDENT',
+                    'score': match_score,
+                    'cand': cand,
+                    'signals': signals,
+                    'reasoning': reasoning,
+                    'action': 'Link as Related Incident'
+                })
+                continue
+            elif is_cross_dept_related:
+                match_score = 0.60
+                reasoning = f"Cross-department civic impact detected between {rep_dept} and {cand_dept} near this location (#{cand_id})."
+                evaluated_matches.append({
+                    'type': 'RELATED_INCIDENT',
+                    'score': match_score,
+                    'cand': cand,
+                    'signals': signals,
+                    'reasoning': reasoning,
+                    'action': 'Link as Related Incident'
+                })
+                continue
+            elif not cand_is_unresolved and time_diff_hours < (14 * 24):
+                match_score = 0.55
+                reasoning = f"Recent incident (#{cand_id}) was resolved at this spot within the last 14 days. Suggests potential recurring civic condition."
+                evaluated_matches.append({
+                    'type': 'RELATED_INCIDENT',
+                    'score': match_score,
+                    'cand': cand,
+                    'signals': signals,
+                    'reasoning': reasoning,
+                    'action': 'Link as Related Incident'
+                })
+                continue
+
+    if evaluated_matches:
+        evaluated_matches.sort(key=lambda m: m['score'], reverse=True)
+        best = evaluated_matches[0]
+        cand = best['cand']
+        
+        now_ts = int(time.time() * 1000)
+        c_ts = cand.get('timestamp') or now_ts
+        hours_ago = round(max(0.1, (now_ts - c_ts) / (3600.0 * 1000.0)), 1)
+
+        existing_summary = {
+            'id': cand.get('id'),
+            'title': cand.get('title'),
+            'category': cand.get('category'),
+            'categoryName': cand.get('categoryName'),
+            'department': cand.get('department'),
+            'deptName': cand.get('deptName'),
+            'location': cand.get('location') or f"{cand.get('ward', '')}, {cand.get('street', '')}",
+            'ward': cand.get('ward'),
+            'status': cand.get('status'),
+            'workerStatus': cand.get('workerStatus'),
+            'timestamp': c_ts,
+            'hoursAgo': hours_ago,
+            'severity': cand.get('severity'),
+            'followUpCount': int(cand.get('followUpCount') or 0),
+            'imageBefore': cand.get('imageBefore')
+        }
+
+        return {
+            'identityType': best['type'],
+            'matchedIssueId': cand.get('id'),
+            'matchScore': best['score'],
+            'signals': best['signals'],
+            'reasoning': best['reasoning'],
+            'recommendedAction': best['action'],
+            'existingIssue': existing_summary
+        }
+
+    return {
+        'identityType': 'NEW_INCIDENT',
+        'matchedIssueId': None,
+        'matchScore': 0.0,
+        'signals': [
+            {'type': 'ISOLATED_INCIDENT', 'label': 'No matching active or unresolved reports found in this zone'}
+        ],
+        'reasoning': 'No conflicting or unresolved civic incidents detected at this location. Proceeding with new ticket creation.',
+        'recommendedAction': 'Proceed with New Incident',
+        'existingIssue': None
+    }
 
 def init_database():
     conn = get_db_connection()
@@ -518,7 +813,17 @@ def init_database():
         ('workCompletedTimestamp', 'INTEGER'),
         ('workCompletedBy', 'TEXT'),
         ('resolutionNotes', 'TEXT'),
-        ('rejectionReason', 'TEXT')
+        ('rejectionReason', 'TEXT'),
+        ('parentIssueId', 'TEXT'),
+        ('identityType', 'TEXT DEFAULT "NEW_INCIDENT"'),
+        ('identityMatchScore', 'REAL DEFAULT 0.0'),
+        ('identityMatchedIssueId', 'TEXT'),
+        ('identityReasoning', 'TEXT'),
+        ('identityReviewed', 'INTEGER DEFAULT 0'),
+        ('identityReviewedBy', 'TEXT'),
+        ('identityReviewedTimestamp', 'INTEGER'),
+        ('followUpCount', 'INTEGER DEFAULT 0'),
+        ('evidenceHash', 'TEXT')
     ]
     for col_name, col_type in new_issue_cols:
         if col_name not in existing_issue_cols:
@@ -526,6 +831,27 @@ def init_database():
                 cursor.execute(f"ALTER TABLE issues ADD COLUMN {col_name} {col_type}")
             except Exception as e:
                 print(f"[Database] Column {col_name} migration note: {e}")
+
+    # Table: Incident Relationships (Civic Incident Identity Engine v43)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS incident_relationships (
+            id TEXT PRIMARY KEY,
+            sourceIssueId TEXT,
+            targetIssueId TEXT,
+            relationshipType TEXT,
+            matchReason TEXT,
+            matchScore REAL DEFAULT 0.0,
+            signals TEXT,
+            createdAt INTEGER,
+            createdBy TEXT,
+            createdById TEXT,
+            reviewedBy TEXT,
+            reviewedAt INTEGER,
+            status TEXT DEFAULT 'ACTIVE'
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_inc_rel_target ON incident_relationships(targetIssueId)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_inc_rel_source ON incident_relationships(sourceIssueId)')
 
     # Table: Sessions (Authoritative Cryptographic Session Store)
     cursor.execute('''
@@ -1209,6 +1535,101 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             self.send_json_response({'success': True, 'issues': issues, 'count': len(issues)})
             return
 
+        # Stage v43: REST API: GET /api/issues/:id/relationships
+        if (path.startswith('/api/issues/') and path.endswith('/relationships')) or path == '/api/issues/relationships':
+            parts = path.split('/')
+            issue_id = parts[3] if len(parts) >= 5 else query.get('issueId', [None])[0]
+            
+            if not issue_id:
+                self.send_json_response({'success': False, 'error': 'Missing issue ID.'}, status=400)
+                return
+            
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            auth_user = get_authenticated_user(self, conn)
+            
+            cursor.execute("SELECT * FROM issues WHERE id = ?", (issue_id,))
+            i_row = cursor.fetchone()
+            if not i_row:
+                conn.close()
+                self.send_json_response({'success': False, 'error': f'Issue #{issue_id} not found.'}, status=404)
+                return
+            
+            target_issue = dict(i_row)
+            
+            # Authoritative Jurisdiction Security Check
+            if auth_user:
+                u_dept = auth_user.get('department')
+                if u_dept == 'municipal':
+                    u_state = auth_user.get('jurisdictionState')
+                    u_city = auth_user.get('jurisdictionCity')
+                    u_ward = auth_user.get('jurisdictionWard')
+                    if u_state and target_issue.get('state') and u_state.lower() != target_issue.get('state').lower():
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Incident outside authorized state jurisdiction.'}, status=403)
+                        return
+                    if u_city and target_issue.get('city') and u_city.lower() != target_issue.get('city').lower():
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Incident outside authorized city jurisdiction.'}, status=403)
+                        return
+                    if u_ward and u_ward != 'ALL' and target_issue.get('ward') and u_ward.lower() not in target_issue.get('ward').lower():
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Incident outside authorized ward jurisdiction.'}, status=403)
+                        return
+                    if target_issue.get('department') == 'food_safety':
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Municipal officer cannot view food safety incident relationships.'}, status=403)
+                        return
+                elif u_dept in ['food', 'food_safety']:
+                    if target_issue.get('department') != 'food_safety':
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Food safety officers only have access to food safety incidents.'}, status=403)
+                        return
+                elif u_dept == 'worker':
+                    if target_issue.get('assignedWorker') != auth_user.get('name') and target_issue.get('assignedWorkerId') != auth_user.get('userId'):
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Workers may only access assigned tasks.'}, status=403)
+                        return
+
+            # Fetch relationships from incident_relationships
+            cursor.execute("""
+                SELECT * FROM incident_relationships 
+                WHERE targetIssueId = ? OR sourceIssueId = ?
+                ORDER BY createdAt DESC
+            """, (issue_id, issue_id))
+            rel_rows = cursor.fetchall()
+            relationships = []
+            for r in rel_rows:
+                rd = dict(r)
+                try:
+                    rd['signals'] = json.loads(rd.get('signals') or '[]')
+                except Exception:
+                    rd['signals'] = []
+                relationships.append(rd)
+
+            # Fetch direct child follow-up issues if any
+            cursor.execute("SELECT id, title, status, timestamp, reportedBy, followUpCount, identityType FROM issues WHERE parentIssueId = ?", (issue_id,))
+            child_rows = cursor.fetchall()
+            linked_followups = [dict(cr) for cr in child_rows]
+
+            conn.close()
+            self.send_json_response({
+                'success': True,
+                'issueId': issue_id,
+                'parentIssueId': target_issue.get('parentIssueId'),
+                'identityType': target_issue.get('identityType') or 'NEW_INCIDENT',
+                'identityMatchScore': target_issue.get('identityMatchScore'),
+                'identityMatchedIssueId': target_issue.get('identityMatchedIssueId'),
+                'identityReasoning': target_issue.get('identityReasoning'),
+                'identityReviewed': target_issue.get('identityReviewed') or 0,
+                'identityReviewedBy': target_issue.get('identityReviewedBy'),
+                'identityReviewedTimestamp': target_issue.get('identityReviewedTimestamp'),
+                'followUpCount': int(target_issue.get('followUpCount') or 0),
+                'relationships': relationships,
+                'linkedFollowUps': linked_followups
+            })
+            return
+
         # 3. REST API: GET /api/vendors
         if path == '/api/vendors':
             conn = get_db_connection()
@@ -1520,10 +1941,11 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
 
             cursor.execute('SELECT COUNT(*) FROM issues')
             total_issues = cursor.fetchone()[0]
-            issue_id = f'ISS-2026-{str(total_issues + 124).zfill(5)}'
+            issue_id = (body.get('id') or '').strip() or f'ISS-2026-{str(total_issues + 124).zfill(5)}'
 
             now = int(time.time() * 1000)
             deadline = now + (48 * 3600 * 1000)
+            reporter_actor = (body.get('reportedBy') or 'Citizen').strip()
 
             dept_key = body.get('department', 'sanitation')
             dept_map = {
@@ -1603,12 +2025,57 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'imageAiReasoning': body.get('imageAiReasoning'),
                 'imageAiAccepted': int(body.get('imageAiAccepted', 0)),
                 'imageOfficerVerified': int(body.get('imageOfficerVerified', 0)),
-                'imageOfficerOverrideReason': body.get('imageOfficerOverrideReason')
+                'imageOfficerOverrideReason': body.get('imageOfficerOverrideReason'),
+                'parentIssueId': body.get('parentIssueId'),
+                'identityType': body.get('identityType', 'NEW_INCIDENT'),
+                'identityMatchScore': float(body.get('identityMatchScore', 0.0)),
+                'identityMatchedIssueId': body.get('identityMatchedIssueId'),
+                'identityReasoning': body.get('identityReasoning'),
+                'identityReviewed': int(body.get('identityReviewed', 0)),
+                'identityReviewedBy': body.get('identityReviewedBy'),
+                'identityReviewedTimestamp': body.get('identityReviewedTimestamp'),
+                'followUpCount': int(body.get('followUpCount', 0)),
+                'evidenceHash': compute_evidence_hash(body.get('imageBefore'))
             }
 
             cols = ', '.join(new_issue.keys())
             placeholders = ', '.join([f":{k}" for k in new_issue.keys()])
             cursor.execute(f"INSERT INTO issues ({cols}) VALUES ({placeholders})", new_issue)
+
+            # Record in incident_relationships if linked or related
+            if body.get('identityMatchedIssueId') or body.get('parentIssueId'):
+                target_id = body.get('parentIssueId') or body.get('identityMatchedIssueId')
+                rel_type = body.get('identityType') or 'RELATED_INCIDENT'
+                cursor.execute('''
+                    INSERT INTO incident_relationships (
+                        id, sourceIssueId, targetIssueId, relationshipType, matchReason,
+                        matchScore, signals, createdAt, createdBy, createdById, status
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    f"REL-{now}-{random.randint(100, 999)}",
+                    new_issue['id'],
+                    target_id,
+                    rel_type,
+                    body.get('identityReasoning') or 'Citizen corroborated relationship',
+                    float(body.get('identityMatchScore', 0.0)),
+                    json.dumps(body.get('signals') or []),
+                    now,
+                    reporter_actor,
+                    user_id,
+                    'ACTIVE'
+                ))
+                cursor.execute('''
+                    INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    f"AUDIT-REL-{now}-{random.randint(100, 999)}",
+                    new_issue['id'],
+                    reporter_actor,
+                    'ISSUE_RELATIONSHIP_CREATED',
+                    None,
+                    f"Linked to incident #{target_id} as {rel_type}",
+                    now
+                ))
 
             # Operational Audit Trail Logging (Phase D Requirement 8)
             audit_id_rep = f"AUDIT-REP-{now}-{random.randint(100, 999)}"
@@ -1653,6 +2120,169 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'issue': broadcast_payload,
                 'remainingToday': max(0, 2 - current_count)
             })
+            return
+
+        # Stage v43: REST API: POST /api/issues/follow-up (Citizen Follow-up Linking)
+        if path == '/api/issues/follow-up':
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            auth_user = get_authenticated_user(self, conn)
+            
+            parent_id = (body.get('parentIssueId') or body.get('issueId') or '').strip()
+            reason = (body.get('reason') or body.get('description') or '').strip()
+            image = body.get('image') or body.get('imageBefore') or ''
+            
+            if not parent_id:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Parent incident ID is required.'}, status=400)
+                return
+            
+            cursor.execute("SELECT * FROM issues WHERE id = ?", (parent_id,))
+            p_row = cursor.fetchone()
+            if not p_row:
+                conn.close()
+                self.send_json_response({'success': False, 'error': f'Parent issue #{parent_id} not found.'}, status=404)
+                return
+            
+            parent_issue = dict(p_row)
+            
+            # Security & Jurisdiction validation
+            if auth_user:
+                u_dept = auth_user.get('department')
+                if u_dept == 'worker':
+                    conn.close()
+                    self.send_json_response({'success': False, 'error': 'Forbidden: Field workforce squads cannot manipulate citizen follow-ups.'}, status=403)
+                    return
+                if u_dept == 'municipal':
+                    u_state = auth_user.get('jurisdictionState')
+                    u_city = auth_user.get('jurisdictionCity')
+                    u_ward = auth_user.get('jurisdictionWard')
+                    if u_state and parent_issue.get('state') and u_state.lower() != parent_issue.get('state').lower():
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Parent issue is outside your authorized state.'}, status=403)
+                        return
+                    if u_city and parent_issue.get('city') and u_city.lower() != parent_issue.get('city').lower():
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Parent issue is outside your authorized city.'}, status=403)
+                        return
+                    if u_ward and u_ward != 'ALL' and parent_issue.get('ward') and u_ward.lower() not in parent_issue.get('ward').lower():
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Parent issue is outside your authorized ward.'}, status=403)
+                        return
+
+            now_ms = int(time.time() * 1000)
+            citizen_name = (auth_user.get('name') if auth_user else body.get('reportedBy')) or 'Citizen'
+            user_id = (auth_user.get('userId') if auth_user else body.get('reportedById')) or 'user-citizen'
+            
+            current_followups = int(parent_issue.get('followUpCount') or 0)
+            new_followup_count = current_followups + 1
+            
+            comments = json.loads(parent_issue.get('comments') or '[]')
+            follow_up_comment = {
+                'author': f"Citizen Follow-up ({citizen_name})",
+                'text': reason or "Citizen submitted a follow-up report confirming the issue remains unresolved on-site.",
+                'time': 'Just now',
+                'type': 'follow_up',
+                'timestamp': now_ms
+            }
+            comments.append(follow_up_comment)
+            
+            cursor.execute('''
+                UPDATE issues 
+                SET followUpCount = ?, comments = ?
+                WHERE id = ?
+            ''', (new_followup_count, json.dumps(comments), parent_id))
+            
+            rel_id = f"REL-FLW-{now_ms}-{random.randint(100, 999)}"
+            flw_id = f"FLW-{parent_id}-{new_followup_count}"
+            cursor.execute('''
+                INSERT INTO incident_relationships (
+                    id, sourceIssueId, targetIssueId, relationshipType, matchReason,
+                    matchScore, signals, createdAt, createdBy, createdById, status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                rel_id,
+                flw_id,
+                parent_id,
+                'FOLLOW_UP',
+                reason or 'Operational citizen follow-up on active grievance',
+                1.0,
+                json.dumps([{'signal': 'DIRECT_CITIZEN_FOLLOW_UP', 'description': 'Citizen explicitly confirmed follow-up on active issue'}]),
+                now_ms,
+                citizen_name,
+                user_id,
+                'ACTIVE'
+            ))
+            
+            audit_id = f"AUDIT-FLW-{now_ms}-{random.randint(100, 999)}"
+            cursor.execute('''
+                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                audit_id,
+                parent_id,
+                citizen_name,
+                'ISSUE_FOLLOW_UP_LINKED',
+                parent_issue.get('assignedWorker'),
+                f"Citizen {citizen_name} submitted follow-up report. Total follow-ups on #{parent_id}: {new_followup_count}",
+                now_ms
+            ))
+            
+            conn.commit()
+            conn.close()
+            
+            self.send_json_response({
+                'success': True,
+                'parentIssueId': parent_id,
+                'followUpCount': new_followup_count,
+                'message': f"Follow-up successfully attached to incident #{parent_id}.",
+                'comment': follow_up_comment
+            })
+            return
+
+        # Stage v43: REST API: POST /api/issues/:id/review-identity (Officer Identity Review)
+        if (path.startswith('/api/issues/') and path.endswith('/review-identity')) or path == '/api/issues/review-identity':
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            auth_user = get_authenticated_user(self, conn)
+            
+            if not auth_user or auth_user.get('department') not in ['municipal', 'food', 'food_safety']:
+                conn.close()
+                self.send_json_response({'success': False, 'error': 'Unauthorized: Only authorized officers can review incident identity.'}, status=403)
+                return
+            
+            parts = path.split('/')
+            issue_id = parts[3] if len(parts) >= 5 else body.get('issueId')
+            status_decision = body.get('decision', 'CONFIRMED')
+            reason = body.get('reason', '')
+            
+            now_ms = int(time.time() * 1000)
+            officer_name = auth_user.get('name', 'Authorized Officer')
+            
+            cursor.execute('''
+                UPDATE issues 
+                SET identityReviewed = 1, identityReviewedBy = ?, identityReviewedTimestamp = ?
+                WHERE id = ?
+            ''', (officer_name, now_ms, issue_id))
+            
+            audit_id = f"AUDIT-REV-{now_ms}-{random.randint(100, 999)}"
+            cursor.execute('''
+                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                audit_id,
+                issue_id,
+                officer_name,
+                'ISSUE_IDENTITY_REVIEWED',
+                None,
+                f"Officer reviewed incident identity: decision={status_decision}. Notes: {reason}",
+                now_ms
+            ))
+            
+            conn.commit()
+            conn.close()
+            
+            self.send_json_response({'success': True, 'issueId': issue_id, 'status': status_decision})
             return
 
         # Stage B: REST API: POST /api/issues/assign (Officer Squad Allocation & Persistence)
@@ -3208,6 +3838,121 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'suggestedTitle': suggested_title,
                 'isAdvisoryOnly': True,
                 'analysisSource': 'Deterministic AI-assisted civic classification'
+            })
+            return
+
+        # ---------------------------------------------------------------------
+        # STAGE v43: CIVIC INCIDENT IDENTITY ENGINE EVALUATION
+        # POST /api/ai/incident-identity
+        # ---------------------------------------------------------------------
+        if path == '/api/ai/incident-identity':
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            auth_user = get_authenticated_user(self, conn)
+
+            # Security & Jurisdiction Validation
+            if auth_user:
+                u_dept = auth_user.get('department')
+                if u_dept == 'worker':
+                    conn.close()
+                    self.send_json_response({'success': False, 'error': 'Forbidden: Field workforce squad is restricted to operational tasks.'}, status=403)
+                    return
+                if u_dept == 'municipal':
+                    u_state = auth_user.get('jurisdictionState')
+                    u_city = auth_user.get('jurisdictionCity')
+                    u_ward = auth_user.get('jurisdictionWard')
+                    req_state = body.get('state')
+                    req_city = body.get('city')
+                    req_ward = body.get('ward')
+                    if u_state and req_state and u_state.lower() != req_state.lower():
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Request state outside authorized municipal jurisdiction.'}, status=403)
+                        return
+                    if u_city and req_city and u_city.lower() != req_city.lower():
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Request city outside authorized municipal jurisdiction.'}, status=403)
+                        return
+                    if u_ward and u_ward != 'ALL' and req_ward and u_ward.lower() not in req_ward.lower():
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Request ward outside authorized municipal jurisdiction.'}, status=403)
+                        return
+                    if body.get('department') == 'food_safety':
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Municipal officer cannot evaluate food safety incident identity.'}, status=403)
+                        return
+                elif u_dept in ['food', 'food_safety']:
+                    if body.get('department') and body.get('department') != 'food_safety':
+                        conn.close()
+                        self.send_json_response({'success': False, 'error': 'Forbidden: Food safety officers are restricted to food safety incidents.'}, status=403)
+                        return
+
+            where_clauses = []
+            prms = []
+            if auth_user and auth_user.get('department') == 'municipal':
+                where_clauses.append("department != 'food_safety'")
+                if auth_user.get('jurisdictionState'):
+                    where_clauses.append("state = ?")
+                    prms.append(auth_user.get('jurisdictionState'))
+                if auth_user.get('jurisdictionCity'):
+                    where_clauses.append("city = ?")
+                    prms.append(auth_user.get('jurisdictionCity'))
+                if auth_user.get('jurisdictionWard') and auth_user.get('jurisdictionWard') != 'ALL':
+                    where_clauses.append("ward = ?")
+                    prms.append(auth_user.get('jurisdictionWard'))
+            elif auth_user and auth_user.get('department') in ['food', 'food_safety']:
+                where_clauses.append("department = 'food_safety'")
+                if auth_user.get('jurisdictionState'):
+                    where_clauses.append("state = ?")
+                    prms.append(auth_user.get('jurisdictionState'))
+                if auth_user.get('jurisdictionCity'):
+                    where_clauses.append("city = ?")
+                    prms.append(auth_user.get('jurisdictionCity'))
+            else:
+                req_state = body.get('state')
+                req_city = body.get('city')
+                if req_state:
+                    where_clauses.append("state = ?")
+                    prms.append(req_state)
+                if req_city:
+                    where_clauses.append("city = ?")
+                    prms.append(req_city)
+
+            query_sql = "SELECT * FROM issues"
+            if where_clauses:
+                query_sql += " WHERE " + " AND ".join(where_clauses)
+            query_sql += " ORDER BY id DESC LIMIT 200"
+
+            cursor.execute(query_sql, prms)
+            candidates = [dict(r) for r in cursor.fetchall()]
+
+            exclude_id = body.get('excludeIssueId') or body.get('issueId')
+            if exclude_id:
+                candidates = [c for c in candidates if str(c.get('id')) != str(exclude_id)]
+
+            evaluation = evaluate_incident_identity(body, candidates, auth_user=auth_user)
+
+            # Audit logging
+            now_ms = int(time.time() * 1000)
+            actor = (auth_user.get('name') if auth_user else body.get('reportedBy')) or 'Citizen'
+            audit_id = f"AUDIT-IDN-{now_ms}-{random.randint(100, 999)}"
+            cursor.execute('''
+                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                audit_id,
+                evaluation.get('matchedIssueId'),
+                actor,
+                'ISSUE_IDENTITY_ANALYZED',
+                None,
+                f"Incident Identity Engine evaluated: type={evaluation.get('identityType')}, score={evaluation.get('matchScore')}. Matched: #{evaluation.get('matchedIssueId')}",
+                now_ms
+            ))
+            conn.commit()
+            conn.close()
+
+            self.send_json_response({
+                'success': True,
+                **evaluation
             })
             return
 
