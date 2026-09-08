@@ -276,3 +276,150 @@
   flex-shrink: 0;
 }
 
+/* Compact Grievance Lifecycle Indicator */
+.compact-lifecycle-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.compact-lifecycle-strip .life-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.compact-lifecycle-strip .life-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #475569;
+  display: inline-block;
+}
+
+.compact-lifecycle-strip .life-step.completed {
+  color: #a7f3d0;
+}
+
+.compact-lifecycle-strip .life-step.completed .life-dot {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.compact-lifecycle-strip .life-step.active {
+  color: #38bdf8;
+  font-weight: 800;
+}
+
+.compact-lifecycle-strip .life-step.active .life-dot {
+  background: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+}
+
+.compact-lifecycle-strip .life-arrow {
+  color: #475569;
+  font-size: 0.75rem;
+  user-select: none;
+  margin: 0 1px;
+}
+
+/* Municipal Officer 4-Tier Command Structure */
+.mun-command-tier {
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mun-command-tier:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Reward Path Tabs */
+.reward-path-tab {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reward-path-tab.active {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: #10b981;
+  color: #34d399;
+}
+
+/* Compact Lifecycle Indicators */
+.compact-lifecycle-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  margin: 0.4rem 0 0.5rem;
+  overflow-x: auto;
+}
+
+.compact-lifecycle-step {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.compact-lifecycle-step.step-done {
+  color: #34d399;
+}
+
+.compact-lifecycle-step.step-done .step-dot {
+  background: #10b981;
+  box-shadow: 0 0 5px rgba(16, 185, 129, 0.6);
+}
+
+.compact-lifecycle-step.step-current {
+  color: #38bdf8;
+}
+
+.compact-lifecycle-step.step-current .step-dot {
+  background: #0284c7;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+}
+
+.compact-lifecycle-step.step-pending {
+  color: #64748b;
+}
+
+.compact-lifecycle-step.step-pending .step-dot {
+  background: #475569;
+}
+
+.step-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.step-name {
+  line-height: 1;
+}
+
+.step-connector {
+  color: #475569;
+  font-size: 0.65rem;
+  user-select: none;
+  margin: 0 1px;
+}

@@ -2882,31 +2882,85 @@
     const issues = db.getAllIssues();
     issues.forEach(issue => {
       if (issue.lat && issue.lng) {
-        const markerColor = issue.department === 'electricity' ? '#0284c7' : issue.department === 'food_safety' ? '#d97706' : '#10b981';
+        // Distinct solid department color coding
+        let markerColor = '#10b981'; // Sanitation (emerald)
+        if (issue.department === 'electricity') markerColor = '#0284c7'; // Electricity (sky blue)
+        else if (issue.department === 'roads') markerColor = '#f97316'; // Roads (orange)
+        else if (issue.department === 'water') markerColor = '#06b6d4'; // Water Supply (cyan)
+        else if (issue.department === 'food_safety') markerColor = '#e11d48'; // Food Safety (coral/red)
         
         const circle = L.circleMarker([issue.lat, issue.lng], {
-          radius: issue.severity === 'bulk' ? 14 : 10,
+          radius: issue.severity === 'bulk' ? 14 : (issue.severity === 'critical' ? 12 : 9),
           fillColor: markerColor,
           color: '#ffffff',
-          weight: 2.5,
+          weight: 3,
           opacity: 1,
-          fillOpacity: 0.9
+          fillOpacity: 0.95
         }).addTo(gisIssueMarkersGroup);
 
         circle.bindPopup(`
-          <div style="color: #0f172a; font-family: sans-serif; min-width: 190px;">
-            <div style="font-weight: 800; font-size: 0.95rem; margin-bottom: 2px;">${issue.title}</div>
-            <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 6px;">📍 ${issue.location}</div>
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size: 0.75rem; font-weight: 700; color: ${markerColor};">
-              <span>${issue.deptName || issue.department}</span>
-              <span style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${(issue.severity || 'normal').toUpperCase()}</span>
+          <div style="color: #0f172a; font-family: sans-serif; min-width: 200px; padding: 2px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+              <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: ${markerColor};">${issue.id}</span>
+              <span style="background: ${markerColor}; color: white; padding: 1px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 800;">${(issue.deptName || issue.department).toUpperCase()}</span>
             </div>
-            <div style="margin-top: 6px; font-size: 0.72rem; color: #475569;">Status: <strong>${issue.status.toUpperCase()}</strong> • Squad: <strong>${issue.assignedWorker || 'Unassigned'}</strong></div>
+            <div style="font-weight: 800; font-size: 0.92rem; margin-bottom: 3px; line-height: 1.3;">${issue.title}</div>
+            <div style="font-size: 0.76rem; color: #64748b; margin-bottom: 6px;">📍 ${issue.location}</div>
+            <div style="background: #f8fafc; padding: 4px 6px; border-radius: 4px; font-size: 0.72rem; color: #475569; border: 1px solid #e2e8f0; margin-bottom: 6px;">
+              <div>Status: <strong>${issue.status.replace('_', ' ').toUpperCase()}</strong></div>
+              <div>Squad: <strong>${issue.assignedWorker || 'Unassigned'}</strong></div>
+            </div>
+            <button style="background: #0284c7; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.72rem; font-weight: 700; width: 100%; cursor: pointer;" onclick="window.viewIssueDetail('${issue.id}')">Track Incident Detail</button>
           </div>
         `);
       }
     });
   }
+
+  // Civic Risk Map Layer Filter Controller
+  window.filterGisMap = function(mode) {
+    if (!gisMapInstance) return;
+    const btnAll = document.getElementById('btnGisFilterAll');
+    const btnTickets = document.getElementById('btnGisFilterTickets');
+    const btnHotspots = document.getElementById('btnGisFilterHotspots');
+
+    [btnAll, btnTickets, btnHotspots].forEach(b => {
+      if (b) {
+        b.style.background = 'rgba(255,255,255,0.06)';
+        b.style.borderColor = 'var(--border)';
+        b.style.color = '#cbd5e1';
+      }
+    });
+
+    if (mode === 'all') {
+      if (btnAll) {
+        btnAll.style.background = 'rgba(56, 189, 248, 0.2)';
+        btnAll.style.borderColor = '#38bdf8';
+        btnAll.style.color = '#38bdf8';
+      }
+      if (gisIssueMarkersGroup && !gisMapInstance.hasLayer(gisIssueMarkersGroup)) gisMapInstance.addLayer(gisIssueMarkersGroup);
+      if (gisPredictiveLayerGroup && !gisMapInstance.hasLayer(gisPredictiveLayerGroup)) gisMapInstance.addLayer(gisPredictiveLayerGroup);
+      showToast('Displaying All GIS Layers (Tickets, Hotspots & Fleet)', 'info', '🗺️');
+    } else if (mode === 'tickets') {
+      if (btnTickets) {
+        btnTickets.style.background = 'rgba(16, 185, 129, 0.2)';
+        btnTickets.style.borderColor = '#10b981';
+        btnTickets.style.color = '#34d399';
+      }
+      if (gisIssueMarkersGroup && !gisMapInstance.hasLayer(gisIssueMarkersGroup)) gisMapInstance.addLayer(gisIssueMarkersGroup);
+      if (gisPredictiveLayerGroup && gisMapInstance.hasLayer(gisPredictiveLayerGroup)) gisMapInstance.removeLayer(gisPredictiveLayerGroup);
+      showToast('Filtered: Current Grievance Tickets Only', 'info', '📍');
+    } else if (mode === 'hotspots') {
+      if (btnHotspots) {
+        btnHotspots.style.background = 'rgba(239, 68, 68, 0.2)';
+        btnHotspots.style.borderColor = '#ef4444';
+        btnHotspots.style.color = '#f87171';
+      }
+      if (gisIssueMarkersGroup && gisMapInstance.hasLayer(gisIssueMarkersGroup)) gisMapInstance.removeLayer(gisIssueMarkersGroup);
+      if (gisPredictiveLayerGroup && !gisMapInstance.hasLayer(gisPredictiveLayerGroup)) gisMapInstance.addLayer(gisPredictiveLayerGroup);
+      showToast('Filtered: Predictive Recurring Hotspots Only', 'info', '🔥');
+    }
+  };
 
   // Real-Time Moving Fleet GPS Loop
   let activeFleetMarkers = [];
@@ -3565,6 +3619,55 @@
   // =========================================================================
   // 6. UI RENDERER & ROUTER
   // =========================================================================
+  function renderCompactLifecycle(issue) {
+    const isResolved = issue.status === 'resolved';
+    const isAssigned = Boolean(issue.assignedWorker && issue.assignedWorker !== 'Unassigned' && issue.assignedTimestamp);
+    const isField = Boolean(
+      isResolved || 
+      issue.status === 'work_completed' || 
+      issue.status === 'pending_verification' || 
+      issue.status === 'in_progress' || 
+      issue.workerStatus === 'On Site - Conducting Work' || 
+      issue.workerStatus === 'Work Completed - Awaiting Verification' || 
+      issue.arrivedTimestamp || 
+      issue.workerCompletedTimestamp
+    );
+    const isVerification = Boolean(
+      isResolved || 
+      issue.status === 'pending_verification' || 
+      issue.status === 'work_completed' || 
+      issue.imageOfficerVerified === 1 || 
+      issue.workerCompletedTimestamp
+    );
+
+    const steps = [
+      { label: 'Reported', active: true, done: isAssigned || isField || isVerification || isResolved },
+      { label: 'Assigned', active: isAssigned, done: isField || isVerification || isResolved },
+      { label: 'Field Work', active: isField, done: isVerification || isResolved },
+      { label: 'Verification', active: isVerification, done: isResolved },
+      { label: 'Resolved', active: isResolved, done: isResolved }
+    ];
+
+    return `
+      <div class="compact-lifecycle-strip">
+        ${steps.map((s, idx) => {
+          const isComplete = s.done;
+          const isCurrent = s.active && !s.done;
+          const dotClass = isComplete ? 'step-done' : isCurrent ? 'step-current' : 'step-pending';
+          const arrow = idx < steps.length - 1 ? '<span class="step-connector">→</span>' : '';
+          return `
+            <div class="compact-lifecycle-step ${dotClass}" title="${s.label}: ${isComplete ? 'Completed' : isCurrent ? 'Active / In Progress' : 'Pending'}">
+              <span class="step-dot"></span>
+              <span class="step-name">${s.label}</span>
+            </div>
+            ${arrow}
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+  window.renderCompactLifecycle = renderCompactLifecycle;
+
   function renderCardHTML(issue) {
     const isResolved = issue.status === 'resolved';
     const isEscalated = issue.status === 'escalated' || issue.isSlaBreached;
@@ -3763,7 +3866,7 @@
             <span>${issue.location}</span>
           </div>
 
-          ${slaGaugeHTML}
+          ${renderCompactLifecycle(issue)}
           ${squadTelemetryHTML}
 
           <div style="font-size: 0.72rem; color: #64748b; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; justify-content: space-between;">
@@ -4167,6 +4270,10 @@
         }).join('');
       }
     }
+
+    if (typeof window.renderCivicRewardsUI === 'function') {
+      window.renderCivicRewardsUI();
+    }
   }
 
   function renderMunicipalDashboard() {
@@ -4212,7 +4319,20 @@
     if (rateEl) rateEl.textContent = `${resolutionRate}%`;
     if (rewardsEl) rewardsEl.textContent = `${rewardsPaid} Pts`;
     if (finesEl) finesEl.textContent = `₹${finesCollected.toLocaleString('en-IN')}`;
-    if (hotspotsEl) hotspotsEl.textContent = activeHotspotsCount;
+    const attentionBadge = document.getElementById('munAttentionCountBadge');
+    if (attentionBadge) {
+      const needsAttention = issues.filter(i => 
+        i.status !== 'resolved' && (
+          i.status === 'escalated' || 
+          i.isSlaBreached || 
+          !i.assignedWorker || 
+          i.assignedWorker === 'Unassigned' || 
+          i.status === 'work_completed' || 
+          i.workerStatus === 'Work Completed - Awaiting Verification'
+        )
+      );
+      attentionBadge.textContent = `${needsAttention.length} NEED ATTENTION`;
+    }
 
     const tableBody = document.getElementById('munIncidentTableBody');
     const tableBodyQueue = document.getElementById('munIncidentTableBody_queue');
@@ -4243,16 +4363,16 @@
                 <div style="font-size: 0.72rem; color: var(--command-text-muted);">${issue.city || 'Surampalem'} • ${issue.ward || 'Ward 12'}</div>
               </td>
               <td><span class="cat-badge">${issue.deptIcon} ${issue.deptName}</span></td>
-              <td>
-                <span class="badge sev-${issue.severity}">${issue.severity.toUpperCase()}</span>
-                <div style="font-size: 0.7rem; color: #38bdf8; margin-top: 3px; font-family: var(--font-mono); font-weight: 700;">
-                  🤖 Risk: ${issue.aiRiskScore || (issue.severity === 'critical' ? 88 : (issue.severity === 'bulk' || issue.severity === 'high' ? 74 : 52))}/100
+              <td style="min-width: 220px;">
+                ${renderCompactLifecycle(issue)}
+                <div style="font-size: 0.68rem; color: #94a3b8; margin-top: 2px;">
+                  Severity: <strong style="color: ${issue.severity === 'critical' ? '#f87171' : issue.severity === 'high' ? '#fbbf24' : '#34d399'};">${(issue.severity || 'medium').toUpperCase()}</strong> • Risk: ${issue.aiRiskScore || 50}/100
                 </div>
               </td>
               <td>
                 <div class="sla-progress-container">
                   <span class="sla-text ${isResolved ? 'text-success' : isEscalated ? 'text-danger' : 'text-warning'}" style="font-weight: 800; font-size: 0.75rem;">
-                    ${isResolved ? `✅ Resolved (${turnaroundStr})` : isEscalated ? `🚨 SLA Breached (>48h) — Escalated to Commissioner` : `⏱️ ${issue.slaHoursLeft}h left (Due ${deadlineTimeStr})`}
+                    ${isResolved ? `✅ Resolved (${turnaroundStr})` : isEscalated ? `🚨 SLA Breached (>48h) — Escalated` : `⏱️ ${issue.slaHoursLeft}h left (Due ${deadlineTimeStr})`}
                   </span>
                 </div>
               </td>
@@ -4716,6 +4836,11 @@
       if (authView) authView.classList.add('active');
       if (chatbotBtn) chatbotBtn.style.display = 'none';
 
+      // Show PWA install UI exclusively on login screen
+      document.querySelectorAll('.pwa-install-element').forEach(el => {
+        el.style.display = '';
+      });
+
       // Prefill last remembered email for user convenience
       const lastEmail = localStorage.getItem('CIVIC_LAST_EMAIL');
       const emailInput = document.getElementById('authEmailInput');
@@ -4728,6 +4853,11 @@
     }
 
     if (chatbotBtn) chatbotBtn.style.display = 'flex';
+
+    // Strictly hide PWA install UI inside authenticated dashboards
+    document.querySelectorAll('.pwa-install-element').forEach(el => {
+      el.style.display = 'none';
+    });
 
     // Synchronize Dynamic User Avatar, Badge & Profile Elements
     const currentUser = auth.getUser();
@@ -8945,6 +9075,116 @@
         }
       }
 
+      // Populate Tier 3: Overview Hotspots Table Snapshot
+      const overviewHotspotsTable = document.getElementById('overviewHotspotsTableBody');
+      if (overviewHotspotsTable) {
+        if (cachedPredictiveForecasts.length === 0) {
+          overviewHotspotsTable.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 1.25rem; color: #94a3b8; font-size: 0.8rem;">No active hotspots detected.</td></tr>`;
+        } else {
+          overviewHotspotsTable.innerHTML = cachedPredictiveForecasts.slice(0, 4).map(f => {
+            let riskBadgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981;';
+            let riskBadgeText = 'LOW';
+            if (f.predicted_risk_score >= 80 || f.predicted_risk_level === 'Critical') {
+              riskBadgeStyle = 'background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444;';
+              riskBadgeText = 'CRITICAL';
+            } else if (f.predicted_risk_score >= 60 || f.predicted_risk_level === 'High') {
+              riskBadgeStyle = 'background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b;';
+              riskBadgeText = 'HIGH';
+            } else if (f.predicted_risk_score >= 35 || f.predicted_risk_level === 'Moderate') {
+              riskBadgeStyle = 'background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid #eab308;';
+              riskBadgeText = 'MODERATE';
+            }
+            return `
+              <tr>
+                <td>
+                  <div style="font-weight: 700; color: white;">${f.ward_name}</div>
+                  <div style="font-size: 0.72rem; color: #38bdf8;">Zone: ${f.ward_name.includes('Market') ? 'Commercial' : 'Urban Sector'}</div>
+                </td>
+                <td>
+                  <div style="font-weight: 600; color: #f1f5f9;">${f.civic_category}</div>
+                  <div style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase;">${f.department}</div>
+                </td>
+                <td>
+                  <span class="badge" style="${riskBadgeStyle}">${riskBadgeText} (${f.predicted_risk_score}/100)</span>
+                </td>
+                <td>
+                  <span style="font-size: 0.75rem; color: #cbd5e1;">${f.recurrence_pattern || 'Moderate'}</span>
+                </td>
+                <td>
+                  <span class="badge" style="background: rgba(255,255,255,0.05); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); font-size: 0.72rem;">${f.forecast_horizon || 'Next 7 Days'}</span>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-sm btn-outline" style="border-color: #f59e0b; color: #f59e0b; font-size: 0.72rem; padding: 0.25rem 0.6rem; cursor: pointer;" onclick="window.openPredictiveDetailModal('${f.id}')">
+                    Inspect & Act
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+
+      // Populate Tier 3: The 3 Civic Intelligence Questions
+      const whatEl = document.getElementById('civicIntelWhat');
+      const whyEl = document.getElementById('civicIntelWhy');
+      const actEl = document.getElementById('civicIntelAction');
+      if (whatEl && whyEl && actEl) {
+        const topF = cachedPredictiveForecasts[0];
+        if (topF) {
+          whatEl.innerHTML = `<strong>Recurring ${topF.civic_category} cluster</strong> detected at ${topF.ward_name}. ${topF.recent_incident_count || 3} related incidents logged over the last 14 days.`;
+          whyEl.innerHTML = `<strong>Root Cause: ${topF.recurrence_pattern}</strong>. Sustained footfall & peak utility load exceed standard disposal and transformer ratings.`;
+          actEl.innerHTML = `<strong>Recommended Action:</strong> ${topF.recommended_preventive_action}. Authorized officer verification required.`;
+        }
+      }
+
+      // Populate Tier 4: Preventive Civic Actions Cards
+      const prevActionsContainer = document.getElementById('overviewPreventiveActionsContainer');
+      if (prevActionsContainer) {
+        if (cachedPredictiveForecasts.length === 0) {
+          prevActionsContainer.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 1.5rem; color: #94a3b8;">No pending preventive actions.</div>`;
+        } else {
+          prevActionsContainer.innerHTML = cachedPredictiveForecasts.slice(0, 3).map(f => {
+            const action = cachedPreventiveActions.find(a => a.forecast_id === f.id);
+            const status = action ? action.status : 'pending_review';
+            const isApproved = status === 'approved' || status === 'assigned' || status === 'implemented';
+            return `
+              <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.45rem;">
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; font-size: 0.7rem;">
+                      ${f.civic_category} • ${f.ward_name}
+                    </span>
+                    <span class="badge" style="background: rgba(255, 255, 255, 0.05); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); font-size: 0.68rem;">
+                      Risk: ${f.predicted_risk_score}/100
+                    </span>
+                  </div>
+                  <h4 style="color: white; font-size: 0.92rem; margin: 0 0 0.35rem; font-weight: 700;">
+                    ${f.recommended_preventive_action}
+                  </h4>
+                  <p style="font-size: 0.75rem; color: #94a3b8; line-height: 1.4; margin: 0 0 0.75rem;">
+                    Forecast: ${f.forecast_horizon || 'Next 7 Days'} • Recurrence: ${f.recurrence_pattern}
+                  </p>
+                </div>
+                <div style="display: flex; gap: 0.45rem; margin-top: auto; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.6rem;">
+                  <button type="button" class="btn btn-sm btn-outline" style="flex: 1; font-size: 0.74rem; border-color: #38bdf8; color: #38bdf8; padding: 0.35rem; cursor: pointer;" onclick="window.openPredictiveDetailModal('${f.id}')">
+                    Inspect Detail
+                  </button>
+                  ${!isApproved ? `
+                    <button type="button" class="btn btn-sm btn-primary" style="flex: 1; font-size: 0.74rem; background: #10b981; border-color: #10b981; font-weight: 700; padding: 0.35rem; cursor: pointer;" onclick="window.openPredictiveDetailModal('${f.id}')">
+                      Approve Action
+                    </button>
+                  ` : `
+                    <span style="flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #34d399; font-weight: 700;">
+                      ✓ ${status.toUpperCase()}
+                    </span>
+                  `}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
       // Update GIS layer if map instance is ready
       renderGisPredictiveHotspots(cachedPredictiveForecasts);
     } catch (e) {
@@ -9375,67 +9615,239 @@
   // =========================================================================
   // PRODUCTION MODAL HANDLERS: UTILITY REBATE, CCTV E-CHALLAN, FOODGUARD
   // =========================================================================
-  window._selectedRebate = { type: 'power', cost: 100 };
+  // =========================================================================
+  // UPGRADED PROFESSIONAL CIVIC REWARDS & DUAL-PATH REDEMPTION ENGINE
+  // =========================================================================
+  let cachedRewardsCatalog = [];
+  let selectedRewardId = 'bus_pass';
+  let currentRewardPath = 'self';
 
+  window.openCivicRewardsModal = async function() {
+    window.openModal('civicRewardModal');
+    await window.renderCivicRewardsUI();
+  };
+
+  // Backwards compatibility for legacy callers
   window.openUtilityRebateModal = function() {
-    const balance = calculateCitizenCreditsBalance();
-    const balanceEl = document.getElementById('rebateModalCurrentBalance');
-    if (balanceEl) balanceEl.textContent = balance;
+    window.openCivicRewardsModal();
+  };
 
-    window.selectRebateOption('power', 100);
-    const voucher = document.getElementById('rebateSuccessVoucher');
-    if (voucher) voucher.style.display = 'none';
+  window.switchRewardPath = function(path) {
+    currentRewardPath = path;
+    const tabSelf = document.getElementById('rewardPathTab_self');
+    const tabComm = document.getElementById('rewardPathTab_community');
+    const cSelf = document.getElementById('rewardContainer_self');
+    const cComm = document.getElementById('rewardContainer_community');
+    
+    if (path === 'self') {
+      if (tabSelf) tabSelf.classList.add('active');
+      if (tabComm) tabComm.classList.remove('active');
+      if (cSelf) cSelf.style.display = 'block';
+      if (cComm) cComm.style.display = 'none';
+    } else {
+      if (tabSelf) tabSelf.classList.remove('active');
+      if (tabComm) tabComm.classList.add('active');
+      if (cSelf) cSelf.style.display = 'none';
+      if (cComm) cComm.style.display = 'block';
+    }
+    const match = cachedRewardsCatalog.find(r => r.category === path);
+    if (match) {
+      window.selectRewardItem(match.id);
+    }
+  };
 
-    const btn = document.getElementById('confirmRedeemBtn');
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<span>🎁</span> Redeem Benefit (Deduct Credits)';
+  let currentInlineRewardPath = 'self';
+
+  window.switchInlineRewardPath = function(path) {
+    currentInlineRewardPath = path;
+    const tabSelf = document.getElementById('inlinePathTab_self') || document.getElementById('inlineRewardPathTab_self');
+    const tabComm = document.getElementById('inlinePathTab_community') || document.getElementById('inlineRewardPathTab_community');
+    
+    if (path === 'self') {
+      if (tabSelf) tabSelf.classList.add('active');
+      if (tabComm) tabComm.classList.remove('active');
+    } else {
+      if (tabSelf) tabSelf.classList.remove('active');
+      if (tabComm) tabComm.classList.add('active');
     }
 
-    window.openModal('utilityRebateModal');
+    const inlineContainer = document.getElementById('inlineRewardCatalogContainer');
+    if (inlineContainer && cachedRewardsCatalog.length > 0) {
+      const items = cachedRewardsCatalog.filter(r => r.category === path);
+      inlineContainer.innerHTML = items.map(item => `
+        <div class="rebate-card" onclick="window.openCivicRewardsModal(); window.switchRewardPath('${item.category}'); window.selectRewardItem('${item.id}');" style="cursor: pointer; position: relative;">
+          <div style="font-size: 1.8rem; margin-bottom: 0.4rem;">${item.icon}</div>
+          <div class="rebate-card-title">${item.title}</div>
+          <p style="font-size: 0.75rem; color: #94a3b8; margin: 0.35rem 0 0.5rem; line-height: 1.35;">${item.description}</p>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 0.4rem; border-top: 1px dashed rgba(255,255,255,0.08);">
+            <div class="rebate-cost" style="color: #34d399; font-weight: 800; font-family: var(--font-mono);">${item.points_cost} Pts</div>
+            <span class="badge" style="font-size: 0.65rem; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">PROTOTYPE</span>
+          </div>
+        </div>
+      `).join('');
+    }
   };
 
-  window.selectRebateOption = function(type, cost) {
-    window._selectedRebate = { type, cost };
-    document.querySelectorAll('.rebate-card').forEach(card => card.classList.remove('selected'));
-    const target = document.getElementById(`rebateCard_${type}`);
-    if (target) target.classList.add('selected');
+  window.selectRewardItem = function(rewardId) {
+    selectedRewardId = rewardId;
+    document.querySelectorAll('.rebate-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll(`.rebate-card[data-reward-id="${rewardId}"]`).forEach(c => c.classList.add('selected'));
+    
+    const reward = cachedRewardsCatalog.find(r => r.id === rewardId);
+    if (reward) {
+      const titleEl = document.getElementById('selectedRewardTitleText');
+      const costEl = document.getElementById('selectedRewardCostText');
+      if (titleEl) titleEl.textContent = `${reward.icon} ${reward.title}`;
+      if (costEl) costEl.textContent = `Cost: ${reward.points_cost} Civic Points • ${reward.category === 'community' ? 'Community Impact' : 'Direct Commuter / Utility'}`;
+    }
   };
 
-  window.confirmSelectedRebate = function() {
-    const currentBalance = calculateCitizenCreditsBalance();
-    const { type, cost } = window._selectedRebate || { type: 'power', cost: 100 };
+  window.renderCivicRewardsUI = async function() {
+    try {
+      const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const resp = await fetch('/api/citizen/rewards', { headers });
+      const data = await resp.json();
+      
+      if (data && data.success) {
+        cachedRewardsCatalog = data.catalog || [];
+        const userPts = data.user_points !== undefined ? data.user_points : calculateCitizenCreditsBalance();
+        
+        const balanceEl = document.getElementById('rewardsModalCreditBalance');
+        if (balanceEl) balanceEl.textContent = userPts;
+        
+        const inlineBalanceEl = document.getElementById('citizenWalletBalanceLarge');
+        if (inlineBalanceEl) inlineBalanceEl.textContent = userPts;
 
-    if (currentBalance < cost) {
-      showToast(`Insufficient balance. You need ${cost} Civic Credits, but have ${currentBalance}.`, 'error', '⚠️');
+        // Render Cards HTML Generator
+        const renderGridCards = (items, isInline = false) => items.map(item => `
+          <div class="rebate-card ${item.id === selectedRewardId ? 'selected' : ''}" data-reward-id="${item.id}" onclick="${isInline ? `window.openCivicRewardsModal()` : `window.selectRewardItem('${item.id}')`}" style="cursor: pointer; position: relative;">
+            <div style="font-size: 1.8rem; margin-bottom: 0.4rem;">${item.icon}</div>
+            <div class="rebate-card-title">${item.title}</div>
+            <p style="font-size: 0.75rem; color: #94a3b8; margin: 0.35rem 0 0.5rem; line-height: 1.35;">${item.description}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 0.4rem; border-top: 1px dashed rgba(255,255,255,0.08);">
+              <div class="rebate-cost" style="color: #34d399; font-weight: 800; font-family: var(--font-mono);">${item.points_cost} Pts</div>
+              <span class="badge" style="font-size: 0.65rem; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">PROTOTYPE</span>
+            </div>
+          </div>
+        `).join('');
+
+        // Modal containers
+        const gridSelf = document.getElementById('rewardGrid_self');
+        const gridComm = document.getElementById('rewardGrid_community');
+        if (gridSelf) {
+          const selfItems = cachedRewardsCatalog.filter(r => r.category === 'self');
+          gridSelf.innerHTML = renderGridCards(selfItems);
+        }
+        if (gridComm) {
+          const commItems = cachedRewardsCatalog.filter(r => r.category === 'community');
+          gridComm.innerHTML = renderGridCards(commItems);
+        }
+
+        // Inline wallet showcase containers in #citizenTab_wallet
+        window.switchInlineRewardPath(currentInlineRewardPath);
+
+        // Auto select current or first item
+        window.selectRewardItem(selectedRewardId);
+      }
+    } catch (err) {
+      console.warn('Failed to load civic rewards:', err);
+    }
+  };
+
+  window.confirmSelectedRewardRedemption = async function() {
+    if (!selectedRewardId) {
+      showToast('Please select a reward to redeem.', 'error', '⚠️');
       return;
     }
+    const reward = cachedRewardsCatalog.find(r => r.id === selectedRewardId);
+    if (!reward) return;
 
-    const rebateTitle = type === 'power' ? '5% Electricity Bill Rebate' :
-                        type === 'bus' ? '30-Day City Bus Smartcard Pass' : 'Property Tax Municipal Waiver';
-
-    addCitizenCreditTransaction(`Utility Benefit Claim: ${rebateTitle}`, -cost, 'Redeemed Benefit Voucher');
-
-    const code = `REB-2026-${type.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const voucher = document.getElementById('rebateSuccessVoucher');
-    const voucherCodeEl = document.getElementById('rebateVoucherCode');
-    const voucherTitleEl = document.getElementById('rebateSuccessTitle');
-
-    if (voucherCodeEl) voucherCodeEl.textContent = code;
-    if (voucherTitleEl) {
-      voucherTitleEl.textContent = type === 'power' ? '⚡ 5% Electricity Rebate Voucher' :
-        type === 'bus' ? '🚌 Free 30-Day City Bus Smartcard Pass' : '🏛️ Property Tax Waiver Voucher';
-    }
-    if (voucher) voucher.style.display = 'block';
-
-    const btn = document.getElementById('confirmRedeemBtn');
+    const btn = document.getElementById('btnExecuteRedemption');
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = '<span>✅</span> Benefit Voucher Claimed';
+      btn.innerHTML = '<span>⏳</span> Processing Redemption...';
     }
 
-    renderCitizenDashboard();
-    showToast(`Claimed! ${cost} Credits deducted. Voucher: ${code}`, 'reward', '🎁');
+    try {
+      const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const resp = await fetch('/api/citizen/redeem', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          reward_id: selectedRewardId,
+          path: currentRewardPath,
+          ward_impact: 'Ward 12 (Market Zone)'
+        })
+      });
+      const data = await resp.json();
+
+      if (!resp.ok || !data.success) {
+        showToast(data.error || 'Redemption failed. Check your points balance.', 'error', '⚠️');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>🎁</span> Redeem Now';
+        }
+        return;
+      }
+
+      window.closeModal('civicRewardModal');
+
+      // Populate confirmation modal
+      const codeEl = document.getElementById('redemptionSuccessCode');
+      const titleEl = document.getElementById('redemptionSuccessTitle');
+      const typeEl = document.getElementById('redemptionSuccessType');
+      const balEl = document.getElementById('redemptionNewBalanceText');
+      const emojiEl = document.getElementById('redemptionSuccessEmoji');
+
+      if (codeEl) codeEl.textContent = data.voucher_code;
+      if (titleEl) titleEl.textContent = reward.title;
+      if (typeEl) {
+        typeEl.textContent = `${reward.category === 'community' ? 'Community Ward Impact' : 'Direct Commuter Benefit'} • ${reward.points_cost} Points Deducted`;
+      }
+      if (balEl) balEl.textContent = `${data.new_balance} Points`;
+      if (emojiEl) emojiEl.textContent = reward.icon || '🏆';
+
+      // Update local storage user
+      const u = auth.getUser();
+      if (u) {
+        u.wallet_points = data.new_balance;
+        u.civicCredits = data.new_balance;
+        auth.setUser(u);
+      }
+      updateCitizenCreditsUI(data.new_balance);
+
+      window.openModal('civicRedemptionConfirmModal');
+      showToast(`🎉 Redeemed ${reward.title}! Voucher: ${data.voucher_code}`, 'reward', '🎁');
+      renderCitizenDashboard();
+    } catch (err) {
+      console.error('Redeem error:', err);
+      showToast('Network error while processing redemption.', 'error', '⚠️');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🎁</span> Redeem Now';
+      }
+    }
+  };
+
+  window.copyRedemptionCode = function() {
+    const codeEl = document.getElementById('redemptionSuccessCode');
+    if (codeEl && codeEl.textContent) {
+      const text = codeEl.textContent.trim();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('Voucher code copied to clipboard!', 'reward', '📋');
+        }).catch(() => {
+          showToast(text, 'info', '📋');
+        });
+      } else {
+        showToast(text, 'info', '📋');
+      }
+    }
   };
 
   window.openCctvNoticeModal = function(noticeId) {

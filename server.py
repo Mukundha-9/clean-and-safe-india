@@ -54,6 +54,103 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, 'civic_database.db')
 PREDICTIVE_HONEST_LABEL = "AI-Assisted Predictive Demo — Transparent Rule-Based Forecast (No ML Model Configured)"
 
+CIVIC_REWARDS_CATALOG = [
+    {
+        'id': 'bus_pass',
+        'title': 'City Bus Pass Credit',
+        'category': 'self',
+        'typeLabel': 'Direct Commute Benefit',
+        'points': 50,
+        'icon': '🚌',
+        'desc': '30-Day City Bus transit pass credit prototype. Redeem points for public bus transport pass.',
+        'disclaimer': 'DEMO / PROTOTYPE — For civic engagement demonstration only. Not an official public transit contract.'
+    },
+    {
+        'id': 'electricity_credit',
+        'title': 'Electricity Bill Credit',
+        'category': 'self',
+        'typeLabel': 'Utility Bill Credit',
+        'points': 100,
+        'icon': '⚡',
+        'desc': 'Municipal electricity bill adjustment prototype for active civic reporting and street light maintenance reporting.',
+        'disclaimer': 'DEMO / PROTOTYPE — For civic engagement demonstration only. Not an official DISCOM utility contract.'
+    },
+    {
+        'id': 'water_credit',
+        'title': 'Water Bill Credit',
+        'category': 'self',
+        'typeLabel': 'Utility Bill Credit',
+        'points': 75,
+        'icon': '💧',
+        'desc': 'Drinking water municipal supply tariff rebate prototype for active drainage and leakage reporting.',
+        'disclaimer': 'DEMO / PROTOTYPE — For civic engagement demonstration only. Not an official Water Supply Board contract.'
+    },
+    {
+        'id': 'service_coupon',
+        'title': 'Local Civic Service Coupon',
+        'category': 'self',
+        'typeLabel': 'Civic Merchant Voucher',
+        'points': 60,
+        'icon': '🎟️',
+        'desc': 'Local civic market stall and authorized municipal service voucher prototype.',
+        'disclaimer': 'DEMO / PROTOTYPE — For civic engagement demonstration only. Not an official commercial voucher.'
+    },
+    {
+        'id': 'tree_planting',
+        'title': 'Neighbourhood Tree Planting',
+        'category': 'community',
+        'typeLabel': 'Green Ward Sponsorship',
+        'points': 50,
+        'icon': '🌱',
+        'desc': 'Direct your civic points toward Ward 12 sapling procurement and roadside green canopy planting.',
+        'disclaimer': 'DEMO / PROTOTYPE — Community engagement demonstration only.'
+    },
+    {
+        'id': 'school_drive',
+        'title': 'Clean School Zone Drive',
+        'category': 'community',
+        'typeLabel': 'Education Zone Sponsorship',
+        'points': 80,
+        'icon': '🏫',
+        'desc': 'Sponsor dedicated school zone litter bins, child safety signage, and cleanliness kits for local primary schools.',
+        'disclaimer': 'DEMO / PROTOTYPE — Community engagement demonstration only.'
+    },
+    {
+        'id': 'park_bench',
+        'title': 'Local Park Bench Sponsorship',
+        'category': 'community',
+        'typeLabel': 'Public Amenity Sponsorship',
+        'points': 120,
+        'icon': '🪑',
+        'desc': 'Sponsor an eco-friendly recycled park bench dedicated to active civic volunteers in Ward 12.',
+        'disclaimer': 'DEMO / PROTOTYPE — Community engagement demonstration only.'
+    },
+    {
+        'id': 'drinking_water',
+        'title': 'Public Drinking Water Maintenance',
+        'category': 'community',
+        'typeLabel': 'Public Health Sponsorship',
+        'points': 100,
+        'icon': '🚰',
+        'desc': 'Sponsor maintenance and cartridge replacement for public drinking water kiosks in high-footfall ward areas.',
+        'disclaimer': 'DEMO / PROTOTYPE — Community engagement demonstration only.'
+    },
+    {
+        'id': 'community_cleanliness',
+        'title': 'Community Cleanliness Activity',
+        'category': 'community',
+        'typeLabel': 'Volunteer Squad Sponsorship',
+        'points': 60,
+        'icon': '🧹',
+        'desc': 'Sponsor volunteer safety vests, sturdy waste disposal bags, and cleaning tools for local weekend drives.',
+        'disclaimer': 'DEMO / PROTOTYPE — Community engagement demonstration only.'
+    }
+]
+
+for _r in CIVIC_REWARDS_CATALOG:
+    _r['points_cost'] = _r['points']
+    _r['description'] = _r['desc']
+
 # SMTP Mail Dispatcher Configuration (Optional: set environment variables or use default relay)
 SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
 SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
@@ -468,6 +565,22 @@ def init_database():
         )
     ''')
 
+    # Table: Civic Redemptions (Dual-path Citizen Rewards & Community Contributions)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS civic_redemptions (
+            id TEXT PRIMARY KEY,
+            userId TEXT,
+            userEmail TEXT COLLATE NOCASE,
+            rewardId TEXT,
+            rewardTitle TEXT,
+            rewardType TEXT,
+            pointsDeducted INTEGER,
+            voucherCode TEXT,
+            status TEXT DEFAULT 'CONFIRMED_PROTOTYPE',
+            timestamp INTEGER
+        )
+    ''')
+
     # Safe column migrations for users table
     cursor.execute("PRAGMA table_info(users)")
     existing_user_cols = [row['name'] if isinstance(row, dict) or hasattr(row, 'keys') else row[1] for row in cursor.fetchall()]
@@ -529,6 +642,7 @@ def init_database():
     cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'ALL' WHERE LOWER(email) IN ('fso.officer@foodsafety.gov.in', 'inspector.sharma@fssai.gov.in') AND (jurisdictionState IS NULL OR jurisdictionState = '')")
     cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'Ward 12 (Market Zone)' WHERE LOWER(email) = 'worker4@municipality.gov.in' AND (jurisdictionState IS NULL OR jurisdictionState = '')")
     cursor.execute("UPDATE users SET jurisdictionState = 'Andhra Pradesh', jurisdictionCity = 'Surampalem', jurisdictionWard = 'Ward 12 (Market Zone)' WHERE LOWER(email) IN ('citizen@civictech.in', 'mukundha.k@gmail.com') AND (jurisdictionState IS NULL OR jurisdictionState = '')")
+    cursor.execute("UPDATE users SET civicCredits = 250 WHERE LOWER(email) = 'citizen@civictech.in' AND (civicCredits IS NULL OR civicCredits < 150)")
 
     # Authoritatively backfill/update operational boundaries in workers table
     cursor.execute("UPDATE workers SET operationalState = 'Andhra Pradesh', operationalCity = 'Surampalem', operationalWards = '[\"Ward 12 (Market Zone)\", \"Ward 11 (Lake View Zone)\"]' WHERE id = 'WRK-SAN-04' AND (operationalState IS NULL OR operationalState = '')")
@@ -1306,6 +1420,54 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             safe_user = {k: v for k, v in user_dict.items() if k != 'password'}
             safe_user['profileCompleted'] = 1 if safe_user.get('profileCompleted') == 1 else 0
             self.send_json_response({'success': True, 'user': safe_user})
+            return
+
+        # REST API: GET /api/citizen/rewards (Civic Rewards Catalog & Redemptions)
+        if path == '/api/citizen/rewards':
+            conn = get_db_connection()
+            auth_user = get_authenticated_user(self, conn)
+            target_email = None
+            if auth_user:
+                target_email = auth_user.get('email')
+            elif 'email' in query:
+                target_email = query['email'][0].strip()
+            elif not target_email:
+                target_email = 'citizen@civictech.in'
+
+            cursor = conn.cursor()
+            user_points = 250
+            if target_email:
+                cursor.execute('SELECT civicCredits FROM users WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))', (target_email,))
+                row = cursor.fetchone()
+                if row and row['civicCredits'] is not None:
+                    user_points = row['civicCredits']
+
+            # Fetch past redemptions
+            if target_email:
+                cursor.execute('SELECT * FROM civic_redemptions WHERE LOWER(TRIM(userEmail)) = LOWER(TRIM(?)) ORDER BY timestamp DESC LIMIT 20', (target_email,))
+                redemptions = [dict(r) for r in cursor.fetchall()]
+            else:
+                cursor.execute('SELECT * FROM civic_redemptions ORDER BY timestamp DESC LIMIT 20')
+                redemptions = [dict(r) for r in cursor.fetchall()]
+
+            formatted_redemptions = []
+            for r in redemptions:
+                r_dict = dict(r)
+                r_dict['reward_title'] = r_dict.get('rewardTitle')
+                r_dict['voucher_code'] = r_dict.get('voucherCode')
+                r_dict['points_spent'] = r_dict.get('pointsDeducted')
+                ts = r_dict.get('timestamp')
+                r_dict['created_at'] = datetime.datetime.fromtimestamp(ts/1000).strftime('%d %b %Y') if ts else 'Recent'
+                formatted_redemptions.append(r_dict)
+
+            conn.close()
+            self.send_json_response({
+                'success': True,
+                'userPoints': user_points,
+                'user_points': user_points,
+                'catalog': CIVIC_REWARDS_CATALOG,
+                'redemptions': formatted_redemptions
+            })
             return
 
         # 6. Static Asset Serving
@@ -2604,6 +2766,95 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'success': True,
                 'user': safe_user,
                 'message': 'Citizen profile successfully completed!'
+            })
+            return
+
+        # REST API: POST /api/citizen/redeem (Dual-path Civic Rewards & Community Impact)
+        if path == '/api/citizen/redeem':
+            reward_id = body.get('rewardId') or body.get('reward_id')
+            reward_item = next((r for r in CIVIC_REWARDS_CATALOG if r['id'] == reward_id or (reward_id and (r['id'].startswith(reward_id) or reward_id.startswith(r['id'])))), None)
+            if not reward_item:
+                self.send_json_response({'success': False, 'error': f'Invalid reward identifier: {reward_id}'}, status=400)
+                return
+
+            conn = get_db_connection()
+            auth_user = get_authenticated_user(self, conn)
+            user_email = (auth_user['email'] if auth_user else body.get('userEmail') or 'citizen@civictech.in').strip()
+            user_name = auth_user['name'] if auth_user else body.get('userName') or 'KRISH'
+            user_id = auth_user['userId'] if auth_user else body.get('userId') or 'user-101'
+
+            cursor = conn.cursor()
+            cursor.execute('SELECT civicCredits FROM users WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))', (user_email,))
+            user_row = cursor.fetchone()
+            current_credits = user_row['civicCredits'] if user_row and user_row['civicCredits'] is not None else 0
+            cost = reward_item['points']
+
+            if current_credits < cost:
+                conn.close()
+                self.send_json_response({
+                    'success': False,
+                    'error': f'Insufficient Civic Credits. You need {cost} points for {reward_item["title"]}, but have {current_credits} points.',
+                    'currentCredits': current_credits,
+                    'requiredCredits': cost
+                }, status=400)
+                return
+
+            new_balance = current_credits - cost
+            cursor.execute('UPDATE users SET civicCredits = ? WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))', (new_balance, user_email))
+
+            redemption_id = f"RED-{int(time.time()*1000)}"
+            reward_type = reward_item.get('category', 'self')
+            prefix = "CIVIC-ME" if reward_type == 'self' else "CIVIC-COMM"
+            code_tag = reward_item['id'].replace('_', '').upper()[:4]
+            voucher_code = f"{prefix}-2026-{code_tag}-{random.randint(1000, 9999)}"
+            now_ms = int(time.time() * 1000)
+
+            cursor.execute('''
+                INSERT INTO civic_redemptions (
+                    id, userId, userEmail, rewardId, rewardTitle, rewardType, pointsDeducted, voucherCode, status, timestamp
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                redemption_id, user_id, user_email, reward_item['id'], reward_item['title'], reward_type, cost, voucher_code, 'CONFIRMED_PROTOTYPE', now_ms
+            ))
+
+            # Operational audit logging
+            cursor.execute('''
+                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                f"AUD-RED-{now_ms}",
+                reward_item['id'],
+                user_name,
+                'CIVIC_REWARD_REDEEMED',
+                voucher_code,
+                f"Redeemed {reward_item['title']} ({cost} Pts, {reward_type.upper()}). Remaining balance: {new_balance} Pts.",
+                now_ms
+            ))
+
+            conn.commit()
+            conn.close()
+
+            self.send_json_response({
+                'success': True,
+                'message': f"Successfully redeemed {reward_item['title']}!",
+                'voucher_code': voucher_code,
+                'voucherCode': voucher_code,
+                'new_balance': new_balance,
+                'newBalance': new_balance,
+                'redemption': {
+                    'id': redemption_id,
+                    'rewardId': reward_item['id'],
+                    'rewardTitle': reward_item['title'],
+                    'rewardType': reward_type,
+                    'pointsDeducted': cost,
+                    'voucherCode': voucher_code,
+                    'voucher_code': voucher_code,
+                    'status': 'CONFIRMED_PROTOTYPE',
+                    'timestamp': now_ms,
+                    'newBalance': new_balance,
+                    'new_balance': new_balance,
+                    'disclaimer': reward_item['disclaimer']
+                }
             })
             return
 
