@@ -74,6 +74,7 @@ def setup_test_sessions():
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, s)
 
+    c.execute("DELETE FROM citizen_quotas WHERE user_id = 'user-101'")
     conn.commit()
     conn.close()
     return tokens
