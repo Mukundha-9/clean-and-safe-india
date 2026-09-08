@@ -133,7 +133,7 @@
       ward: 'Central Municipal Command & SCADA Grid Room',
       role: 'government_admin',
       roleTitle: 'Designated Municipal & Electricity Administrator',
-      officialId: 'GOV-MUNC-SEC-012',
+      officialId: 'Zonal Administrator',
       avatar: 'KM',
       civicCredits: 0,
       activeStreakWeeks: 0
@@ -147,7 +147,7 @@
       ward: 'District Food Safety & Inspection Cell',
       role: 'food_officer',
       roleTitle: 'Designated Food Safety Officer (FSO)',
-      officialId: 'FSSAI-INSP-2026-44',
+      officialId: 'Food Safety Officer',
       avatar: 'LP',
       civicCredits: 0,
       activeStreakWeeks: 0
@@ -161,7 +161,7 @@
       ward: 'Ward 12 (Market Zone), Surampalem',
       role: 'field_worker',
       roleTitle: 'Field Response Squad Lead',
-      officialId: 'SQUAD-04-LEAD',
+      officialId: 'Squad 4 Lead',
       avatar: 'SQ',
       civicCredits: 0,
       activeStreakWeeks: 0
@@ -278,24 +278,24 @@
         if (cleanPass !== 'password123') throw new Error('Incorrect password for Municipal Admin.');
         fallbackUser = {
           id: 'user-102',
-          name: 'K.H. Sameer Reddy (Zonal Administrator)',
+          name: 'K. Mukundha (Zonal Administrator)',
           email: cleanEmail,
           department: 'municipal',
           roleTitle: 'Designated Municipal Authority',
-          officialId: 'GOV-MUNC-SEC-012',
-          avatar: 'SR',
+          officialId: 'Zonal Administrator',
+          avatar: 'KM',
           civicCredits: 20
         };
       } else if (cleanEmail === 'food.officer@fssai.gov.in') {
         if (cleanPass !== 'fssai2026') throw new Error('Incorrect password for Food Safety Officer.');
         fallbackUser = {
           id: 'user-104',
-          name: 'Food Safety Officer Sharma',
+          name: 'Dr. Lakshmi Prasad (FSO)',
           email: cleanEmail,
           department: 'food',
           roleTitle: 'Chief Food Safety Inspector',
-          officialId: 'FSSAI-INSP-2026-44',
-          avatar: 'FS',
+          officialId: 'Food Safety Officer',
+          avatar: 'LP',
           civicCredits: 20
         };
       } else if (cleanEmail === 'lineman.suresh@apepdcl.gov.in') {
@@ -1414,7 +1414,7 @@
       slaDeadline: Date.now() + 3600000 * 18,
       resolvedTimestamp: Date.now() - 3600000 * 4,
       slaHoursLeft: 0,
-      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedByOfficer: 'K. Mukundha (Zonal Administrator)',
       verifiedTimestamp: Date.now() - 3600000 * 28,
       assignedWorker: 'Sanitation Rapid Fleet 1 (Lead: Ravi Kumar)',
       assignedTimestamp: Date.now() - 3600000 * 26,
@@ -1462,7 +1462,7 @@
       slaDeadline: Date.now() + 3600000 * 24,
       resolvedTimestamp: Date.now() - 3600000 * 6,
       slaHoursLeft: 0,
-      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedByOfficer: 'K. Mukundha (Zonal Administrator)',
       verifiedTimestamp: Date.now() - 3600000 * 22,
       assignedWorker: 'Municipal Rapid Squad 4 (Lead: Ramesh)',
       assignedTimestamp: Date.now() - 3600000 * 20,
@@ -1511,7 +1511,7 @@
       slaHoursLeft: 0,
       isSlaBreached: true,
       escalatedTo: 'Zonal Municipal Commissioner (Dr. Mahesh Babu) & Higher Health Directorate',
-      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedByOfficer: 'K. Mukundha (Zonal Administrator)',
       verifiedTimestamp: Date.now() - 3600000 * 56,
       assignedWorker: 'Sanitation Rapid Fleet 3 (Lead: P. Ramesh)',
       assignedTimestamp: Date.now() - 3600000 * 54,
@@ -1558,7 +1558,7 @@
       slaDeadline: Date.now() + 3600000 * 12,
       resolvedTimestamp: Date.now() - 3600000 * 8,
       slaHoursLeft: 0,
-      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedByOfficer: 'K. Mukundha (Zonal Administrator)',
       verifiedTimestamp: Date.now() - 3600000 * 34,
       assignedWorker: 'Lineman Squad B (Lead: Suresh Kumar)',
       assignedTimestamp: Date.now() - 3600000 * 32,
@@ -1605,7 +1605,7 @@
       slaDeadline: Date.now() + 3600000 * 38,
       resolvedTimestamp: null,
       slaHoursLeft: 38,
-      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedByOfficer: 'K. Mukundha (Zonal Administrator)',
       verifiedTimestamp: Date.now() - 3600000 * 8,
       assignedWorker: 'Public Works Water Squad 2 (Lead: Anita Roy)',
       assignedTimestamp: Date.now() - 3600000 * 6,
@@ -1651,7 +1651,7 @@
       slaDeadline: Date.now() + 3600000 * 30,
       resolvedTimestamp: null,
       slaHoursLeft: 30,
-      verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+      verifiedByOfficer: 'K. Mukundha (Zonal Administrator)',
       verifiedTimestamp: Date.now() - 3600000 * 17.5,
       assignedWorker: 'Lineman Squad B (Suresh & Team)',
       assignedTimestamp: Date.now() - 3600000 * 16,
@@ -2474,7 +2474,7 @@
         reportedBy: currentUser.name || 'KRISH',
         userId: auth.getUser() ? auth.getUser().id : 'user-101',
         reporterProfile: reporterProfile,
-        verifiedByOfficer: 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)',
+        verifiedByOfficer: 'K. Mukundha (Zonal Administrator)',
         verifiedTimestamp: now + (15 * 60 * 1000),
         assignedWorker: assignedSquad,
         assignedTimestamp: now + (35 * 60 * 1000),
@@ -4192,16 +4192,19 @@
     const resolutionRate = totalReports > 0 ? Math.round((resolvedCount / totalReports) * 100) : 100;
     const rewardsPaid = resolvedCount * 50;
     const finesCollected = issues.reduce((sum, i) => sum + (i.fineLevied || 0), 0) + (db.finesCollected || 2500);
+    const activeHotspotsCount = (db.predictiveHotspots && db.predictiveHotspots.length) || 6;
 
     const totalEl = document.getElementById('munTotalReports');
     const rateEl = document.getElementById('munResolutionRate');
     const rewardsEl = document.getElementById('munRewardsPaid');
     const finesEl = document.getElementById('munFinesCollected');
+    const hotspotsEl = document.getElementById('munActiveHotspotsCount');
 
     if (totalEl) totalEl.textContent = totalReports;
     if (rateEl) rateEl.textContent = `${resolutionRate}%`;
     if (rewardsEl) rewardsEl.textContent = `${rewardsPaid} Pts`;
     if (finesEl) finesEl.textContent = `₹${finesCollected.toLocaleString('en-IN')}`;
+    if (hotspotsEl) hotspotsEl.textContent = activeHotspotsCount;
 
     const tableBody = document.getElementById('munIncidentTableBody');
     const tableBodyQueue = document.getElementById('munIncidentTableBody_queue');
@@ -4368,16 +4371,19 @@
     const rectifiedOutlets = foodIssues.filter(i => i.status === 'resolved').length;
     const certifiedVendors = vendors.filter(v => !v.isViolated).length;
     const finesLevied = db.finesCollected || 2500;
+    const pendingNoticesCount = activeAudits;
 
     const totalAuditsEl = document.getElementById('foodTotalAudits');
     const rectifiedEl = document.getElementById('foodRectifiedOutlets');
     const certifiedEl = document.getElementById('foodCertifiedCount');
     const finesEl = document.getElementById('foodFinesCollected');
+    const pendingNoticesEl = document.getElementById('foodPendingNoticesCount');
 
     if (totalAuditsEl) totalAuditsEl.textContent = activeAudits;
     if (rectifiedEl) rectifiedEl.textContent = rectifiedOutlets;
     if (certifiedEl) certifiedEl.textContent = certifiedVendors;
     if (finesEl) finesEl.textContent = `₹${finesLevied.toLocaleString('en-IN')}`;
+    if (pendingNoticesEl) pendingNoticesEl.textContent = pendingNoticesCount;
 
     // 1. Food Complaints & Violations Grid
     const foodGrid = document.getElementById('foodDeptIssuesGrid');
@@ -4734,21 +4740,21 @@
       // 2. Municipal Admin Badge
       const mBadge = document.getElementById('munTopAdminBadge');
       if (mBadge) {
-        mBadge.textContent = currentUser.officialId || 'GOV-MUNC-SEC-012';
+        mBadge.textContent = currentUser.roleTitle || 'Zonal Administrator';
         mBadge.parentElement.title = `Officer: ${currentUser.name}`;
       }
 
       // 3. Food Safety Badge
       const fBadge = document.getElementById('foodTopBadge');
       if (fBadge) {
-        fBadge.textContent = currentUser.officialId || 'FSSAI-INSP-2026-44';
+        fBadge.textContent = currentUser.roleTitle || 'Food Safety Officer';
         fBadge.parentElement.title = `Inspector: ${currentUser.name}`;
       }
 
       // 4. Worker Squad Badge & Name
       const wBadge = document.getElementById('workerTopBadge');
       if (wBadge) {
-        wBadge.textContent = currentUser.officialId || 'SQUAD-04-LEAD';
+        wBadge.textContent = currentUser.roleTitle || 'Squad 4 Lead';
       }
       const wName = document.getElementById('workerTopSquadName');
       if (wName) {

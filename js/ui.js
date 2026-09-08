@@ -173,7 +173,7 @@ class UIManager {
     const adminNameEl = document.getElementById('munTopAdminName');
     const adminBadgeEl = document.getElementById('munTopAdminBadge');
     if (adminNameEl) adminNameEl.textContent = user.name;
-    if (adminBadgeEl) adminBadgeEl.textContent = user.officialId || "GOV-MUNC-SEC-012";
+    if (adminBadgeEl) adminBadgeEl.textContent = user.roleTitle || user.officialId || "Zonal Administrator";
 
     // Summary Metrics
     const totalEl = document.getElementById('munTotalReports');
@@ -313,7 +313,7 @@ class UIManager {
     const fsoNameEl = document.getElementById('foodTopOfficerName');
     const fsoBadgeEl = document.getElementById('foodTopBadge');
     if (fsoNameEl) fsoNameEl.textContent = user.name;
-    if (fsoBadgeEl) fsoBadgeEl.textContent = user.officialId || "FSSAI-INSP-2026-44";
+    if (fsoBadgeEl) fsoBadgeEl.textContent = user.roleTitle || user.officialId || "Food Safety Officer";
 
     // Food Safety Issues
     const foodGrid = document.getElementById('foodDeptIssuesGrid');

@@ -105,12 +105,6 @@
        ENTRY GATEWAY: SECURE 3-DEPARTMENT LOGIN PORTAL (STANDALONE ISOLATED SCREEN)
        ========================================================================= -->
   <div id="authGatewayView" class="master-dashboard-view active auth-hero-wrapper" style="position: relative;">
-    <!-- Top Right App Download / Install Pill -->
-    <div class="pwa-install-element" id="pwaAuthTopInstallBtn" style="position: absolute; top: 1.25rem; right: 1.5rem; z-index: 100;">
-      <button class="btn btn-outline btn-sm btn-install-pwa" onclick="window.triggerPWAInstall()" style="border-color: #10b981; color: #34d399; background: rgba(6, 11, 20, 0.85); backdrop-filter: blur(10px); padding: 0.5rem 1.1rem; box-shadow: 0 0 20px rgba(16, 185, 129, 0.35); font-size: 0.85rem;" title="Download & Install Smart Civic App">
-        <span>📲</span> <strong>Download / Install App</strong>
-      </button>
-    </div>
 
     <!-- Emblem & Official Project Logo Header -->
     <div class="auth-emblem-bar">
@@ -274,20 +268,6 @@
         </button>
       </div>
 
-      <!-- 📲 Prominent Desktop / Mobile App Download Banner -->
-      <div class="pwa-install-element" id="pwaAuthBottomInstallBanner" style="margin-top: 1rem; padding: 0.85rem 1rem; background: rgba(16, 185, 129, 0.1); border: 1px dashed rgba(16, 185, 129, 0.45); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
-        <div style="display: flex; align-items: center; gap: 0.65rem; text-align: left;">
-          <span style="font-size: 1.5rem;">💻</span>
-          <div>
-            <div style="font-size: 0.85rem; font-weight: 800; color: #34d399;">Download / Install App on PC & Phone</div>
-            <div style="font-size: 0.73rem; color: #94a3b8;">Runs as standalone app without browser URL bar</div>
-          </div>
-        </div>
-        <button type="button" class="btn btn-sm btn-install-pwa" onclick="window.triggerPWAInstall()" style="font-size: 0.78rem; padding: 0.45rem 0.85rem; background: #10b981; color: #060911; font-weight: 800; border-radius: 8px; border: none; cursor: pointer; white-space: nowrap;">
-          📲 Download App
-        </button>
-      </div>
-
       <div class="auth-security-badge" style="margin-top: 1rem;">
         <span>🔒</span> 256-Bit Encrypted National Smart City Network
       </div>
@@ -432,19 +412,16 @@
               <button class="btn btn-saffron btn-sm" onclick="window.openCitizenCertificateModal()">
                 <span>📜</span> View Official Certificate
               </button>
-              <button class="btn btn-outline btn-sm" onclick="window.openUtilityRebateModal()">
-                <span>🎁</span> Redeem Utility Benefits
-              </button>
             </div>
           </div>
 
           <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
             <div>
-              <h3 style="font-size: 1.15rem; color: white; margin-bottom: 0.4rem;">🏛️ Municipal Civic Recognition Model</h3>
+              <h3 style="font-size: 1.15rem; color: white; margin-bottom: 0.4rem;">Civic Recognition & Participation</h3>
               <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
-                • <strong>Civic Credits (+50 Pts):</strong> Awarded for every verified hazard resolved within 48h.<br>
+                • <strong>Civic Credits (+50 Pts):</strong> Awarded for every verified hazard resolved within 48h SLA.<br>
                 • <strong>Weekly Active Streak:</strong> Maintain 4+ weeks of active reporting to earn the <em>Mayor's Green Citizen Badge</em>.<br>
-                • <strong>Utility Benefits:</strong> Use credits for property tax rebates & metro card passes!
+                • <strong>Public Recognition:</strong> Active participants receive official Municipal Recognition and Good Samaritan Certificates.
               </p>
             </div>
             <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.6rem 0.9rem; border-radius: var(--radius-sm); font-size: 0.8rem; color: #34d399;">
@@ -459,88 +436,11 @@
         </div>
       </div>
 
-      <!-- Subview 3: CCTV -->
-      <div id="citizenTab_cctv" class="citizen-subview" style="display: none;">
-        <div class="section-header">
-          <div>
-            <h2 class="section-title"><span>📡</span> Public Safety 3-in-1 CCTV Surveillance Feed</h2>
-            <p class="section-desc">24/7 AI-powered public camera surveillance for Vehicle Dumping, Littering, and Food Safety.</p>
-          </div>
-        </div>
-
-        <div class="cctv-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
-          <!-- Case 1: Vehicle Dumping ANPR -->
-          <div class="cctv-camera-card">
-            <div class="cctv-screen">
-              <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&auto=format&fit=crop&q=80" class="cctv-media" alt="Vehicle ANPR">
-              <div class="cctv-hud-top">
-                <div class="cctv-rec"><span class="cctv-rec-dot"></span> REC [CAM-04]</div>
-                <div>ANPR AI ACTIVE</div>
-              </div>
-              <div class="anpr-badge-strip">
-                <div style="font-size: 0.75rem; color: #94a3b8;">ANPR PLATE:</div>
-                <div class="anpr-plate-text">MH12 AB 1234</div>
-                <span class="badge badge-escalated">FINE ₹500 ISSUED</span>
-              </div>
-            </div>
-            <div style="padding: 1rem; color: white;">
-              <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 2px;">Case 1: Vehicle Garbage Dumping (ANPR)</div>
-              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">Detects vehicle dumping and captures number plate for e-Challan.</p>
-              <button class="btn btn-sm btn-outline" style="width: 100%; border-color: #f59e0b; color: #f59e0b;" onclick="window.openCctvNoticeModal('ECH-2026-881')">
-                📜 View RTO Violation Notice
-              </button>
-            </div>
-          </div>
-
-          <!-- Case 2: Person Littering 3-Frame AI -->
-          <div class="cctv-camera-card">
-            <div class="cctv-screen">
-              <img src="https://images.unsplash.com/photo-1574958269340-fa927503f3dd?w=800&auto=format&fit=crop&q=80" class="cctv-media" alt="Littering Surveillance">
-              <div class="cctv-hud-top">
-                <div class="cctv-rec"><span class="cctv-rec-dot"></span> REC [CAM-02]</div>
-                <div>TEMPORAL MOTION AI</div>
-              </div>
-            </div>
-            <div style="padding: 1rem; color: white;">
-              <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 0.4rem;">Case 2: Person Littering (3-Frame AI)</div>
-              <div class="frame-strip-3">
-                <div class="frame-item"><img src="https://images.unsplash.com/photo-1526951521990-620dc14c214b?w=400&auto=format&fit=crop&q=80"><span class="frame-label">1. BEFORE</span></div>
-                <div class="frame-item"><img src="https://images.unsplash.com/photo-1569388330292-79cc1ec67270?w=400&auto=format&fit=crop&q=80"><span class="frame-label" style="background:#ef4444;">2. DURING</span></div>
-                <div class="frame-item"><img src="https://images.unsplash.com/photo-1537084642907-629340c7e59c?w=400&auto=format&fit=crop&q=80"><span class="frame-label">3. AFTER</span></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Case 3: Food Safety & Hygiene AI Detection -->
-          <div class="cctv-camera-card">
-            <div class="cctv-screen">
-              <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80" class="cctv-media" alt="Food Hygiene Detection">
-              <div class="cctv-hud-top">
-                <div class="cctv-rec"><span class="cctv-rec-dot"></span> REC [CAM-08]</div>
-                <div style="color: #34d399;">FOODGUARD AI 94%</div>
-              </div>
-              <div class="anpr-badge-strip" style="background: rgba(15, 23, 42, 0.9);">
-                <div style="font-size: 0.75rem; color: #94a3b8;">HYGIENE SCORE:</div>
-                <div style="font-family: var(--font-mono); font-weight: 800; color: #34d399;">GRADE A+</div>
-                <span class="badge badge-resolved">CLEAN PREP VERIFIED</span>
-              </div>
-            </div>
-            <div style="padding: 1rem; color: white;">
-              <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 2px;">Case 3: Food Prep & Stall Hygiene (FoodGuard AI)</div>
-              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">Bounding box AI checks food coverage, hairnets & drain proximity in real-time.</p>
-              <button class="btn btn-sm btn-outline" style="width: 100%; border-color: #34d399; color: #34d399;" onclick="window.openFoodGuardAiTelemetry()">
-                🛡️ View FoodGuard AI Telemetry
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Subview 4: WhatsApp Bot & Support -->
+      <!-- Subview 3: WhatsApp Bot & Support -->
       <div id="citizenTab_support" class="citizen-subview" style="display: none;">
         <div class="section-header">
           <div>
-            <h2 class="section-title"><span>💬</span> WhatsApp AI Bot & Customer Helpdesk</h2>
+            <h2 class="section-title"><span>💬</span> Citizen Helpdesk & WhatsApp Support</h2>
             <p class="section-desc">Report directly via WhatsApp or submit a technical helpdesk ticket.</p>
           </div>
         </div>
@@ -639,14 +539,9 @@
 
       <!-- Dashboard Footer -->
       <footer class="dashboard-footer">
-        <div style="font-weight: 800; color: white; margin-bottom: 0.4rem;">Smart Civic Connect • Clean & Safe India Platform</div>
-        <div style="color: var(--text-muted); margin-bottom: 0.6rem;">
-          Innovated by <strong>Team Civic Tech Innovators</strong> (Aditya University, Surampalem)
-        </div>
-        <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.82rem; color: #cbd5e1;">
-          <span>👨‍💻 <strong>K.H. Sameer Reddy</strong> (Research & Operations Lead)</span>
-          <span>🛠️ <strong>K. Mukundha</strong> (Lead Developer & System Architect)</span>
-          <span>📢 <strong>N. Ramya Spoorthi</strong> (Communications & Public Safety)</span>
+        <div style="font-weight: 700; color: #10b981; margin-bottom: 0.25rem;">Smart Civic Connect • Digital Public Grievance Redressal</div>
+        <div style="color: var(--text-muted); font-size: 0.8rem;">
+          Government of Andhra Pradesh • Municipal Administration & Urban Development Department
         </div>
       </footer>
     </main>
@@ -700,7 +595,7 @@
           <span>🛡️</span> Issues Queue
         </li>
         <li class="dash-nav-pill municipal-nav-btn" data-tab="hotspots" onclick="window.switchMunicipalSubTab('hotspots')">
-          <span>🔮</span> Hotspots
+          <span>📍</span> Hotspots
         </li>
         <li class="dash-nav-pill municipal-nav-btn" data-tab="heatmap" onclick="window.switchMunicipalSubTab('heatmap')">
           <span>🗺️</span> GIS Map
@@ -754,9 +649,9 @@
             <span class="cmd-metric-sub">Recognition & Streak Pool</span>
           </div>
           <div class="cmd-metric-card">
-            <span class="stat-label">Total Penalties Levied</span>
-            <div class="cmd-metric-num" id="munFinesCollected" style="color: #f87171;">₹2,500</div>
-            <span class="cmd-metric-sub">Dumping & Safety Fines</span>
+            <span class="stat-label">Active Hotspots Monitored</span>
+            <div class="cmd-metric-num" id="munActiveHotspotsCount" style="color: #38bdf8;">6</div>
+            <span class="cmd-metric-sub">Under Preventive Oversight</span>
           </div>
         </div>
 
@@ -879,7 +774,7 @@
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
             <div>
               <div style="display: flex; align-items: center; gap: 0.6rem;">
-                <span style="font-size: 1.5rem;">🔮</span>
+                <span style="font-size: 1.3rem;">📍</span>
                 <h3 style="color: white; font-size: 1.35rem; margin: 0; font-weight: 800; letter-spacing: -0.02em;">
                   Predictive Civic Intelligence
                 </h3>
@@ -896,7 +791,7 @@
             </div>
             <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
               <button type="button" class="btn btn-sm btn-outline" onclick="window.refreshPredictiveForecasts()" style="border-color: #38bdf8; color: #38bdf8; font-size: 0.8rem; cursor: pointer;">
-                <span>🔄</span> Refresh AI Forecasts
+                <span>🔄</span> Refresh Forecasts
               </button>
               <button type="button" class="btn btn-sm btn-primary" onclick="window.switchMunicipalSubTab('heatmap')" style="font-size: 0.8rem; cursor: pointer;">
                 <span>🗺️</span> View GIS Hotspots
@@ -907,22 +802,22 @@
           <!-- 4 KPI Cards -->
           <div class="grid-4" style="margin-bottom: 1.5rem;">
             <div class="cmd-metric-card" style="border-left: 3px solid #38bdf8;">
-              <span class="stat-label">🔮 Active Predictive Hotspots</span>
+              <span class="stat-label">Active Predictive Hotspots</span>
               <div class="cmd-metric-num" id="kpiActivePredictiveHotspots">6</div>
               <span class="cmd-metric-sub">Across 5 Monitored Wards</span>
             </div>
             <div class="cmd-metric-card" style="border-left: 3px solid #ef4444;">
-              <span class="stat-label">🔴 Critical Forecasts</span>
+              <span class="stat-label">Critical Forecasts</span>
               <div class="cmd-metric-num" id="kpiCriticalForecasts" style="color: #ef4444;">1</div>
               <span class="cmd-metric-sub">Risk Score ≥ 80 / 100</span>
             </div>
             <div class="cmd-metric-card" style="border-left: 3px solid #f59e0b;">
-              <span class="stat-label">🟠 High-Risk Areas</span>
+              <span class="stat-label">High-Risk Areas</span>
               <div class="cmd-metric-num" id="kpiHighRiskAreas" style="color: #f59e0b;">1</div>
               <span class="cmd-metric-sub">Risk Score 60–79 / 100</span>
             </div>
             <div class="cmd-metric-card" style="border-left: 3px solid #10b981;">
-              <span class="stat-label">🛡️ Preventive Actions</span>
+              <span class="stat-label">Preventive Actions</span>
               <div class="cmd-metric-num" id="kpiPreventiveActionsCount" style="color: #10b981;">6</div>
               <span class="cmd-metric-sub">Advisory Recommendations</span>
             </div>
@@ -1150,14 +1045,9 @@
 
       <!-- Municipal Footer -->
       <footer class="dashboard-footer">
-        <div style="font-weight: 800; color: white; margin-bottom: 0.4rem;">Municipal & Electricity Control Center • Clean & Safe India</div>
-        <div style="color: #94a3b8; font-size: 0.82rem; margin-bottom: 0.6rem;">
-          Innovated by <strong>Team Civic Tech Innovators</strong> (Aditya University, Surampalem)
-        </div>
-        <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.82rem; color: #cbd5e1;">
-          <span>👨‍💻 <strong>K.H. Sameer Reddy</strong> (Research & Operations Lead)</span>
-          <span>🛠️ <strong>K. Mukundha</strong> (Lead Developer & System Architect)</span>
-          <span>📢 <strong>N. Ramya Spoorthi</strong> (Communications & Public Safety)</span>
+        <div style="font-weight: 700; color: #38bdf8; margin-bottom: 0.25rem;">Integrated Municipal & Electricity Command Center</div>
+        <div style="color: var(--text-muted); font-size: 0.8rem;">
+          Surampalem Circle • Municipal Administration & Urban Development Department
         </div>
       </footer>
     </main>
@@ -1210,11 +1100,8 @@
         <li class="dash-nav-pill food-nav-btn" data-tab="vendors" onclick="window.switchFoodSubTab('vendors')">
           <span>📜</span> Certified Vendors & QR
         </li>
-        <li class="dash-nav-pill food-nav-btn" data-tab="gassensor" onclick="window.switchFoodSubTab('gassensor')">
-          <span>🥩</span> MQ-135 Spoilage Gas
-        </li>
         <li class="dash-nav-pill food-nav-btn" data-tab="policies" onclick="window.switchFoodSubTab('policies')">
-          <span>⚖️</span> Penalties & Fines
+          <span>⚖️</span> Penalties & Guidelines
         </li>
       </ul>
 
@@ -1265,9 +1152,9 @@
             <span class="cmd-metric-sub">Grade A+ Hygiene Pass</span>
           </div>
           <div class="cmd-metric-card">
-            <span class="stat-label">FSSAI Penalties Levied</span>
-            <div class="cmd-metric-num" id="foodFinesCollected" style="color: #f87171;">₹2,500</div>
-            <span class="cmd-metric-sub">Notice & Seizure Fines</span>
+            <span class="stat-label">Pending Notices</span>
+            <div class="cmd-metric-num" id="foodPendingNoticesCount" style="color: #f59e0b;">2</div>
+            <span class="cmd-metric-sub">Under Rectification SLA</span>
           </div>
         </div>
 
@@ -1310,55 +1197,10 @@
         <div id="foodDeptVendorsGrid" class="grid-3"></div>
       </div>
 
-      <div id="foodTab_gassensor" class="food-subview" style="display: none;">
-        <div class="section-header">
-          <div>
-            <h2 class="section-title"><span>🥩</span> MQ-135 Food Spoilage Gas Telemetry</h2>
-            <p class="section-desc">Real-time IoT gas sensor stream detecting harmful volatile gases, ammonia, and spoilage odors.</p>
-          </div>
-        </div>
-
-        <div class="iot-telemetry-panel">
-          <div class="iot-gauges-grid">
-            <div class="iot-gauge-card">
-              <span class="iot-gauge-label">
-                <span class="iot-status-led iotGasLed led-green"></span>
-                MQ-135 Gas Sensor (Ammonia / CO₂ / Spoilage)
-              </span>
-              <div class="iot-gauge-value iotGasValue">185 PPM</div>
-              <div style="font-size: 0.8rem; color: #94a3b8;" class="iotGasStatus">Normal Food Environment</div>
-            </div>
-
-            <div class="iot-gauge-card">
-              <span class="iot-gauge-label">FoodGuard AI Hygiene Rating</span>
-              <div class="iot-gauge-value" style="color: #10b981;">92% Clean</div>
-              <div style="font-size: 0.8rem; color: #94a3b8;">Surrounding Prep Surface Verified</div>
-            </div>
-          </div>
-
-          <div class="statutory-sensor-card" style="background: #0d1527; border-radius: var(--radius-md); padding: 1.25rem; margin-top: 1.5rem; border: 1px solid rgba(245, 158, 11, 0.3);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
-              <h4 style="color: #f59e0b; font-size: 0.95rem; margin: 0; display: flex; align-items: center; gap: 0.4rem;">
-                <span>🔬</span> Statutory IoT Environmental Telemetry
-              </h4>
-              <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.72rem;">CALIBRATED SENSOR ACTIVE</span>
-            </div>
-            <p style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.45; margin: 0 0 0.85rem;">
-              Automated MQ-135 sensor telemetry monitoring ambient ammonia and VOC levels in Surampalem Food Market Zone. Automated statutory notice triggers if air quality index breaches 350 PPM threshold.
-            </p>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; font-size: 0.78rem; background: rgba(255, 255, 255, 0.02); padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);">
-              <div><span style="color: #94a3b8;">Baseline:</span> <strong style="color: white; margin-left: 4px;">120 PPM</strong></div>
-              <div><span style="color: #94a3b8;">Current:</span> <strong style="color: #34d399; margin-left: 4px;" class="iotGasValue">185 PPM</strong></div>
-              <div><span style="color: #94a3b8;">Statutory Limit:</span> <strong style="color: #f87171; margin-left: 4px;">350 PPM</strong></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div id="foodTab_policies" class="food-subview" style="display: none;">
         <div class="section-header">
           <div>
-            <h2 class="section-title"><span>⚖️</span> Food Safety Progressive Penalty Framework</h2>
+            <h2 class="section-title"><span>⚖️</span> Statutory Enforcement & Compliance Guidelines</h2>
             <p class="section-desc">Structured enforcement against unhygienic practices under Food Safety Regulations.</p>
           </div>
         </div>
@@ -1386,14 +1228,9 @@
 
       <!-- Food Safety Footer -->
       <footer class="dashboard-footer">
-        <div style="font-weight: 800; color: #f59e0b; margin-bottom: 0.4rem;">Food Safety & Standards Authority • Clean & Safe India</div>
-        <div style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 0.6rem;">
-          Innovated by <strong>Team Civic Tech Innovators</strong> (Aditya University, Surampalem)
-        </div>
-        <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.82rem; color: #cbd5e1;">
-          <span>👨‍💻 <strong>K.H. Sameer Reddy</strong> (Research & Operations Lead)</span>
-          <span>🛠️ <strong>K. Mukundha</strong> (Lead Developer & System Architect)</span>
-          <span>📢 <strong>N. Ramya Spoorthi</strong> (Communications & Public Safety)</span>
+        <div style="font-weight: 700; color: #f59e0b; margin-bottom: 0.25rem;">Food Safety & Standards Directorate</div>
+        <div style="color: var(--text-muted); font-size: 0.8rem;">
+          Surampalem Circle • Statutory Food Hygiene & Quality Enforcement
         </div>
       </footer>
     </main>
@@ -1412,13 +1249,9 @@
         <span class="mobile-fab-icon">+</span>
         <span class="mobile-nav-label">Inspect</span>
       </button>
-      <button class="mobile-nav-tab" data-tab="gassensor" onclick="window.switchFoodSubTab('gassensor')">
-        <span class="mobile-nav-icon">🥩</span>
-        <span class="mobile-nav-label">Gas PPM</span>
-      </button>
       <button class="mobile-nav-tab" data-tab="policies" onclick="window.switchFoodSubTab('policies')">
         <span class="mobile-nav-icon">⚖️</span>
-        <span class="mobile-nav-label">Penalties</span>
+        <span class="mobile-nav-label">Guidelines</span>
       </button>
     </nav>
   </div>
@@ -1494,8 +1327,8 @@
           <div class="card">
             <h3 style="color: white; margin-bottom: 0.75rem;">Squad Operational Profile</h3>
             <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.88rem; color: #cbd5e1;">
-              <div><strong>Squad Lead:</strong> Ramesh (Field Lead)</div>
-              <div><strong>Official ID:</strong> <span style="font-family: var(--font-mono); color: #fbbf24;">SQUAD-04-LEAD</span></div>
+              <div><strong>Squad Lead:</strong> Ramesh</div>
+              <div><strong>Designation:</strong> <span style="font-weight: 700; color: #fbbf24;">Squad 4 Field Lead</span></div>
               <div><strong>Jurisdiction:</strong> Ward 12 (Market Zone), Surampalem</div>
               <div><strong>Specialization:</strong> Commercial Solid Waste & Rapid Compactor Operations</div>
               <div><strong>Assigned Vehicle:</strong> Hydraulic Tipper #AP-05-TX</div>
@@ -2105,9 +1938,6 @@
         </div>
       </div>
       <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <button type="button" onclick="window.openGeminiSettingsModal()" title="AI Engine Settings (Google Gemini 2.5 Flash)" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 2px 7px; border-radius: 6px; font-size: 0.72rem; cursor: pointer;">
-          ⚙️ AI Engine
-        </button>
         <button style="background: none; border: none; color: white; font-size: 1.1rem; cursor: pointer;" id="chatbotClose">✕</button>
       </div>
     </div>
@@ -2128,369 +1958,7 @@
     </div>
   </div>
 
-  <!-- Gemini API Key Configuration Modal -->
-  <div class="modal-overlay" id="geminiSettingsModal">
-    <div class="modal-box" style="max-width: 480px;">
-      <div class="modal-header">
-        <h3 style="font-size: 1.15rem; color: white; display: flex; align-items: center; gap: 0.5rem;">
-          <span>✨</span> Google Gemini AI Configuration
-        </h3>
-        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('geminiSettingsModal')">✕</button>
-      </div>
-      <div class="modal-body" style="padding: 1.25rem;">
-        <p style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5; margin-bottom: 1rem;">
-          Connect your Google Gemini 2.5 Flash API Key to unlock real-time multimodal civic hazard photo analysis and autonomous grievance resolution copilots.
-        </p>
-        <div class="form-group">
-          <label class="form-label" style="font-size: 0.78rem;">Gemini API Key:</label>
-          <input type="password" id="geminiApiKeyInput" class="form-input" placeholder="AIzaSy..." style="font-family: monospace;">
-        </div>
-        <div id="geminiKeyStatusMessage" style="font-size: 0.75rem; margin-top: 0.5rem;"></div>
-        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
-          <button class="btn btn-outline btn-sm" onclick="window.closeModal('geminiSettingsModal')">Cancel</button>
-          <button class="btn btn-primary btn-sm" onclick="window.saveGeminiApiKey()">Save Key</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Universal App Download & Installation Modal (PC, Android & iOS) -->
-  <div class="modal-overlay" id="appInstallHelpModal">
-    <div class="modal-box" style="max-width: 520px; text-align: center;">
-      <div class="modal-header">
-        <h3 style="font-size: 1.2rem; color: white;">📲 Download & Install Smart Civic App</h3>
-        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('appInstallHelpModal')">✕</button>
-      </div>
-      <div class="modal-body" style="padding: 1.5rem 1.25rem;">
-        <div style="font-size: 2.75rem; margin-bottom: 0.25rem;">🚀</div>
-        <h4 style="color: white; font-size: 1.15rem; margin-bottom: 0.35rem;">Clean & Safe India Application</h4>
-        <p style="font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-bottom: 1.25rem;">
-          Run as a standalone full-screen app on Windows, Mac, Android, and iPhone with live real-time synchronization and offline support.
-        </p>
-
-        <!-- Platform Options -->
-        <div style="display: flex; flex-direction: column; gap: 0.85rem; text-align: left;">
-          <!-- 1. PC / Desktop Direct Install -->
-          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 1rem;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
-              <div style="font-weight: 800; color: #34d399; font-size: 0.92rem;">🖥️ Windows PC & Mac Desktop</div>
-              <button class="btn btn-sm btn-primary" onclick="window.executeDirectPWAInstall()" style="font-size: 0.78rem; padding: 0.35rem 0.75rem;">
-                Install PWA App ⚡
-              </button>
-            </div>
-            <div style="font-size: 0.78rem; color: #cbd5e1; line-height: 1.45;">
-              Look for the <strong>Install icon <span style="color: #38bdf8; font-weight: 900;">(⊕)</span></strong> on the right side of your Chrome / Edge address bar, or click above.
-            </div>
-            <div style="margin-top: 0.6rem; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
-              <span style="font-size: 0.75rem; color: #94a3b8;">Want a 1-click Desktop Shortcut?</span>
-              <button class="btn btn-sm btn-outline" onclick="window.downloadDesktopShortcut()" style="font-size: 0.72rem; padding: 0.25rem 0.6rem; border-color: #38bdf8; color: #38bdf8;">
-                💾 Download Shortcut (.url)
-              </button>
-            </div>
-          </div>
-
-          <!-- 2. Android Phone / Tablet -->
-          <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 1rem;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
-              <div style="font-weight: 800; color: #38bdf8; font-size: 0.92rem;">📱 Android Phone / Tablet</div>
-              <button class="btn btn-sm" onclick="window.executeDirectPWAInstall()" style="background: #38bdf8; color: #060911; font-weight: 800; font-size: 0.78rem; padding: 0.35rem 0.75rem; border: none; border-radius: 6px; cursor: pointer;">
-                Install APK 📲
-              </button>
-            </div>
-            <div style="font-size: 0.78rem; color: #cbd5e1; line-height: 1.45;">
-              In Chrome, tap the 3 dots <strong>(⋮)</strong> in the top right → select <strong>'Install app'</strong> or <strong>'Add to Home screen'</strong>.
-            </div>
-          </div>
-
-          <!-- 3. iPhone / iPad (iOS Safari) -->
-          <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 1rem;">
-            <div style="font-weight: 800; color: #fbbf24; font-size: 0.92rem; margin-bottom: 0.4rem;">🍎 iPhone / iPad (iOS Safari)</div>
-            <div style="font-size: 0.78rem; color: #cbd5e1; line-height: 1.45;">
-              Tap the Safari <strong>Share</strong> button <span style="font-size: 1rem;">⎋</span> at the bottom → scroll down and tap <strong>'Add to Home Screen'</strong> ➕.
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="window.closeModal('appInstallHelpModal')" style="width: 100%;">
-          Close Window
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- iOS Safari Install Guidance Sheet -->
-  <div class="modal-overlay" id="iosInstallModal">
-    <div class="modal-box" style="max-width: 420px; text-align: center;">
-      <div class="modal-header">
-        <h3 style="font-size: 1.15rem; color: white;">📲 Install on iPhone / iPad</h3>
-        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('iosInstallModal')">✕</button>
-      </div>
-      <div class="modal-body" style="padding: 1.5rem 1.25rem;">
-        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📱</div>
-        <h4 style="color: white; font-size: 1.1rem; margin-bottom: 0.75rem;">Install Clean & Safe India App</h4>
-        <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 1.25rem;">
-          To install this Progressive Web App on your iPhone or iPad:
-        </p>
-        <div style="text-align: left; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; font-size: 0.88rem; color: #e2e8f0; display: flex; flex-direction: column; gap: 0.75rem;">
-          <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <span style="background: #10b981; color: #060911; font-weight: 800; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">1</span>
-            <span>Tap the <strong>Share</strong> button <span style="font-size: 1.1rem;">⎋</span> at the bottom of Safari.</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <span style="background: #10b981; color: #060911; font-weight: 800; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">2</span>
-            <span>Scroll down and select <strong>'Add to Home Screen'</strong> ➕.</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <span style="background: #10b981; color: #060911; font-weight: 800; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem;">3</span>
-            <span>Tap <strong>'Add'</strong> in the top right corner.</span>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" onclick="window.closeModal('iosInstallModal')" style="width: 100%;">
-          Got it! 👍
-        </button>
-      </div>
-    </div>
-  </div>
-       ========================================================================= -->
-  <div class="modal-overlay" id="utilityRebateModal">
-    <div class="modal-box modal-lg" style="max-width: 650px;">
-      <div class="modal-header">
-        <div style="display: flex; align-items: center; gap: 0.6rem;">
-          <span style="font-size: 1.4rem;">🎁</span>
-          <div>
-            <h3 style="font-size: 1.2rem; color: white; margin: 0;">Redeem Civic Credits for Utility Benefits</h3>
-            <div style="font-size: 0.75rem; color: #a7f3d0;">Official Municipal Public Welfare Rebate Program</div>
-          </div>
-        </div>
-        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('utilityRebateModal')">✕</button>
-      </div>
-
-      <div class="modal-body" style="padding: 1.25rem;">
-        <!-- Available Credit Balance Bar -->
-        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 10px; padding: 0.9rem 1.25rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
-          <div>
-            <div style="font-size: 0.74rem; text-transform: uppercase; color: #a7f3d0; font-weight: 800;">Your Redeemable Civic Balance</div>
-            <div style="font-size: 1.6rem; font-weight: 900; font-family: var(--font-mono); color: #34d399;">
-              <span id="rebateModalCurrentBalance">150</span> <span style="font-size: 0.95rem; font-weight: 700;">Credits</span>
-            </div>
-          </div>
-          <span class="badge" style="background: rgba(16, 185, 129, 0.25); color: #a7f3d0; border: 1px solid #10b981; font-size: 0.8rem; padding: 0.35rem 0.75rem;">
-            Silver Guardian Status
-          </span>
-        </div>
-
-        <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-          Select an authorized civic reward below. Credits are deducted instantly and an official voucher code is generated:
-        </p>
-
-        <!-- Benefit Selection Grid -->
-        <div class="rebate-grid" id="rebateOptionsContainer">
-          <!-- Option 1: 5% Electricity Rebate -->
-          <div class="rebate-card selected" id="rebateCard_power" onclick="window.selectRebateOption('power', 100)">
-            <div class="rebate-card-header">
-              <span class="rebate-icon">⚡</span>
-              <span class="rebate-cost-tag">100 Credits</span>
-            </div>
-            <div class="rebate-title">5% Electricity Bill Rebate</div>
-            <p class="rebate-desc">
-              Applied directly against your APCPDCL / TSSPDCL domestic power consumer meter bill for next billing cycle.
-            </p>
-          </div>
-
-          <!-- Option 2: 1-Month Free Bus Pass -->
-          <div class="rebate-card" id="rebateCard_bus" onclick="window.selectRebateOption('bus', 150)">
-            <div class="rebate-card-header">
-              <span class="rebate-icon">🚌</span>
-              <span class="rebate-cost-tag">150 Credits</span>
-            </div>
-            <div class="rebate-title">Free 30-Day City Bus Pass</div>
-            <p class="rebate-desc">
-              Unlimited travel smartcard voucher across all municipal express & feeder transit lines in Surampalem Circle.
-            </p>
-          </div>
-
-          <!-- Option 3: Property Tax Concession -->
-          <div class="rebate-card" id="rebateCard_tax" onclick="window.selectRebateOption('tax', 200)">
-            <div class="rebate-card-header">
-              <span class="rebate-icon">🏛️</span>
-              <span class="rebate-cost-tag">200 Credits</span>
-            </div>
-            <div class="rebate-title">Property Tax Green Rebate</div>
-            <p class="rebate-desc">
-              ₹250 municipal assessment waiver for residents with verified active participation in ward cleanliness.
-            </p>
-          </div>
-        </div>
-
-        <!-- Success Redemption Voucher (Initially Hidden) -->
-        <div id="rebateSuccessVoucher" style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px dashed #10b981; border-radius: 10px; padding: 1rem; text-align: center; margin-top: 1rem;">
-          <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">🎉</div>
-          <h4 style="color: #34d399; font-size: 1.05rem; margin-bottom: 0.25rem;" id="rebateSuccessTitle">Benefit Voucher Generated</h4>
-          <div style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: 800; color: white; letter-spacing: 2px; margin: 0.5rem 0;" id="rebateVoucherCode">REB-2026-POWER-8912</div>
-          <p style="font-size: 0.78rem; color: #cbd5e1; margin-bottom: 0;" id="rebateSuccessInstructions">
-            Present this voucher code at the municipal utility desk or enter in online consumer bill payment portal.
-          </p>
-        </div>
-      </div>
-
-      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-        <button type="button" class="btn btn-outline" onclick="window.closeModal('utilityRebateModal')">Close</button>
-        <button type="button" class="btn btn-primary" id="confirmRedeemBtn" onclick="window.confirmSelectedRebate()" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: 800;">
-          <span>🎁</span> Redeem Benefit (Deduct Credits)
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       STATUTORY CCTV & ANPR E-CHALLAN VIOLATION NOTICE MODAL
-       ========================================================================= -->
-  <div class="modal-overlay" id="cctvNoticeModal">
-    <div class="modal-box modal-lg" style="max-width: 620px;">
-      <div class="modal-header">
-        <div style="display: flex; align-items: center; gap: 0.6rem;">
-          <span style="font-size: 1.4rem;">📜</span>
-          <div>
-            <h3 style="font-size: 1.2rem; color: #f59e0b; margin: 0;">Statutory Public Violation Notice</h3>
-            <div style="font-size: 0.75rem; color: #94a3b8;">Automated Traffic & Municipal Enforcement e-Challan</div>
-          </div>
-        </div>
-        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('cctvNoticeModal')">✕</button>
-      </div>
-
-      <div class="modal-body" style="padding: 1.25rem;">
-        <div class="echallan-slip-box">
-          <div class="echallan-topbar">
-            <div style="display: flex; align-items: center; gap: 0.6rem;">
-              <img src="assets/logo.png" style="width: 32px; height: 32px;" alt="Emblem">
-              <div>
-                <div class="echallan-emblem-text">GOVERNMENT OF ANDHRA PRADESH • TRANSPORT & MUNICIPAL DEPT</div>
-                <div style="font-size: 0.75rem; color: #94a3b8;">Surampalem Circle • Automated Surveillance Division</div>
-              </div>
-            </div>
-            <span class="badge badge-escalated" style="font-size: 0.78rem;">OFFICIAL NOTICE</span>
-          </div>
-
-          <div class="echallan-grid">
-            <div class="echallan-row-item">
-              <div class="echallan-label">Notice Reference No:</div>
-              <div class="echallan-val" style="color: #f59e0b; font-family: var(--font-mono);">#ECH-2026-881</div>
-            </div>
-            <div class="echallan-row-item">
-              <div class="echallan-label">Target Vehicle Plate (ANPR):</div>
-              <div class="echallan-val" style="font-family: var(--font-mono); letter-spacing: 1px;">MH12 AB 1234</div>
-            </div>
-            <div class="echallan-row-item">
-              <div class="echallan-label">Offense Category:</div>
-              <div class="echallan-val">Illegal Public Garbage Dumping & Littering</div>
-            </div>
-            <div class="echallan-row-item">
-              <div class="echallan-label">Detected By:</div>
-              <div class="echallan-val">CAM-04 High-Definition ANPR Lens</div>
-            </div>
-            <div class="echallan-row-item">
-              <div class="echallan-label">Violation Location:</div>
-              <div class="echallan-val">College Road Food Court Junction, Ward 12</div>
-            </div>
-            <div class="echallan-row-item">
-              <div class="echallan-label">Statutory Fine:</div>
-              <div class="echallan-val" style="color: #ef4444; font-size: 1rem;">₹500.00</div>
-            </div>
-          </div>
-
-          <div style="background: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; padding: 0.65rem 0.9rem; border-radius: 6px; font-size: 0.78rem; color: #cbd5e1; line-height: 1.45;">
-            ⚖️ <strong>Legal Clause:</strong> Under Section 269 of IPC and Municipal Public Health By-Laws 2024, dumping refuse from moving/stationary vehicles into public thoroughfares incurs statutory penal liability. Notice forwarded to RTO records.
-          </div>
-
-          <div class="echallan-barcode-strip">
-            <div class="echallan-barcode-art">||| | |||| | ||||| ||| |||| | ||</div>
-            <div style="font-size: 0.68rem; color: #64748b; margin-top: 4px;">DIGITALLY SIGNED STATUTORY RECORD • ID: RTO-AP-2026-881</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
-        <button type="button" class="btn btn-outline" onclick="window.closeModal('cctvNoticeModal')">Close</button>
-        <button type="button" class="btn btn-outline" onclick="window.print()" style="border-color: #f59e0b; color: #f59e0b;">
-          <span>🖨️</span> Print Official Notice
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       FOODGUARD COMPUTER VISION HYGIENE TELEMETRY MODAL
-       ========================================================================= -->
-  <div class="modal-overlay" id="foodGuardAiModal">
-    <div class="modal-box modal-lg" style="max-width: 680px;">
-      <div class="modal-header">
-        <div style="display: flex; align-items: center; gap: 0.6rem;">
-          <span style="font-size: 1.4rem;">🛡️</span>
-          <div>
-            <h3 style="font-size: 1.2rem; color: #34d399; margin: 0;">FoodGuard Computer Vision Hygiene Telemetry</h3>
-            <div style="font-size: 0.75rem; color: #94a3b8;">Automated Optical Stall Inspection • Surampalem Food Court</div>
-          </div>
-        </div>
-        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('foodGuardAiModal')">✕</button>
-      </div>
-
-      <div class="modal-body" style="padding: 1.25rem;">
-        <div class="foodguard-telemetry-wrapper">
-          <!-- Left: CV Video Frame with Bounding Boxes -->
-          <div class="foodguard-cv-frame">
-            <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80" class="foodguard-cv-img" alt="Food Court Stall">
-            <div class="foodguard-bbox" style="top: 15%; left: 10%; width: 45%; height: 35%;">
-              Food Shield: 98% Covered ✓
-            </div>
-            <div class="foodguard-bbox" style="bottom: 12%; left: 25%; width: 50%; height: 25%; border-color: #38bdf8; color: #bae6fd;">
-              Prep Counter: 92% Sanitized ✓
-            </div>
-            <div class="foodguard-bbox" style="bottom: 15%; right: 8%; width: 25%; height: 30%; border-color: #facc15; color: #fef08a;">
-              Bin: Sealed ✓
-            </div>
-          </div>
-
-          <!-- Right: Telemetry Metrics -->
-          <div style="display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <div style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 800;">Target Establishment:</div>
-              <h4 style="color: white; font-size: 1.1rem; margin: 2px 0 0.5rem;">Swagath Grand Fast Food</h4>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 0.85rem;">
-                <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-                  <div style="font-size: 0.68rem; color: #94a3b8;">HYGIENE GRADE:</div>
-                  <div style="font-size: 1.15rem; font-weight: 900; color: #10b981;">GRADE A+</div>
-                </div>
-                <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-                  <div style="font-size: 0.68rem; color: #94a3b8;">OVERALL SCORE:</div>
-                  <div style="font-size: 1.15rem; font-weight: 900; color: #38bdf8;">94 / 100</div>
-                </div>
-              </div>
-
-              <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 0.75rem;">
-                • <strong>Optical Food Shield:</strong> Compliant (Cover glass intact)<br>
-                • <strong>Staff Hairnets & Aprons:</strong> Detected on 3/3 food handlers<br>
-                • <strong>Drain Proximity:</strong> 3.8m distance (Safe zone)
-              </div>
-            </div>
-
-            <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.78rem; color: #a7f3d0;">
-              ✅ <strong>Statutory Compliance Passed:</strong> Next scheduled manual physical inspection in 14 days.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="window.closeModal('foodGuardAiModal')" style="width: 100%;">
-          Close Telemetry View
-        </button>
-      </div>
-    </div>
-  </div>
 
     <!-- =========================================================================
        PREDICTIVE CIVIC RISK & PREVENTIVE DECISION SUPPORT (HUMAN-IN-THE-LOOP)
@@ -2813,7 +2281,7 @@
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => {
-            if (name !== 'clean-safe-india-v37.0.0') {
+            if (name !== 'clean-safe-india-v40.0.0') {
               caches.delete(name);
             }
           });
@@ -2823,6 +2291,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=38.0.0"></script>
+  <script src="js/bundle.js?v=40.0.0"></script>
 </body>
 </html>

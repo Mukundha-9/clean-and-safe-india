@@ -45,7 +45,7 @@ export const SYSTEM_ACCOUNTS = {
     ward: 'Central Municipal Command & SCADA Grid Room',
     role: 'government_admin',
     roleTitle: 'Designated Municipal & Electricity Administrator',
-    officialId: 'GOV-MUNC-SEC-012',
+    officialId: 'Zonal Administrator',
     avatar: 'KM',
     walletBalance: 0,
     rewardPoints: 0
@@ -59,7 +59,7 @@ export const SYSTEM_ACCOUNTS = {
     ward: 'District Food Safety & Inspection Cell',
     role: 'food_officer',
     roleTitle: 'Designated Food Safety Officer (FSO)',
-    officialId: 'FSSAI-INSP-2026-44',
+    officialId: 'Food Safety Officer',
     avatar: 'LP',
     walletBalance: 0,
     rewardPoints: 0

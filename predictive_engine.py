@@ -212,7 +212,7 @@ def seed_predictive_intelligence_data(conn):
                 'garbage_overflow', 'Garbage Overflow', '🗑️', 'bulk', 'HIGH RISK HAZARD', 'resolved',
                 now_ms - (8 * day_ms), now_ms + (40 * 3600 * 1000), 0, now_ms - (7 * day_ms), 0,
                 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80', None,
-                'K. Ramesh (Market Guild)', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now_ms - (7 * day_ms),
+                'K. Ramesh (Market Guild)', 'user-101', 'K. Mukundha (Zonal Administrator)', now_ms - (7 * day_ms),
                 'Municipal Rapid Squad 4', now_ms - (7 * day_ms), 'Resolved', 'Collection Truck', 8, '[]', '[]', 0, 0,
                 17.0010, 81.8045, None, None, None, 'CLU-W12-SAN', 76, 0.92, 'Commercial market zone waste cluster', 48.0, 0.12,
                 'sanitation', 'garbage_overflow', 'bulk', 1, None, 'Garbage / Waste Accumulation', 'Demo / Rule-Based',
@@ -227,7 +227,7 @@ def seed_predictive_intelligence_data(conn):
                 'garbage_overflow', 'Garbage Overflow', '🗑️', 'medium', 'STANDARD COMPLAINT', 'resolved',
                 now_ms - (14 * day_ms), now_ms + (34 * 3600 * 1000), 0, now_ms - (12 * day_ms), 0,
                 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80', None,
-                'Citizen Watch', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now_ms - (13 * day_ms),
+                'Citizen Watch', 'user-101', 'K. Mukundha (Zonal Administrator)', now_ms - (13 * day_ms),
                 'Municipal Rapid Squad 4', now_ms - (13 * day_ms), 'Resolved', 'Collection Truck', 4, '[]', '[]', 0, 0,
                 17.0014, 81.8049, None, None, None, 'CLU-W12-SAN', 68, 0.88, 'Transit route container overflow', 48.0, 0.15,
                 'sanitation', 'garbage_overflow', 'medium', 1, None, 'Garbage / Waste Accumulation', 'Demo / Rule-Based',
@@ -242,7 +242,7 @@ def seed_predictive_intelligence_data(conn):
                 'garbage_overflow', 'Garbage Overflow', '🗑️', 'bulk', 'HISTORICAL LOG', 'resolved',
                 now_ms - (35 * day_ms), now_ms - (33 * day_ms), 0, now_ms - (33 * day_ms), 0,
                 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80', None,
-                'Sanitation Audit', 'system-fso', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now_ms - (34 * day_ms),
+                'Sanitation Audit', 'system-fso', 'K. Mukundha (Zonal Administrator)', now_ms - (34 * day_ms),
                 'Municipal Rapid Squad 4', now_ms - (34 * day_ms), 'Resolved', 'Tractor / Heavy Squad', 6, '[]', '[]', 0, 0,
                 17.0011, 81.8046, None, None, None, 'CLU-W12-SAN', 72, 0.90, 'Monthly survey log', 48.0, 0.10,
                 'sanitation', 'garbage_overflow', 'bulk', 1, None, None, None, None, 0, None, 0, 0, None
@@ -256,7 +256,7 @@ def seed_predictive_intelligence_data(conn):
                 'garbage_overflow', 'Garbage Overflow', '🗑️', 'medium', 'HISTORICAL LOG', 'resolved',
                 now_ms - (42 * day_ms), now_ms - (40 * day_ms), 0, now_ms - (40 * day_ms), 0,
                 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80', None,
-                'Citizen Watch', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now_ms - (41 * day_ms),
+                'Citizen Watch', 'user-101', 'K. Mukundha (Zonal Administrator)', now_ms - (41 * day_ms),
                 'Municipal Rapid Squad 4', now_ms - (41 * day_ms), 'Resolved', 'Pushcart Squad', 3, '[]', '[]', 0, 0,
                 17.0013, 81.8047, None, None, None, 'CLU-W12-SAN', 64, 0.85, 'Historical log', 48.0, 0.08,
                 'sanitation', 'garbage_overflow', 'medium', 1, None, None, None, None, 0, None, 0, 0, None
@@ -270,7 +270,7 @@ def seed_predictive_intelligence_data(conn):
                 'garbage_overflow', 'Garbage Overflow', '🗑️', 'medium', 'HISTORICAL LOG', 'resolved',
                 now_ms - (55 * day_ms), now_ms - (53 * day_ms), 0, now_ms - (53 * day_ms), 0,
                 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80', None,
-                'Sanitation Audit', 'system-fso', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now_ms - (54 * day_ms),
+                'Sanitation Audit', 'system-fso', 'K. Mukundha (Zonal Administrator)', now_ms - (54 * day_ms),
                 'Municipal Rapid Squad 4', now_ms - (54 * day_ms), 'Resolved', 'Collection Truck', 2, '[]', '[]', 0, 0,
                 17.0010, 81.8044, None, None, None, 'CLU-W12-SAN', 60, 0.80, 'Baseline log', 48.0, 0.05,
                 'sanitation', 'garbage_overflow', 'medium', 1, None, None, None, None, 0, None, 0, 0, None
@@ -284,7 +284,7 @@ def seed_predictive_intelligence_data(conn):
                 'pothole', 'Pothole / Road Damage', '🕳️', 'bulk', 'CRITICAL ROAD HAZARD', 'pending',
                 now_ms - (10 * day_ms), now_ms + (38 * 3600 * 1000), 38.0, None, 0,
                 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80', None,
-                'Railway Commuter', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now_ms - (9 * day_ms),
+                'Railway Commuter', 'user-101', 'K. Mukundha (Zonal Administrator)', now_ms - (9 * day_ms),
                 'Public Works Squad 2', now_ms - (9 * day_ms), 'Dispatched', 'Tractor / Heavy Squad', 15, '[]', '[]', 0, 0,
                 17.0065, 81.8090, None, None, None, 'CLU-W7-ROA', 82, 0.94, 'Active transit crater', 24.0, 0.35,
                 'roads', 'pothole', 'bulk', 1, None, 'Pothole / Road Damage', 'Demo / Rule-Based',
@@ -299,7 +299,7 @@ def seed_predictive_intelligence_data(conn):
                 'road_damage', 'Pothole / Road Damage', '🕳️', 'high', 'HIGH RISK HAZARD', 'resolved',
                 now_ms - (20 * day_ms), now_ms - (18 * day_ms), 0, now_ms - (18 * day_ms), 0,
                 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80', None,
-                'Goods Transporter', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now_ms - (19 * day_ms),
+                'Goods Transporter', 'user-101', 'K. Mukundha (Zonal Administrator)', now_ms - (19 * day_ms),
                 'Public Works Squad 2', now_ms - (19 * day_ms), 'Resolved', 'Road Roller & Tar Squad', 11, '[]', '[]', 0, 0,
                 17.0068, 81.8095, None, None, None, 'CLU-W7-ROA', 74, 0.90, 'Heavy freight road distress', 48.0, 0.18,
                 'roads', 'road_damage', 'high', 1, None, 'Pothole / Road Damage', 'Demo / Rule-Based',
@@ -314,7 +314,7 @@ def seed_predictive_intelligence_data(conn):
                 'pothole', 'Pothole / Road Damage', '🕳️', 'medium', 'HISTORICAL LOG', 'resolved',
                 now_ms - (40 * day_ms), now_ms - (38 * day_ms), 0, now_ms - (38 * day_ms), 0,
                 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80', None,
-                'PWD Inspector', 'system-fso', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now_ms - (39 * day_ms),
+                'PWD Inspector', 'system-fso', 'K. Mukundha (Zonal Administrator)', now_ms - (39 * day_ms),
                 'Public Works Squad 2', now_ms - (39 * day_ms), 'Resolved', 'Collection Truck', 5, '[]', '[]', 0, 0,
                 17.0064, 81.8088, None, None, None, 'CLU-W7-ROA', 62, 0.82, 'Historical PWD log', 48.0, 0.05,
                 'roads', 'pothole', 'medium', 1, None, None, None, None, 0, None, 0, 0, None
@@ -328,7 +328,7 @@ def seed_predictive_intelligence_data(conn):
                 'road_damage', 'Pothole / Road Damage', '🕳️', 'medium', 'HISTORICAL LOG', 'resolved',
                 now_ms - (60 * day_ms), now_ms - (58 * day_ms), 0, now_ms - (58 * day_ms), 0,
                 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80', None,
-                'Staff Resident', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now_ms - (59 * day_ms),
+                'Staff Resident', 'user-101', 'K. Mukundha (Zonal Administrator)', now_ms - (59 * day_ms),
                 'Public Works Squad 2', now_ms - (59 * day_ms), 'Resolved', 'Pushcart Squad', 4, '[]', '[]', 0, 0,
                 17.0062, 81.8085, None, None, None, 'CLU-W7-ROA', 58, 0.78, 'Baseline survey log', 48.0, 0.02,
                 'roads', 'road_damage', 'medium', 1, None, None, None, None, 0, None, 0, 0, None
@@ -342,7 +342,7 @@ def seed_predictive_intelligence_data(conn):
                 'drain_blockage', 'Drain Blockage / Waterlogging', '🌊', 'high', 'HIGH RISK HAZARD', 'pending',
                 now_ms - (12 * day_ms), now_ms + (36 * 3600 * 1000), 36.0, None, 0,
                 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80', None,
-                'Lake Resident', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now_ms - (11 * day_ms),
+                'Lake Resident', 'user-101', 'K. Mukundha (Zonal Administrator)', now_ms - (11 * day_ms),
                 'Municipal Rapid Squad 4', now_ms - (11 * day_ms), 'Dispatched', 'Suction Machine Truck', 9, '[]', '[]', 0, 0,
                 17.0012, 81.8040, None, None, None, 'CLU-W11-DRA', 70, 0.88, 'Pre-monsoon runoff choke', 48.0, 0.22,
                 'sanitation', 'drain_blockage', 'high', 1, None, 'Standing Water / Waterlogging', 'Demo / Rule-Based',
@@ -357,7 +357,7 @@ def seed_predictive_intelligence_data(conn):
                 'drain_blockage', 'Drain Blockage / Waterlogging', '🌊', 'medium', 'HISTORICAL LOG', 'resolved',
                 now_ms - (45 * day_ms), now_ms - (43 * day_ms), 0, now_ms - (43 * day_ms), 0,
                 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80', None,
-                'Drainage Squad', 'system-fso', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now_ms - (44 * day_ms),
+                'Drainage Squad', 'system-fso', 'K. Mukundha (Zonal Administrator)', now_ms - (44 * day_ms),
                 'Municipal Rapid Squad 4', now_ms - (44 * day_ms), 'Resolved', 'Tractor / Heavy Squad', 3, '[]', '[]', 0, 0,
                 17.0010, 81.8038, None, None, None, 'CLU-W11-DRA', 55, 0.75, 'Seasonal desilting record', 48.0, 0.05,
                 'sanitation', 'drain_blockage', 'medium', 1, None, None, None, None, 0, None, 0, 0, None
@@ -386,7 +386,7 @@ def seed_predictive_intelligence_data(conn):
                 'water_leakage', 'Water Supply / Pipeline Leakage', '🚰', 'low', 'STANDARD COMPLAINT', 'resolved',
                 now_ms - (50 * day_ms), now_ms - (48 * day_ms), 0, now_ms - (48 * day_ms), 0,
                 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80', None,
-                'Colony Resident', 'user-101', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now_ms - (49 * day_ms),
+                'Colony Resident', 'user-101', 'K. Mukundha (Zonal Administrator)', now_ms - (49 * day_ms),
                 'Public Works Squad 2', now_ms - (49 * day_ms), 'Resolved', 'Pushcart Squad', 2, '[]', '[]', 0, 0,
                 None, None, None, None, None, None, 35, 0.65, 'Minor valve seal check', 48.0, 0.02,
                 'water_supply', 'water_leakage', 'low', 1, None, None, None, None, 0, None, 0, 0, None
@@ -1005,7 +1005,7 @@ def handle_predictive_post(handler, path, body, sse_hub=None, auth_user=None):
             return True
 
         act_id = body.get('action_id') or body.get('actionId') or body.get('id')
-        officer_name = auth_user.get('name') or auth_user.get('officialId') or 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)'
+        officer_name = auth_user.get('name') or auth_user.get('officialId') or 'K. Mukundha (Zonal Administrator)'
         note = (body.get('notes') or body.get('note') or 'Officer authorized preventive action schedule').strip()
 
         if not act_id:
@@ -1099,7 +1099,7 @@ def handle_predictive_post(handler, path, body, sse_hub=None, auth_user=None):
             return True
 
         act_id = body.get('action_id') or body.get('actionId') or body.get('id')
-        officer_name = auth_user.get('name') or auth_user.get('officialId') or 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)'
+        officer_name = auth_user.get('name') or auth_user.get('officialId') or 'K. Mukundha (Zonal Administrator)'
         reason = (body.get('justification') or body.get('reason') or body.get('rejectionReason') or '').strip()
 
         if not act_id:
@@ -1199,7 +1199,7 @@ def handle_predictive_post(handler, path, body, sse_hub=None, auth_user=None):
             return True
 
         act_id = body.get('action_id') or body.get('actionId') or body.get('id')
-        officer_name = auth_user.get('name') or auth_user.get('officialId') or 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)'
+        officer_name = auth_user.get('name') or auth_user.get('officialId') or 'K. Mukundha (Zonal Administrator)'
         new_action = (body.get('modified_action') or body.get('action') or body.get('newAction') or '').strip()
         new_priority = body.get('priority') or body.get('newPriority') or 'High'
         reason = (body.get('notes') or body.get('reason') or body.get('modificationReason') or 'Officer tailored action to current field resources').strip()
@@ -1299,7 +1299,7 @@ def handle_predictive_post(handler, path, body, sse_hub=None, auth_user=None):
 
         act_id = body.get('action_id') or body.get('actionId') or body.get('id')
         squad_name = body.get('squad') or body.get('assignedWorker') or 'Municipal Rapid Squad 4'
-        officer_name = auth_user.get('name') or auth_user.get('officialId') or 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)'
+        officer_name = auth_user.get('name') or auth_user.get('officialId') or 'K. Mukundha (Zonal Administrator)'
 
         if not act_id:
             handler.send_json_response({'success': False, 'error': 'actionId is required.'}, status=400)
@@ -1355,7 +1355,7 @@ def handle_predictive_post(handler, path, body, sse_hub=None, auth_user=None):
 
         act_id = body.get('action_id') or body.get('actionId') or body.get('id')
         field_notes = (body.get('fieldNotes') or body.get('notes') or body.get('implementedNotes') or '').strip()
-        officer_name = auth_user.get('name') or auth_user.get('officialId') or 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)'
+        officer_name = auth_user.get('name') or auth_user.get('officialId') or 'K. Mukundha (Zonal Administrator)'
 
         if not act_id:
             handler.send_json_response({'success': False, 'error': 'actionId is required.'}, status=400)

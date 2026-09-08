@@ -14,7 +14,7 @@ window.viewIssueDetail = function(issueId) {
     const resolvedTimeStr = isResolved ? formatReportDateTime(resolvedTs) : null;
     const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, resolvedTs, issue) : null;
 
-    const verifiedOfficer = issue.verifiedByOfficer || 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)';
+    const verifiedOfficer = issue.verifiedByOfficer || 'K. Mukundha (Zonal Administrator)';
     const verifiedTimeStr = formatReportDateTime(issue.verifiedTimestamp || (issue.timestamp + 18 * 60 * 1000));
     const assignedWorker = issue.assignedWorker || 'Municipal Rapid Squad';
     const assignedTimeStr = formatReportDateTime(issue.assignedTimestamp || (issue.timestamp + 45 * 60 * 1000));

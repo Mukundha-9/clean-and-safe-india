@@ -510,15 +510,15 @@ def init_database():
     ''')
     cursor.execute('''
         INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt, jurisdictionState, jurisdictionCity, jurisdictionWard)
-        VALUES ('admin@municipality.gov.in', 'user-102', 'K. Mukundha (Zonal Administrator)', 'password123', 'municipal', 'Designated Municipal & Electricity Administrator', 'GOV-MUNC-SEC-012', 'KM', 0, 0, strftime('%s', 'now'), 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)')
+        VALUES ('admin@municipality.gov.in', 'user-102', 'K. Mukundha (Zonal Administrator)', 'password123', 'municipal', 'Designated Municipal & Electricity Administrator', 'Zonal Administrator', 'KM', 0, 0, strftime('%s', 'now'), 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)')
     ''')
     cursor.execute('''
         INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt, jurisdictionState, jurisdictionCity, jurisdictionWard)
-        VALUES ('fso.officer@foodsafety.gov.in', 'user-103', 'Dr. Lakshmi Prasad (FSO)', 'password123', 'food', 'Designated Food Safety Officer (FSO)', 'FSSAI-INSP-2026-44', 'LP', 0, 0, strftime('%s', 'now'), 'Andhra Pradesh', 'Surampalem', 'ALL')
+        VALUES ('fso.officer@foodsafety.gov.in', 'user-103', 'Dr. Lakshmi Prasad (FSO)', 'password123', 'food', 'Designated Food Safety Officer (FSO)', 'Food Safety Officer', 'LP', 0, 0, strftime('%s', 'now'), 'Andhra Pradesh', 'Surampalem', 'ALL')
     ''')
     cursor.execute('''
         INSERT OR IGNORE INTO users (email, id, name, password, department, roleTitle, officialId, avatar, civicCredits, activeStreakWeeks, createdAt, jurisdictionState, jurisdictionCity, jurisdictionWard)
-        VALUES ('worker4@municipality.gov.in', 'user-104', 'Ramesh (Squad 4 Leader)', 'password123', 'worker', 'Field Response Squad Lead', 'SQUAD-04-LEAD', 'SQ', 0, 0, strftime('%s', 'now'), 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)')
+        VALUES ('worker4@municipality.gov.in', 'user-104', 'Ramesh (Squad 4 Leader)', 'password123', 'worker', 'Field Response Squad Lead', 'Squad 4 Lead', 'SQ', 0, 0, strftime('%s', 'now'), 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)')
     ''')
 
     # Authoritatively backfill/update official jurisdictions & default profiles in users table
@@ -554,9 +554,9 @@ def init_database():
     now_ms = int(time.time() * 1000)
     exp_ms = now_ms + (30 * 86400 * 1000)
     demo_sessions = [
-        ('DEMO_TOKEN_MUNICIPAL_OFFICER', 'user-102', 'admin@municipality.gov.in', 'municipal', 'Designated Municipal & Electricity Administrator', 'K. Mukundha (Zonal Administrator)', 'GOV-MUNC-SEC-012', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', now_ms, exp_ms),
-        ('DEMO_TOKEN_FOOD_OFFICER', 'user-103', 'fso.officer@foodsafety.gov.in', 'food', 'Designated Food Safety Officer (FSO)', 'Dr. Lakshmi Prasad (FSO)', 'FSSAI-INSP-2026-44', 'Andhra Pradesh', 'Surampalem', 'ALL', now_ms, exp_ms),
-        ('DEMO_TOKEN_WORKER_4', 'user-104', 'worker4@municipality.gov.in', 'worker', 'Field Response Squad Lead', 'Ramesh (Squad 4 Leader)', 'SQUAD-04-LEAD', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', now_ms, exp_ms),
+        ('DEMO_TOKEN_MUNICIPAL_OFFICER', 'user-102', 'admin@municipality.gov.in', 'municipal', 'Designated Municipal & Electricity Administrator', 'K. Mukundha (Zonal Administrator)', 'Zonal Administrator', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', now_ms, exp_ms),
+        ('DEMO_TOKEN_FOOD_OFFICER', 'user-103', 'fso.officer@foodsafety.gov.in', 'food', 'Designated Food Safety Officer (FSO)', 'Dr. Lakshmi Prasad (FSO)', 'Food Safety Officer', 'Andhra Pradesh', 'Surampalem', 'ALL', now_ms, exp_ms),
+        ('DEMO_TOKEN_WORKER_4', 'user-104', 'worker4@municipality.gov.in', 'worker', 'Field Response Squad Lead', 'Ramesh (Squad 4 Leader)', 'Squad 4 Lead', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', now_ms, exp_ms),
         ('DEMO_TOKEN_CITIZEN', 'user-101', 'citizen@civictech.in', 'citizen', 'Verified Citizen Reporter', 'KRISH', 'CIT-IND-2026-8941', 'Andhra Pradesh', 'Surampalem', 'Ward 12 (Market Zone)', now_ms, exp_ms),
         ('DEMO_TOKEN_DELHI_OFFICER', 'user-delhi-01', 'delhi.officer@mcd.gov.in', 'municipal', 'Zonal Officer (Delhi MCD)', 'Rajesh Sharma (MCD Zonal Head)', 'GOV-MCD-DEL-01', 'Delhi NCR', 'New Delhi', 'Ward 5 (Central)', now_ms, exp_ms),
         ('DEMO_TOKEN_HYD_FSO', 'user-fso-hyd', 'hyd.fso@foodsafety.gov.in', 'food', 'Food Safety Officer (GHMC)', 'Dr. Aruna Reddy (GHMC FSO)', 'FSSAI-HYD-2026-99', 'Telangana', 'Hyderabad', 'ALL', now_ms, exp_ms),
@@ -641,7 +641,7 @@ def seed_initial_data(conn):
             'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
             'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
             'KRISH', 'user-101',
-            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (28 * 3600 * 1000),
+            'K. Mukundha (Zonal Administrator)', now - (28 * 3600 * 1000),
             'Sanitation Rapid Fleet 1 (Lead: Ravi Kumar)', now - (26 * 3600 * 1000),
             'Completed & Verified On-Site', 'Compactor Fleet',
             14, json.dumps(['user-101', 'user-102']),
@@ -667,7 +667,7 @@ def seed_initial_data(conn):
             'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=800&auto=format&fit=crop&q=80',
             'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=80',
             'KRISH', 'user-101',
-            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (22 * 3600 * 1000),
+            'K. Mukundha (Zonal Administrator)', now - (22 * 3600 * 1000),
             'Municipal Rapid Squad 4 (Lead: Ramesh)', now - (20 * 3600 * 1000),
             'Completed & Verified On-Site', 'Tipper Truck',
             18, json.dumps(['user-101']),
@@ -692,7 +692,7 @@ def seed_initial_data(conn):
             'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80',
             None,
             'KRISH', 'user-101',
-            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (56 * 3600 * 1000),
+            'K. Mukundha (Zonal Administrator)', now - (56 * 3600 * 1000),
             'Sanitation Rapid Fleet 3 (Lead: P. Ramesh)', now - (54 * 3600 * 1000),
             'Delayed (>48h) — Auto-Forwarded to Municipal Commissioner Red Desk for Urgent Action',
             'Heavy Hydraulic Compactor & 10-Ton Tipper Fleet',
@@ -719,7 +719,7 @@ def seed_initial_data(conn):
             'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=800&auto=format&fit=crop&q=80',
             'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800&auto=format&fit=crop&q=80',
             'KRISH', 'user-101',
-            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (34 * 3600 * 1000),
+            'K. Mukundha (Zonal Administrator)', now - (34 * 3600 * 1000),
             'Lineman Squad B (Lead: Suresh Kumar)', now - (32 * 3600 * 1000),
             'Completed & Verified On-Site', 'Lineman Bucket Van (AP-05-EB)',
             22, json.dumps(['user-101']),
@@ -744,7 +744,7 @@ def seed_initial_data(conn):
             'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=800&auto=format&fit=crop&q=80',
             None,
             'KRISH', 'user-101',
-            'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (8 * 3600 * 1000),
+            'K. Mukundha (Zonal Administrator)', now - (8 * 3600 * 1000),
             'Public Works Water Squad 2 (Lead: Anita Roy)', now - (6 * 3600 * 1000),
             'On Site - Conducting Work', 'Valve Repair Utility Van',
             9, json.dumps(['user-101']),
@@ -765,7 +765,7 @@ def seed_initial_data(conn):
             'sparking_wire', 'Sparking Cable / Wire', '⚡', 'bulk', 'CRITICAL LIFE HAZARD', 'pending',
             now - (18 * 3600 * 1000), now + (30 * 3600 * 1000), 29.8, None, 0,
             'https://images.unsplash.com/photo-1544724569-5f546fd6f2b5?w=800&auto=format&fit=crop&q=80', None,
-            'R. Venkatesh (Citizen)', 'user-103', 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)', now - (17 * 3600 * 1000),
+            'R. Venkatesh (Citizen)', 'user-103', 'K. Mukundha (Zonal Administrator)', now - (17 * 3600 * 1000),
             'Lineman Squad B (Suresh Kumar)', now - (16 * 3600 * 1000), 'Feeder Isolated & Line Repair Crew Active',
             'Lineman Bucket Van (AP-05-EB)', 28, json.dumps(['user-103', 'user-104', 'user-105']),
             json.dumps([
@@ -3101,7 +3101,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             issue_id = body.get('issueId')
             verified = bool(body.get('verified'))
             override_reason = (body.get('overrideReason') or '').strip()
-            officer_name = (body.get('officerName') or 'Consultant Officer K. Mukundha (GOV-MUNC-SEC-012)').strip()
+            officer_name = (body.get('officerName') or 'K. Mukundha (Zonal Administrator)').strip()
 
             if not issue_id:
                 self.send_json_response({'success': False, 'error': 'Issue ID is required.'}, status=400)
