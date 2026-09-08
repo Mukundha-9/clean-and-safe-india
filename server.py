@@ -1964,18 +1964,24 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 {'author': 'Consultant Officer K. Mukundha', 'text': 'Grievance verified. Squad allocated and dispatched.', 'time': 'Just now'}
             ]
 
+            auth_user_iss = get_authenticated_user(self, conn)
+            resolved_state = body.get('state') or (auth_user_iss and auth_user_iss.get('jurisdictionState')) or 'Andhra Pradesh'
+            resolved_city = body.get('city') or (auth_user_iss and auth_user_iss.get('jurisdictionCity')) or 'Surampalem'
+            resolved_ward = body.get('ward') or (auth_user_iss and auth_user_iss.get('jurisdictionWard')) or 'Ward 12 (Market Zone)'
+            resolved_street = body.get('street') or (auth_user_iss and auth_user_iss.get('permanentAddress')) or 'Geotagged Incident Location'
+
             new_issue = {
                 'id': issue_id,
-                'state': body.get('state', 'Andhra Pradesh'),
-                'city': body.get('city', 'Surampalem'),
-                'ward': body.get('ward', 'Ward 12 (Market Zone)'),
-                'street': body.get('street', 'Main Road'),
+                'state': resolved_state,
+                'city': resolved_city,
+                'ward': resolved_ward,
+                'street': resolved_street,
                 'department': dept_key,
                 'deptName': dept_name,
                 'deptIcon': dept_icon,
                 'title': body.get('title', 'Civic Hazard'),
                 'description': body.get('description', ''),
-                'location': f"{body.get('city', 'Surampalem')} • {body.get('ward', 'Ward 12')}, {body.get('street', '')}",
+                'location': f"{resolved_city} • {resolved_ward}, {resolved_street}",
                 'category': body.get('category', 'general'),
                 'categoryName': body.get('categoryName', 'Civic Hazard'),
                 'categoryIcon': dept_icon,
@@ -3908,8 +3914,8 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                     where_clauses.append("city = ?")
                     prms.append(auth_user.get('jurisdictionCity'))
             else:
-                req_state = body.get('state')
-                req_city = body.get('city')
+                req_state = body.get('state') or (auth_user and auth_user.get('jurisdictionState'))
+                req_city = body.get('city') or (auth_user and auth_user.get('jurisdictionCity'))
                 if req_state:
                     where_clauses.append("state = ?")
                     prms.append(req_state)

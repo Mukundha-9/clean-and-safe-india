@@ -3419,7 +3419,8 @@
   };
 
   window.handleModalCityChange = function(city) {
-    const state = document.getElementById('modalReportState').value;
+    const stateEl = document.getElementById('modalReportState');
+    const state = stateEl ? stateEl.value : 'Andhra Pradesh';
     const wardSelect = document.getElementById('modalReportWard');
     if (!wardSelect) return;
 
@@ -6725,6 +6726,24 @@
     } else if (descInput && descInput.value.trim().length >= 6) {
       window.triggerRealtimeTriage(descInput.value);
     }
+
+    // Auto-populate hidden citizen domicile & location from authenticated session
+    const currentUser = (window.auth && typeof window.auth.getCurrentUser === 'function') ? window.auth.getCurrentUser() : {};
+    const stateEl = document.getElementById('modalReportState');
+    const cityEl = document.getElementById('modalReportCity');
+    const wardEl = document.getElementById('modalReportWard');
+    const streetEl = document.getElementById('reportLocationInput');
+
+    const defState = currentUser.jurisdictionState || currentUser.state || 'Andhra Pradesh';
+    const defCity = currentUser.jurisdictionCity || currentUser.city || 'Surampalem';
+    const defWard = currentUser.jurisdictionWard || currentUser.ward || 'Ward 12 (Market Zone)';
+    const defStreet = currentUser.permanentAddress || `${defWard}, Geotagged Zone`;
+
+    if (stateEl) stateEl.value = defState;
+    if (cityEl) cityEl.value = defCity;
+    if (wardEl) wardEl.value = defWard;
+    if (streetEl) streetEl.value = defStreet;
+
     window.openModal('reportIssueModal');
   };
 
@@ -8689,11 +8708,18 @@
         e.preventDefault();
         const title = document.getElementById('reportTitleInput').value;
         const desc = document.getElementById('reportDescInput').value;
-        const street = document.getElementById('reportLocationInput').value;
-        const state = document.getElementById('modalReportState').value;
-        const city = document.getElementById('modalReportCity').value;
-        const ward = document.getElementById('modalReportWard').value;
         const dept = document.getElementById('reportDeptSelect').value;
+
+        const currentUser = (window.auth && typeof window.auth.getCurrentUser === 'function') ? window.auth.getCurrentUser() : {};
+        const stateEl = document.getElementById('modalReportState');
+        const cityEl = document.getElementById('modalReportCity');
+        const wardEl = document.getElementById('modalReportWard');
+        const streetEl = document.getElementById('reportLocationInput');
+
+        const state = (stateEl && stateEl.value) ? stateEl.value : (currentUser.jurisdictionState || currentUser.state || 'Andhra Pradesh');
+        const city = (cityEl && cityEl.value) ? cityEl.value : (currentUser.jurisdictionCity || currentUser.city || 'Surampalem');
+        const ward = (wardEl && wardEl.value) ? wardEl.value : (currentUser.jurisdictionWard || currentUser.ward || 'Ward 12 (Market Zone)');
+        const street = (streetEl && streetEl.value) ? streetEl.value : (currentUser.permanentAddress || `${ward}, Geotagged Zone`);
 
         // Use user captured photo or default fallback
         const submittedImage = selectedReportImageBase64 || 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80';

@@ -1742,47 +1742,11 @@
             </div>
           </div>
 
-          <!-- SMART JURISDICTION & LOCATION DIVISION -->
-          <div class="complaint-section-box">
-            <div style="font-weight: 800; font-size: 0.8rem; color: #38bdf8; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">
-              <span>📍</span> JURISDICTION &amp; LOCATION
-            </div>
-            <div class="grid-2" style="gap: 0.65rem; margin-bottom: 0.65rem;">
-              <div>
-                <label class="form-label" style="font-size: 0.74rem;">State:</label>
-                <select id="modalReportState" class="form-select" onchange="window.handleModalStateChange(this.value)">
-                  <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
-                  <option value="Telangana">Telangana</option>
-                  <option value="Maharashtra">Maharashtra</option>
-                  <option value="Karnataka">Karnataka</option>
-                  <option value="Tamil Nadu">Tamil Nadu</option>
-                  <option value="Delhi NCR">Delhi NCR</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label" style="font-size: 0.74rem;">City / District:</label>
-                <select id="modalReportCity" class="form-select" onchange="window.handleModalCityChange(this.value)">
-                  <option value="Surampalem" selected>Surampalem</option>
-                  <option value="Kakinada">Kakinada</option>
-                  <option value="Visakhapatnam">Visakhapatnam</option>
-                </select>
-              </div>
-            </div>
-            <div class="grid-2" style="gap: 0.65rem;">
-              <div>
-                <label class="form-label" style="font-size: 0.74rem;">Ward / Zone:</label>
-                <select id="modalReportWard" class="form-select">
-                  <option value="Ward 12 (Market Zone)" selected>Ward 12 (Market Zone)</option>
-                  <option value="Ward 11 (Lake View Zone)">Ward 11 (Lake View Zone)</option>
-                  <option value="Ward 14 (Campus Zone)">Ward 14 (Campus Zone)</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label" style="font-size: 0.74rem;">Street Name &amp; Landmark:</label>
-                <input type="text" id="reportLocationInput" class="form-input" placeholder="e.g. Gandhi Statue Main Road" required>
-              </div>
-            </div>
-          </div>
+          <!-- Automatic Citizen Domicile & Location (Resolved silently from authenticated session & live GPS) -->
+          <input type="hidden" id="modalReportState" value="Andhra Pradesh">
+          <input type="hidden" id="modalReportCity" value="Surampalem">
+          <input type="hidden" id="modalReportWard" value="Ward 12 (Market Zone)">
+          <input type="hidden" id="reportLocationInput" value="">
 
           <!-- COMPLAINT CLASSIFICATION & SUMMARY (Auto-filled by Smart Triage) -->
           <div class="grid-2" style="gap: 0.65rem;">
