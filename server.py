@@ -16,6 +16,7 @@ import math
 import base64
 import predictive_engine
 import ai_engine
+import food_safety_engine
 
 # ------------------------------------------------------------------------------
 # INDUSTRY-STANDARD PASSWORD SECURITY (SCRYPT WITH PER-USER SALT)
@@ -705,7 +706,7 @@ def evaluate_incident_identity(report_data, candidate_issues, auth_user=None):
                     'action': 'Add Follow-up to Existing Ticket'
                 })
                 continue
-            elif dist_m < 80 and same_cat and time_diff_hours < 2.0:
+            elif cand_is_unresolved and dist_m < 80 and same_cat and time_diff_hours < 2.0:
                 match_score = 0.90
                 reasoning = f"An active civic report may already exist at this location (#{cand_id}), reported {int(time_diff_hours * 60)} mins ago. This may be a follow-up to an existing issue rather than a new complaint."
                 evaluated_matches.append({
@@ -1033,7 +1034,15 @@ def init_database():
         ('geoResolvedZone', 'TEXT'),
         ('geoResolvedStreet', 'TEXT'),
         ('geoCheckTimestamp', 'INTEGER'),
-        ('geoCheckReasoning', 'TEXT')
+        ('geoCheckReasoning', 'TEXT'),
+        ('citizenResolutionFeedback', 'TEXT'),
+        ('citizenFeedbackTimestamp', 'INTEGER'),
+        ('resolutionReviewRequested', 'INTEGER DEFAULT 0'),
+        ('fsoReviewStatus', "TEXT DEFAULT 'pending_review'"),
+        ('establishmentType', 'TEXT'),
+        ('aiVisualConcern', 'TEXT'),
+        ('aiRiskAssessment', 'TEXT'),
+        ('aiRiskReasons', 'TEXT')
     ]
     for col_name, col_type in new_issue_cols:
         if col_name not in existing_issue_cols:
@@ -1041,6 +1050,75 @@ def init_database():
                 cursor.execute(f"ALTER TABLE issues ADD COLUMN {col_name} {col_type}")
             except Exception as e:
                 print(f"[Database] Column {col_name} migration note: {e}")
+
+    # Safe column migrations for vendors table
+    cursor.execute("PRAGMA table_info(vendors)")
+    existing_vendor_cols = [row['name'] if isinstance(row, dict) or hasattr(row, 'keys') else row[1] for row in cursor.fetchall()]
+    new_vendor_cols = [
+        ('establishmentType', 'TEXT'),
+        ('monitoringStatus', "TEXT DEFAULT 'Standard'"),
+        ('totalComplaints', 'INTEGER DEFAULT 1'),
+        ('uniqueIncidents', 'INTEGER DEFAULT 1'),
+        ('followUpCount', 'INTEGER DEFAULT 0'),
+        ('inspectionsCompleted', 'INTEGER DEFAULT 0'),
+        ('correctiveActionsCount', 'INTEGER DEFAULT 0'),
+        ('reinspectionsCount', 'INTEGER DEFAULT 0'),
+        ('unresolvedCount', 'INTEGER DEFAULT 0'),
+        ('recurrenceTrend', "TEXT DEFAULT 'Stable'")
+    ]
+    for col_name, col_type in new_vendor_cols:
+        if col_name not in existing_vendor_cols:
+            try:
+                cursor.execute(f"ALTER TABLE vendors ADD COLUMN {col_name} {col_type}")
+            except Exception as e:
+                print(f"[Database] Vendor Column {col_name} migration note: {e}")
+
+    # Table: Food Inspections (Advanced Food Safety Operations v45)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS food_inspections (
+            inspectionId TEXT PRIMARY KEY,
+            issueId TEXT,
+            vendorId TEXT,
+            vendorName TEXT,
+            officerId TEXT,
+            officerName TEXT,
+            jurisdictionState TEXT,
+            jurisdictionCity TEXT,
+            ward TEXT,
+            scheduledAt INTEGER,
+            startedAt INTEGER,
+            completedAt INTEGER,
+            inspectionStatus TEXT,
+            inspectionResult TEXT,
+            inspectionNotes TEXT,
+            checklistData TEXT,
+            evidence TEXT,
+            correctiveActionRequired INTEGER,
+            nextInspectionAt INTEGER,
+            verifiedAt INTEGER,
+            verifiedBy TEXT
+        )
+    ''')
+
+    # Table: Food Corrective Actions (Advanced Food Safety Operations v45)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS food_corrective_actions (
+            actionId TEXT PRIMARY KEY,
+            inspectionId TEXT,
+            issueId TEXT,
+            vendorId TEXT,
+            vendorName TEXT,
+            description TEXT,
+            status TEXT,
+            assignedAt INTEGER,
+            implementedAt INTEGER,
+            verifiedAt INTEGER,
+            verificationNotes TEXT,
+            officerId TEXT,
+            officerName TEXT,
+            jurisdictionCity TEXT
+        )
+    ''')
 
     # Table: Incident Relationships (Civic Incident Identity Engine v43)
     cursor.execute('''
@@ -1654,6 +1732,10 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
         if predictive_engine.handle_predictive_get(self, path, query, auth_user=auth_user_pred):
             return
 
+        # Food Safety Inspection & Risk Operations Endpoints (GET)
+        if food_safety_engine.handle_food_safety_get(self, path, query, auth_user=auth_user_pred):
+            return
+
         # 2. REST API: GET /api/issues
         if path == '/api/issues':
             conn = get_db_connection()
@@ -2141,6 +2223,10 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
         auth_user_pred = get_authenticated_user(self, conn_pred)
         conn_pred.close()
         if predictive_engine.handle_predictive_post(self, path, body, sse_hub, auth_user=auth_user_pred):
+            return
+
+        # Food Safety Inspection & Risk Operations Endpoints (POST)
+        if food_safety_engine.handle_food_safety_post(self, path, body, sse_hub, auth_user=auth_user_pred):
             return
 
         # 1. REST API: POST /api/issues
