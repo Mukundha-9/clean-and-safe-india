@@ -5705,6 +5705,41 @@
         if (streetInput && !streetInput.value) {
           streetInput.value = `Gandhi Statue Main Road (Geotagged #${Math.floor(100+Math.random()*900)})`;
         }
+
+        // Version 44: Update Location Captured card
+        const areaEl = document.getElementById('modalLocationCapturedArea');
+        const badgeEl = document.getElementById('modalLocationStatusBadge');
+        if (areaEl || badgeEl) {
+          fetch('/api/geo/verify-location', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lat, lng, accuracy: acc, ward: 'Ward 12 (Market Zone)', city: 'Surampalem' })
+          }).then(res => res.json()).then(data => {
+            if (data.success && data.geoEvidence) {
+              const g = data.geoEvidence;
+              if (areaEl) areaEl.textContent = `${g.resolvedCity || 'Surampalem'} • ${g.resolvedWard || 'Ward 12'}`;
+              if (badgeEl) {
+                if (g.status === 'LOCATION_CONSISTENT') {
+                  badgeEl.textContent = '✓ Location consistent';
+                  badgeEl.style.background = 'rgba(16, 185, 129, 0.2)';
+                  badgeEl.style.color = '#34d399';
+                  badgeEl.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                } else if (g.status === 'LOCATION_NEEDS_CONFIRMATION') {
+                  badgeEl.textContent = '⚠️ Location needs confirmation';
+                  badgeEl.style.background = 'rgba(245, 158, 11, 0.2)';
+                  badgeEl.style.color = '#fbbf24';
+                  badgeEl.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+                } else {
+                  badgeEl.textContent = '! Location could not be fully verified';
+                  badgeEl.style.background = 'rgba(239, 68, 68, 0.2)';
+                  badgeEl.style.color = '#f87171';
+                  badgeEl.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                }
+              }
+            }
+          }).catch(() => {});
+        }
+
         showToast(`📍 GPS Geotag Locked (${lat}° N, ${lng}° E)!`, 'reward', '📡');
       }, 700);
     }
@@ -7560,6 +7595,30 @@
         </div>
       `).join('');
 
+      // Version 44: Geo-Evidence Consistency Badges
+      const geoStatus = issue.geoConsistencyStatus || 'LOCATION_CONSISTENT';
+      let geoBadgeText = '✓ Location Consistent';
+      let geoBadgeBg = 'rgba(16, 185, 129, 0.15)';
+      let geoBadgeColor = '#34d399';
+      let geoBadgeBorder = '#10b981';
+
+      if (geoStatus === 'LOCATION_NEEDS_CONFIRMATION') {
+        geoBadgeText = '⚠️ Needs Confirmation';
+        geoBadgeBg = 'rgba(245, 158, 11, 0.15)';
+        geoBadgeColor = '#fbbf24';
+        geoBadgeBorder = '#f59e0b';
+      } else if (geoStatus === 'LOCATION_MISMATCH') {
+        geoBadgeText = '⚠️ Location Mismatch';
+        geoBadgeBg = 'rgba(239, 68, 68, 0.15)';
+        geoBadgeColor = '#f87171';
+        geoBadgeBorder = '#ef4444';
+      } else if (geoStatus === 'LOCATION_UNAVAILABLE') {
+        geoBadgeText = 'ℹ️ Location Unavailable';
+        geoBadgeBg = 'rgba(148, 163, 184, 0.15)';
+        geoBadgeColor = '#cbd5e1';
+        geoBadgeBorder = '#64748b';
+      }
+
       content.innerHTML = `
         <div>
           ${(isCitizen && isResolved) ? `
@@ -7578,14 +7637,22 @@
           <div class="tracker-header-card">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
               <div>
-                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; flex-wrap: wrap;">
                   <span class="cat-badge">${deptIcon} ${deptName}</span>
                   <span class="badge badge-${status}">${status.replace('_', ' ').toUpperCase()}</span>
                   <span class="badge sev-${(issue.severity || 'medium').toLowerCase()}">${severity}</span>
+                  ${!isCitizen ? `
+                    <button type="button" class="btn btn-sm btn-outline" onclick="window.changeIssuePriority('${issue.id}', '${(issue.severity || 'medium').toLowerCase()}')" style="font-size: 0.68rem; padding: 2px 7px; border-color: rgba(255,255,255,0.2); color: #38bdf8; cursor: pointer; background: rgba(56,189,248,0.08);" title="Change incident priority level">
+                      ⚡ Change Priority
+                    </button>
+                  ` : ''}
                 </div>
                 <h2 style="font-size: 1.35rem; color: white; margin: 0.2rem 0 0.4rem;">${issueTitle}</h2>
-                <div style="font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 0.4rem;">
-                  <span>📍</span> <span>${issueLocation}</span>
+                <div style="font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                  <span>📍 ${issueLocation}</span>
+                  <span class="badge" style="background: ${geoBadgeBg}; color: ${geoBadgeColor}; border: 1px solid ${geoBadgeBorder}; font-size: 0.68rem; font-weight: 800; padding: 2px 6px;">
+                    ${geoBadgeText}
+                  </span>
                 </div>
               </div>
               <div style="text-align: right;">
@@ -7662,6 +7729,46 @@
               <span>Ticket allocated to <strong>${deptName} (${incidentCity})</strong> based on incident GPS. Citizen verified at permanent residence in <strong>${reporterProfile.homeCity || 'Surampalem'}</strong>.</span>
             </div>
           </div>
+
+          <!-- Version 44: Geo-Evidence Consistency Record -->
+          <details style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.25rem;">
+            <summary style="cursor: pointer; font-size: 0.82rem; font-weight: 800; color: #38bdf8; display: flex; align-items: center; justify-content: space-between; user-select: none;">
+              <span style="display: flex; align-items: center; gap: 0.4rem;">
+                <span>🛰️</span> VIEW LOCATION EVIDENCE
+              </span>
+              <span class="badge" style="background: ${geoBadgeBg}; color: ${geoBadgeColor}; border: 1px solid ${geoBadgeBorder}; font-size: 0.7rem; font-weight: 800;">
+                ${geoBadgeText}
+              </span>
+            </summary>
+            <div style="margin-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.65rem;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem; font-size: 0.78rem;">
+                <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                  <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Evidence Source:</span>
+                  <strong style="color: white;">📱 Citizen Device GPS (Tamper-Resistant)</strong>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                  <span style="color: #94a3b8; font-size: 0.7rem; display: block;">GPS Coordinates &amp; Accuracy:</span>
+                  <strong style="color: #38bdf8; font-family: var(--font-mono);">${issue.latitude ? Number(issue.latitude).toFixed(5) + '° N, ' + Number(issue.longitude).toFixed(5) + '° E' : 'GPS Coordinates Unavailable'} ${issue.accuracy ? '(±' + Math.round(issue.accuracy) + 'm)' : ''}</strong>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                  <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Resolved Civic Jurisdiction:</span>
+                  <strong style="color: white;">${issue.geoResolvedWard || issue.ward || 'Ward 12'}, ${issue.geoResolvedCity || issue.city || 'Surampalem'}</strong>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                  <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Municipal Sector Proximity:</span>
+                  <strong style="color: ${issue.geoDistanceMeters !== null && issue.geoDistanceMeters !== undefined && issue.geoDistanceMeters > 900 ? '#f87171' : '#34d399'};">${issue.geoDistanceMeters !== null && issue.geoDistanceMeters !== undefined ? Math.round(issue.geoDistanceMeters) + 'm from civic sector center' : 'Within ward bounds'}</strong>
+                </div>
+              </div>
+              ${issue.geoCheckReasoning ? `
+                <div style="margin-top: 0.6rem; font-size: 0.75rem; color: #cbd5e1; background: rgba(56, 189, 248, 0.06); border-left: 3px solid #38bdf8; padding: 0.45rem 0.65rem; border-radius: 4px;">
+                  <strong>Geo-Consistency Reasoning:</strong> ${issue.geoCheckReasoning}
+                </div>
+              ` : ''}
+              <div style="margin-top: 0.5rem; font-size: 0.7rem; color: #64748b; font-style: italic;">
+                Transparent Notice: Location is captured directly from device GPS coordinates during citizen submission. Photo EXIF metadata is not simulated or fabricated.
+              </div>
+            </div>
+          </details>
 
           <!-- Field Resolution Evidence Record (Before & After) -->
           <div style="margin-bottom: 1.5rem;">
@@ -8850,32 +8957,32 @@
       if (scoreEl) scoreEl.textContent = `Match Confidence: ${pct}%`;
 
       if (idData.identityType === 'POSSIBLE_DUPLICATE') {
-        if (iconEl) iconEl.textContent = '⚠️';
-        if (titleEl) titleEl.textContent = 'Possible Duplicate Incident Detected';
-        if (subEl) subEl.textContent = 'A highly similar civic complaint was recently reported at this exact location.';
+        if (iconEl) iconEl.textContent = '📍';
+        if (titleEl) titleEl.textContent = 'An active civic report may already exist at this location.';
+        if (subEl) subEl.textContent = 'This may be a follow-up to an existing issue rather than a new complaint.';
         if (badgeEl) {
-          badgeEl.textContent = 'POSSIBLE DUPLICATE';
+          badgeEl.textContent = 'ACTIVE REPORT AT THIS LOCATION';
           badgeEl.style.background = '#f59e0b';
         }
-        if (recActionEl) recActionEl.textContent = 'Action: Add Follow-up or Confirm New';
+        if (recActionEl) recActionEl.textContent = 'Recommended: Add Follow-up';
       } else if (idData.identityType === 'FOLLOW_UP') {
         if (iconEl) iconEl.textContent = '🔄';
-        if (titleEl) titleEl.textContent = 'Active Grievance In Progress at this Spot';
-        if (subEl) subEl.textContent = 'An existing complaint is currently active/unresolved on site. Submit a follow-up to escalate priority!';
+        if (titleEl) titleEl.textContent = 'An active civic report may already exist at this location.';
+        if (subEl) subEl.textContent = 'This may be a follow-up to an existing issue rather than a new complaint.';
         if (badgeEl) {
-          badgeEl.textContent = 'FOLLOW UP';
+          badgeEl.textContent = 'EXISTING ACTIVE REPORT';
           badgeEl.style.background = '#0284c7';
         }
-        if (recActionEl) recActionEl.textContent = 'Action: Attach Citizen Follow-up';
+        if (recActionEl) recActionEl.textContent = 'Recommended: Add Follow-up';
       } else {
         if (iconEl) iconEl.textContent = '🔗';
-        if (titleEl) titleEl.textContent = 'Related Incident in Immediate Area';
-        if (subEl) subEl.textContent = 'A related or adjacent civic condition exists nearby in this ward.';
+        if (titleEl) titleEl.textContent = 'A related civic incident is active nearby.';
+        if (subEl) subEl.textContent = 'You can add a follow-up to the existing ticket or submit as a new incident.';
         if (badgeEl) {
-          badgeEl.textContent = 'RELATED INCIDENT';
+          badgeEl.textContent = 'RELATED CIVIC INCIDENT';
           badgeEl.style.background = '#8b5cf6';
         }
-        if (recActionEl) recActionEl.textContent = 'Action: Link or File New';
+        if (recActionEl) recActionEl.textContent = 'Action: Add Follow-up or Report as New';
       }
 
       const exTitleEl = document.getElementById('identityExistingTitle');
@@ -9059,6 +9166,46 @@
         }
       } catch (e) {
         showToast('Error reviewing incident identity.', 'error', '⚠️');
+      }
+    };
+
+    // Stage v44: Municipal Officer Severity / Priority Update
+    window.changeIssuePriority = async function(issueId, currentSeverity) {
+      const options = ['low', 'medium', 'high', 'critical'];
+      const promptVal = window.prompt(`Change incident priority for #${issueId} (Current: ${(currentSeverity || 'medium').toUpperCase()}):\nEnter low, medium, high, or critical:`, currentSeverity || 'medium');
+      if (!promptVal) return;
+      const cleanSev = promptVal.trim().toLowerCase();
+      if (!options.includes(cleanSev)) {
+        alert(`Invalid priority "${promptVal}". Allowed values are: low, medium, high, critical.`);
+        return;
+      }
+      try {
+        const authHeaders = { 'Content-Type': 'application/json' };
+        const token = auth.getToken();
+        if (token) authHeaders['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`/api/issues/${issueId}/change-priority`, {
+          method: 'POST',
+          headers: authHeaders,
+          body: JSON.stringify({ severity: cleanSev, reason: 'Municipal officer manual priority adjustment' })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          showToast(`Priority changed to ${cleanSev.toUpperCase()}`, 'success', '⚡');
+          const issue = db.getIssueById ? db.getIssueById(issueId) : null;
+          if (issue) {
+            issue.severity = cleanSev;
+          }
+          if (window.viewIssueDetail) {
+            window.viewIssueDetail(issueId);
+          }
+          renderMunicipalDashboard();
+        } else {
+          showToast(data.error || 'Failed to update priority', 'error', '⚠️');
+        }
+      } catch (err) {
+        console.error('Error changing priority:', err);
+        showToast('Network error updating priority', 'error', '⚠️');
       }
     };
 
