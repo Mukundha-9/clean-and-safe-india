@@ -372,7 +372,7 @@ class UIManager {
 
             ${isViolated && vendor.violationClause ? `
               <div class="vendor-violation-compact">
-                <div class="v-section-label">⚖️ Statutory Violation Notice</div>
+                <div class="v-section-label">VIOLATION</div>
                 <div class="v-clause-text">${vendor.violationClause}</div>
                 <div class="v-grid-row">
                   <div class="v-grid-cell">
@@ -380,12 +380,12 @@ class UIManager {
                     <span class="v-cell-val text-amber">${vendor.penaltyImposed || '₹2,000.00'}</span>
                   </div>
                   <div class="v-grid-cell">
-                    <span class="v-cell-label">Deadline</span>
-                    <span class="v-cell-val">${vendor.rectificationDeadline || '48 Hours'}</span>
+                    <span class="v-cell-label">Action</span>
+                    <span class="v-cell-val" title="${vendor.rectificationDeadline || '48 Hours'}">${vendor.rectificationDeadline || '48 Hours'}</span>
                   </div>
                   <div class="v-grid-cell">
                     <span class="v-cell-label">MQ-135 Gas</span>
-                    <span class="v-cell-val">${vendor.mq135GasPpm || '370 PPM'}</span>
+                    <span class="v-cell-val" title="${vendor.mq135GasPpm || '370 PPM'}">${(vendor.mq135GasPpm || '370 PPM').replace(/\s*\(.*?\)/, '').trim()}</span>
                   </div>
                 </div>
               </div>
@@ -393,7 +393,7 @@ class UIManager {
 
             <div class="vendor-card-footer">
               <button class="${isViolated ? 'btn-vendor-violation' : 'btn-vendor-certified'}" onclick="window.viewDigitalCertificate('${vendor.id}')">
-                <span>${isViolated ? '⚠️' : '📜'}</span>
+                <span>${isViolated ? '▲' : '📜'}</span>
                 <span>${isViolated ? 'View Statutory Violation Notice' : 'View National Hygiene Certificate'}</span>
               </button>
             </div>
