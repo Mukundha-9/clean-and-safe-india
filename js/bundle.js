@@ -1681,57 +1681,13 @@
       ]
     },
 
+        // =========================================================================
+    // FOOD SAFETY & HYGIENE VIOLATION ENFORCEMENT REPORTS (5 REALISTIC REPORTS)
+    // =========================================================================
+    // REPORT 1: Sri Sai Street Food Stall (CRITICAL, PENDING / ON NOTICE, ₹2,500 FINE)
     {
       isDemo: true,
-      id: 'ISS-2026-00125',
-      state: 'Andhra Pradesh',
-      city: 'Surampalem',
-      ward: 'Ward 14 (Campus Zone)',
-      street: 'College Road Food Court',
-      department: 'food_safety',
-      deptName: 'Food Safety Department',
-      deptIcon: '🍲',
-      title: 'Uncovered Stale Food & Open Drain Violation',
-      description: 'Campus Night Shawarma & Grills: Preparing food next to open drain channel without hairnets or sneeze covers.',
-      location: 'Ward 14 (Campus Zone), College Road Food Court, Surampalem',
-      category: 'food_hygiene',
-      categoryName: 'Unhygienic Food Stall / Prep',
-      categoryIcon: '🍲',
-      severity: 'medium',
-      severityLabel: 'MEDIUM RISK',
-      status: 'pending',
-      timestamp: Date.now() - 3600000 * 4,
-      slaDeadline: Date.now() + 3600000 * 44,
-      resolvedTimestamp: null,
-      slaHoursLeft: 44,
-      verifiedByOfficer: 'Dr. Lakshmi Prasad (Senior FSO)',
-      verifiedTimestamp: Date.now() - 3600000 * 3.8,
-      assignedWorker: 'Food Safety Officer (Dr. Lakshmi Prasad)',
-      assignedTimestamp: Date.now() - 3600000 * 3.5,
-      workerStatus: 'Improvement Notice Issued — 7-Day Rectification Window',
-      isSlaBreached: false,
-      lat: 16.9980,
-      lng: 81.8020,
-      reportedBy: 'Dr. Lakshmi Prasad (FSO)',
-      userId: 'food-01',
-      vendorId: 'FSSAI-AP-2026-V02',
-      vendorName: 'Campus Night Shawarma & Grills',
-      mq135GasPpm: 340,
-      upvotes: 18,
-      upvotedBy: [],
-      imageBefore: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
-      imageAfter: null,
-      recommendedResource: 'Food Safety Inspector Unit',
-      rewardIssued: false,
-      fineLevied: 500,
-      comments: [
-        { author: 'Dr. Lakshmi Prasad (FSO)', text: 'Statutory 7-Day Improvement Notice issued with ₹500 fine.', time: '4h ago' }
-      ]
-    },
-
-    {
-      isDemo: true,
-      id: 'ISS-2026-00128',
+      id: 'ISS-2026-FS-001',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
       ward: 'Ward 12 (Market Zone)',
@@ -1739,41 +1695,244 @@
       department: 'food_safety',
       deptName: 'Food Safety Department',
       deptIcon: '🍲',
-      title: 'Stale Burnt Cooking Oil & Toxic Fumes Violation',
-      description: 'Sri Krishna Seafood Point: Reusing black rancid cooking oil across multiple frying cycles (TPM 34%).',
+      title: 'Poor Food Handling & Uncovered Prepared Food',
+      description: 'Sri Sai Street Food Stall: Prepared street foods stored uncovered adjacent to traffic dust; food handlers operating without headgear or disposable gloves.',
       location: 'Ward 12 (Market Zone), Market Gate Cross, Surampalem',
       category: 'food_hygiene',
-      categoryName: 'Toxic Oil Reuse Violation',
-      categoryIcon: '🍳',
+      categoryName: 'Food Hygiene & Preparation',
+      categoryIcon: '🍲',
+      establishmentType: 'Street Food Stall',
       severity: 'bulk',
-      severityLabel: 'CRITICAL VIOLATION',
+      severityLabel: 'CRITICAL HAZARD',
       status: 'pending',
-      timestamp: Date.now() - 3600000 * 10,
-      slaDeadline: Date.now() + 3600000 * 38,
+      timestamp: Date.now() - 3600000 * 3,
+      slaDeadline: Date.now() + 3600000 * 45,
       resolvedTimestamp: null,
-      slaHoursLeft: 38,
-      verifiedByOfficer: 'Dr. Lakshmi Prasad (Senior FSO)',
-      verifiedTimestamp: Date.now() - 3600000 * 9.5,
+      slaHoursLeft: 45,
+      verifiedByOfficer: 'Dr. Lakshmi Prasad (FSO)',
+      verifiedTimestamp: Date.now() - 3600000 * 2.8,
       assignedWorker: 'Food Safety Officer (Dr. Lakshmi Prasad)',
-      assignedTimestamp: Date.now() - 3600000 * 9,
-      workerStatus: 'Adulteration Sampling & Notice Levied',
+      assignedTimestamp: Date.now() - 3600000 * 2.5,
+      workerStatus: 'Statutory 48h Notice Issued — Re-inspection & ₹2,500 fine levied',
       isSlaBreached: false,
       lat: 17.0012,
       lng: 81.8038,
       reportedBy: 'Dr. Lakshmi Prasad (FSO)',
       userId: 'food-01',
-      vendorId: 'FSSAI-AP-2026-V01',
-      vendorName: 'Sri Krishna Seafood & Fast Food Point',
-      mq135GasPpm: 370,
-      upvotes: 45,
+      vendorId: 'FSSAI-AP-2026-V11',
+      vendorName: 'Sri Sai Street Food Stall',
+      mq135GasPpm: 385,
+      upvotes: 24,
       upvotedBy: [],
       imageBefore: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
       imageAfter: null,
       recommendedResource: 'Food Safety Adulteration Cell',
       rewardIssued: false,
-      fineLevied: 2000,
+      fineLevied: 2500,
       comments: [
-        { author: 'Dr. Lakshmi Prasad (FSO)', text: 'Critical Violation notice issued under Section 56. ₹2,000 fine levied.', time: '10h ago' }
+        { author: 'Dr. Lakshmi Prasad (FSO)', role: 'fso', text: 'Statutory Notice issued: Uncovered foods must be enclosed with sneeze guard immediately. Fine ₹2,500 levied.', time: '3h ago' }
+      ]
+    },
+
+    // REPORT 2: Lakshmi Tiffin Center (HIGH RISK, PENDING / ON NOTICE, ₹1,000 FINE)
+    {
+      isDemo: true,
+      id: 'ISS-2026-FS-002',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      street: 'Gandhi Statue Circle',
+      department: 'food_safety',
+      deptName: 'Food Safety Department',
+      deptIcon: '🍲',
+      title: 'Poor Kitchen Hygiene & Improper Waste Disposal',
+      description: 'Lakshmi Tiffin Center: Wet organic kitchen waste overflowing onto prep floor; unsegregated bins attracting flies; lack of grease trap sanitation.',
+      location: 'Ward 12 (Market Zone), Gandhi Statue Circle, Surampalem',
+      category: 'food_hygiene',
+      categoryName: 'Kitchen Hygiene & Waste Disposal',
+      categoryIcon: '🚯',
+      establishmentType: 'Tiffin Center / Eatery',
+      severity: 'high',
+      severityLabel: 'HIGH RISK',
+      status: 'pending',
+      timestamp: Date.now() - 3600000 * 6,
+      slaDeadline: Date.now() + 3600000 * 42,
+      resolvedTimestamp: null,
+      slaHoursLeft: 42,
+      verifiedByOfficer: 'Dr. Lakshmi Prasad (FSO)',
+      verifiedTimestamp: Date.now() - 3600000 * 5.8,
+      assignedWorker: 'Food Safety Officer (Dr. Lakshmi Prasad)',
+      assignedTimestamp: Date.now() - 3600000 * 5.5,
+      workerStatus: 'Improvement Notice Issued — 7-Day Rectification & ₹1,000 Fine',
+      isSlaBreached: false,
+      lat: 17.0025,
+      lng: 81.8015,
+      reportedBy: 'Dr. Lakshmi Prasad (FSO)',
+      userId: 'food-01',
+      vendorId: 'FSSAI-AP-2026-V12',
+      vendorName: 'Lakshmi Tiffin Center',
+      mq135GasPpm: 320,
+      upvotes: 19,
+      upvotedBy: [],
+      imageBefore: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
+      imageAfter: null,
+      recommendedResource: 'Food Safety Inspector Unit',
+      rewardIssued: false,
+      fineLevied: 1000,
+      comments: [
+        { author: 'Dr. Lakshmi Prasad (FSO)', role: 'fso', text: 'Improvement Notice issued: Enclosed pedal bins and grease trap cleaning mandated within 7 days. Fine ₹1,000.', time: '6h ago' }
+      ]
+    },
+
+    // REPORT 3: Market Fresh Juice Point (HIGH RISK, PENDING / ON NOTICE, ₹1,500 FINE)
+    {
+      isDemo: true,
+      id: 'ISS-2026-FS-003',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      street: 'Vegetable Market Lane',
+      department: 'food_safety',
+      deptName: 'Food Safety Department',
+      deptIcon: '🍲',
+      title: 'Improper Food Storage & Unhygienic Ice Handling',
+      description: 'Market Fresh Juice Point: Commercial block ice stored directly on untreated wooden board; cut citrus fruits kept at ambient temperature (34°C) without refrigeration.',
+      location: 'Ward 12 (Market Zone), Vegetable Market Lane, Surampalem',
+      category: 'food_hygiene',
+      categoryName: 'Food Storage & Temperature Control',
+      categoryIcon: '🧊',
+      establishmentType: 'Juice Point / Beverage Stall',
+      severity: 'high',
+      severityLabel: 'HIGH RISK',
+      status: 'pending',
+      timestamp: Date.now() - 3600000 * 12,
+      slaDeadline: Date.now() + 3600000 * 36,
+      resolvedTimestamp: null,
+      slaHoursLeft: 36,
+      verifiedByOfficer: 'Dr. Lakshmi Prasad (FSO)',
+      verifiedTimestamp: Date.now() - 3600000 * 11.5,
+      assignedWorker: 'Food Safety Officer (Dr. Lakshmi Prasad)',
+      assignedTimestamp: Date.now() - 3600000 * 11,
+      workerStatus: 'Re-inspection Scheduled — Food Grade Ice & Chiller Mandate',
+      isSlaBreached: false,
+      lat: 17.0005,
+      lng: 81.8050,
+      reportedBy: 'Dr. Lakshmi Prasad (FSO)',
+      userId: 'food-01',
+      vendorId: 'FSSAI-AP-2026-V13',
+      vendorName: 'Market Fresh Juice Point',
+      mq135GasPpm: 290,
+      upvotes: 14,
+      upvotedBy: [],
+      imageBefore: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=800&auto=format&fit=crop&q=80',
+      imageAfter: null,
+      recommendedResource: 'Food Safety Temperature Control Squad',
+      rewardIssued: false,
+      fineLevied: 1500,
+      comments: [
+        { author: 'Dr. Lakshmi Prasad (FSO)', role: 'fso', text: 'Chilling violation notice: Only food-grade purified ice cubes permitted. Chiller temperature log mandated. Fine ₹1,500.', time: '12h ago' }
+      ]
+    },
+
+    // REPORT 4: Surampalem Bakery & Snacks (MEDIUM RISK, RECTIFIED & RESTORED, ₹500 FINE SETTLED)
+    {
+      isDemo: true,
+      id: 'ISS-2026-FS-004',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 14 (Campus Zone)',
+      street: 'College Road Food Court',
+      department: 'food_safety',
+      deptName: 'Food Safety Department',
+      deptIcon: '🍲',
+      title: 'Food-Contact Surface Hygiene & Utensil Sanitation',
+      description: 'Surampalem Bakery & Snacks: Baking trays and food preparation tables lacked daily sanitization records; baking utensils encrusted with residue.',
+      location: 'Ward 14 (Campus Zone), College Road Food Court, Surampalem',
+      category: 'food_hygiene',
+      categoryName: 'Prep Surface Sanitation',
+      categoryIcon: '🧼',
+      establishmentType: 'Bakery & Confectionery',
+      severity: 'medium',
+      severityLabel: 'MODERATE RISK',
+      status: 'resolved',
+      timestamp: Date.now() - 3600000 * 28,
+      slaDeadline: Date.now() + 3600000 * 20,
+      resolvedTimestamp: Date.now() - 3600000 * 4,
+      slaHoursLeft: 0,
+      verifiedByOfficer: 'Dr. Lakshmi Prasad (FSO)',
+      verifiedTimestamp: Date.now() - 3600000 * 27.5,
+      assignedWorker: 'Food Safety Officer (Dr. Lakshmi Prasad)',
+      assignedTimestamp: Date.now() - 3600000 * 27,
+      workerStatus: 'Re-inspected: Corrective actions verified compliant; surfaces sanitized, Grade A+ Restored',
+      resolutionNotes: 'Re-inspected: Corrective actions verified compliant; stainless surfaces sanitized, daily logbook certified.',
+      isSlaBreached: false,
+      lat: 16.9980,
+      lng: 81.8020,
+      reportedBy: 'Dr. Lakshmi Prasad (FSO)',
+      userId: 'food-01',
+      vendorId: 'FSSAI-AP-2026-V14',
+      vendorName: 'Surampalem Bakery & Snacks',
+      mq135GasPpm: 110,
+      upvotes: 31,
+      upvotedBy: [],
+      imageBefore: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&auto=format&fit=crop&q=80',
+      imageAfter: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
+      recommendedResource: 'Food Safety Sanitization Unit',
+      rewardIssued: false,
+      fineLevied: 500,
+      comments: [
+        { author: 'Dr. Lakshmi Prasad (FSO)', role: 'fso', text: 'Re-inspection completed. Stainless steel surfaces sanitized and sterilization protocol operational. Fine ₹500 settled. Cleared.', time: '4h ago' }
+      ]
+    },
+
+    // REPORT 5: Annapurna Food Corner (MEDIUM-LOW RISK, RECTIFIED & RESTORED, COMPLIANT / ₹0)
+    {
+      isDemo: true,
+      id: 'ISS-2026-FS-005',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      street: 'Main Road Center',
+      department: 'food_safety',
+      deptName: 'Food Safety Department',
+      deptIcon: '🍲',
+      title: 'Missing Hygiene Documentation & FSSAI Display Board',
+      description: 'Annapurna Food Corner: Food safety display board missing at entrance; medical fitness certificates for 2 food handlers were expired.',
+      location: 'Ward 12 (Market Zone), Main Road Center, Surampalem',
+      category: 'food_hygiene',
+      categoryName: 'Documentation & Display Compliance',
+      categoryIcon: '📜',
+      establishmentType: 'Street Eatery / Food Corner',
+      severity: 'medium',
+      severityLabel: 'LOW-MEDIUM RISK',
+      status: 'resolved',
+      timestamp: Date.now() - 3600000 * 36,
+      slaDeadline: Date.now() + 3600000 * 12,
+      resolvedTimestamp: Date.now() - 3600000 * 8,
+      slaHoursLeft: 0,
+      verifiedByOfficer: 'Dr. Lakshmi Prasad (FSO)',
+      verifiedTimestamp: Date.now() - 3600000 * 35.5,
+      assignedWorker: 'Food Safety Officer (Dr. Lakshmi Prasad)',
+      assignedTimestamp: Date.now() - 3600000 * 35,
+      workerStatus: 'Documentation corrected & outlet cleared; FSSAI QR board installed',
+      resolutionNotes: 'Documentation corrected: FSSAI registration QR board displayed, medical certificates renewed and approved.',
+      isSlaBreached: false,
+      lat: 17.0030,
+      lng: 81.8028,
+      reportedBy: 'Dr. Lakshmi Prasad (FSO)',
+      userId: 'food-01',
+      vendorId: 'FSSAI-AP-2026-V15',
+      vendorName: 'Annapurna Food Corner',
+      mq135GasPpm: 95,
+      upvotes: 28,
+      upvotedBy: [],
+      imageBefore: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80',
+      imageAfter: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
+      recommendedResource: 'FSSAI Registration & Licensing Squad',
+      rewardIssued: false,
+      fineLevied: 0,
+      comments: [
+        { author: 'Dr. Lakshmi Prasad (FSO)', role: 'fso', text: 'Compliance verified: FSSAI display board installed with QR verification; handler health certificates renewed. Status compliant.', time: '8h ago' }
       ]
     },
 
@@ -2112,46 +2271,6 @@
     },
 
     {
-      id: 'ISS-2026-00142',
-      state: 'Tamil Nadu',
-      city: 'Chennai',
-      ward: 'Marina Beach Zone',
-      street: 'Kamarajar Salai',
-      department: 'food_safety',
-      deptName: 'Food Safety Department',
-      deptIcon: '🍲',
-      title: 'Stale Fish & Reheated Oil at Marina Beach Food Stalls',
-      description: 'Marina Coastal Fish Fry Stalls: Street seafood stalls operating without refrigeration or oil testing kits.',
-      location: 'Marina Beach Zone, Kamarajar Salai, Chennai',
-      category: 'food_hygiene',
-      categoryName: 'Seafood Safety Violation',
-      categoryIcon: '🐟',
-      severity: 'bulk',
-      severityLabel: 'CRITICAL VIOLATION',
-      status: 'pending',
-      timestamp: Date.now() - 3600000 * 11,
-      slaHoursLeft: 37,
-      lat: 13.0500,
-      lng: 80.2824,
-      reportedBy: 'Dr. Lakshmi Prasad (FSO)',
-      userId: 'food-01',
-      vendorId: 'FSSAI-TN-2026-V03',
-      vendorName: 'Marina Coastal Fish Fry Stalls',
-      mq135GasPpm: 520,
-      upvotes: 35,
-      upvotedBy: [],
-      imageBefore: 'https://images.unsplash.com/photo-1534482421-64566f976cfa?w=800&auto=format&fit=crop&q=80',
-      imageAfter: null,
-      recommendedResource: 'Tamil Nadu FDA Squad',
-      assignedWorker: 'Chennai FSO Squad 3',
-      rewardIssued: false,
-      fineLevied: 5000,
-      comments: [
-        { author: 'TN FDA Officer', text: 'Critical Seizure Notice issued under Section 59. ₹5,000 fine levied.', time: '5h ago' }
-      ]
-    },
-
-    {
       id: 'ISS-2026-00143',
       state: 'Delhi NCR',
       city: 'New Delhi',
@@ -2226,125 +2345,112 @@
     }
   ];
 
-  const INITIAL_VENDORS = [
-    // 🟢 Certified Vendors
+    const INITIAL_VENDORS = [
+    // 🟢 Certified Safe Vendors (2 Outlets: Grade A+ Passed & Fully Rectified)
     {
-      id: 'FSSAI-AP-2026-089',
+      id: 'FSSAI-AP-2026-V14',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 14 (Campus Zone)',
+      name: 'Surampalem Bakery & Snacks',
+      owner: 'K. Satyanarayana',
+      location: 'College Road Food Court, Surampalem',
+      hygieneGrade: 'A+',
+      score: '94/100',
+      validTill: '31 Dec 2026',
+      inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
+      status: 'VERIFIED & CERTIFIED',
+      isViolated: false,
+      mq135GasPpm: '110 PPM',
+      penaltyImposed: '₹500 (Settled)',
+      officerDirectives: 'Stainless surfaces sterilized and daily sanitation log certified. Certified Grade A+.'
+    },
+    {
+      id: 'FSSAI-AP-2026-V15',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
       ward: 'Ward 12 (Market Zone)',
-      name: 'Annapurna Pure Veg Tiffins',
+      name: 'Annapurna Food Corner',
       owner: 'Venkata Rao',
-      location: 'Main Road, Surampalem',
+      location: 'Main Road Center, Surampalem',
       hygieneGrade: 'A+',
       score: '96/100',
       validTill: '31 Dec 2026',
       inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
       status: 'VERIFIED & CERTIFIED',
-      isViolated: false
+      isViolated: false,
+      mq135GasPpm: '95 PPM',
+      penaltyImposed: '₹0 (Compliant)',
+      officerDirectives: 'FSSAI QR code display board installed and handler health fitness certificates renewed. Certified Grade A+.'
     },
+
+    // 🔴 Establishments with Active Statutory Violation Notices (3 Outlets: Under Rectification SLA)
     {
-      id: 'FSSAI-AP-2026-112',
-      state: 'Andhra Pradesh',
-      city: 'Surampalem',
-      ward: 'Ward 14 (Campus Zone)',
-      name: 'Sai Balaji Fast Food & Juices',
-      owner: 'M. Srinivas',
-      location: 'College Campus Gate 2, Surampalem',
-      hygieneGrade: 'A',
-      score: '88/100',
-      validTill: '15 Nov 2026',
-      inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
-      status: 'VERIFIED & CERTIFIED',
-      isViolated: false
-    },
-    // 🔴 Establishments with Official Statutory Violation Notices
-    {
-      id: 'FSSAI-AP-2026-V01',
+      id: 'FSSAI-AP-2026-V11',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
       ward: 'Ward 12 (Market Zone)',
-      name: 'Sri Krishna Seafood & Fast Food Point',
-      owner: 'K. Durga Prasad',
+      name: 'Sri Sai Street Food Stall',
+      owner: 'P. Subba Rao',
       location: 'Market Gate Cross, Surampalem',
       hygieneGrade: 'C',
-      score: '42/100',
+      score: '40/100',
       validTill: 'Action Required (48h SLA)',
       inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
-      status: 'VIOLATION NOTICE ISSUED',
+      status: 'STATUTORY VIOLATION NOTICE',
       isViolated: true,
-      violationClause: 'Section 56: Repeated / Burnt Cooking Oil (TPM 34%)',
-      penaltyImposed: '₹2,000.00',
-      rectificationDeadline: '27 Aug 2026',
-      mq135GasPpm: '370 PPM (High Volatile Fumes)',
-      officerDirectives: 'Discard all rancid oil batch immediately. Install TPM digital tester and oil filtration log.'
+      violationClause: 'Section 56: Poor Food Handling & Uncovered Prepared Foods',
+      penaltyImposed: '₹2,500.00',
+      rectificationDeadline: '48 Hours SLA',
+      mq135GasPpm: '385 PPM',
+      officerDirectives: 'Erect acrylic sneeze guards and mandate gloves/hairnets for handlers immediately.'
     },
     {
-      id: 'FSSAI-AP-2026-V02',
+      id: 'FSSAI-AP-2026-V12',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
-      ward: 'Ward 14 (Campus Zone)',
-      name: 'Campus Night Shawarma & Grills',
-      owner: 'M. Farooq',
-      location: 'College Road Food Court, Surampalem',
+      ward: 'Ward 12 (Market Zone)',
+      name: 'Lakshmi Tiffin Center',
+      owner: 'G. Appa Rao',
+      location: 'Gandhi Statue Circle, Surampalem',
       hygieneGrade: 'C',
-      score: '51/100',
+      score: '48/100',
       validTill: 'Action Required (7-Day Notice)',
       inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
       status: 'VIOLATION NOTICE ISSUED',
       isViolated: true,
-      violationClause: 'Section 58: Uncovered Food Prep adjacent to Open Drain',
-      penaltyImposed: '₹500.00',
-      rectificationDeadline: '30 Aug 2026',
-      mq135GasPpm: '340 PPM',
-      officerDirectives: 'Fit acrylic sneeze shield across display, install drain boundary cover, enforce chef caps and gloves.'
+      violationClause: 'Section 58: Kitchen Waste Overflow & Lack of Grease Trap',
+      penaltyImposed: '₹1,000.00',
+      rectificationDeadline: '7-Day Rectification Window',
+      mq135GasPpm: '320 PPM',
+      officerDirectives: 'Install foot-operated sealed waste bins and deep clean kitchen drainage traps.'
     },
     {
-      id: 'FSSAI-TN-2026-V03',
-      state: 'Tamil Nadu',
-      city: 'Chennai',
-      ward: 'Marina Beach Zone',
-      name: 'Marina Coastal Fish Fry Stalls',
-      owner: 'S. Murugan',
-      location: 'Kamarajar Salai, Marina Beach, Chennai',
-      hygieneGrade: 'F',
-      score: '28/100',
-      validTill: 'Immediate Seizure Notice',
-      inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
-      status: 'CRITICAL SUSPENSION',
-      isViolated: true,
-      violationClause: 'Section 59: Unpreserved Stale Seafood & Toxic Cooking Oil',
-      penaltyImposed: '₹5,000.00',
-      rectificationDeadline: 'Immediate Commercial Closure',
-      mq135GasPpm: '520 PPM (Severe Spoilage)',
-      officerDirectives: 'Immediate confiscation of unchilled seafood stocks. Deep sanitation audit mandatory prior to reopening.'
-    },
-    {
-      id: 'FSSAI-AP-2026-V04',
+      id: 'FSSAI-AP-2026-V13',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
       ward: 'Ward 12 (Market Zone)',
-      name: 'Aditya Highway Dhaba & Fast Food',
-      owner: 'R. Koteswara Rao',
-      location: 'Gandhi Statue Main Road, Surampalem',
-      hygieneGrade: 'F',
-      score: '24/100',
-      validTill: 'SEIZED & SUSPENDED',
+      name: 'Market Fresh Juice Point',
+      owner: 'D. Suresh',
+      location: 'Vegetable Market Lane, Surampalem',
+      hygieneGrade: 'C',
+      score: '52/100',
+      validTill: 'Action Required (72h SLA)',
       inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
-      status: 'CRITICAL UNHYGIENIC VIOLATION',
+      status: 'VIOLATION NOTICE ISSUED',
       isViolated: true,
-      violationClause: 'Section 59: Rotten Meat Storage, Reheated Stale Oil (TPM >36%) & Drain Adjacent Prep',
-      penaltyImposed: '₹5,000.00',
-      rectificationDeadline: 'Immediate Suspension & Seizure',
-      mq135GasPpm: '580 PPM (Severe Toxic Ammonia Spoilage)',
-      officerDirectives: 'Complete commercial closure order served. Kitchen sealed under FSSAI Section 38. Confiscation of contaminated food inventory.'
-    },
+      violationClause: 'Section 59: Improper Ambient Fruit Storage & Unhygienic Block Ice',
+      penaltyImposed: '₹1,500.00',
+      rectificationDeadline: '72 Hours SLA',
+      mq135GasPpm: '290 PPM',
+      officerDirectives: 'Replace wooden block ice board with food-grade stainless chest and log chiller temperatures.'
+    }
   ];
 
   class DatabaseManager {
     constructor() {
-      this.issues = this.loadFromStorage('clean_safe_issues_v11', INITIAL_ISSUES);
-      this.vendors = this.loadFromStorage('clean_safe_vendors_v10', INITIAL_VENDORS);
+      this.issues = this.loadFromStorage('clean_safe_issues_v12', INITIAL_ISSUES);
+      this.vendors = this.loadFromStorage('clean_safe_vendors_v11', INITIAL_VENDORS);
       this.finesCollected = this.loadFromStorage('clean_safe_fines_v9', 2500);
       this.listeners = [];
       this.initBackend();
@@ -2361,7 +2467,7 @@
           const data = await res.json();
           if (data.issues && data.issues.length > 0) {
             this.issues = data.issues;
-            this.saveToStorage('clean_safe_issues_v11', this.issues);
+            this.saveToStorage('clean_safe_issues_v12', this.issues);
             this.notify();
           }
         }
@@ -2375,7 +2481,7 @@
           const vData = await vRes.json();
           if (vData.vendors && vData.vendors.length > 0) {
             this.vendors = vData.vendors;
-            this.saveToStorage('clean_safe_vendors_v10', this.vendors);
+            this.saveToStorage('clean_safe_vendors_v11', this.vendors);
             this.notify();
           }
         }
@@ -2505,7 +2611,7 @@
       };
 
       this.issues.unshift(newIssue);
-      this.saveToStorage('clean_safe_issues_v11', this.issues);
+      this.saveToStorage('clean_safe_issues_v12', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_CREATED', newIssue);
 
@@ -2539,7 +2645,7 @@
         time: 'Just now'
       });
 
-      this.saveToStorage('clean_safe_issues_v11', this.issues);
+      this.saveToStorage('clean_safe_issues_v12', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_RESOLVED', issue);
 
@@ -2584,8 +2690,8 @@
         }
       }
 
-      this.saveToStorage('clean_safe_issues_v11', this.issues);
-      this.saveToStorage('clean_safe_vendors_v10', this.vendors);
+      this.saveToStorage('clean_safe_issues_v12', this.issues);
+      this.saveToStorage('clean_safe_vendors_v11', this.vendors);
       this.notify();
       broadcastRealtimeEvent('FOOD_RECTIFIED', issue);
 
@@ -2614,7 +2720,7 @@
         timestamp: Date.now()
       };
       issue.comments.push(newComment);
-      this.saveToStorage('clean_safe_issues_v11', this.issues);
+      this.saveToStorage('clean_safe_issues_v12', this.issues);
       this.notify();
       broadcastRealtimeEvent('COMMENT_ADDED', { issueId, comment: newComment });
 
@@ -2682,7 +2788,7 @@
         fineLevied: fineAmount
       });
 
-      this.saveToStorage('clean_safe_vendors_v10', this.vendors);
+      this.saveToStorage('clean_safe_vendors_v11', this.vendors);
       this.saveToStorage('clean_safe_fines_v9', this.finesCollected);
       this.notify();
       broadcastRealtimeEvent('FOOD_VIOLATION_LOGGED', { issue: newIssue, vendor: newVendor });
@@ -2721,7 +2827,7 @@
         issue.upvotes = (issue.upvotes || 0) + 1;
       }
 
-      this.saveToStorage('clean_safe_issues_v11', this.issues);
+      this.saveToStorage('clean_safe_issues_v12', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_UPVOTED', issue);
       return issue;
@@ -3086,7 +3192,7 @@
       const existing = db.issues.find(i => i.id === issue.id);
       if (!existing) {
         db.issues.unshift(issue);
-        db.saveToStorage('clean_safe_issues_v11', db.issues);
+        db.saveToStorage('clean_safe_issues_v12', db.issues);
         db.notify();
       }
       showToast(`🚨 New Complaint #${issue.id} reported in ${issue.ward || 'Ward'}!`, 'info', '📢');
@@ -3102,7 +3208,7 @@
       } else {
         db.issues.unshift(updated);
       }
-      db.saveToStorage('clean_safe_issues_v11', db.issues);
+      db.saveToStorage('clean_safe_issues_v12', db.issues);
       db.notify();
       showToast(`✅ Complaint #${updated.id} resolved by field team!`, 'reward', '🎉');
       playNotificationSound('chime');
@@ -3117,7 +3223,7 @@
       } else {
         db.issues.unshift(assigned);
       }
-      db.saveToStorage('clean_safe_issues_v11', db.issues);
+      db.saveToStorage('clean_safe_issues_v12', db.issues);
       db.notify();
       showToast(`🚛 Squad Assigned to Ticket #${assigned.id} (${assigned.assignedWorker})`, 'info', '👷');
       playNotificationSound('chime');
@@ -3135,7 +3241,7 @@
       } else {
         db.issues.unshift(transitioned);
       }
-      db.saveToStorage('clean_safe_issues_v11', db.issues);
+      db.saveToStorage('clean_safe_issues_v12', db.issues);
       db.notify();
       const isEnRoute = transitioned.workerStatus && transitioned.workerStatus.includes('En Route');
       const statusIcon = isEnRoute ? '🚗' : '📍';
@@ -3156,7 +3262,7 @@
         const vExisting = db.vendors.find(x => x.id === v.id);
         if (!vExisting) {
           db.vendors.unshift(v);
-          db.saveToStorage('clean_safe_vendors_v10', db.vendors);
+          db.saveToStorage('clean_safe_vendors_v11', db.vendors);
         }
       }
       db.notify();
@@ -4689,7 +4795,7 @@
     renderPredictiveHotspotsUI();
   }
 
-  function renderFoodSafetyDashboard() {
+    function renderFoodSafetyDashboard() {
     const user = auth.getUser() || {};
     const jurBadge = document.getElementById('foodJurisdictionBadge');
     if (jurBadge) {
@@ -4702,7 +4808,7 @@
     let foodIssues = allIssues.filter(i => i.department === 'food_safety');
     let vendors = db.getAllVendors();
 
-    // 4-Tier Geospatial Jurisdiction Filter
+    // 4-Tier Geospatial Jurisdiction Filter (City-Wide Statutory Scope for Food Safety Directorate)
     if (selectedState !== 'all') {
       foodIssues = foodIssues.filter(i => (i.state || 'Andhra Pradesh') === selectedState);
       vendors = vendors.filter(v => (v.state || 'Andhra Pradesh') === selectedState);
@@ -4710,14 +4816,6 @@
     if (selectedCity !== 'all') {
       foodIssues = foodIssues.filter(i => (i.city || 'Surampalem') === selectedCity);
       vendors = vendors.filter(v => (v.city || 'Surampalem') === selectedCity);
-    }
-    if (selectedWard !== 'all') {
-      foodIssues = foodIssues.filter(i => (i.ward || '') === selectedWard || (i.location && i.location.includes(selectedWard.split(' ')[0])));
-      vendors = vendors.filter(v => (v.ward || '') === selectedWard || (v.location && v.location.includes(selectedWard.split(' ')[0])) || (v.address && v.address.includes(selectedWard.split(' ')[0])));
-    }
-    if (selectedStreet !== 'all') {
-      foodIssues = foodIssues.filter(i => (i.street || '') === selectedStreet || (i.location && i.location.includes(selectedStreet)));
-      vendors = vendors.filter(v => (v.street || '') === selectedStreet || (v.location && v.location.includes(selectedStreet)) || (v.address && v.address.includes(selectedStreet)));
     }
 
     // Metric Summary Counters
@@ -4739,6 +4837,14 @@
     if (finesEl) finesEl.textContent = `₹${finesLevied.toLocaleString('en-IN')}`;
     if (pendingNoticesEl) pendingNoticesEl.textContent = pendingNoticesCount;
 
+    // Filter Chips Dynamic Badge Counters
+    const chipAll = document.querySelector('.food-filter-chip[data-filter="all"]');
+    const chipPending = document.querySelector('.food-filter-chip[data-filter="pending"]');
+    const chipResolved = document.querySelector('.food-filter-chip[data-filter="resolved"]');
+    if (chipAll) chipAll.innerHTML = `All Food Reports <span style="background: rgba(255,255,255,0.18); color: white; padding: 2px 7px; border-radius: 10px; font-size: 0.72rem; margin-left: 4px; font-weight: 700;">${foodIssues.length}</span>`;
+    if (chipPending) chipPending.innerHTML = `⚠️ Pending / On Notice <span style="background: rgba(245,158,11,0.25); color: #f59e0b; padding: 2px 7px; border-radius: 10px; font-size: 0.72rem; margin-left: 4px; font-weight: 700;">${activeAudits}</span>`;
+    if (chipResolved) chipResolved.innerHTML = `✅ Rectified & Restored <span style="background: rgba(16,185,129,0.25); color: #10b981; padding: 2px 7px; border-radius: 10px; font-size: 0.72rem; margin-left: 4px; font-weight: 700;">${rectifiedOutlets}</span>`;
+
     // 1. Food Complaints & Violations Grid
     const foodGrid = document.getElementById('foodDeptIssuesGrid');
     if (foodGrid) {
@@ -4751,36 +4857,85 @@
       } else {
         foodGrid.innerHTML = filteredIssues.map(issue => {
           const isResolved = issue.status === 'resolved';
+          const isCritical = (issue.severity || '').toLowerCase() === 'bulk' || (issue.severityLabel || '').includes('CRITICAL');
+          const isHigh = (issue.severity || '').toLowerCase() === 'high' || (issue.severityLabel || '').includes('HIGH');
+          
+          let severityBadge = '';
+          if (isCritical) {
+            severityBadge = '<span class="badge" style="position: absolute; top: 8px; right: 8px; background: #dc2626; color: white; font-weight: 800; font-size: 0.7rem; box-shadow: 0 2px 8px rgba(220,38,38,0.5);">CRITICAL HAZARD</span>';
+          } else if (isHigh) {
+            severityBadge = '<span class="badge" style="position: absolute; top: 8px; right: 8px; background: #ea580c; color: white; font-weight: 800; font-size: 0.7rem;">HIGH RISK</span>';
+          } else {
+            severityBadge = '<span class="badge" style="position: absolute; top: 8px; right: 8px; background: #d97706; color: white; font-weight: 800; font-size: 0.7rem;">MEDIUM RISK</span>';
+          }
+
+          const statusBadge = isResolved 
+            ? '<span class="badge badge-resolved" style="font-weight: 800; font-size: 0.75rem;">✅ RECTIFIED & RESTORED</span>'
+            : '<span class="badge badge-pending" style="font-weight: 800; font-size: 0.75rem; background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid #f59e0b;">⚠️ PENDING / ON NOTICE</span>';
+
+          const fineDisplay = (issue.fineLevied && issue.fineLevied > 0)
+            ? `<span style="color: #f87171; font-weight: 700;">₹${Number(issue.fineLevied).toLocaleString('en-IN')} Fine Imposed</span>`
+            : `<span style="color: #34d399; font-weight: 700;">Compliant / ₹0</span>`;
+
+          const establishmentType = issue.establishmentType || (issue.categoryName || 'Food Establishment');
+          const vendorName = issue.vendorName || issue.title;
+
           return `
-            <div class="card" style="border-top: 3px solid ${isResolved ? '#10b981' : '#f59e0b'};">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-                <span class="badge ${isResolved ? 'badge-resolved' : 'badge-pending'}">${isResolved ? '✅ RECTIFIED & CLEARED' : '⚠️ ACTIVE NOTICE'}</span>
-                <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #f59e0b; font-weight: 700;">${issue.id}</span>
-              </div>
-              <div style="height: 140px; border-radius: 6px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border);">
-                <img src="${issue.imageBefore}" style="width: 100%; height: 100%; object-fit: cover;" alt="${issue.title}">
-              </div>
-              <h3 style="color: white; font-size: 1.05rem; margin-bottom: 0.4rem;">${issue.title}</h3>
-              <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">${issue.description}</p>
-              
-              <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 0.6rem; border-radius: 6px; font-size: 0.78rem; margin-bottom: 0.85rem; color: #cbd5e1;">
-                <div>📍 <strong>Location:</strong> ${issue.location}</div>
-                <div>🥩 <strong>MQ-135 Gas:</strong> ${issue.mq135GasPpm ? issue.mq135GasPpm + ' PPM' : '340 PPM (Elevated)'}</div>
-                ${issue.fineLevied ? `<div style="color:#f87171;">⚖️ <strong>Fine Imposed:</strong> ₹${issue.fineLevied}</div>` : ''}
+            <div class="card" style="border-top: 4px solid ${isResolved ? '#10b981' : isCritical ? '#ef4444' : '#f59e0b'}; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+                  ${statusBadge}
+                  <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #f59e0b; font-weight: 800; letter-spacing: 0.05em;">${issue.id}</span>
+                </div>
+
+                <div style="position: relative; height: 145px; border-radius: 8px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border);">
+                  <img src="${issue.imageBefore || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80'}" style="width: 100%; height: 100%; object-fit: cover;" alt="${issue.title}">
+                  <span style="position: absolute; top: 8px; left: 8px; background: rgba(15,23,42,0.88); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.18); color: #e2e8f0; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 700;">
+                    🏷️ ${establishmentType}
+                  </span>
+                  ${severityBadge}
+                </div>
+
+                <div style="font-size: 0.78rem; color: #38bdf8; font-weight: 800; text-transform: uppercase; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.35rem;">
+                  <span>🏪</span> ${vendorName}
+                </div>
+
+                <h3 style="color: white; font-size: 1.02rem; margin-bottom: 0.4rem; line-height: 1.35;">${issue.title}</h3>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem; line-height: 1.45;">${issue.description}</p>
+                
+                <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 0.65rem; border-radius: 6px; font-size: 0.78rem; margin-bottom: 0.85rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 0.35rem;">
+                  <div>📍 <strong>Location:</strong> ${issue.location}</div>
+                  <div>📑 <strong>Violation Category:</strong> ${issue.categoryName || 'Food Hygiene & Safety'}</div>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>🥩 <strong>MQ-135 Gas:</strong> ${issue.mq135GasPpm ? issue.mq135GasPpm + ' PPM' : 'Normal'}</span>
+                    <span>⚖️ ${fineDisplay}</span>
+                  </div>
+                  ${isResolved 
+                    ? `<div style="color: #34d399; font-size: 0.75rem; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 4px; margin-top: 2px;">
+                        <strong>✓ Resolution:</strong> ${issue.resolutionNotes || issue.workerStatus || 'Corrective action verified compliant.'}
+                       </div>`
+                    : `<div style="color: #fbbf24; font-size: 0.75rem; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 4px; margin-top: 2px;">
+                        <strong>⏳ Rectification SLA:</strong> ${issue.workerStatus || 'Under Rectification Notice'}
+                       </div>`
+                  }
+                  <div style="color: #94a3b8; font-size: 0.73rem; margin-top: 2px;">
+                    👮 <strong>Assigned FSO:</strong> ${issue.assignedWorker || 'Dr. Lakshmi Prasad (FSO)'}
+                  </div>
+                </div>
               </div>
 
-              <div class="food-action-row">
-                <button class="btn btn-sm btn-outline" style="flex: 1;" onclick="window.viewIssueDetail('${issue.id}')">
+              <div class="food-action-row" style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                <button class="btn btn-sm btn-outline" style="flex: 1; padding: 0.45rem 0.5rem; font-size: 0.78rem;" onclick="window.viewIssueDetail('${issue.id}')">
                   🔍 Review Details
                 </button>
                 ${!isResolved ? `
-                  <button class="btn btn-sm btn-rectify" style="flex: 1;" onclick="window.openFoodRectifyModal('${issue.id}')">
+                  <button class="btn btn-sm btn-rectify" style="flex: 1; padding: 0.45rem 0.5rem; font-size: 0.78rem; background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #f59e0b; color: white; font-weight: 700;" onclick="window.openFoodRectifyModal('${issue.id}')">
                     🛠️ Rectify Problem
                   </button>
                 ` : `
-                  <span style="font-size: 0.8rem; color: #34d399; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: 1;">
-                    ✓ Grade A+ Cleared
-                  </span>
+                  <button class="btn btn-sm btn-outline" style="flex: 1; padding: 0.45rem 0.5rem; font-size: 0.78rem; border-color: #10b981; color: #34d399; font-weight: 700;" onclick="window.viewDigitalCertificate('${issue.vendorId}')">
+                    📜 Certificate
+                  </button>
                 `}
               </div>
             </div>
@@ -6168,7 +6323,7 @@
       issue.imageOfficerOverrideReason = null;
       issue.verifiedByOfficer = officerName;
       issue.verifiedTimestamp = Date.now();
-      db.saveToStorage('clean_safe_issues_v11', db.issues);
+      db.saveToStorage('clean_safe_issues_v12', db.issues);
       db.notify();
 
       showToast('✅ Visual evidence verified by Officer!', 'reward', '🛡️');
@@ -6213,7 +6368,7 @@
       issue.imageOfficerOverrideReason = reason.trim();
       issue.verifiedByOfficer = officerName;
       issue.verifiedTimestamp = Date.now();
-      db.saveToStorage('clean_safe_issues_v11', db.issues);
+      db.saveToStorage('clean_safe_issues_v12', db.issues);
       db.notify();
 
       showToast('⚠️ Officer override registered with audit justification.', 'reward', '📝');
@@ -8608,7 +8763,7 @@
       if (idx !== -1) {
         db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
       }
-      db.saveToStorage('clean_safe_issues_v11', db.issues);
+      db.saveToStorage('clean_safe_issues_v12', db.issues);
       db.notify();
 
       window.closeModal('assignSquadModal');
@@ -8729,7 +8884,7 @@
           text: `⚠️ Resolution Rejected & Returned to Worker: ${reason}`,
           time: 'Just now'
         });
-        db.saveToStorage('clean_safe_issues_v10', db.issues);
+        db.saveToStorage('clean_safe_issues_v12', db.issues);
         db.notify();
       }
 
@@ -9572,7 +9727,7 @@
             if (data.issue && data.issue.workCompletedTimestamp) {
               issue.workCompletedTimestamp = data.issue.workCompletedTimestamp;
             }
-            db.saveToStorage('clean_safe_issues_v10', db.issues);
+            db.saveToStorage('clean_safe_issues_v12', db.issues);
             db.notify();
           }
 
@@ -10605,7 +10760,7 @@
       if (idx !== -1) {
         db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
       }
-      db.saveToStorage('clean_safe_issues_v11', db.issues);
+      db.saveToStorage('clean_safe_issues_v12', db.issues);
       db.notify();
 
       showToast(`🚗 Squad is now en route to #${issueId}!`, 'info', '🚗');
@@ -10654,7 +10809,7 @@
       if (idx !== -1) {
         db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
       }
-      db.saveToStorage('clean_safe_issues_v11', db.issues);
+      db.saveToStorage('clean_safe_issues_v12', db.issues);
       db.notify();
 
       showToast(`📍 Squad marked arrived on site for #${issueId}! Remediation underway.`, 'reward', '📍');
