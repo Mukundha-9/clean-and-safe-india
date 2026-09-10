@@ -553,50 +553,439 @@
   box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
 }
 
-/* Vendor Directory F Violation Badge Containment */
-.vendor-hygiene-badge {
-  text-align: center;
-  border-radius: var(--radius-md, 8px);
-  padding: 8px 14px;
-  min-width: 84px;
+/* ==========================================================================
+   Food Safety FSO — Certified Food Vendors & QR Codes Directory (Clean Registry)
+   ========================================================================== */
+
+#foodDeptVendorsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  #foodDeptVendorsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .vendor-registry-card {
+    padding: 1rem 0.85rem 0.85rem 0.85rem;
+  }
+  .v-grid-row {
+    gap: 0.35rem;
+  }
+  .v-cell-val {
+    font-size: 0.72rem;
+  }
+}
+
+/* Compact structured registry card */
+.vendor-registry-card {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: var(--radius-lg, 12px);
+  padding: 1.15rem 1.15rem 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  height: auto;
+}
+
+.vendor-registry-card.card-certified {
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+.vendor-registry-card.card-certified:hover {
+  border-color: rgba(16, 185, 129, 0.65);
+  box-shadow: 0 6px 22px rgba(16, 185, 129, 0.15);
+}
+
+.vendor-registry-card.card-violation {
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.035);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+.vendor-registry-card.card-violation:hover {
+  border-color: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 6px 22px rgba(239, 68, 68, 0.18);
+}
+
+/* Header Row: [QR]  Vendor Info        [Grade Badge] */
+.vendor-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+/* QR Code: Fixed square 78x78px, clean white container, rounded corners */
+.vendor-qr-box {
+  width: 78px;
+  height: 78px;
   flex-shrink: 0;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 4px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.vendor-qr-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Middle Content Column */
+.vendor-title-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.vendor-name {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+
+.vendor-status-pill {
   display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 2px 8px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.vendor-status-pill.status-certified {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.vendor-status-pill.status-violation {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.status-certified .status-dot {
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+.status-violation .status-dot {
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+}
+
+/* Top-Right Grade Badge: Fixed 78px width, centered, dominant letter, small sub-label */
+.vendor-grade-badge {
+  width: 78px;
+  height: 58px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  box-sizing: border-box;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-align: center;
+  padding: 4px 6px;
 }
-.vendor-hygiene-badge.badge-violation {
-  background: rgba(239, 68, 68, 0.2);
-  border: 2px solid #ef4444;
+
+.vendor-grade-badge.grade-certified {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1.5px solid #10b981;
 }
-.vendor-hygiene-badge.badge-hygiene {
-  background: rgba(16, 185, 129, 0.15);
-  border: 2px solid #10b981;
-}
-.vendor-hygiene-badge .grade-text {
+.vendor-grade-badge.grade-certified .grade-letter {
   font-size: 1.35rem;
   font-weight: 900;
-  line-height: 1.1;
-}
-.vendor-hygiene-badge.badge-violation .grade-text {
-  color: #f87171;
-}
-.vendor-hygiene-badge.badge-hygiene .grade-text {
+  line-height: 1;
   color: #34d399;
 }
-.vendor-hygiene-badge .label-text {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  margin-top: 3px;
-}
-.vendor-hygiene-badge.badge-violation .label-text {
-  color: #ef4444;
-}
-.vendor-hygiene-badge.badge-hygiene .label-text {
+.vendor-grade-badge.grade-certified .grade-sub {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   color: #10b981;
+  margin-top: 2px;
 }
+
+.vendor-grade-badge.grade-violation {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1.5px solid #ef4444;
+}
+.vendor-grade-badge.grade-violation .grade-letter {
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #f87171;
+}
+.vendor-grade-badge.grade-violation .grade-sub {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #ef4444;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+/* Compact Metadata Rows */
+.vendor-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin-bottom: 0.85rem;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta-icon {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.meta-label {
+  color: #64748b;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.meta-val {
+  color: #cbd5e1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta-val.score-high {
+  color: #34d399;
+  font-weight: 800;
+}
+.meta-val.score-violation {
+  color: #f87171;
+  font-weight: 800;
+}
+
+/* Violation Details Box: Compact, structured, readable rows (Section 7) */
+.vendor-violation-compact {
+  background: rgba(239, 68, 68, 0.07);
+  border: 1px dashed rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  padding: 0.65rem 0.8rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.v-section-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #f87171;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.v-clause-text {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fecdd3;
+  line-height: 1.35;
+}
+
+.v-grid-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(239, 68, 68, 0.18);
+}
+
+.v-grid-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.v-cell-label {
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 1px;
+}
+
+.v-cell-val {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v-cell-val.text-amber {
+  color: #fbbf24;
+  font-family: var(--font-mono, monospace);
+  font-weight: 800;
+}
+
+/* Action button area */
+.vendor-card-footer {
+  margin-top: auto;
+}
+
+.btn-vendor-certified {
+  width: 100%;
+  height: 38px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+.btn-vendor-certified:hover {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
+}
+
+.btn-vendor-violation {
+  width: 100%;
+  height: 38px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  border: 1.5px solid rgba(239, 68, 68, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+.btn-vendor-violation:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.35);
+}
+
+/* Theme-aligned Vendor Directory Filter Chips (Item 11) */
+.vendor-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(15, 23, 42, 0.75);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1.5px solid transparent;
+  outline: none;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.vendor-filter-chip[data-filter="all"] {
+  border-color: #64748b;
+  color: #94a3b8;
+  background: rgba(100, 116, 139, 0.1);
+}
+.vendor-filter-chip[data-filter="all"]:hover {
+  border-color: #94a3b8;
+  color: #f1f5f9;
+}
+.vendor-filter-chip[data-filter="all"].active {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: #f59e0b;
+  color: #fbbf24;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.35);
+}
+
+.vendor-filter-chip[data-filter="certified"] {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.08);
+}
+.vendor-filter-chip[data-filter="certified"]:hover {
+  border-color: #10b981;
+  color: #a7f3d0;
+}
+.vendor-filter-chip[data-filter="certified"].active {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: #10b981;
+  color: #a7f3d0;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
+}
+
+.vendor-filter-chip[data-filter="violation"] {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.08);
+}
+.vendor-filter-chip[data-filter="violation"]:hover {
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+.vendor-filter-chip[data-filter="violation"].active {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: #ef4444;
+  color: #fca5a5;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.35);
+}
+
 
 

@@ -326,33 +326,80 @@ class UIManager {
     const vendorGrid = document.getElementById('foodDeptVendorsGrid');
     if (vendorGrid) {
       const vendors = db.getAllVendors();
-      vendorGrid.innerHTML = vendors.map(vendor => `
-        <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-              <div>
-                <span class="badge ${vendor.hygieneGrade.includes('A') ? 'badge-resolved' : 'badge-pending'}">
-                  ${vendor.status}
-                </span>
-                <h3 style="margin-top: 0.4rem; font-size: 1.15rem;">${vendor.name}</h3>
-                <p style="font-size: 0.85rem; color: var(--text-muted);">Proprietor: ${vendor.owner} • 📍 ${vendor.location}</p>
+      vendorGrid.innerHTML = vendors.map(vendor => {
+        const isViolated = vendor.isViolated || vendor.hygieneGrade === 'F';
+        return `
+          <div class="vendor-registry-card ${isViolated ? 'card-violation' : 'card-certified'}">
+            <div class="vendor-card-header">
+              <div class="vendor-qr-box">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=FSSAI-CERT-${encodeURIComponent(vendor.id || 'AP-V02')}" onerror="this.onerror=null;this.src='assets/app_qr_code.png'" alt="QR Code" class="vendor-qr-img">
               </div>
-              <div style="text-align: center; background: #ecfdf5; border: 2px solid #10b981; border-radius: var(--radius-md); padding: 8px 14px; min-width: 84px; box-sizing: border-box; flex-shrink: 0; display: inline-flex; flex-direction: column; align-items: center; justify-content: center;">
-                <div style="font-size: 1.35rem; font-weight: 900; line-height: 1.1; color: #047857;">${vendor.hygieneGrade}</div>
-                <div style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; white-space: nowrap; color: #065f46; margin-top: 3px;">HYGIENE</div>
+              <div class="vendor-title-col">
+                <h3 class="vendor-name" title="${vendor.name}">${vendor.name}</h3>
+                <div class="vendor-status-pill ${isViolated ? 'status-violation' : 'status-certified'}">
+                  <span class="status-dot"></span>
+                  <span>${isViolated ? 'STATUTORY VIOLATION NOTICE' : (vendor.status || 'VERIFIED & CERTIFIED')}</span>
+                </div>
+              </div>
+              <div class="vendor-grade-badge ${isViolated ? 'grade-violation' : 'grade-certified'}">
+                <span class="grade-letter">${vendor.hygieneGrade || (isViolated ? 'F' : 'A+')}</span>
+                <span class="grade-sub">${isViolated ? 'VIOLATION' : 'HYGIENE'}</span>
               </div>
             </div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-              <div>• Audit Score: <strong>${vendor.score}</strong></div>
-              <div>• Certificate Validity: <strong>${vendor.validTill}</strong></div>
-              <div>• Inspected by: ${vendor.inspectedBy}</div>
+
+            <div class="vendor-meta-list">
+              <div class="meta-row">
+                <span class="meta-icon">👤</span>
+                <span class="meta-label">Proprietor:</span>
+                <span class="meta-val">${vendor.owner}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-icon">📍</span>
+                <span class="meta-label">Location:</span>
+                <span class="meta-val">${vendor.location}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-icon">📅</span>
+                <span class="meta-label">Certificate Validity:</span>
+                <span class="meta-val">${vendor.validTill || '31 Dec 2026'}</span>
+              </div>
+              <div class="meta-row">
+                <span class="meta-icon">🏆</span>
+                <span class="meta-label">Hygiene Audit Score:</span>
+                <span class="meta-val ${isViolated ? 'score-violation' : 'score-high'}">${vendor.score || (isViolated ? '38/100' : '92/100')}</span>
+              </div>
+            </div>
+
+            ${isViolated && vendor.violationClause ? `
+              <div class="vendor-violation-compact">
+                <div class="v-section-label">⚖️ Statutory Violation Notice</div>
+                <div class="v-clause-text">${vendor.violationClause}</div>
+                <div class="v-grid-row">
+                  <div class="v-grid-cell">
+                    <span class="v-cell-label">Penalty</span>
+                    <span class="v-cell-val text-amber">${vendor.penaltyImposed || '₹2,000.00'}</span>
+                  </div>
+                  <div class="v-grid-cell">
+                    <span class="v-cell-label">Deadline</span>
+                    <span class="v-cell-val">${vendor.rectificationDeadline || '48 Hours'}</span>
+                  </div>
+                  <div class="v-grid-cell">
+                    <span class="v-cell-label">MQ-135 Gas</span>
+                    <span class="v-cell-val">${vendor.mq135GasPpm || '370 PPM'}</span>
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="vendor-card-footer">
+              <button class="${isViolated ? 'btn-vendor-violation' : 'btn-vendor-certified'}" onclick="window.viewDigitalCertificate('${vendor.id}')">
+                <span>${isViolated ? '⚠️' : '📜'}</span>
+                <span>${isViolated ? 'View Statutory Violation Notice' : 'View National Hygiene Certificate'}</span>
+              </button>
             </div>
           </div>
-          <button class="btn btn-outline btn-sm" style="width: 100%;" onclick="window.viewDigitalCertificate('${vendor.id}')">
-            <span>📜</span> View & Print Digital Certificate
-          </button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
   }
 

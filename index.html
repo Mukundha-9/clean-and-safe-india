@@ -1451,14 +1451,14 @@
           </div>
         </div>
 
-        <!-- Vendor Directory Filters -->
+        <!-- Vendor Directory Filters (Compact Theme-Aligned) -->
         <div class="filter-chips-container" style="margin-bottom: 1.25rem;">
-          <button class="filter-chip active vendor-filter-chip" data-filter="all" onclick="window.handleVendorFilter('all', this)">All Establishments</button>
-          <button class="filter-chip vendor-filter-chip" data-filter="certified" onclick="window.handleVendorFilter('certified', this)">🟢 Certified Grade A+ (Passed)</button>
-          <button class="filter-chip vendor-filter-chip" data-filter="violation" onclick="window.handleVendorFilter('violation', this)">🔴 Statutory Violation Notices</button>
+          <button class="vendor-filter-chip active" data-filter="all" onclick="window.handleVendorFilter('all', this)"><span>📜</span> All Establishments</button>
+          <button class="vendor-filter-chip" data-filter="certified" onclick="window.handleVendorFilter('certified', this)"><span>🟢</span> Certified Grade A+ (Passed)</button>
+          <button class="vendor-filter-chip" data-filter="violation" onclick="window.handleVendorFilter('violation', this)"><span>🔴</span> Statutory Violation Notices</button>
         </div>
 
-        <div id="foodDeptVendorsGrid" class="grid-3"></div>
+        <div id="foodDeptVendorsGrid"></div>
       </div>
 
       <div id="foodTab_policies" class="food-subview" style="display: none;">
