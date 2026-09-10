@@ -28,11 +28,11 @@
   <!-- Design System & Stylesheets with Cache-Busting -->
   <link rel="stylesheet" href="css/main.css?v=8.0">
   <link rel="stylesheet" href="css/components.css?v=29.0.0">
-  <link rel="stylesheet" href="css/command-center.css?v=45.0.0">
+  <link rel="stylesheet" href="css/command-center.css?v=43.0.0">
   <link rel="stylesheet" href="css/electricity.css?v=7.0">
   <link rel="stylesheet" href="css/iot-simulation.css?v=7.0">
   <link rel="stylesheet" href="css/auth.css?v=7.0">
-  <link rel="stylesheet" href="css/responsive.css?v=45.0.0">
+  <link rel="stylesheet" href="css/responsive.css?v=26.0.0">
 
   <style>
     /* Absolute Zero-Leakage View Isolation */
@@ -784,7 +784,7 @@
           </div>
 
           <div class="cmd-table-container">
-            <table class="cmd-table civic-card-table">
+            <table class="cmd-table">
               <thead>
                 <tr>
                   <th>Ticket ID</th>
@@ -822,42 +822,27 @@
             </button>
           </div>
 
-          <!-- Version 44: Compact Operational Priority Dispatch Matrix (Vertical Top-to-Bottom Layout) -->
-          <div class="mun-priority-dispatch-strip" style="background: rgba(13, 21, 39, 0.75); border: 1px solid #1e293b; border-radius: var(--radius-md); padding: 0.85rem 1.1rem; margin-bottom: 1rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
-              <div style="font-size: 0.74rem; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em;">
-                ⚡ Field Operations Priority Matrix
+          <!-- Dynamic Resource Allocation Matrix -->
+          <div class="grid-3" style="margin-bottom: 1rem;">
+            <div class="resource-alloc-box">
+              <div class="resource-icon-badge">🛒</div>
+              <div class="resource-info">
+                <h4>Low Severity → Pushcart</h4>
+                <p>Roadside litter & spot sweep (1 Worker)</p>
               </div>
-              <span style="font-size: 0.7rem; color: #94a3b8;">Dispatch units allocated by priority level</span>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 0.45rem;">
-              <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 0.45rem 0.75rem;">
-                <div style="display: flex; align-items: center; gap: 0.6rem;">
-                  <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-weight: 800; font-size: 0.68rem; min-width: 65px; text-align: center;">LOW</span>
-                  <span style="color: white; font-size: 0.8rem; font-weight: 700;">🛒 Pushcart Squad</span>
-                </div>
-                <span style="color: #94a3b8; font-size: 0.74rem;">Roadside litter &amp; spot sweep (1 Worker)</span>
+            <div class="resource-alloc-box">
+              <div class="resource-icon-badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">🚛</div>
+              <div class="resource-info">
+                <h4>Medium Severity → Collection Truck</h4>
+                <p>Community bin overflow (Vehicle #AP-05-TX)</p>
               </div>
-              <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 0.45rem 0.75rem;">
-                <div style="display: flex; align-items: center; gap: 0.6rem;">
-                  <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-weight: 800; font-size: 0.68rem; min-width: 65px; text-align: center;">MEDIUM</span>
-                  <span style="color: white; font-size: 0.8rem; font-weight: 700;">🚐 Collection Truck</span>
-                </div>
-                <span style="color: #94a3b8; font-size: 0.74rem;">Community bin overflow (Vehicle #AP-05-TX)</span>
-              </div>
-              <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 0.45rem 0.75rem;">
-                <div style="display: flex; align-items: center; gap: 0.6rem;">
-                  <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; font-weight: 800; font-size: 0.68rem; min-width: 65px; text-align: center;">HIGH</span>
-                  <span style="color: white; font-size: 0.8rem; font-weight: 700;">🚜 Hydraulic Compactor</span>
-                </div>
-                <span style="color: #94a3b8; font-size: 0.74rem;">Heavy waste dump &amp; drainage clearance</span>
-              </div>
-              <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 0.45rem 0.75rem;">
-                <div style="display: flex; align-items: center; gap: 0.6rem;">
-                  <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; font-weight: 800; font-size: 0.68rem; min-width: 65px; text-align: center;">CRITICAL</span>
-                  <span style="color: white; font-size: 0.8rem; font-weight: 700;">🚨 Rapid Multi-Unit Fleet</span>
-                </div>
-                <span style="color: #94a3b8; font-size: 0.74rem;">Urgent electrical / major water main rupture</span>
+            </div>
+            <div class="resource-alloc-box">
+              <div class="resource-icon-badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">🚜</div>
+              <div class="resource-info">
+                <h4>Bulk Severity → Tractor / Compactor</h4>
+                <p>Construction debris, road tarring, heavy dump</p>
               </div>
             </div>
           </div>
@@ -1000,7 +985,7 @@
         </div>
 
         <div class="cmd-table-container">
-          <table class="cmd-table civic-card-table">
+          <table class="cmd-table">
             <thead>
               <tr>
                 <th>Ticket ID</th>
@@ -1326,50 +1311,34 @@
   <!-- =========================================================================
        SECTOR 3: FOOD SAFETY & STANDARDS REGULATORY AUTHORITY (FSSAI)
        ========================================================================= -->
-    <div id="foodSafetyMasterView" class="master-dashboard-view">
-    <!-- Food Safety Command Center Topbar -->
+  <div id="foodSafetyMasterView" class="master-dashboard-view">
+    <!-- Food Safety Topbar -->
     <header class="dashboard-topbar topbar-food">
       <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
         <img src="assets/logo.png" alt="Clean & Safe India" class="topbar-logo-img">
         <div style="min-width: 0;">
-          <div class="topbar-brand-title" style="font-weight: 800; font-size: 1.1rem; color: #f59e0b; display: flex; align-items: center; gap: 0.4rem;">
-            <span>🛡️</span> Food Safety Command Center
-          </div>
-          <div class="topbar-brand-subtitle" style="font-size: 0.72rem; color: var(--text-muted);">
-            FSSAI Operations • Dr. Lakshmi Prasad (FSO)
-          </div>
+          <div class="topbar-brand-title" style="font-weight: 800; font-size: 1.1rem; color: #f59e0b;">Food Safety FSO</div>
+          <div class="topbar-brand-subtitle" style="font-size: 0.72rem; color: var(--text-muted);">FSSAI Portal • Dr. Lakshmi Prasad</div>
         </div>
       </div>
 
-      <!-- Operational Sub-tabs -->
+      <!-- Sub-tabs -->
       <ul class="dashboard-nav-pills">
-        <li class="dash-nav-pill food-nav-btn active" data-tab="urgent" onclick="window.switchFoodSubTab('urgent')">
-          <span>🚨</span> Urgent Reviews
-        </li>
-        <li class="dash-nav-pill food-nav-btn" data-tab="inspections" onclick="window.switchFoodSubTab('inspections')">
-          <span>📋</span> Inspections
+        <li class="dash-nav-pill food-nav-btn active" data-tab="complaints" onclick="window.switchFoodSubTab('complaints')">
+          <span>🍲</span> Hygiene Violations
         </li>
         <li class="dash-nav-pill food-nav-btn" data-tab="vendors" onclick="window.switchFoodSubTab('vendors')">
-          <span>🏪</span> Establishments
-        </li>
-        <li class="dash-nav-pill food-nav-btn" data-tab="corrective" onclick="window.switchFoodSubTab('corrective')">
-          <span>🛠️</span> Corrective Actions
-        </li>
-        <li class="dash-nav-pill food-nav-btn" data-tab="reinspections" onclick="window.switchFoodSubTab('reinspections')">
-          <span>🔄</span> Re-Inspections
-        </li>
-        <li class="dash-nav-pill food-nav-btn" data-tab="hotspots" onclick="window.switchFoodSubTab('hotspots')">
-          <span>🔮</span> Hotspots & Predictive
+          <span>📜</span> Certified Vendors & QR
         </li>
         <li class="dash-nav-pill food-nav-btn" data-tab="policies" onclick="window.switchFoodSubTab('policies')">
-          <span>⚖️</span> Guidelines
+          <span>⚖️</span> Penalties & Guidelines
         </li>
       </ul>
 
       <!-- User Actions & Logout -->
       <div style="display: flex; align-items: center; gap: 0.75rem;">
-        <button class="btn btn-saffron btn-sm" onclick="window.openFoodInspectionModal()" title="Conduct On-Site Audit">
-          <span>➕</span> New Inspection
+        <button class="btn btn-saffron btn-sm" id="foodTopLogNoticeBtn" onclick="window.openFoodInspectionModal()">
+          <span>➕</span> Log Inspection Notice
         </button>
         <button class="btn-switch-portal" onclick="window.handleLogout()">
           <span>🔒</span> Logout
@@ -1383,87 +1352,49 @@
         <div style="display: flex; align-items: center; gap: 0.75rem;">
           <span style="font-size: 1.3rem;">🥗</span>
           <div>
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; font-weight: 700; display: block;">Official Food Safety Jurisdiction</span>
+            <span style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; font-weight: 700; display: block;">FSSAI Enforcement Jurisdiction</span>
             <strong id="foodJurisdictionBadge" style="color: #f59e0b; font-size: 0.95rem;">Andhra Pradesh → Surampalem (City-Wide Food Safety Directorate)</strong>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 0.5rem;">
           <span style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 4px; font-weight: 700; display: flex; align-items: center; gap: 0.35rem;">
-            <span>🔒</span> OFFICIAL FOOD SAFETY JURISDICTION [LOCKED]
+            <span>🔒</span> STATUTORY CITY SCOPE (LOCKED)
           </span>
         </div>
       </div>
 
-      <!-- Compact Lifecycle Visual Breadcrumb: FOOD SAFETY RISK LOOP -->
-      <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 1.25rem;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
-          <div style="font-size: 0.74rem; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.4rem;">
-            <span>🔄</span> Food Safety Risk Loop &amp; Inspection Lifecycle
+      <!-- Subview 1: Food Complaints & Violations -->
+      <div id="foodTab_complaints" class="food-subview">
+        <div class="grid-4" style="margin-bottom: 1.5rem;">
+          <div class="cmd-metric-card">
+            <span class="stat-label">Active Food Audits</span>
+            <div class="cmd-metric-num" id="foodTotalAudits" style="color: #f59e0b;">3</div>
+            <span class="cmd-metric-sub">Across All Food Zones</span>
           </div>
-          <span style="font-size: 0.72rem; color: #94a3b8;">Closed-Loop Proactive Risk Governance</span>
+          <div class="cmd-metric-card">
+            <span class="stat-label">Rectified Outlets</span>
+            <div class="cmd-metric-num" id="foodRectifiedOutlets" style="color: #10b981;">1</div>
+            <span class="cmd-metric-sub">Re-inspected & Cleared</span>
+          </div>
+          <div class="cmd-metric-card">
+            <span class="stat-label">Certified Safe Vendors</span>
+            <div class="cmd-metric-num" id="foodCertifiedCount" style="color: #38bdf8;">2</div>
+            <span class="cmd-metric-sub">Grade A+ Hygiene Pass</span>
+          </div>
+          <div class="cmd-metric-card">
+            <span class="stat-label">Pending Notices</span>
+            <div class="cmd-metric-num" id="foodPendingNoticesCount" style="color: #f59e0b;">2</div>
+            <span class="cmd-metric-sub">Under Rectification SLA</span>
+          </div>
         </div>
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.25rem; overflow-x: auto; padding-bottom: 4px; font-size: 0.72rem;">
-          <span style="color: #cbd5e1; white-space: nowrap; font-weight: 600;">1. Citizen Evidence</span>
-          <span style="color: #64748b;">→</span>
-          <span style="color: #38bdf8; white-space: nowrap; font-weight: 600;">2. AI Assessment</span>
-          <span style="color: #64748b;">→</span>
-          <span style="color: #f59e0b; white-space: nowrap; font-weight: 700;">3. FSO Review</span>
-          <span style="color: #64748b;">→</span>
-          <span style="color: #cbd5e1; white-space: nowrap; font-weight: 600;">4. Inspection</span>
-          <span style="color: #64748b;">→</span>
-          <span style="color: #fbbf24; white-space: nowrap; font-weight: 600;">5. Corrective Action</span>
-          <span style="color: #64748b;">→</span>
-          <span style="color: #10b981; white-space: nowrap; font-weight: 600;">6. Re-inspection</span>
-          <span style="color: #64748b;">→</span>
-          <span style="color: #34d399; white-space: nowrap; font-weight: 700;">7. Compliance History</span>
-          <span style="color: #64748b;">→</span>
-          <span style="color: #a855f7; white-space: nowrap; font-weight: 700;">8. Predictive Monitoring</span>
-        </div>
-      </div>
 
-      <!-- 6-KPI Command Center Metrics Row -->
-      <div class="grid-4" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.85rem; margin-bottom: 1.5rem;">
-        <div class="cmd-metric-card" onclick="window.switchFoodSubTab('urgent')" style="cursor: pointer;">
-          <span class="stat-label">Urgent Reviews Due</span>
-          <div class="cmd-metric-num" id="foodMetricUrgentReviews" style="color: #f87171;">3</div>
-          <span class="cmd-metric-sub">Reports Under Review</span>
-        </div>
-        <div class="cmd-metric-card" onclick="window.switchFoodSubTab('inspections')" style="cursor: pointer;">
-          <span class="stat-label">Active Inspections</span>
-          <div class="cmd-metric-num" id="foodMetricActiveInspections" style="color: #f59e0b;">2</div>
-          <span class="cmd-metric-sub">Scheduled &amp; In Progress</span>
-        </div>
-        <div class="cmd-metric-card" onclick="window.switchFoodSubTab('corrective')" style="cursor: pointer;">
-          <span class="stat-label">Pending Corrective Actions</span>
-          <div class="cmd-metric-num" id="foodMetricPendingActions" style="color: #fbbf24;">2</div>
-          <span class="cmd-metric-sub">Awaiting Verification</span>
-        </div>
-        <div class="cmd-metric-card" onclick="window.switchFoodSubTab('reinspections')" style="cursor: pointer;">
-          <span class="stat-label">Re-Inspections Due</span>
-          <div class="cmd-metric-num" id="foodMetricReinspectionsDue" style="color: #38bdf8;">1</div>
-          <span class="cmd-metric-sub">Compliance Audits</span>
-        </div>
-        <div class="cmd-metric-card" onclick="window.switchFoodSubTab('vendors')" style="cursor: pointer;">
-          <span class="stat-label">High-Risk Establishments</span>
-          <div class="cmd-metric-num" id="foodMetricHighRiskVendors" style="color: #ef4444;">3</div>
-          <span class="cmd-metric-sub">Under Monitoring</span>
-        </div>
-        <div class="cmd-metric-card" onclick="window.switchFoodSubTab('hotspots')" style="cursor: pointer;">
-          <span class="stat-label">Hotspot Corridors</span>
-          <div class="cmd-metric-num" id="foodMetricHotspots" style="color: #a855f7;">1</div>
-          <span class="cmd-metric-sub">Market Zone Density</span>
-        </div>
-      </div>
-
-      <!-- SECTION 1: URGENT FOOD SAFETY REPORTS / URGENT REVIEWS -->
-      <div id="foodTab_urgent" class="food-subview">
         <div class="section-header">
           <div>
-            <h2 class="section-title"><span>🚨</span> Urgent Food Safety Reports &amp; Officer Triage</h2>
-            <p class="section-desc">Citizen-submitted food safety concerns prioritized by transparent AI-assisted risk indicators. FSO determines operational review outcomes.</p>
+            <h2 class="section-title"><span>🍲</span> Food Hygiene Violations & Enforcement Triage</h2>
+            <p class="section-desc">Designated Food Safety Officer triage queue: conduct re-inspections, levy statutory fines, and rectify verified hazards.</p>
           </div>
           <button class="btn btn-saffron btn-sm" onclick="window.openFoodInspectionModal()">
-            <span>➕</span> Log Inspection Notice
+            <span>➕</span> Log New Food Violation
           </button>
         </div>
 
@@ -1471,225 +1402,95 @@
         <div class="filter-chips-container" style="margin-bottom: 1.25rem;">
           <button class="filter-chip active food-filter-chip" data-filter="all" onclick="window.handleFoodFilter('all', this)">All Food Reports</button>
           <button class="filter-chip food-filter-chip" data-filter="pending" onclick="window.handleFoodFilter('pending', this)">⚠️ Pending / On Notice</button>
-          <button class="filter-chip food-filter-chip" data-filter="resolved" onclick="window.handleFoodFilter('resolved', this)">✅ Rectified &amp; Restored</button>
+          <button class="filter-chip food-filter-chip" data-filter="resolved" onclick="window.handleFoodFilter('resolved', this)">✅ Rectified & Restored</button>
         </div>
 
         <div id="foodDeptIssuesGrid" class="grid-3"></div>
       </div>
 
-      <!-- SECTION 2: INSPECTIONS REQUIRING ATTENTION -->
-      <div id="foodTab_inspections" class="food-subview" style="display: none;">
-        <div class="section-header">
-          <div>
-            <h2 class="section-title"><span>📋</span> Inspections Requiring Attention</h2>
-            <p class="section-desc">Structured FSO field audits evaluated across 6 standardized hygiene &amp; safety observation checklists.</p>
-          </div>
-          <button class="btn btn-saffron btn-sm" onclick="window.openFoodInspectionModal()">
-            <span>➕</span> Conduct New Audit
-          </button>
-        </div>
-
-        <!-- Inspections Filter Chips -->
-        <div class="filter-chips-container" style="margin-bottom: 1.25rem;">
-          <button class="filter-chip active insp-filter-chip" data-filter="all" onclick="window.handleInspectionFilter('all', this)">All Inspections</button>
-          <button class="filter-chip insp-filter-chip" data-filter="scheduled" onclick="window.handleInspectionFilter('scheduled', this)">📅 Scheduled / Due</button>
-          <button class="filter-chip insp-filter-chip" data-filter="in_progress" onclick="window.handleInspectionFilter('in_progress', this)">⏳ In Progress</button>
-          <button class="filter-chip insp-filter-chip" data-filter="completed" onclick="window.handleInspectionFilter('completed', this)">✅ Completed</button>
-        </div>
-
-        <div id="foodInspectionsListGrid" style="display: flex; flex-direction: column; gap: 0.85rem;"></div>
-      </div>
-
-      <!-- SECTION 3: HIGH-RISK / RECURRING ESTABLISHMENTS -->
+      <!-- Subview 2: Certified & Violated Directory -->
       <div id="foodTab_vendors" class="food-subview" style="display: none;">
         <div class="section-header">
           <div>
-            <h2 class="section-title"><span>🏪</span> Food Establishments &amp; Intelligence Registry</h2>
-            <p class="section-desc">Operational directory of registered eateries: complaint history, recurrence trends, open corrective actions, and monitoring states.</p>
+            <h2 class="section-title"><span>📜</span> Food Establishments & Statutory Certificates Directory</h2>
+            <p class="section-desc">Official registry of certified clean vendors (Grade A+) and establishments issued official violation & rectification notices (Grade C).</p>
           </div>
         </div>
 
         <!-- Vendor Directory Filters -->
         <div class="filter-chips-container" style="margin-bottom: 1.25rem;">
           <button class="filter-chip active vendor-filter-chip" data-filter="all" onclick="window.handleVendorFilter('all', this)">All Establishments</button>
-          <button class="filter-chip vendor-filter-chip" data-filter="violation" onclick="window.handleVendorFilter('violation', this)">🔴 Under Active Monitoring</button>
-          <button class="filter-chip vendor-filter-chip" data-filter="certified" onclick="window.handleVendorFilter('certified', this)">🟢 Verified &amp; Compliant</button>
+          <button class="filter-chip vendor-filter-chip" data-filter="certified" onclick="window.handleVendorFilter('certified', this)">🟢 Certified Grade A+ (Passed)</button>
+          <button class="filter-chip vendor-filter-chip" data-filter="violation" onclick="window.handleVendorFilter('violation', this)">🔴 Statutory Violation Notices</button>
         </div>
 
         <div id="foodDeptVendorsGrid" class="grid-3"></div>
       </div>
 
-      <!-- SECTION 4: CORRECTIVE ACTIONS TRACKER -->
-      <div id="foodTab_corrective" class="food-subview" style="display: none;">
-        <div class="section-header">
-          <div>
-            <h2 class="section-title"><span>🛠️</span> Corrective Actions &amp; Rectification Engine</h2>
-            <p class="section-desc">Track mandated hygiene corrections from issue to vendor implementation and FSO on-site verification.</p>
-          </div>
-          <button class="btn btn-outline btn-sm" onclick="window.openNewCorrectiveActionModal()">
-            <span>➕</span> Issue Corrective Action
-          </button>
-        </div>
-
-        <!-- Corrective Action Filter Chips -->
-        <div class="filter-chips-container" style="margin-bottom: 1.25rem;">
-          <button class="filter-chip active ca-filter-chip" data-filter="all" onclick="window.handleCorrectiveFilter('all', this)">All Actions</button>
-          <button class="filter-chip ca-filter-chip" data-filter="pending" onclick="window.handleCorrectiveFilter('pending', this)">⏳ Pending Implementation</button>
-          <button class="filter-chip ca-filter-chip" data-filter="verified" onclick="window.handleCorrectiveFilter('verified', this)">✅ Verified Compliant</button>
-        </div>
-
-        <div id="foodCorrectiveActionsGrid" style="display: flex; flex-direction: column; gap: 0.85rem;"></div>
-      </div>
-
-      <!-- SECTION 5: RE-INSPECTIONS DUE -->
-      <div id="foodTab_reinspections" class="food-subview" style="display: none;">
-        <div class="section-header">
-          <div>
-            <h2 class="section-title"><span>🔄</span> Re-Inspection &amp; Compliance Verification Queue</h2>
-            <p class="section-desc">Mandatory re-audits conducted after corrective action implementation before compliance restoration.</p>
-          </div>
-        </div>
-
-        <div id="foodReinspectionsGrid" style="display: flex; flex-direction: column; gap: 0.85rem;"></div>
-      </div>
-
-      <!-- SECTION 6: FOOD SAFETY HOTSPOTS & PREDICTIVE MONITORING -->
-      <div id="foodTab_hotspots" class="food-subview" style="display: none;">
-        <div class="section-header">
-          <div>
-            <h2 class="section-title"><span>🔮</span> Food Safety Hotspots &amp; Predictive Monitoring</h2>
-            <p class="section-desc">Data-backed spatial density hotspots and root-cause advisory intelligence supporting proactive inspection scheduling.</p>
-          </div>
-        </div>
-
-        <!-- Honest Predictive Disclaimer Banner -->
-        <div style="background: rgba(56, 189, 248, 0.08); border-left: 4px solid #38bdf8; border-radius: 8px; padding: 0.85rem 1.25rem; margin-bottom: 1.5rem;">
-          <div style="font-size: 0.78rem; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.05em;">
-            Transparent Advisory Disclosure
-          </div>
-          <p style="font-size: 0.82rem; color: #cbd5e1; margin: 4px 0 0 0;">
-            <strong>AI-Assisted Predictive Demo — Transparent Rule-Based Forecast (No ML Model Configured)</strong><br>
-            All hotspot prioritizations derive from verified incident frequency, GPS proximity, and historical corrective action signals. Decisions remain with authorized Food Safety Officers.
-          </p>
-        </div>
-
-        <div class="grid-2" style="gap: 1.25rem; margin-bottom: 1.5rem;">
-          <!-- Hotspot Cluster Card -->
-          <div class="card" style="border-top: 4px solid #a855f7;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; font-weight: 800;">DENSITY HOTSPOT</span>
-              <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #a855f7; font-weight: 800;">ZONE 12-MARKET</span>
-            </div>
-            <h3 style="color: white; font-size: 1.15rem; margin-bottom: 0.35rem;">Ward 12 Commercial Market Corridor</h3>
-            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.85rem;">Market Gate Cross &amp; Gandhi Statue Commercial Street, Surampalem</p>
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; font-size: 0.8rem; margin-bottom: 0.85rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 0.35rem;">
-              <div>📍 <strong>Verified Reports:</strong> 4 food safety complaints (3 unique incidents, 1 follow-up)</div>
-              <div>📈 <strong>Incident Trend:</strong> INCREASING (Elevated evening street-prep volume)</div>
-              <div>⚠️ <strong>Primary Concern:</strong> Uncovered prepared food &amp; ambient block ice handling</div>
-            </div>
-            <div style="font-size: 0.78rem; color: #38bdf8; font-weight: 700; margin-bottom: 0.4rem;">Possible Contributing Factors (Advisory):</div>
-            <ul style="font-size: 0.76rem; color: #94a3b8; margin: 0 0 1rem 1.25rem; line-height: 1.5;">
-              <li>High pedestrian footfall adjacent to unenclosed display bays</li>
-              <li>Inadequate cold-chain storage for street juice point block ice</li>
-              <li>Peak evening commercial rush straining hand-sanitization routines</li>
-            </ul>
-            <div style="border-top: 1px solid var(--border); padding-top: 0.75rem;">
-              <span style="font-size: 0.78rem; color: #f59e0b; font-weight: 700;">Recommended Action:</span>
-              <div style="font-size: 0.8rem; color: white; margin-top: 2px;">Prioritize proactive weekend evening inspection coverage.</div>
-            </div>
-          </div>
-
-          <!-- Predictive Risk Horizon Card -->
-          <div class="card" style="border-top: 4px solid #38bdf8;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; font-weight: 800;">7-DAY RISK HORIZON</span>
-              <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #38bdf8; font-weight: 800;">PREDICTIVE DEMO</span>
-            </div>
-            <h3 style="color: white; font-size: 1.15rem; margin-bottom: 0.35rem;">Predictive Inspection Priority Forecast</h3>
-            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.85rem;">Rule-based multi-signal forecast across Surampalem food establishments</p>
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; font-size: 0.8rem; margin-bottom: 0.85rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 0.35rem;">
-              <div>🎯 <strong>Priority Establishment:</strong> Sri Sai Street Food Stall (Score: 88/100)</div>
-              <div>⚡ <strong>Trigger Signals:</strong> Critical hazard report + 48h SLA + unshielded display</div>
-              <div>⏱️ <strong>Recommended Horizon:</strong> On-site audit within next 24-48 hours</div>
-            </div>
-            <div style="font-size: 0.78rem; color: #34d399; font-weight: 700; margin-bottom: 0.4rem;">Secondary Horizon Watch:</div>
-            <ul style="font-size: 0.76rem; color: #94a3b8; margin: 0 0 1rem 1.25rem; line-height: 1.5;">
-              <li>Lakshmi Tiffin Center: Grease trap bio-cleaning verification pending (7-day SLA)</li>
-              <li>Market Fresh Juice Point: Food-grade ice chest installation check</li>
-            </ul>
-            <div style="border-top: 1px solid var(--border); padding-top: 0.75rem;">
-              <button class="btn btn-sm btn-outline" style="width: 100%; border-color: #38bdf8; color: #38bdf8;" onclick="window.switchFoodSubTab('inspections')">
-                📋 Review All Scheduled Audits
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SECTION 7: STATUTORY ENFORCEMENT & COMPLIANCE GUIDELINES -->
       <div id="foodTab_policies" class="food-subview" style="display: none;">
         <div class="section-header">
           <div>
-            <h2 class="section-title"><span>⚖️</span> Statutory Enforcement &amp; Compliance Guidelines</h2>
-            <p class="section-desc">Structured enforcement framework under Food Safety Regulations (AI-Assisted Decision Support).</p>
+            <h2 class="section-title"><span>⚖️</span> Statutory Enforcement & Compliance Guidelines</h2>
+            <p class="section-desc">Structured enforcement against unhygienic practices under Food Safety Regulations.</p>
           </div>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem;">
           <div class="card" style="border-left: 5px solid #f59e0b;">
-            <h3 style="color: #f59e0b; font-size: 1.15rem; margin-bottom: 0.5rem;">Section 56: Exposure &amp; Handling</h3>
-            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">Improvement Notice + Rectification SLA</p>
-            <div style="font-size: 0.8rem; color: var(--text-main);">Erect sneeze guards, enforce disposable gloves and caps for all prep workers.</div>
+            <h3 style="color: #f59e0b; font-size: 1.15rem; margin-bottom: 0.5rem;">1st Violation</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">Official Notice Dispatched + ₹500 Fine</p>
+            <div style="font-size: 0.8rem; color: var(--text-main);">7 days to rectify cleanliness or face suspension.</div>
           </div>
 
           <div class="card" style="border-left: 5px solid #ef4444;">
-            <h3 style="color: #f43f5e; font-size: 1.15rem; margin-bottom: 0.5rem;">Section 58: Kitchen Sanitation</h3>
-            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">7-Day Rectification Notice</p>
-            <div style="font-size: 0.8rem; color: var(--text-main);">Sealed waste pedal bins, grease trap cleaning, daily sanitization log.</div>
+            <h3 style="color: #f43f5e; font-size: 1.15rem; margin-bottom: 0.5rem;">Repeat Violation</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">₹2,000 Heavy Fine + 7-Day Probation</p>
+            <div style="font-size: 0.8rem; color: var(--text-main);">Digital certificate revoked and status marked as Probation.</div>
           </div>
 
-          <div class="card" style="border-left: 5px solid #38bdf8;">
-            <h3 style="color: #38bdf8; font-size: 1.15rem; margin-bottom: 0.5rem;">Section 59: Storage &amp; Temperature</h3>
-            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">Cold-Chain Compliance Directive</p>
-            <div style="font-size: 0.8rem; color: var(--text-main);">Food-grade ice storage, dairy/fruit refrigeration log, no open-air thawing.</div>
+          <div class="card" style="border-left: 5px solid #7f1d1d;">
+            <h3 style="color: #fda4af; font-size: 1.15rem; margin-bottom: 0.5rem;">Continuous Violation</h3>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.5rem;">License Cancellation & Outlet Sealing</p>
+            <div style="font-size: 0.8rem; color: var(--text-main);">Immediate commercial shutdown and legal notice.</div>
           </div>
         </div>
       </div>
 
       <!-- Food Safety Footer -->
       <footer class="dashboard-footer">
-        <div style="font-weight: 700; color: #f59e0b; margin-bottom: 0.25rem;">Food Safety &amp; Standards Directorate</div>
+        <div style="font-weight: 700; color: #f59e0b; margin-bottom: 0.25rem;">Food Safety & Standards Directorate</div>
         <div style="color: var(--text-muted); font-size: 0.8rem;">
-          Surampalem Circle • Statutory Food Hygiene &amp; Quality Enforcement
+          Surampalem Circle • Statutory Food Hygiene & Quality Enforcement
         </div>
       </footer>
     </main>
 
     <!-- Mobile Food Safety Bottom Nav -->
     <nav class="mobile-bottom-nav mobile-nav-food">
-      <button class="mobile-nav-tab active" data-tab="urgent" onclick="window.switchFoodSubTab('urgent')">
-        <span class="mobile-nav-icon">🚨</span>
-        <span class="mobile-nav-label">Reviews</span>
-      </button>
-      <button class="mobile-nav-tab" data-tab="inspections" onclick="window.switchFoodSubTab('inspections')">
-        <span class="mobile-nav-icon">📋</span>
+      <button class="mobile-nav-tab active" data-tab="complaints" onclick="window.switchFoodSubTab('complaints')">
+        <span class="mobile-nav-icon">🍲</span>
         <span class="mobile-nav-label">Audits</span>
       </button>
-      <button class="mobile-nav-tab mobile-nav-fab-food" onclick="window.openFoodInspectionModal()" title="New Inspection">
+      <button class="mobile-nav-tab" data-tab="vendors" onclick="window.switchFoodSubTab('vendors')">
+        <span class="mobile-nav-icon">📜</span>
+        <span class="mobile-nav-label">Vendors</span>
+      </button>
+      <button class="mobile-nav-tab mobile-nav-fab-food" onclick="window.openFoodInspectionModal()" title="Log Inspection">
         <span class="mobile-fab-icon">+</span>
         <span class="mobile-nav-label">Inspect</span>
       </button>
-      <button class="mobile-nav-tab" data-tab="vendors" onclick="window.switchFoodSubTab('vendors')">
-        <span class="mobile-nav-icon">🏪</span>
-        <span class="mobile-nav-label">Vendors</span>
-      </button>
-      <button class="mobile-nav-tab" data-tab="corrective" onclick="window.switchFoodSubTab('corrective')">
-        <span class="mobile-nav-icon">🛠️</span>
-        <span class="mobile-nav-label">Actions</span>
+      <button class="mobile-nav-tab" data-tab="policies" onclick="window.switchFoodSubTab('policies')">
+        <span class="mobile-nav-icon">⚖️</span>
+        <span class="mobile-nav-label">Guidelines</span>
       </button>
     </nav>
   </div>
-id="workerMasterView" class="master-dashboard-view">
+
+
+  <!-- =========================================================================
+       SECTOR 4: DEDICATED FIELD SQUAD RAPID RESPONSE PORTAL
+       ========================================================================= -->
+  <div id="workerMasterView" class="master-dashboard-view">
     <!-- Worker Topbar -->
     <header class="dashboard-topbar topbar-worker">
       <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
@@ -1842,22 +1643,6 @@ id="workerMasterView" class="master-dashboard-view">
             </div>
           </div>
 
-          <!-- Version 44: Compact Geo-Evidence Location Captured Card -->
-          <div class="location-captured-card" id="modalLocationCapturedCard" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-md); padding: 0.65rem 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
-            <div style="display: flex; align-items: center; gap: 0.65rem;">
-              <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(56, 189, 248, 0.15); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;">📍</div>
-              <div>
-                <div style="font-size: 0.68rem; font-weight: 800; color: #38bdf8; letter-spacing: 0.05em; text-transform: uppercase;">LOCATION CAPTURED</div>
-                <div style="font-size: 0.82rem; font-weight: 700; color: white;" id="modalLocationCapturedArea">Surampalem • Ward 12 (Market Zone)</div>
-                <div style="font-size: 0.7rem; color: #94a3b8;" id="modalLocationCapturedSub">Your report will be routed using this location.</div>
-              </div>
-            </div>
-            <div style="text-align: right; flex-shrink: 0;">
-              <div style="font-size: 0.66rem; color: #94a3b8; margin-bottom: 2px;">LOCATION STATUS</div>
-              <span class="badge" id="modalLocationStatusBadge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 0.72rem; font-weight: 800;">✓ Location consistent</span>
-            </div>
-          </div>
-
           <!-- PRIMARY SECTION: SINGLE UNIFIED COMPLAINT DESCRIPTION WITH INLINE VOICE -->
           <div class="form-group" style="margin-bottom: 0;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
@@ -1957,11 +1742,47 @@ id="workerMasterView" class="master-dashboard-view">
             </div>
           </div>
 
-          <!-- Automatic Citizen Domicile & Location (Resolved silently from authenticated session & live GPS) -->
-          <input type="hidden" id="modalReportState" value="Andhra Pradesh">
-          <input type="hidden" id="modalReportCity" value="Surampalem">
-          <input type="hidden" id="modalReportWard" value="Ward 12 (Market Zone)">
-          <input type="hidden" id="reportLocationInput" value="">
+          <!-- SMART JURISDICTION & LOCATION DIVISION -->
+          <div class="complaint-section-box">
+            <div style="font-weight: 800; font-size: 0.8rem; color: #38bdf8; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem;">
+              <span>📍</span> JURISDICTION &amp; LOCATION
+            </div>
+            <div class="grid-2" style="gap: 0.65rem; margin-bottom: 0.65rem;">
+              <div>
+                <label class="form-label" style="font-size: 0.74rem;">State:</label>
+                <select id="modalReportState" class="form-select" onchange="window.handleModalStateChange(this.value)">
+                  <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
+                  <option value="Telangana">Telangana</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="Tamil Nadu">Tamil Nadu</option>
+                  <option value="Delhi NCR">Delhi NCR</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label" style="font-size: 0.74rem;">City / District:</label>
+                <select id="modalReportCity" class="form-select" onchange="window.handleModalCityChange(this.value)">
+                  <option value="Surampalem" selected>Surampalem</option>
+                  <option value="Kakinada">Kakinada</option>
+                  <option value="Visakhapatnam">Visakhapatnam</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid-2" style="gap: 0.65rem;">
+              <div>
+                <label class="form-label" style="font-size: 0.74rem;">Ward / Zone:</label>
+                <select id="modalReportWard" class="form-select">
+                  <option value="Ward 12 (Market Zone)" selected>Ward 12 (Market Zone)</option>
+                  <option value="Ward 11 (Lake View Zone)">Ward 11 (Lake View Zone)</option>
+                  <option value="Ward 14 (Campus Zone)">Ward 14 (Campus Zone)</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label" style="font-size: 0.74rem;">Street Name &amp; Landmark:</label>
+                <input type="text" id="reportLocationInput" class="form-input" placeholder="e.g. Gandhi Statue Main Road" required>
+              </div>
+            </div>
+          </div>
 
           <!-- COMPLAINT CLASSIFICATION & SUMMARY (Auto-filled by Smart Triage) -->
           <div class="grid-2" style="gap: 0.65rem;">
@@ -2169,304 +1990,148 @@ id="workerMasterView" class="master-dashboard-view">
   </div>
 
   <!-- Food Safety Officer: Log Inspection Violation Notice Modal -->
-    <!-- =========================================================================
-       FOOD SAFETY OPERATIONS MODALS (INSPECTIONS, CHECKLISTS, CORRECTIVE ACTIONS)
-       ========================================================================= -->
-
-  <!-- 1. Upgraded 6-Section FSO Field Inspection Checklist Modal -->
   <div class="modal-overlay" id="foodInspectionModal">
-    <div class="modal-box modal-lg" style="max-width: 760px; max-height: 90vh; overflow-y: auto;">
-      <div class="modal-header" style="position: sticky; top: 0; background: #0b1329; z-index: 10; border-bottom: 1px solid var(--border);">
-        <div style="display: flex; align-items: center; gap: 0.6rem;">
-          <span style="font-size: 1.4rem;">📋</span>
-          <div>
-            <h3 style="font-size: 1.2rem; color: #f59e0b; margin: 0;">FSO Standardized Inspection Audit</h3>
-            <div style="font-size: 0.75rem; color: #94a3b8;">Human-in-the-Loop On-Site Verification • 6 Operational Checklists</div>
-          </div>
-        </div>
+    <div class="modal-box modal-lg">
+      <div class="modal-header">
+        <h3 style="font-size: 1.25rem; color: #f59e0b;">📋 FSSAI Food Safety Inspection & Violation Notice</h3>
         <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('foodInspectionModal')">✕</button>
       </div>
-
-      <form id="foodInspectionChecklistForm" onsubmit="window.handleFoodInspectionSubmit(event)">
-        <div class="modal-body" style="padding: 1.25rem;">
-          <!-- Honest Legal/Product Advisory Header -->
-          <div style="background: rgba(245, 158, 11, 0.08); border-left: 4px solid #f59e0b; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1.25rem;">
-            <div style="font-size: 0.76rem; font-weight: 800; color: #f59e0b; text-transform: uppercase;">
-              Statutory Inspection Protocol
-            </div>
-            <p style="font-size: 0.78rem; color: #cbd5e1; margin: 2px 0 0 0; line-height: 1.4;">
-              Record verified on-site observations. Findings reflect visual and operational audits by authorized Food Safety Officers (no laboratory or microbiological claims without physical test evidence).
-            </p>
+      <form id="foodInspectionForm">
+        <div class="modal-body">
+          <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 0.85rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #fde68a;">
+            🔍 Designated Food Safety Officer (FSO) Audit Entry. Logging a violation will generate a statutory FSSAI notice, compute penalty fines, and record it in the public registry.
           </div>
 
-          <!-- Target Establishment & Linked Incident -->
-          <div class="grid-2" style="gap: 1rem; margin-bottom: 1rem;">
-            <div class="form-group" style="margin-bottom: 0;">
-              <label class="form-label">Establishment / Vendor:</label>
-              <select id="foodInspVendorSelect" class="form-select" onchange="window.onFoodVendorSelectChange(this)">
-                <option value="FSSAI-AP-2026-V11" selected>Sri Sai Street Food Stall (Market Gate Cross)</option>
-                <option value="FSSAI-AP-2026-V12">Lakshmi Tiffin Center (Gandhi Statue Circle)</option>
-                <option value="FSSAI-AP-2026-V13">Market Fresh Juice Point (Vegetable Market Lane)</option>
-                <option value="FSSAI-AP-2026-V14">Surampalem Bakery &amp; Snacks (College Road Food Court)</option>
-                <option value="FSSAI-AP-2026-V15">Annapurna Food Corner (Main Road Center)</option>
-                <option value="custom">+ Other / Unregistered Establishment</option>
-              </select>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Establishment / Stall Name:</label>
+              <input type="text" id="foodVendorNameInput" class="form-input" placeholder="e.g. Swagath Grand Fast Food" required>
             </div>
-            <div class="form-group" style="margin-bottom: 0;">
-              <label class="form-label">Linked Incident / Report ID (Optional):</label>
-              <input type="text" id="foodInspIssueIdInput" class="form-input" placeholder="e.g. ISS-2026-FS-001" value="ISS-2026-FS-001">
+            <div class="form-group">
+              <label class="form-label">Proprietor / Owner Name:</label>
+              <input type="text" id="foodOwnerNameInput" class="form-input" placeholder="e.g. R. Koteswara Rao" required>
             </div>
           </div>
 
-          <div id="foodCustomVendorFields" style="display: none; background: rgba(255,255,255,0.02); border: 1px dashed var(--border); padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem;">
+          <!-- 4-Tier Location Division -->
+          <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.25rem;">
+            <div style="font-weight: 800; font-size: 0.82rem; color: #f59e0b; margin-bottom: 0.6rem;">📍 ESTABLISHMENT JURISDICTION</div>
+            <div class="grid-2" style="gap: 0.75rem; margin-bottom: 0.75rem;">
+              <div>
+                <label class="form-label" style="font-size: 0.75rem;">State:</label>
+                <select id="foodStateSelect" class="form-select">
+                  <option value="Andhra Pradesh" selected>Andhra Pradesh</option>
+                  <option value="Telangana">Telangana</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="Tamil Nadu">Tamil Nadu</option>
+                  <option value="Delhi NCR">Delhi NCR</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label" style="font-size: 0.75rem;">City / District:</label>
+                <select id="foodCitySelect" class="form-select">
+                  <option value="Surampalem" selected>Surampalem</option>
+                  <option value="Kakinada">Kakinada</option>
+                  <option value="Visakhapatnam">Visakhapatnam</option>
+                  <option value="Hyderabad">Hyderabad</option>
+                  <option value="Pune">Pune</option>
+                  <option value="Chennai">Chennai</option>
+                  <option value="New Delhi">New Delhi</option>
+                </select>
+              </div>
+            </div>
             <div class="grid-2" style="gap: 0.75rem;">
               <div>
-                <label class="form-label" style="font-size: 0.75rem;">Custom Establishment Name:</label>
-                <input type="text" id="foodCustomVendorName" class="form-input" placeholder="e.g. New Balaji Sweets">
+                <label class="form-label" style="font-size: 0.75rem;">Ward / Area Zone:</label>
+                <input type="text" id="foodWardInput" class="form-input" placeholder="e.g. Ward 14 (Campus Food Zone)" required>
               </div>
               <div>
-                <label class="form-label" style="font-size: 0.75rem;">Ward &amp; Street:</label>
-                <input type="text" id="foodCustomVendorLocation" class="form-input" placeholder="e.g. Ward 12, Market Cross">
+                <label class="form-label" style="font-size: 0.75rem;">Street & Exact Location:</label>
+                <input type="text" id="foodStreetInput" class="form-input" placeholder="e.g. College Road Food Court Lane 2" required>
               </div>
             </div>
           </div>
 
-          <!-- 6-SECTION INSPECTION CHECKLIST -->
-          <div style="font-size: 0.84rem; font-weight: 800; color: white; margin-bottom: 0.65rem; display: flex; align-items: center; gap: 0.4rem;">
-            <span>🔍</span> Standardized 6-Section Hygiene &amp; Safety Checklist
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Primary Violation Clause:</label>
+              <select id="foodViolationTypeSelect" class="form-select">
+                <option value="stale_oil" selected>🍳 Section 56: Stale / Reheated Cooking Oil (TPM > 25%)</option>
+                <option value="open_drain">🍲 Section 58: Uncovered Food Adjacent to Open Drain</option>
+                <option value="expired_items">🥩 Section 59: Expired / Spoilage Ingredients Detected</option>
+                <option value="gas_ammonia">💨 MQ-135 Gas Alert: High Volatile Ammonia Odor (>350 PPM)</option>
+                <option value="water_hygiene">🚰 Section 60: Non-Potable Water & Unsanitary Prep Surfaces</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Statutory Notice & Fine Level:</label>
+              <select id="foodNoticeLevelSelect" class="form-select">
+                <option value="500" selected>⚠️ 1st Notice: 7-Day Rectification + ₹500 Fine</option>
+                <option value="2000">🚨 2nd Notice: Critical Violation + ₹2,000 Fine</option>
+                <option value="5000">🛑 3rd Notice: License Suspension & Seizure + ₹5,000 Fine</option>
+              </select>
+            </div>
           </div>
 
-          <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem;">
-            <!-- Section A: Food Handling -->
-            <details open style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.85rem;">
-              <summary style="cursor: pointer; font-weight: 700; font-size: 0.82rem; color: #38bdf8; user-select: none;">
-                A. Food Handling &amp; Exposure Protection
-              </summary>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; font-size: 0.78rem; color: #cbd5e1;">
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_handling_safe" checked> Safe handling practices observed
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_handling_protected" checked> Food protected from airborne dust / sneeze guard
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_handling_utensils" checked> Clean food-grade serving tongs/utensils used
-                </label>
-              </div>
-            </details>
-
-            <!-- Section B: Food Storage -->
-            <details open style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.85rem;">
-              <summary style="cursor: pointer; font-weight: 700; font-size: 0.82rem; color: #38bdf8; user-select: none;">
-                B. Food Storage &amp; Temperature Control
-              </summary>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; font-size: 0.78rem; color: #cbd5e1;">
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_storage_appropriate" checked> Storage containers clean &amp; elevated from floor
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_storage_temp" checked> Perishables chilled (dairy/juices under refrigeration)
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_storage_separation" checked> Raw and cooked foods segregated
-                </label>
-              </div>
-            </details>
-
-            <!-- Section C: Personal Hygiene -->
-            <details style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.85rem;">
-              <summary style="cursor: pointer; font-weight: 700; font-size: 0.82rem; color: #38bdf8; user-select: none;">
-                C. Personal Hygiene &amp; Staff Apparel
-              </summary>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; font-size: 0.78rem; color: #cbd5e1;">
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_hygiene_wash" checked> Dedicated hand-washing facility operational
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_hygiene_caps" checked> Hairnets, clean aprons &amp; gloves in use
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_hygiene_medical" checked> Handlers free from visible skin/wound infections
-                </label>
-              </div>
-            </details>
-
-            <!-- Section D: Premises Hygiene -->
-            <details style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.85rem;">
-              <summary style="cursor: pointer; font-weight: 700; font-size: 0.82rem; color: #38bdf8; user-select: none;">
-                D. Premises Hygiene &amp; Waste Containment
-              </summary>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; font-size: 0.78rem; color: #cbd5e1;">
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_premises_surfaces" checked> Prep surfaces stainless / daily sanitization log
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_premises_waste" checked> Enclosed foot-operated waste pedal bins
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_premises_pests" checked> No visible rodent / insect infestation
-                </label>
-              </div>
-            </details>
-
-            <!-- Section E: Water & Cleaning -->
-            <details style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.85rem;">
-              <summary style="cursor: pointer; font-weight: 700; font-size: 0.82rem; color: #38bdf8; user-select: none;">
-                E. Water Potability &amp; Sanitation
-              </summary>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; font-size: 0.78rem; color: #cbd5e1;">
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_water_potable" checked> Potable RO/purified water used for cooking &amp; ice
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_water_greasetrap" checked> Kitchen drainage grease trap clean &amp; free-flowing
-                </label>
-              </div>
-            </details>
-
-            <!-- Section F: Labelling & Documentation -->
-            <details style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.85rem;">
-              <summary style="cursor: pointer; font-weight: 700; font-size: 0.82rem; color: #38bdf8; user-select: none;">
-                F. Documentation &amp; Statutory Display
-              </summary>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; font-size: 0.78rem; color: #cbd5e1;">
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_doc_fssai" checked> FSSAI Registration display board mounted with QR
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer;">
-                  <input type="checkbox" id="chk_doc_medical" checked> Handler medical fitness certificates current
-                </label>
-              </div>
-            </details>
-          </div>
-
-          <!-- Officer Observations Textarea -->
           <div class="form-group">
-            <label class="form-label">Officer Audit Observations &amp; Specific Findings:</label>
-            <textarea id="foodAuditNotesInput" class="form-textarea" rows="3" placeholder="Detail observed hygiene conditions, evidence inspected, corrective actions mandated, and on-site guidance given..." required></textarea>
-          </div>
-
-          <!-- Standardized Outcome & Corrective Action Flag -->
-          <div class="grid-2" style="gap: 1rem; margin-bottom: 1rem;">
-            <div class="form-group" style="margin-bottom: 0;">
-              <label class="form-label">Inspection Compliance Result:</label>
-              <select id="foodInspResultSelect" class="form-select">
-                <option value="compliant">🟢 Compliant (Satisfies FSSAI Standards)</option>
-                <option value="compliant_with_corrective_action" selected>🟡 Compliant with Corrective Action Mandate</option>
-                <option value="non_compliance_observed">🔴 Non-Compliance Observed (Improvement Notice)</option>
-                <option value="further_inspection_required">⚠️ Further Inspection Required</option>
-                <option value="monitoring_required">👁️ Active Regulatory Monitoring Required</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-              <label class="form-label">Next Inspection Scheduled (Days / SLA):</label>
-              <select id="foodInspNextSlaSelect" class="form-select">
-                <option value="48h" selected>Within 48 Hours (Urgent Re-audit)</option>
-                <option value="7d">Within 7 Days (Standard Rectification)</option>
-                <option value="30d">Within 30 Days (Routine Surveillance)</option>
-                <option value="none">No immediate follow-up required</option>
-              </select>
-            </div>
+            <label class="form-label">Officer Audit Observations & Rectification Order:</label>
+            <textarea id="foodAuditNotesInput" class="form-textarea" placeholder="Detail observed hygiene failures, contaminated items, and required corrective actions before re-audit..." required></textarea>
           </div>
         </div>
 
-        <div class="modal-footer" style="position: sticky; bottom: 0; background: #0b1329; z-index: 10; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <div class="modal-footer">
           <button type="button" class="btn btn-outline" onclick="window.closeModal('foodInspectionModal')">Cancel</button>
-          <button type="submit" class="btn btn-saffron" style="font-weight: 800;">
-            <span>⚖️</span> Record Official Inspection Audit
+          <button type="submit" class="btn btn-saffron">
+            <span>⚖️</span> Issue Statutory Notice & Record Violation
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- 2. Formal Corrective Action Modal -->
-  <div class="modal-overlay" id="foodCorrectiveActionModal">
-    <div class="modal-box modal-lg" style="max-width: 600px;">
+  <!-- Food Safety Officer: Rectify & Re-Inspect Modal -->
+  <div class="modal-overlay" id="foodRectifyModal">
+    <div class="modal-box modal-lg">
       <div class="modal-header">
-        <h3 style="font-size: 1.2rem; color: #fbbf24;">🛠️ Issue Formal Corrective Action Order</h3>
-        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('foodCorrectiveActionModal')">✕</button>
+        <h3 style="font-size: 1.25rem; color: #34d399;">🛠️ Re-Inspection & Problem Rectification Verification</h3>
+        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('foodRectifyModal')">✕</button>
       </div>
-      <form id="foodCorrectiveActionForm" onsubmit="window.handleCreateCorrectiveActionSubmit(event)">
-        <div class="modal-body" style="padding: 1.25rem;">
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-            Issue a time-bound statutory corrective directive to the food establishment. Progress will be tracked through vendor implementation and FSO on-site re-audit.
+      <form id="foodRectifyForm">
+        <div class="modal-body">
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem;" id="foodRectifyModalTitle">
+            Verify that the establishment has completed all mandated corrective actions and satisfies FSSAI hygiene standards.
           </p>
 
           <div class="form-group">
-            <label class="form-label">Select Establishment:</label>
-            <select id="caVendorSelect" class="form-select">
-              <option value="FSSAI-AP-2026-V11" selected>Sri Sai Street Food Stall (Market Gate Cross)</option>
-              <option value="FSSAI-AP-2026-V12">Lakshmi Tiffin Center (Gandhi Statue Circle)</option>
-              <option value="FSSAI-AP-2026-V13">Market Fresh Juice Point (Vegetable Market Lane)</option>
-              <option value="FSSAI-AP-2026-V14">Surampalem Bakery &amp; Snacks (College Road Food Court)</option>
-              <option value="FSSAI-AP-2026-V15">Annapurna Food Corner (Main Road Center)</option>
-            </select>
+            <label class="form-label">Re-Inspection Audit Findings & Corrective Proof:</label>
+            <textarea id="foodRectifyNotesInput" class="form-textarea" placeholder="e.g. Re-inspected premises: Fresh cooking oil batch tested (TPM 12%), food display glass installed, area sanitized, water test passed." required></textarea>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Re-Tested MQ-135 Gas PPM:</label>
+              <input type="number" id="foodRectifyGasInput" class="form-input" value="145" min="50" max="800" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Hygiene Audit Score (out of 100):</label>
+              <input type="number" id="foodRectifyScoreInput" class="form-input" value="94" min="0" max="100" required>
+            </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Mandated Corrective Action Description:</label>
-            <textarea id="caDescriptionInput" class="form-textarea" rows="3" placeholder="e.g. Erect transparent acrylic sneeze shield over prepared food displays; enforce disposable gloves and hairnets for all prep staff." required></textarea>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Compliance Rectification SLA:</label>
-            <select id="caSlaSelect" class="form-select">
-              <option value="48h" selected>48 Hours (High Priority Exposure Risk)</option>
-              <option value="7d">7 Days (Standard Improvement Notice)</option>
-              <option value="14d">14 Days (Infrastructure / Equipment Upgrade)</option>
+            <label class="form-label">Enforcement Clearance Outcome:</label>
+            <select id="foodRectifyOutcomeSelect" class="form-select">
+              <option value="passed" selected>🟢 Compliant & Fully Rectified (Award Grade A+ Certificate)</option>
+              <option value="probation">🟡 Probation Extension (Re-check in 48 Hours)</option>
             </select>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline" onclick="window.closeModal('foodCorrectiveActionModal')">Cancel</button>
-          <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #d97706, #f59e0b); border-color: #f59e0b; font-weight: 800;">
-            <span>📋</span> Issue Corrective Directive
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- 3. Food Safety Officer: On-Site Re-Inspection & Compliance Verification Modal -->
-  <div class="modal-overlay" id="foodReinspectionModal">
-    <div class="modal-box modal-lg" style="max-width: 620px;">
-      <div class="modal-header">
-        <h3 style="font-size: 1.25rem; color: #34d399;">🔄 On-Site Re-Inspection &amp; Compliance Verification</h3>
-        <button class="btn btn-outline btn-icon-only" onclick="window.closeModal('foodReinspectionModal')">✕</button>
-      </div>
-      <form id="foodReinspectionForm" onsubmit="window.handleReinspectionSubmit(event)">
-        <input type="hidden" id="reinspectionTargetInspId">
-        <div class="modal-body" style="padding: 1.25rem;">
-          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;" id="foodReinspectionModalTitle">
-            Verify that the establishment has completed mandated corrective actions and satisfies FSSAI hygiene standards.
-          </p>
-
-          <div class="form-group">
-            <label class="form-label">Re-Inspection Audit Findings &amp; Corrective Proof:</label>
-            <textarea id="reinspectionNotesInput" class="form-textarea" rows="3" placeholder="e.g. Re-inspected premises: Sneeze shield installed across prep bay, staff wearing certified disposable hairnets & gloves, area sanitized." required></textarea>
-          </div>
-
-          <div class="grid-2" style="gap: 1rem; margin-bottom: 1rem;">
-            <div class="form-group" style="margin-bottom: 0;">
-              <label class="form-label">Verified Hygiene Audit Score (out of 100):</label>
-              <input type="number" id="reinspectionScoreInput" class="form-input" value="94" min="0" max="100" required>
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-              <label class="form-label">Enforcement Clearance Outcome:</label>
-              <select id="reinspectionOutcomeSelect" class="form-select">
-                <option value="COMPLIANCE_CONFIRMED" selected>🟢 Compliance Confirmed (Award Grade A+ Certificate)</option>
-                <option value="CORRECTIVE_ACTION_STILL_REQUIRED">🟡 Corrective Action Still Required (Probation Extension)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline" onclick="window.closeModal('foodReinspectionModal')">Cancel</button>
-          <button type="submit" class="btn btn-primary" style="font-weight: 800; background: linear-gradient(135deg, #059669, #10b981); border-color: #10b981;">
-            <span>✅</span> Authorize Compliance Verification
+          <button type="button" class="btn btn-outline" onclick="window.closeModal('foodRectifyModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <span>✅</span> Confirm Rectification & Clear Establishment
           </button>
         </div>
       </form>
@@ -3080,13 +2745,13 @@ id="workerMasterView" class="master-dashboard-view">
     <div class="modal-box" style="max-width: 620px;">
       <div class="modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding: 1.15rem 1.4rem;">
         <div style="display: flex; align-items: center; gap: 0.65rem;">
-          <span style="font-size: 1.5rem;" id="identityModalHeaderIcon">🔄</span>
+          <span style="font-size: 1.5rem;" id="identityModalHeaderIcon">⚠️</span>
           <div>
             <h3 style="font-size: 1.15rem; color: white; margin: 0; font-weight: 800;" id="identityModalHeaderTitle">
-              An active civic report may already exist at this location.
+              Possible Existing Incident Detected
             </h3>
             <p style="font-size: 0.74rem; color: #94a3b8; margin: 2px 0 0;" id="identityModalHeaderSubtitle">
-              This may be a follow-up to an existing issue rather than a new complaint.
+              AI-assisted civic identity matching recommends linking to prevent ticket duplication.
             </p>
           </div>
         </div>
@@ -3095,17 +2760,17 @@ id="workerMasterView" class="master-dashboard-view">
 
       <div class="modal-body" style="padding: 1.25rem 1.4rem;">
         <!-- Status Banner -->
-        <div id="identityBannerBox" style="background: rgba(2, 132, 199, 0.12); border: 1px solid #0284c7; border-radius: 10px; padding: 0.85rem 1.1rem; margin-bottom: 1.15rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
+        <div id="identityBannerBox" style="background: rgba(245, 158, 11, 0.12); border: 1px solid #f59e0b; border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 1.15rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
           <div>
-            <span class="badge" id="identityTypeBadge" style="background: #0284c7; color: white; font-weight: 800; font-size: 0.72rem;">
-              FOLLOW UP
+            <span class="badge" id="identityTypeBadge" style="background: #f59e0b; color: #000; font-weight: 800; font-size: 0.72rem;">
+              POSSIBLE DUPLICATE
             </span>
-            <span style="font-size: 0.76rem; color: #7dd3fc; margin-left: 0.5rem; font-weight: 600;">
-              Existing field report in progress
+            <span id="identityScoreText" style="font-size: 0.78rem; color: #fde68a; font-weight: 700; margin-left: 0.5rem;">
+              Match Confidence: 88%
             </span>
           </div>
           <span style="font-size: 0.72rem; color: #cbd5e1;" id="identityRecommendedActionLabel">
-            Recommended: Add Follow-up
+            Action: Add Follow-up or Confirm New
           </span>
         </div>
 
@@ -3138,13 +2803,28 @@ id="workerMasterView" class="master-dashboard-view">
           </div>
         </div>
 
+        <!-- Multi-Signal Corroboration -->
+        <div style="margin-bottom: 1.15rem;">
+          <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.4rem;">
+            Observed Corroboration Signals:
+          </div>
+          <div id="identitySignalsContainer" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+            <!-- Signal Pills dynamically injected -->
+          </div>
+        </div>
+
+        <!-- Deterministic Reasoning Statement -->
+        <div style="background: rgba(255,255,255,0.03); border-left: 3px solid #38bdf8; padding: 0.65rem 0.85rem; border-radius: 4px; font-size: 0.78rem; color: #cbd5e1; margin-bottom: 1.25rem;">
+          <strong>AI Analysis:</strong> <span id="identityReasoningText">Existing ticket matches location and category.</span>
+        </div>
+
         <!-- Action Selection Guidance -->
         <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.75rem;">
           Choose how you would like to proceed with your submission:
         </div>
 
         <!-- 4 Citizen Action Buttons -->
-        <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1rem;">
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
           <button type="button" class="btn btn-primary" id="btnIdentityAddFollowUp" onclick="window.confirmSubmitFollowUp()" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: 800; padding: 0.65rem 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%;">
             <span>🔄</span> Add Follow-up to Existing Ticket (Recommended)
           </button>
@@ -3162,24 +2842,6 @@ id="workerMasterView" class="master-dashboard-view">
             Cancel / Edit Complaint Details
           </button>
         </div>
-
-        <!-- Collapsible Technical Identity & Evidence Details (De-emphasized) -->
-        <details style="border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.65rem 0.85rem; background: rgba(0,0,0,0.25);">
-          <summary style="cursor: pointer; font-size: 0.76rem; color: #94a3b8; font-weight: 700; user-select: none;">
-            ⚙️ Identity &amp; Evidence Details
-          </summary>
-          <div style="margin-top: 0.65rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.74rem; color: #cbd5e1; margin-bottom: 0.5rem;">
-              <span style="color: #94a3b8;">Match Confidence:</span>
-              <strong style="color: #38bdf8;" id="identityScoreText">Match Confidence: 88%</strong>
-            </div>
-            <div style="font-size: 0.72rem; color: #94a3b8; margin-bottom: 0.35rem; font-weight: 700;">Corroboration Signals:</div>
-            <div id="identitySignalsContainer" style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem;"></div>
-            <div style="background: rgba(255,255,255,0.03); border-left: 3px solid #38bdf8; padding: 0.45rem 0.65rem; border-radius: 4px; font-size: 0.74rem; color: #cbd5e1;" id="identityReasoningText">
-              Existing ticket matches location and category.
-            </div>
-          </div>
-        </details>
       </div>
     </div>
   </div>
@@ -3195,7 +2857,7 @@ id="workerMasterView" class="master-dashboard-view">
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => {
-            if (name !== 'clean-safe-india-v47.0.0') {
+            if (name !== 'clean-safe-india-v43.0.0') {
               caches.delete(name);
             }
           });
@@ -3205,6 +2867,6 @@ id="workerMasterView" class="master-dashboard-view">
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=47.0.0"></script>
+  <script src="js/bundle.js?v=43.0.0"></script>
 </body>
 </html>

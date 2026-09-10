@@ -1681,163 +1681,9 @@
       ]
     },
 
-        // =========================================================================
-    // FOOD SAFETY & HYGIENE VIOLATION ENFORCEMENT REPORTS (5 REALISTIC REPORTS)
-    // =========================================================================
-    // REPORT 1: Sri Sai Street Food Stall (CRITICAL, PENDING / ON NOTICE, ₹2,500 FINE)
     {
       isDemo: true,
-      id: 'ISS-2026-FS-001',
-      state: 'Andhra Pradesh',
-      city: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      street: 'Market Gate Cross',
-      department: 'food_safety',
-      deptName: 'Food Safety Department',
-      deptIcon: '🍲',
-      title: 'Poor Food Handling & Uncovered Prepared Food',
-      description: 'Sri Sai Street Food Stall: Prepared street foods stored uncovered adjacent to traffic dust; food handlers operating without headgear or disposable gloves.',
-      location: 'Ward 12 (Market Zone), Market Gate Cross, Surampalem',
-      category: 'food_hygiene',
-      categoryName: 'Food Hygiene & Preparation',
-      categoryIcon: '🍲',
-      establishmentType: 'Street Food Stall',
-      severity: 'bulk',
-      severityLabel: 'CRITICAL HAZARD',
-      status: 'pending',
-      timestamp: Date.now() - 3600000 * 3,
-      slaDeadline: Date.now() + 3600000 * 45,
-      resolvedTimestamp: null,
-      slaHoursLeft: 45,
-      verifiedByOfficer: 'Dr. Lakshmi Prasad (FSO)',
-      verifiedTimestamp: Date.now() - 3600000 * 2.8,
-      assignedWorker: 'Food Safety Officer (Dr. Lakshmi Prasad)',
-      assignedTimestamp: Date.now() - 3600000 * 2.5,
-      workerStatus: 'Statutory 48h Notice Issued — Re-inspection & ₹2,500 fine levied',
-      isSlaBreached: false,
-      lat: 17.0012,
-      lng: 81.8038,
-      reportedBy: 'Dr. Lakshmi Prasad (FSO)',
-      userId: 'food-01',
-      vendorId: 'FSSAI-AP-2026-V11',
-      vendorName: 'Sri Sai Street Food Stall',
-      mq135GasPpm: 385,
-      upvotes: 24,
-      upvotedBy: [],
-      imageBefore: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
-      imageAfter: null,
-      recommendedResource: 'Food Safety Adulteration Cell',
-      rewardIssued: false,
-      fineLevied: 2500,
-      comments: [
-        { author: 'Dr. Lakshmi Prasad (FSO)', role: 'fso', text: 'Statutory Notice issued: Uncovered foods must be enclosed with sneeze guard immediately. Fine ₹2,500 levied.', time: '3h ago' }
-      ]
-    },
-
-    // REPORT 2: Lakshmi Tiffin Center (HIGH RISK, PENDING / ON NOTICE, ₹1,000 FINE)
-    {
-      isDemo: true,
-      id: 'ISS-2026-FS-002',
-      state: 'Andhra Pradesh',
-      city: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      street: 'Gandhi Statue Circle',
-      department: 'food_safety',
-      deptName: 'Food Safety Department',
-      deptIcon: '🍲',
-      title: 'Poor Kitchen Hygiene & Improper Waste Disposal',
-      description: 'Lakshmi Tiffin Center: Wet organic kitchen waste overflowing onto prep floor; unsegregated bins attracting flies; lack of grease trap sanitation.',
-      location: 'Ward 12 (Market Zone), Gandhi Statue Circle, Surampalem',
-      category: 'food_hygiene',
-      categoryName: 'Kitchen Hygiene & Waste Disposal',
-      categoryIcon: '🚯',
-      establishmentType: 'Tiffin Center / Eatery',
-      severity: 'high',
-      severityLabel: 'HIGH RISK',
-      status: 'pending',
-      timestamp: Date.now() - 3600000 * 6,
-      slaDeadline: Date.now() + 3600000 * 42,
-      resolvedTimestamp: null,
-      slaHoursLeft: 42,
-      verifiedByOfficer: 'Dr. Lakshmi Prasad (FSO)',
-      verifiedTimestamp: Date.now() - 3600000 * 5.8,
-      assignedWorker: 'Food Safety Officer (Dr. Lakshmi Prasad)',
-      assignedTimestamp: Date.now() - 3600000 * 5.5,
-      workerStatus: 'Improvement Notice Issued — 7-Day Rectification & ₹1,000 Fine',
-      isSlaBreached: false,
-      lat: 17.0025,
-      lng: 81.8015,
-      reportedBy: 'Dr. Lakshmi Prasad (FSO)',
-      userId: 'food-01',
-      vendorId: 'FSSAI-AP-2026-V12',
-      vendorName: 'Lakshmi Tiffin Center',
-      mq135GasPpm: 320,
-      upvotes: 19,
-      upvotedBy: [],
-      imageBefore: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
-      imageAfter: null,
-      recommendedResource: 'Food Safety Inspector Unit',
-      rewardIssued: false,
-      fineLevied: 1000,
-      comments: [
-        { author: 'Dr. Lakshmi Prasad (FSO)', role: 'fso', text: 'Improvement Notice issued: Enclosed pedal bins and grease trap cleaning mandated within 7 days. Fine ₹1,000.', time: '6h ago' }
-      ]
-    },
-
-    // REPORT 3: Market Fresh Juice Point (HIGH RISK, PENDING / ON NOTICE, ₹1,500 FINE)
-    {
-      isDemo: true,
-      id: 'ISS-2026-FS-003',
-      state: 'Andhra Pradesh',
-      city: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      street: 'Vegetable Market Lane',
-      department: 'food_safety',
-      deptName: 'Food Safety Department',
-      deptIcon: '🍲',
-      title: 'Improper Food Storage & Unhygienic Ice Handling',
-      description: 'Market Fresh Juice Point: Commercial block ice stored directly on untreated wooden board; cut citrus fruits kept at ambient temperature (34°C) without refrigeration.',
-      location: 'Ward 12 (Market Zone), Vegetable Market Lane, Surampalem',
-      category: 'food_hygiene',
-      categoryName: 'Food Storage & Temperature Control',
-      categoryIcon: '🧊',
-      establishmentType: 'Juice Point / Beverage Stall',
-      severity: 'high',
-      severityLabel: 'HIGH RISK',
-      status: 'pending',
-      timestamp: Date.now() - 3600000 * 12,
-      slaDeadline: Date.now() + 3600000 * 36,
-      resolvedTimestamp: null,
-      slaHoursLeft: 36,
-      verifiedByOfficer: 'Dr. Lakshmi Prasad (FSO)',
-      verifiedTimestamp: Date.now() - 3600000 * 11.5,
-      assignedWorker: 'Food Safety Officer (Dr. Lakshmi Prasad)',
-      assignedTimestamp: Date.now() - 3600000 * 11,
-      workerStatus: 'Re-inspection Scheduled — Food Grade Ice & Chiller Mandate',
-      isSlaBreached: false,
-      lat: 17.0005,
-      lng: 81.8050,
-      reportedBy: 'Dr. Lakshmi Prasad (FSO)',
-      userId: 'food-01',
-      vendorId: 'FSSAI-AP-2026-V13',
-      vendorName: 'Market Fresh Juice Point',
-      mq135GasPpm: 290,
-      upvotes: 14,
-      upvotedBy: [],
-      imageBefore: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=800&auto=format&fit=crop&q=80',
-      imageAfter: null,
-      recommendedResource: 'Food Safety Temperature Control Squad',
-      rewardIssued: false,
-      fineLevied: 1500,
-      comments: [
-        { author: 'Dr. Lakshmi Prasad (FSO)', role: 'fso', text: 'Chilling violation notice: Only food-grade purified ice cubes permitted. Chiller temperature log mandated. Fine ₹1,500.', time: '12h ago' }
-      ]
-    },
-
-    // REPORT 4: Surampalem Bakery & Snacks (MEDIUM RISK, RECTIFIED & RESTORED, ₹500 FINE SETTLED)
-    {
-      isDemo: true,
-      id: 'ISS-2026-FS-004',
+      id: 'ISS-2026-00125',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
       ward: 'Ward 14 (Campus Zone)',
@@ -1845,94 +1691,89 @@
       department: 'food_safety',
       deptName: 'Food Safety Department',
       deptIcon: '🍲',
-      title: 'Food-Contact Surface Hygiene & Utensil Sanitation',
-      description: 'Surampalem Bakery & Snacks: Baking trays and food preparation tables lacked daily sanitization records; baking utensils encrusted with residue.',
+      title: 'Uncovered Stale Food & Open Drain Violation',
+      description: 'Campus Night Shawarma & Grills: Preparing food next to open drain channel without hairnets or sneeze covers.',
       location: 'Ward 14 (Campus Zone), College Road Food Court, Surampalem',
       category: 'food_hygiene',
-      categoryName: 'Prep Surface Sanitation',
-      categoryIcon: '🧼',
-      establishmentType: 'Bakery & Confectionery',
+      categoryName: 'Unhygienic Food Stall / Prep',
+      categoryIcon: '🍲',
       severity: 'medium',
-      severityLabel: 'MODERATE RISK',
-      status: 'resolved',
-      timestamp: Date.now() - 3600000 * 28,
-      slaDeadline: Date.now() + 3600000 * 20,
-      resolvedTimestamp: Date.now() - 3600000 * 4,
-      slaHoursLeft: 0,
-      verifiedByOfficer: 'Dr. Lakshmi Prasad (FSO)',
-      verifiedTimestamp: Date.now() - 3600000 * 27.5,
+      severityLabel: 'MEDIUM RISK',
+      status: 'pending',
+      timestamp: Date.now() - 3600000 * 4,
+      slaDeadline: Date.now() + 3600000 * 44,
+      resolvedTimestamp: null,
+      slaHoursLeft: 44,
+      verifiedByOfficer: 'Dr. Lakshmi Prasad (Senior FSO)',
+      verifiedTimestamp: Date.now() - 3600000 * 3.8,
       assignedWorker: 'Food Safety Officer (Dr. Lakshmi Prasad)',
-      assignedTimestamp: Date.now() - 3600000 * 27,
-      workerStatus: 'Re-inspected: Corrective actions verified compliant; surfaces sanitized, Grade A+ Restored',
-      resolutionNotes: 'Re-inspected: Corrective actions verified compliant; stainless surfaces sanitized, daily logbook certified.',
+      assignedTimestamp: Date.now() - 3600000 * 3.5,
+      workerStatus: 'Improvement Notice Issued — 7-Day Rectification Window',
       isSlaBreached: false,
       lat: 16.9980,
       lng: 81.8020,
       reportedBy: 'Dr. Lakshmi Prasad (FSO)',
       userId: 'food-01',
-      vendorId: 'FSSAI-AP-2026-V14',
-      vendorName: 'Surampalem Bakery & Snacks',
-      mq135GasPpm: 110,
-      upvotes: 31,
+      vendorId: 'FSSAI-AP-2026-V02',
+      vendorName: 'Campus Night Shawarma & Grills',
+      mq135GasPpm: 340,
+      upvotes: 18,
       upvotedBy: [],
-      imageBefore: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&auto=format&fit=crop&q=80',
-      imageAfter: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
-      recommendedResource: 'Food Safety Sanitization Unit',
+      imageBefore: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
+      imageAfter: null,
+      recommendedResource: 'Food Safety Inspector Unit',
       rewardIssued: false,
       fineLevied: 500,
       comments: [
-        { author: 'Dr. Lakshmi Prasad (FSO)', role: 'fso', text: 'Re-inspection completed. Stainless steel surfaces sanitized and sterilization protocol operational. Fine ₹500 settled. Cleared.', time: '4h ago' }
+        { author: 'Dr. Lakshmi Prasad (FSO)', text: 'Statutory 7-Day Improvement Notice issued with ₹500 fine.', time: '4h ago' }
       ]
     },
 
-    // REPORT 5: Annapurna Food Corner (MEDIUM-LOW RISK, RECTIFIED & RESTORED, COMPLIANT / ₹0)
     {
       isDemo: true,
-      id: 'ISS-2026-FS-005',
+      id: 'ISS-2026-00128',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
       ward: 'Ward 12 (Market Zone)',
-      street: 'Main Road Center',
+      street: 'Market Gate Cross',
       department: 'food_safety',
       deptName: 'Food Safety Department',
       deptIcon: '🍲',
-      title: 'Missing Hygiene Documentation & FSSAI Display Board',
-      description: 'Annapurna Food Corner: Food safety display board missing at entrance; medical fitness certificates for 2 food handlers were expired.',
-      location: 'Ward 12 (Market Zone), Main Road Center, Surampalem',
+      title: 'Stale Burnt Cooking Oil & Toxic Fumes Violation',
+      description: 'Sri Krishna Seafood Point: Reusing black rancid cooking oil across multiple frying cycles (TPM 34%).',
+      location: 'Ward 12 (Market Zone), Market Gate Cross, Surampalem',
       category: 'food_hygiene',
-      categoryName: 'Documentation & Display Compliance',
-      categoryIcon: '📜',
-      establishmentType: 'Street Eatery / Food Corner',
-      severity: 'medium',
-      severityLabel: 'LOW-MEDIUM RISK',
-      status: 'resolved',
-      timestamp: Date.now() - 3600000 * 36,
-      slaDeadline: Date.now() + 3600000 * 12,
-      resolvedTimestamp: Date.now() - 3600000 * 8,
-      slaHoursLeft: 0,
-      verifiedByOfficer: 'Dr. Lakshmi Prasad (FSO)',
-      verifiedTimestamp: Date.now() - 3600000 * 35.5,
+      categoryName: 'Toxic Oil Reuse Violation',
+      categoryIcon: '🍳',
+      severity: 'bulk',
+      severityLabel: 'CRITICAL VIOLATION',
+      status: 'pending',
+      timestamp: Date.now() - 3600000 * 10,
+      slaDeadline: Date.now() + 3600000 * 38,
+      resolvedTimestamp: null,
+      slaHoursLeft: 38,
+      verifiedByOfficer: 'Dr. Lakshmi Prasad (Senior FSO)',
+      verifiedTimestamp: Date.now() - 3600000 * 9.5,
       assignedWorker: 'Food Safety Officer (Dr. Lakshmi Prasad)',
-      assignedTimestamp: Date.now() - 3600000 * 35,
-      workerStatus: 'Documentation corrected & outlet cleared; FSSAI QR board installed',
-      resolutionNotes: 'Documentation corrected: FSSAI registration QR board displayed, medical certificates renewed and approved.',
+      assignedTimestamp: Date.now() - 3600000 * 9,
+      workerStatus: 'Adulteration Sampling & Notice Levied',
       isSlaBreached: false,
-      lat: 17.0030,
-      lng: 81.8028,
+      lat: 17.0012,
+      lng: 81.8038,
       reportedBy: 'Dr. Lakshmi Prasad (FSO)',
       userId: 'food-01',
-      vendorId: 'FSSAI-AP-2026-V15',
-      vendorName: 'Annapurna Food Corner',
-      mq135GasPpm: 95,
-      upvotes: 28,
+      vendorId: 'FSSAI-AP-2026-V01',
+      vendorName: 'Sri Krishna Seafood & Fast Food Point',
+      mq135GasPpm: 370,
+      upvotes: 45,
       upvotedBy: [],
-      imageBefore: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80',
-      imageAfter: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
-      recommendedResource: 'FSSAI Registration & Licensing Squad',
+      imageBefore: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
+      imageAfter: null,
+      recommendedResource: 'Food Safety Adulteration Cell',
       rewardIssued: false,
-      fineLevied: 0,
+      fineLevied: 2000,
       comments: [
-        { author: 'Dr. Lakshmi Prasad (FSO)', role: 'fso', text: 'Compliance verified: FSSAI display board installed with QR verification; handler health certificates renewed. Status compliant.', time: '8h ago' }
+        { author: 'Dr. Lakshmi Prasad (FSO)', text: 'Critical Violation notice issued under Section 56. ₹2,000 fine levied.', time: '10h ago' }
       ]
     },
 
@@ -2271,6 +2112,46 @@
     },
 
     {
+      id: 'ISS-2026-00142',
+      state: 'Tamil Nadu',
+      city: 'Chennai',
+      ward: 'Marina Beach Zone',
+      street: 'Kamarajar Salai',
+      department: 'food_safety',
+      deptName: 'Food Safety Department',
+      deptIcon: '🍲',
+      title: 'Stale Fish & Reheated Oil at Marina Beach Food Stalls',
+      description: 'Marina Coastal Fish Fry Stalls: Street seafood stalls operating without refrigeration or oil testing kits.',
+      location: 'Marina Beach Zone, Kamarajar Salai, Chennai',
+      category: 'food_hygiene',
+      categoryName: 'Seafood Safety Violation',
+      categoryIcon: '🐟',
+      severity: 'bulk',
+      severityLabel: 'CRITICAL VIOLATION',
+      status: 'pending',
+      timestamp: Date.now() - 3600000 * 11,
+      slaHoursLeft: 37,
+      lat: 13.0500,
+      lng: 80.2824,
+      reportedBy: 'Dr. Lakshmi Prasad (FSO)',
+      userId: 'food-01',
+      vendorId: 'FSSAI-TN-2026-V03',
+      vendorName: 'Marina Coastal Fish Fry Stalls',
+      mq135GasPpm: 520,
+      upvotes: 35,
+      upvotedBy: [],
+      imageBefore: 'https://images.unsplash.com/photo-1534482421-64566f976cfa?w=800&auto=format&fit=crop&q=80',
+      imageAfter: null,
+      recommendedResource: 'Tamil Nadu FDA Squad',
+      assignedWorker: 'Chennai FSO Squad 3',
+      rewardIssued: false,
+      fineLevied: 5000,
+      comments: [
+        { author: 'TN FDA Officer', text: 'Critical Seizure Notice issued under Section 59. ₹5,000 fine levied.', time: '5h ago' }
+      ]
+    },
+
+    {
       id: 'ISS-2026-00143',
       state: 'Delhi NCR',
       city: 'New Delhi',
@@ -2345,320 +2226,125 @@
     }
   ];
 
-    const INITIAL_VENDORS = [
-    // 🟢 Certified Safe Vendors (2 Outlets: Grade A+ Passed & Fully Rectified)
+  const INITIAL_VENDORS = [
+    // 🟢 Certified Vendors
     {
-      id: 'FSSAI-AP-2026-V14',
-      state: 'Andhra Pradesh',
-      city: 'Surampalem',
-      ward: 'Ward 14 (Campus Zone)',
-      name: 'Surampalem Bakery & Snacks',
-      owner: 'K. Satyanarayana',
-      location: 'College Road Food Court, Surampalem',
-      hygieneGrade: 'A+',
-      score: '94/100',
-      validTill: '31 Dec 2026',
-      inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
-      status: 'VERIFIED & CERTIFIED',
-      isViolated: false,
-      mq135GasPpm: '110 PPM',
-      penaltyImposed: '₹500 (Settled)',
-      officerDirectives: 'Stainless surfaces sterilized and daily sanitation log certified. Certified Grade A+.'
-    },
-    {
-      id: 'FSSAI-AP-2026-V15',
+      id: 'FSSAI-AP-2026-089',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
       ward: 'Ward 12 (Market Zone)',
-      name: 'Annapurna Food Corner',
+      name: 'Annapurna Pure Veg Tiffins',
       owner: 'Venkata Rao',
-      location: 'Main Road Center, Surampalem',
+      location: 'Main Road, Surampalem',
       hygieneGrade: 'A+',
       score: '96/100',
       validTill: '31 Dec 2026',
       inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
       status: 'VERIFIED & CERTIFIED',
-      isViolated: false,
-      mq135GasPpm: '95 PPM',
-      penaltyImposed: '₹0 (Compliant)',
-      officerDirectives: 'FSSAI QR code display board installed and handler health fitness certificates renewed. Certified Grade A+.'
+      isViolated: false
     },
-
-    // 🔴 Establishments with Active Statutory Violation Notices (3 Outlets: Under Rectification SLA)
     {
-      id: 'FSSAI-AP-2026-V11',
+      id: 'FSSAI-AP-2026-112',
+      state: 'Andhra Pradesh',
+      city: 'Surampalem',
+      ward: 'Ward 14 (Campus Zone)',
+      name: 'Sai Balaji Fast Food & Juices',
+      owner: 'M. Srinivas',
+      location: 'College Campus Gate 2, Surampalem',
+      hygieneGrade: 'A',
+      score: '88/100',
+      validTill: '15 Nov 2026',
+      inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
+      status: 'VERIFIED & CERTIFIED',
+      isViolated: false
+    },
+    // 🔴 Establishments with Official Statutory Violation Notices
+    {
+      id: 'FSSAI-AP-2026-V01',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
       ward: 'Ward 12 (Market Zone)',
-      name: 'Sri Sai Street Food Stall',
-      owner: 'P. Subba Rao',
+      name: 'Sri Krishna Seafood & Fast Food Point',
+      owner: 'K. Durga Prasad',
       location: 'Market Gate Cross, Surampalem',
       hygieneGrade: 'C',
-      score: '40/100',
+      score: '42/100',
       validTill: 'Action Required (48h SLA)',
       inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
-      status: 'STATUTORY VIOLATION NOTICE',
+      status: 'VIOLATION NOTICE ISSUED',
       isViolated: true,
-      violationClause: 'Section 56: Poor Food Handling & Uncovered Prepared Foods',
-      penaltyImposed: '₹2,500.00',
-      rectificationDeadline: '48 Hours SLA',
-      mq135GasPpm: '385 PPM',
-      officerDirectives: 'Erect acrylic sneeze guards and mandate gloves/hairnets for handlers immediately.'
+      violationClause: 'Section 56: Repeated / Burnt Cooking Oil (TPM 34%)',
+      penaltyImposed: '₹2,000.00',
+      rectificationDeadline: '27 Aug 2026',
+      mq135GasPpm: '370 PPM (High Volatile Fumes)',
+      officerDirectives: 'Discard all rancid oil batch immediately. Install TPM digital tester and oil filtration log.'
     },
     {
-      id: 'FSSAI-AP-2026-V12',
+      id: 'FSSAI-AP-2026-V02',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      name: 'Lakshmi Tiffin Center',
-      owner: 'G. Appa Rao',
-      location: 'Gandhi Statue Circle, Surampalem',
+      ward: 'Ward 14 (Campus Zone)',
+      name: 'Campus Night Shawarma & Grills',
+      owner: 'M. Farooq',
+      location: 'College Road Food Court, Surampalem',
       hygieneGrade: 'C',
-      score: '48/100',
+      score: '51/100',
       validTill: 'Action Required (7-Day Notice)',
       inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
       status: 'VIOLATION NOTICE ISSUED',
       isViolated: true,
-      violationClause: 'Section 58: Kitchen Waste Overflow & Lack of Grease Trap',
-      penaltyImposed: '₹1,000.00',
-      rectificationDeadline: '7-Day Rectification Window',
-      mq135GasPpm: '320 PPM',
-      officerDirectives: 'Install foot-operated sealed waste bins and deep clean kitchen drainage traps.'
+      violationClause: 'Section 58: Uncovered Food Prep adjacent to Open Drain',
+      penaltyImposed: '₹500.00',
+      rectificationDeadline: '30 Aug 2026',
+      mq135GasPpm: '340 PPM',
+      officerDirectives: 'Fit acrylic sneeze shield across display, install drain boundary cover, enforce chef caps and gloves.'
     },
     {
-      id: 'FSSAI-AP-2026-V13',
+      id: 'FSSAI-TN-2026-V03',
+      state: 'Tamil Nadu',
+      city: 'Chennai',
+      ward: 'Marina Beach Zone',
+      name: 'Marina Coastal Fish Fry Stalls',
+      owner: 'S. Murugan',
+      location: 'Kamarajar Salai, Marina Beach, Chennai',
+      hygieneGrade: 'F',
+      score: '28/100',
+      validTill: 'Immediate Seizure Notice',
+      inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
+      status: 'CRITICAL SUSPENSION',
+      isViolated: true,
+      violationClause: 'Section 59: Unpreserved Stale Seafood & Toxic Cooking Oil',
+      penaltyImposed: '₹5,000.00',
+      rectificationDeadline: 'Immediate Commercial Closure',
+      mq135GasPpm: '520 PPM (Severe Spoilage)',
+      officerDirectives: 'Immediate confiscation of unchilled seafood stocks. Deep sanitation audit mandatory prior to reopening.'
+    },
+    {
+      id: 'FSSAI-AP-2026-V04',
       state: 'Andhra Pradesh',
       city: 'Surampalem',
       ward: 'Ward 12 (Market Zone)',
-      name: 'Market Fresh Juice Point',
-      owner: 'D. Suresh',
-      location: 'Vegetable Market Lane, Surampalem',
-      hygieneGrade: 'C',
-      score: '52/100',
-      validTill: 'Action Required (72h SLA)',
+      name: 'Aditya Highway Dhaba & Fast Food',
+      owner: 'R. Koteswara Rao',
+      location: 'Gandhi Statue Main Road, Surampalem',
+      hygieneGrade: 'F',
+      score: '24/100',
+      validTill: 'SEIZED & SUSPENDED',
       inspectedBy: 'Dr. Lakshmi Prasad (FSO)',
-      status: 'VIOLATION NOTICE ISSUED',
+      status: 'CRITICAL UNHYGIENIC VIOLATION',
       isViolated: true,
-      violationClause: 'Section 59: Improper Ambient Fruit Storage & Unhygienic Block Ice',
-      penaltyImposed: '₹1,500.00',
-      rectificationDeadline: '72 Hours SLA',
-      mq135GasPpm: '290 PPM',
-      officerDirectives: 'Replace wooden block ice board with food-grade stainless chest and log chiller temperatures.'
-    }
+      violationClause: 'Section 59: Rotten Meat Storage, Reheated Stale Oil (TPM >36%) & Drain Adjacent Prep',
+      penaltyImposed: '₹5,000.00',
+      rectificationDeadline: 'Immediate Suspension & Seizure',
+      mq135GasPpm: '580 PPM (Severe Toxic Ammonia Spoilage)',
+      officerDirectives: 'Complete commercial closure order served. Kitchen sealed under FSSAI Section 38. Confiscation of contaminated food inventory.'
+    },
   ];
 
-    // =========================================================================
-  // INITIAL FOOD INSPECTIONS (ADVANCED FOOD SAFETY OPERATIONS v45)
-  // =========================================================================
-  const INITIAL_INSPECTIONS = [
-    {
-      inspectionId: 'INSP-2026-FS-001',
-      issueId: 'ISS-2026-FS-001',
-      vendorId: 'FSSAI-AP-2026-V11',
-      vendorName: 'Sri Sai Street Food Stall',
-      officerId: 'user-103',
-      officerName: 'Dr. Lakshmi Prasad (FSO)',
-      jurisdictionState: 'Andhra Pradesh',
-      jurisdictionCity: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      scheduledAt: Date.now() - 3600000 * 2,
-      startedAt: Date.now() - 3600000 * 1,
-      completedAt: null,
-      inspectionStatus: 'in_progress',
-      inspectionResult: 'further_inspection_required',
-      inspectionNotes: 'Field audit in progress following citizen photo evidence. Uncovered food display confirmed near roadway.',
-      checklistData: {
-        food_handling: { safe_handling_observed: false, protected_from_exposure: false, notes: 'Street snacks displayed without sneeze guard' },
-        food_storage: { appropriate_storage: false, temp_controlled: false, notes: 'Requires covered food-grade acrylic containers' },
-        personal_hygiene: { hand_hygiene: true, protective_clothing: false, notes: 'Disposable gloves and hairnets mandated' },
-        premises_hygiene: { clean_surfaces: true, waste_containment: true, notes: 'Prep table acceptable' },
-        water_cleaning: { potable_water: true, cleaning_routines: true, notes: 'RO water container verified' },
-        labelling_display: { display_board: true, valid_certificates: true, notes: 'FSSAI registration board visible' }
-      },
-      evidence: ['https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80'],
-      correctiveActionRequired: 1,
-      nextInspectionAt: Date.now() + 3600000 * 46,
-      verifiedAt: null,
-      verifiedBy: null
-    },
-    {
-      inspectionId: 'INSP-2026-FS-002',
-      issueId: 'ISS-2026-FS-002',
-      vendorId: 'FSSAI-AP-2026-V12',
-      vendorName: 'Lakshmi Tiffin Center',
-      officerId: 'user-103',
-      officerName: 'Dr. Lakshmi Prasad (FSO)',
-      jurisdictionState: 'Andhra Pradesh',
-      jurisdictionCity: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      scheduledAt: Date.now() - 3600000 * 5,
-      startedAt: Date.now() - 3600000 * 4,
-      completedAt: Date.now() - 3600000 * 3,
-      inspectionStatus: 'completed',
-      inspectionResult: 'compliant_with_corrective_action',
-      inspectionNotes: 'Kitchen audit: Grease trap bio-cleaning required. Enclosed pedal bins mandated.',
-      checklistData: {
-        food_handling: { safe_handling_observed: true, protected_from_exposure: true, notes: 'Food protected in warmer' },
-        food_storage: { appropriate_storage: true, temp_controlled: true, notes: 'Refrigerated chutney storage verified' },
-        personal_hygiene: { hand_hygiene: true, protective_clothing: true, notes: 'Staff wearing aprons' },
-        premises_hygiene: { clean_surfaces: false, waste_containment: false, notes: 'Grease trap clogged; wet waste bin unsealed' },
-        water_cleaning: { potable_water: true, cleaning_routines: false, notes: 'Drainage channel cleaning required' },
-        labelling_display: { display_board: true, valid_certificates: true, notes: 'Registration valid' }
-      },
-      evidence: ['https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80'],
-      correctiveActionRequired: 1,
-      nextInspectionAt: Date.now() + 3600000 * 120,
-      verifiedAt: null,
-      verifiedBy: null
-    },
-    {
-      inspectionId: 'INSP-2026-FS-003',
-      issueId: 'ISS-2026-FS-003',
-      vendorId: 'FSSAI-AP-2026-V13',
-      vendorName: 'Market Fresh Juice Point',
-      officerId: 'user-103',
-      officerName: 'Dr. Lakshmi Prasad (FSO)',
-      jurisdictionState: 'Andhra Pradesh',
-      jurisdictionCity: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      scheduledAt: Date.now() + 3600000 * 18,
-      startedAt: null,
-      completedAt: null,
-      inspectionStatus: 'scheduled',
-      inspectionResult: 'monitoring_required',
-      inspectionNotes: 'Scheduled full on-site audit for block ice handling & chiller temperature records.',
-      checklistData: null,
-      evidence: [],
-      correctiveActionRequired: 0,
-      nextInspectionAt: Date.now() + 3600000 * 18,
-      verifiedAt: null,
-      verifiedBy: null
-    },
-    {
-      inspectionId: 'INSP-2026-FS-004',
-      issueId: 'ISS-2026-FS-004',
-      vendorId: 'FSSAI-AP-2026-V14',
-      vendorName: 'Surampalem Bakery & Snacks',
-      officerId: 'user-103',
-      officerName: 'Dr. Lakshmi Prasad (FSO)',
-      jurisdictionState: 'Andhra Pradesh',
-      jurisdictionCity: 'Surampalem',
-      ward: 'Ward 14 (Campus Zone)',
-      scheduledAt: Date.now() - 3600000 * 26,
-      startedAt: Date.now() - 3600000 * 25,
-      completedAt: Date.now() - 3600000 * 24,
-      inspectionStatus: 'completed',
-      inspectionResult: 'compliant',
-      inspectionNotes: 'Re-inspection confirmed: Stainless preparation surfaces sanitized, daily log certified.',
-      checklistData: {
-        food_handling: { safe_handling_observed: true, protected_from_exposure: true, notes: 'Enclosed display counters' },
-        food_storage: { appropriate_storage: true, temp_controlled: true, notes: 'Dry baking inventory elevated' },
-        personal_hygiene: { hand_hygiene: true, protective_clothing: true, notes: 'Clean chef uniforms' },
-        premises_hygiene: { clean_surfaces: true, waste_containment: true, notes: 'Daily sterilization log verified' },
-        water_cleaning: { potable_water: true, cleaning_routines: true, notes: 'Sterilization unit operational' },
-        labelling_display: { display_board: true, valid_certificates: true, notes: 'FSSAI Grade A+ displayed' }
-      },
-      evidence: ['https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80'],
-      correctiveActionRequired: 0,
-      nextInspectionAt: null,
-      verifiedAt: Date.now() - 3600000 * 4,
-      verifiedBy: 'Dr. Lakshmi Prasad (FSO)'
-    },
-    {
-      inspectionId: 'INSP-2026-FS-005',
-      issueId: 'ISS-2026-FS-005',
-      vendorId: 'FSSAI-AP-2026-V15',
-      vendorName: 'Annapurna Food Corner',
-      officerId: 'user-103',
-      officerName: 'Dr. Lakshmi Prasad (FSO)',
-      jurisdictionState: 'Andhra Pradesh',
-      jurisdictionCity: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      scheduledAt: Date.now() - 3600000 * 34,
-      startedAt: Date.now() - 3600000 * 33,
-      completedAt: Date.now() - 3600000 * 32,
-      inspectionStatus: 'completed',
-      inspectionResult: 'compliant',
-      inspectionNotes: 'Verification audit: FSSAI registration QR board mounted at entrance, health cards renewed.',
-      checklistData: {
-        food_handling: { safe_handling_observed: true, protected_from_exposure: true, notes: 'Compliant' },
-        food_storage: { appropriate_storage: true, temp_controlled: true, notes: 'Compliant' },
-        personal_hygiene: { hand_hygiene: true, protective_clothing: true, notes: 'Compliant' },
-        premises_hygiene: { clean_surfaces: true, waste_containment: true, notes: 'Compliant' },
-        water_cleaning: { potable_water: true, cleaning_routines: true, notes: 'Compliant' },
-        labelling_display: { display_board: true, valid_certificates: true, notes: 'QR board verified' }
-      },
-      evidence: ['https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80'],
-      correctiveActionRequired: 0,
-      nextInspectionAt: null,
-      verifiedAt: Date.now() - 3600000 * 8,
-      verifiedBy: 'Dr. Lakshmi Prasad (FSO)'
-    }
-  ];
-
-  // =========================================================================
-  // INITIAL CORRECTIVE ACTIONS (ADVANCED FOOD SAFETY OPERATIONS v45)
-  // =========================================================================
-  const INITIAL_CORRECTIVE_ACTIONS = [
-    {
-      actionId: 'CA-2026-FS-001',
-      inspectionId: 'INSP-2026-FS-001',
-      issueId: 'ISS-2026-FS-001',
-      vendorId: 'FSSAI-AP-2026-V11',
-      vendorName: 'Sri Sai Street Food Stall',
-      description: 'Erect transparent acrylic sneeze shield over prepared food displays; enforce disposable gloves and hairnets for all prep staff.',
-      status: 'pending',
-      assignedAt: Date.now() - 3600000 * 2,
-      implementedAt: null,
-      verifiedAt: null,
-      verificationNotes: null,
-      officerId: 'user-103',
-      officerName: 'Dr. Lakshmi Prasad (FSO)',
-      jurisdictionCity: 'Surampalem',
-      deadline: '48 Hours SLA'
-    },
-    {
-      actionId: 'CA-2026-FS-002',
-      inspectionId: 'INSP-2026-FS-002',
-      issueId: 'ISS-2026-FS-002',
-      vendorId: 'FSSAI-AP-2026-V12',
-      vendorName: 'Lakshmi Tiffin Center',
-      description: 'Install pedal-operated enclosed kitchen waste bins and clear kitchen grease trap channel with certified bio-enzyme cleaner.',
-      status: 'pending',
-      assignedAt: Date.now() - 3600000 * 4,
-      implementedAt: null,
-      verifiedAt: null,
-      verificationNotes: null,
-      officerId: 'user-103',
-      officerName: 'Dr. Lakshmi Prasad (FSO)',
-      jurisdictionCity: 'Surampalem',
-      deadline: '7-Day Rectification Window'
-    },
-    {
-      actionId: 'CA-2026-FS-004',
-      inspectionId: 'INSP-2026-FS-004',
-      issueId: 'ISS-2026-FS-004',
-      vendorId: 'FSSAI-AP-2026-V14',
-      vendorName: 'Surampalem Bakery & Snacks',
-      description: 'Implement daily stainless steel utensil sterilization log and replace damaged baking trays.',
-      status: 'verified',
-      assignedAt: Date.now() - 3600000 * 24,
-      implementedAt: Date.now() - 3600000 * 8,
-      verifiedAt: Date.now() - 3600000 * 4,
-      verificationNotes: 'Sterilization log certified compliant during field re-audit. Damaged trays removed from service.',
-      officerId: 'user-103',
-      officerName: 'Dr. Lakshmi Prasad (FSO)',
-      jurisdictionCity: 'Surampalem',
-      deadline: 'Verified & Cleared'
-    }
-  ];
-
-class DatabaseManager {
+  class DatabaseManager {
     constructor() {
-      this.issues = this.loadFromStorage('clean_safe_issues_v13', INITIAL_ISSUES);
-      this.vendors = this.loadFromStorage('clean_safe_vendors_v12', INITIAL_VENDORS);
-      this.inspections = this.loadFromStorage('clean_safe_food_inspections_v1', INITIAL_INSPECTIONS);
-      this.correctiveActions = this.loadFromStorage('clean_safe_food_ca_v1', INITIAL_CORRECTIVE_ACTIONS);
+      this.issues = this.loadFromStorage('clean_safe_issues_v11', INITIAL_ISSUES);
+      this.vendors = this.loadFromStorage('clean_safe_vendors_v10', INITIAL_VENDORS);
       this.finesCollected = this.loadFromStorage('clean_safe_fines_v9', 2500);
       this.listeners = [];
       this.initBackend();
@@ -2675,7 +2361,7 @@ class DatabaseManager {
           const data = await res.json();
           if (data.issues && data.issues.length > 0) {
             this.issues = data.issues;
-            this.saveToStorage('clean_safe_issues_v13', this.issues);
+            this.saveToStorage('clean_safe_issues_v11', this.issues);
             this.notify();
           }
         }
@@ -2689,61 +2375,13 @@ class DatabaseManager {
           const vData = await vRes.json();
           if (vData.vendors && vData.vendors.length > 0) {
             this.vendors = vData.vendors;
-            this.saveToStorage('clean_safe_vendors_v12', this.vendors);
+            this.saveToStorage('clean_safe_vendors_v10', this.vendors);
             this.notify();
           }
         }
       } catch (e) {
         console.log('[Backend] Local fallback active for vendors');
       }
-    }
-
-      getAllInspections() {
-      return this.inspections || [];
-    }
-    getInspectionById(id) {
-      return (this.inspections || []).find(i => i.inspectionId === id || i.id === id);
-    }
-    addInspection(insp) {
-      if (!this.inspections) this.inspections = [];
-      this.inspections.unshift(insp);
-      this.saveToStorage('clean_safe_food_inspections_v1', this.inspections);
-      this.notify();
-      return insp;
-    }
-    updateInspection(id, updates) {
-      const idx = (this.inspections || []).findIndex(i => i.inspectionId === id || i.id === id);
-      if (idx !== -1) {
-        this.inspections[idx] = { ...this.inspections[idx], ...updates };
-        this.saveToStorage('clean_safe_food_inspections_v1', this.inspections);
-        this.notify();
-        return this.inspections[idx];
-      }
-      return null;
-    }
-
-    getAllCorrectiveActions() {
-      return this.correctiveActions || [];
-    }
-    getCorrectiveActionById(id) {
-      return (this.correctiveActions || []).find(c => c.actionId === id || c.id === id);
-    }
-    addCorrectiveAction(ca) {
-      if (!this.correctiveActions) this.correctiveActions = [];
-      this.correctiveActions.unshift(ca);
-      this.saveToStorage('clean_safe_food_ca_v1', this.correctiveActions);
-      this.notify();
-      return ca;
-    }
-    updateCorrectiveAction(id, updates) {
-      const idx = (this.correctiveActions || []).findIndex(c => c.actionId === id || c.id === id);
-      if (idx !== -1) {
-        this.correctiveActions[idx] = { ...this.correctiveActions[idx], ...updates };
-        this.saveToStorage('clean_safe_food_ca_v1', this.correctiveActions);
-        this.notify();
-        return this.correctiveActions[idx];
-      }
-      return null;
     }
 
     loadFromStorage(key, fallback) {
@@ -2867,7 +2505,7 @@ class DatabaseManager {
       };
 
       this.issues.unshift(newIssue);
-      this.saveToStorage('clean_safe_issues_v13', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_CREATED', newIssue);
 
@@ -2901,7 +2539,7 @@ class DatabaseManager {
         time: 'Just now'
       });
 
-      this.saveToStorage('clean_safe_issues_v13', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_RESOLVED', issue);
 
@@ -2946,8 +2584,8 @@ class DatabaseManager {
         }
       }
 
-      this.saveToStorage('clean_safe_issues_v13', this.issues);
-      this.saveToStorage('clean_safe_vendors_v12', this.vendors);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
+      this.saveToStorage('clean_safe_vendors_v10', this.vendors);
       this.notify();
       broadcastRealtimeEvent('FOOD_RECTIFIED', issue);
 
@@ -2976,7 +2614,7 @@ class DatabaseManager {
         timestamp: Date.now()
       };
       issue.comments.push(newComment);
-      this.saveToStorage('clean_safe_issues_v13', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.notify();
       broadcastRealtimeEvent('COMMENT_ADDED', { issueId, comment: newComment });
 
@@ -3044,7 +2682,7 @@ class DatabaseManager {
         fineLevied: fineAmount
       });
 
-      this.saveToStorage('clean_safe_vendors_v12', this.vendors);
+      this.saveToStorage('clean_safe_vendors_v10', this.vendors);
       this.saveToStorage('clean_safe_fines_v9', this.finesCollected);
       this.notify();
       broadcastRealtimeEvent('FOOD_VIOLATION_LOGGED', { issue: newIssue, vendor: newVendor });
@@ -3083,7 +2721,7 @@ class DatabaseManager {
         issue.upvotes = (issue.upvotes || 0) + 1;
       }
 
-      this.saveToStorage('clean_safe_issues_v13', this.issues);
+      this.saveToStorage('clean_safe_issues_v11', this.issues);
       this.notify();
       broadcastRealtimeEvent('ISSUE_UPVOTED', issue);
       return issue;
@@ -3448,7 +3086,7 @@ class DatabaseManager {
       const existing = db.issues.find(i => i.id === issue.id);
       if (!existing) {
         db.issues.unshift(issue);
-        db.saveToStorage('clean_safe_issues_v13', db.issues);
+        db.saveToStorage('clean_safe_issues_v11', db.issues);
         db.notify();
       }
       showToast(`🚨 New Complaint #${issue.id} reported in ${issue.ward || 'Ward'}!`, 'info', '📢');
@@ -3464,7 +3102,7 @@ class DatabaseManager {
       } else {
         db.issues.unshift(updated);
       }
-      db.saveToStorage('clean_safe_issues_v13', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
       showToast(`✅ Complaint #${updated.id} resolved by field team!`, 'reward', '🎉');
       playNotificationSound('chime');
@@ -3479,7 +3117,7 @@ class DatabaseManager {
       } else {
         db.issues.unshift(assigned);
       }
-      db.saveToStorage('clean_safe_issues_v13', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
       showToast(`🚛 Squad Assigned to Ticket #${assigned.id} (${assigned.assignedWorker})`, 'info', '👷');
       playNotificationSound('chime');
@@ -3497,7 +3135,7 @@ class DatabaseManager {
       } else {
         db.issues.unshift(transitioned);
       }
-      db.saveToStorage('clean_safe_issues_v13', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
       const isEnRoute = transitioned.workerStatus && transitioned.workerStatus.includes('En Route');
       const statusIcon = isEnRoute ? '🚗' : '📍';
@@ -3518,7 +3156,7 @@ class DatabaseManager {
         const vExisting = db.vendors.find(x => x.id === v.id);
         if (!vExisting) {
           db.vendors.unshift(v);
-          db.saveToStorage('clean_safe_vendors_v12', db.vendors);
+          db.saveToStorage('clean_safe_vendors_v10', db.vendors);
         }
       }
       db.notify();
@@ -3781,8 +3419,7 @@ class DatabaseManager {
   };
 
   window.handleModalCityChange = function(city) {
-    const stateEl = document.getElementById('modalReportState');
-    const state = stateEl ? stateEl.value : 'Andhra Pradesh';
+    const state = document.getElementById('modalReportState').value;
     const wardSelect = document.getElementById('modalReportWard');
     if (!wardSelect) return;
 
@@ -4639,250 +4276,6 @@ class DatabaseManager {
     }
   }
 
-  function renderCivicReportRowHTML(issue) {
-    const isResolved = issue.status === 'resolved';
-    const isEscalated = issue.status === 'escalated' || Boolean(issue.isSlaBreached);
-    const reportedTimeStr = formatReportDateTime(issue.timestamp);
-    const deadlineTimestamp = issue.slaDeadline || (issue.timestamp + 48 * 3600 * 1000);
-    const deadlineTimeStr = formatReportDateTime(deadlineTimestamp);
-    const resolvedTs = isResolved ? (issue.resolvedTimestamp || (issue.timestamp + 3600000 * 28)) : null;
-    const resolvedTimeStr = isResolved ? formatReportDateTime(resolvedTs) : null;
-    const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, resolvedTs, issue) : null;
-
-    // Safe Fallbacks (Never show raw null or null null)
-    const safeId = issue.id || 'ISS-RECORD';
-    const safeTitle = issue.title || 'Civic Incident Grievance';
-    const safeCity = (issue.city && issue.city !== 'null') ? issue.city : 'Surampalem';
-    const safeWard = (issue.ward && issue.ward !== 'null') ? issue.ward : 'Ward 12 (Market Zone)';
-    const safeStreet = (issue.street && issue.street !== 'null') ? issue.street : (issue.location && !issue.location.includes('null') ? issue.location : 'Municipal Jurisdiction');
-    const safeState = (issue.state && issue.state !== 'null') ? issue.state : 'Andhra Pradesh';
-    const safeDept = issue.deptName || 'Sanitation & Waste Management';
-    const safeDeptIcon = issue.deptIcon || '🏢';
-    const safeSeverity = (issue.severity || 'medium').toUpperCase();
-    const safeRisk = issue.aiRiskScore || (issue.severity === 'critical' ? 88 : (issue.severity === 'bulk' || issue.severity === 'high' ? 74 : 52));
-    const safeReporter = (issue.reportedBy && issue.reportedBy !== 'null' && !issue.reportedBy.includes('null')) ? issue.reportedBy : 'Citizen Reporter';
-    const safeWorker = (issue.assignedWorker && issue.assignedWorker !== 'null' && issue.assignedWorker !== 'Unassigned' && !issue.assignedWorker.includes('null')) ? issue.assignedWorker : null;
-    const safeWorkerStatus = (issue.workerStatus && issue.workerStatus !== 'null' && !issue.workerStatus.includes('null')) ? issue.workerStatus : null;
-    const safeDesc = (issue.description && issue.description !== 'null') ? issue.description : '';
-
-    // Follow-up and Identity signals
-    const followUpBadge = Number(issue.followUpCount) > 0 ? `
-      <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 0.68rem; padding: 2px 6px;">
-        🔄 ${issue.followUpCount} Follow-up${Number(issue.followUpCount) > 1 ? 's' : ''}
-      </span>
-    ` : '';
-
-    const identityBadge = (issue.identityType && issue.identityType !== 'NEW_INCIDENT') ? `
-      <span class="badge" style="background: rgba(147, 51, 234, 0.2); color: #d8b4fe; border: 1px solid #a855f7; font-size: 0.68rem; padding: 2px 6px;">
-        ${issue.identityType.replace(/_/g, ' ')}
-      </span>
-    ` : '';
-
-    // SLA Display Configuration
-    let slaBadgeHtml = '';
-    const slaHoursLeft = Math.max(0, Number(issue.slaHoursLeft) || 0);
-
-    if (isResolved) {
-      slaBadgeHtml = `
-        <div class="report-sla-box sla-resolved">
-          <div class="report-sla-title" style="color: #34d399;">
-            <span>✓</span> <span>Resolved</span>
-          </div>
-          <div class="report-sla-due">
-            <span style="color: #cbd5e1; font-weight: 700;">${turnaroundStr || 'On Schedule'}</span>
-            ${resolvedTimeStr ? `• Closed: ${resolvedTimeStr}` : ''}
-          </div>
-        </div>
-      `;
-    } else if (isEscalated) {
-      slaBadgeHtml = `
-        <div class="report-sla-box sla-breached">
-          <div class="report-sla-title" style="color: #f87171;">
-            <span>⚠️</span> <span>48h SLA BREACHED</span>
-          </div>
-          <div class="report-sla-due" style="color: #fca5a5; font-weight: 700;">
-            <span>ESCALATED TO COMMISSIONER</span>
-          </div>
-          <div style="font-size: 0.7rem; color: #94a3b8;">Deadline: ${deadlineTimeStr}</div>
-        </div>
-      `;
-    } else {
-      const slaPercent = Math.min(100, Math.max(0, Math.round((slaHoursLeft / 48) * 100)));
-      const slaTextColor = slaHoursLeft <= 12 ? '#f87171' : slaHoursLeft <= 24 ? '#fbbf24' : '#38bdf8';
-      slaBadgeHtml = `
-        <div class="report-sla-box">
-          <div class="report-sla-title" style="color: ${slaTextColor};">
-            <span>⏱️</span> <span>${slaHoursLeft}h remaining</span>
-          </div>
-          <div class="report-sla-due">
-            <span>Due: ${deadlineTimeStr}</span>
-          </div>
-          <div class="sla-progress-bar" style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-top: 3px;">
-            <div style="height: 100%; width: ${slaPercent}%; background: ${slaTextColor}; border-radius: 4px;"></div>
-          </div>
-        </div>
-      `;
-    }
-
-    // Compact Workflow Steps Indicator
-    const isAssigned = Boolean(safeWorker && issue.assignedTimestamp) || isResolved;
-    const isFieldWork = Boolean(issue.enRouteTimestamp || issue.arrivedTimestamp || (safeWorkerStatus && (safeWorkerStatus.includes('En Route') || safeWorkerStatus.includes('On Site') || safeWorkerStatus.includes('Work') || safeWorkerStatus.includes('Dispatched') || safeWorkerStatus.includes('Clearing') || safeWorkerStatus.includes('Jumper')))) || isResolved;
-    const isVerified = Boolean(issue.verifiedTimestamp || issue.imageOfficerVerified === 1 || issue.verifiedByOfficer) || isResolved;
-
-    const step1Done = true;
-    const step2Done = isAssigned;
-    const step3Done = isFieldWork;
-    const step4Done = isVerified;
-    const step5Done = isResolved;
-
-    const workflowHtml = `
-      <div class="workflow-steps-list" title="Workflow Stage Progression">
-        <span class="workflow-step ${step1Done ? 'step-done' : ''}">● Reported</span>
-        <span class="workflow-arrow">→</span>
-        <span class="workflow-step ${step2Done ? 'step-done' : (step1Done && !step2Done ? 'step-current' : '')}">
-          ${step2Done ? '●' : '○'} Assigned
-        </span>
-        <span class="workflow-arrow">→</span>
-        <span class="workflow-step ${step3Done ? 'step-done' : (step2Done && !step3Done ? 'step-current' : '')}">
-          ${step3Done ? '●' : '○'} Field Work
-        </span>
-        <span class="workflow-arrow">→</span>
-        <span class="workflow-step ${step4Done ? 'step-done' : (step3Done && !step4Done ? 'step-current' : '')}">
-          ${step4Done ? '●' : '○'} Verification
-        </span>
-        <span class="workflow-arrow">→</span>
-        <span class="workflow-step ${step5Done ? 'step-done' : (step4Done && !step5Done ? 'step-current' : '')}">
-          ${step5Done ? '●' : '○'} Resolved
-        </span>
-      </div>
-    `;
-
-    // Status Badge
-    const statusBadgeHtml = isResolved
-      ? `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); font-weight: 700; font-size: 0.72rem; padding: 0.2rem 0.55rem;">✓ RESOLVED</span>`
-      : isEscalated
-        ? `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); font-weight: 800; font-size: 0.72rem; padding: 0.2rem 0.55rem;">⚠️ SLA BREACHED</span>`
-        : issue.status === 'in_progress'
-          ? `<span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); font-weight: 700; font-size: 0.72rem; padding: 0.2rem 0.55rem;">🔄 IN PROGRESS</span>`
-          : `<span class="badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); font-weight: 700; font-size: 0.72rem; padding: 0.2rem 0.55rem;">⏱️ PENDING</span>`;
-
-    // Action Buttons
-    const actionsHtml = `
-      <div class="report-actions-bar">
-        <button class="btn btn-sm btn-outline" style="color: white; border-color: rgba(255,255,255,0.18); padding: 0.4rem 0.75rem; font-size: 0.78rem; font-weight: 600;" onclick="window.viewIssueDetail('${issue.id}')">
-          📦 Track
-        </button>
-        ${!isResolved ? `
-          ${(!safeWorker) ? `
-            <button class="btn btn-sm btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); border-color: #0284c7; font-weight: 700; padding: 0.4rem 0.85rem; font-size: 0.78rem;" onclick="window.openAssignSquadModal('${issue.id}')">
-              🚛 Assign Squad
-            </button>
-          ` : `
-            <button class="btn btn-sm btn-outline" style="border-color: #38bdf8; color: #38bdf8; padding: 0.4rem 0.75rem; font-size: 0.78rem; font-weight: 600;" onclick="window.openAssignSquadModal('${issue.id}')" title="Assigned to ${safeWorker}">
-              🔄 Reassign
-            </button>
-          `}
-          <button class="btn btn-sm btn-outline" style="border-color: #475569; color: #cbd5e1; padding: 0.4rem 0.75rem; font-size: 0.78rem;" onclick="window.openResolveModal('${issue.id}')">
-            Resolve
-          </button>
-        ` : `
-          <span style="display: inline-flex; align-items: center; gap: 0.35rem; color: #10b981; font-weight: 700; font-size: 0.82rem; padding: 0.35rem 0.6rem;">
-            <span>✓</span> <span>Done</span>
-          </span>
-        `}
-      </div>
-    `;
-
-    const statusClass = isResolved ? 'status-resolved' : isEscalated ? 'status-escalated' : (issue.status === 'in_progress' ? 'status-in_progress' : 'status-pending');
-
-    return `
-      <div class="civic-report-row ${statusClass}" data-issue-id="${safeId}">
-        <!-- 1. Header Grid: Ticket/Title | Location/Assignment | Department/SLA -->
-        <div class="report-row-header">
-          
-          <!-- Left: Ticket ID, Date & Prominent Title -->
-          <div class="report-zone-ticket">
-            <div class="report-ticket-meta">
-              <span class="report-ticket-id">${safeId}</span>
-              <span class="report-ticket-time">📅 ${reportedTimeStr}</span>
-              ${statusBadgeHtml}
-            </div>
-            <h4 class="report-title">
-              <span>${safeTitle}</span>
-              ${followUpBadge}
-              ${identityBadge}
-            </h4>
-            ${safeDesc ? `<p class="report-desc" style="color: var(--command-text-muted); font-size: 0.8rem; margin: 0.2rem 0 0; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${safeDesc}</p>` : ''}
-          </div>
-
-          <!-- Center: Clean Location & Assignment Grouping -->
-          <div class="report-zone-location">
-            <div>
-              <div class="report-loc-primary">
-                <span>📍</span> <span>${safeCity}</span>
-                <span style="color: #64748b; font-weight: 400;">•</span>
-                <span style="color: #38bdf8; font-size: 0.78rem;">${safeState}</span>
-              </div>
-              <div class="report-loc-secondary" style="margin-top: 2px;">
-                <span>${safeWard}</span>
-              </div>
-              <div class="report-loc-landmark" style="margin-top: 2px;">
-                <span>${safeStreet}</span>
-              </div>
-            </div>
-
-            <div class="report-assignment-block">
-              <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 700;">Assigned Worker / Squad</div>
-              <div style="margin-top: 2px;">
-                ${safeWorker ? `
-                  <span style="color: #38bdf8; font-weight: 600;">👷 ${safeWorker}</span>
-                  ${safeWorkerStatus ? `<div style="font-size: 0.72rem; color: #94a3b8; margin-top: 1px;">Status: ${safeWorkerStatus}</div>` : ''}
-                ` : `
-                  <span style="color: #94a3b8; font-style: italic;">👤 Not assigned</span>
-                `}
-              </div>
-            </div>
-          </div>
-
-          <!-- Right: Department Badge & Dedicated SLA Block -->
-          <div class="report-zone-sla">
-            <div style="display: flex; justify-content: flex-end;">
-              <span class="report-dept-badge">${safeDeptIcon} ${safeDept}</span>
-            </div>
-            ${slaBadgeHtml}
-          </div>
-
-        </div>
-
-        <!-- 2. Middle Row: Compact Horizontal Workflow Progress Indicator -->
-        <div class="report-row-workflow">
-          <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Workflow Progress:</div>
-          ${workflowHtml}
-        </div>
-
-        <!-- 3. Footer Bar: Compact Secondary Metadata & Action Buttons -->
-        <div class="report-row-footer">
-          <div class="report-meta-chips">
-            <span class="badge sev-${issue.severity || 'medium'}" style="font-size: 0.72rem; padding: 0.2rem 0.5rem;">
-              SEVERITY: ${safeSeverity}
-            </span>
-            <span style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8; font-size: 0.74rem; background: rgba(56, 189, 248, 0.08); padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.2);">
-              🤖 Risk: ${safeRisk}/100
-            </span>
-            <span style="font-size: 0.74rem; color: #94a3b8;">
-              👤 Reported by: <strong style="color: #cbd5e1;">${safeReporter}</strong>
-            </span>
-          </div>
-
-          ${actionsHtml}
-        </div>
-      </div>
-    `;
-  }
-  if (typeof window !== 'undefined') {
-    window.renderCivicReportRowHTML = renderCivicReportRowHTML;
-  }
-
   function renderMunicipalDashboard() {
     const user = auth.getUser() || {};
     const jurBadge = document.getElementById('munJurisdictionBadge');
@@ -4966,26 +4359,79 @@ class DatabaseManager {
     const tableBody = document.getElementById('munIncidentTableBody');
     const tableBodyQueue = document.getElementById('munIncidentTableBody_queue');
     if (tableBody || tableBodyQueue) {
-      const targets = [tableBody, tableBodyQueue].filter(Boolean);
-      targets.forEach(target => {
-        const isTableBody = target.tagName === 'TBODY';
-        if (issues.length === 0) {
-          target.innerHTML = isTableBody
-            ? `<tr><td colspan="7" class="civic-report-td" style="text-align: center; padding: 2.5rem; color: #94a3b8; font-size: 0.88rem; background: rgba(15, 23, 42, 0.6); border-radius: 12px; border: 1px dashed rgba(148, 163, 184, 0.2);">No civic incidents found in the selected jurisdiction (${selectedState} → ${selectedCity} → ${selectedWard}).</td></tr>`
-            : `<div style="text-align: center; padding: 2.5rem; color: #94a3b8; font-size: 0.88rem; background: rgba(15, 23, 42, 0.6); border-radius: 12px; border: 1px dashed rgba(148, 163, 184, 0.2);">No civic incidents found in the selected jurisdiction (${selectedState} → ${selectedCity} → ${selectedWard}).</div>`;
-          return;
-        }
+      const htmlContent = issues.length === 0
+        ? `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">No civic incidents found in the selected jurisdiction (${selectedState} → ${selectedCity} → ${selectedWard}).</td></tr>`
+        : issues.map(issue => {
+          const isResolved = issue.status === 'resolved';
+          const isEscalated = issue.status === 'escalated' || issue.isSlaBreached;
+          const reportedTimeStr = formatReportDateTime(issue.timestamp);
+          const deadlineTimeStr = formatReportDateTime(issue.slaDeadline || (issue.timestamp + 48 * 3600 * 1000));
+          const resolvedTimeStr = isResolved ? formatReportDateTime(issue.resolvedTimestamp || (issue.timestamp + 3600000 * 28)) : null;
+          const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, issue.resolvedTimestamp || (issue.timestamp + 3600000 * 28)) : null;
 
-        const itemsHtml = issues.map(issue => {
-          const cardHtml = renderCivicReportRowHTML(issue);
-          if (isTableBody) {
-            return `<tr class="civic-report-tr"><td colspan="7" class="civic-report-td">${cardHtml}</td></tr>`;
-          }
-          return cardHtml;
+          return `
+            <tr>
+              <td>
+                <div style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8;">${issue.id}</div>
+                <div style="font-size: 0.72rem; color: var(--command-text-muted);">📅 ${reportedTimeStr}</div>
+              </td>
+              <td>
+                <div style="font-weight: 700; color: white; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                  <span>${issue.title}</span>
+                  ${Number(issue.followUpCount) > 0 ? `
+                    <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 0.65rem; padding: 2px 5px;">
+                      🔄 ${issue.followUpCount} Follow-up${Number(issue.followUpCount) > 1 ? 's' : ''}
+                    </span>
+                  ` : ''}
+                  ${issue.identityType && issue.identityType !== 'NEW_INCIDENT' ? `
+                    <span class="badge" style="background: rgba(147, 51, 234, 0.2); color: #d8b4fe; border: 1px solid #a855f7; font-size: 0.65rem; padding: 2px 5px;">
+                      ${issue.identityType.replace('_', ' ')}
+                    </span>
+                  ` : ''}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--command-text-muted);">📍 ${issue.location}</div>
+                <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">👤 ${issue.reportedBy || 'Citizen'} • 👷 ${issue.assignedWorker || 'Squad'}</div>
+              </td>
+              <td>
+                <div style="font-size: 0.78rem; color: #38bdf8; font-weight: 700;">${issue.state || 'Andhra Pradesh'}</div>
+                <div style="font-size: 0.72rem; color: var(--command-text-muted);">${issue.city || 'Surampalem'} • ${issue.ward || 'Ward 12'}</div>
+              </td>
+              <td><span class="cat-badge">${issue.deptIcon} ${issue.deptName}</span></td>
+              <td style="min-width: 220px;">
+                ${renderCompactLifecycle(issue)}
+                <div style="font-size: 0.68rem; color: #94a3b8; margin-top: 2px;">
+                  Severity: <strong style="color: ${issue.severity === 'critical' ? '#f87171' : issue.severity === 'high' ? '#fbbf24' : '#34d399'};">${(issue.severity || 'medium').toUpperCase()}</strong> • Risk: ${issue.aiRiskScore || 50}/100
+                </div>
+              </td>
+              <td>
+                <div class="sla-progress-container">
+                  <span class="sla-text ${isResolved ? 'text-success' : isEscalated ? 'text-danger' : 'text-warning'}" style="font-weight: 800; font-size: 0.75rem;">
+                    ${isResolved ? `✅ Resolved (${turnaroundStr})` : isEscalated ? `🚨 SLA Breached (>48h) — Escalated` : `⏱️ ${issue.slaHoursLeft}h left (Due ${deadlineTimeStr})`}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center;">
+                  <button class="btn btn-sm btn-outline" style="color: white; border-color: var(--command-border); padding: 0.35rem 0.6rem;" onclick="window.viewIssueDetail('${issue.id}')">📦 Track</button>
+                  ${!isResolved ? `
+                    ${(!issue.assignedWorker || issue.assignedWorker === 'Unassigned' || !issue.assignedTimestamp) ? `
+                      <button class="btn btn-sm btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: 700; white-space: nowrap; padding: 0.35rem 0.65rem;" onclick="window.openAssignSquadModal('${issue.id}')">
+                        🚛 Assign Squad
+                      </button>
+                    ` : `
+                      <button class="btn btn-sm btn-outline" style="border-color: #38bdf8; color: #38bdf8; font-size: 0.72rem; white-space: nowrap; padding: 0.35rem 0.55rem;" onclick="window.openAssignSquadModal('${issue.id}')" title="Assigned to ${issue.assignedWorker}">
+                        🔄 Reassign
+                      </button>
+                    `}
+                    <button class="btn btn-sm btn-outline" style="border-color: #475569; color: #cbd5e1; padding: 0.35rem 0.55rem;" onclick="window.openResolveModal('${issue.id}')">Resolve</button>
+                  ` : `<span style="font-size: 0.8rem; color: #10b981; font-weight: 700;">Done</span>`}
+                </div>
+              </td>
+            </tr>
+          `;
         }).join('');
-
-        target.innerHTML = itemsHtml;
-      });
+      if (tableBody) tableBody.innerHTML = htmlContent;
+      if (tableBodyQueue) tableBodyQueue.innerHTML = htmlContent;
     }
 
     const outageGrid = document.getElementById('munPowerOutageGrid');
@@ -5051,79 +4497,57 @@ class DatabaseManager {
     renderPredictiveHotspotsUI();
   }
 
-    function renderFoodSafetyDashboard() {
-    const user = auth.getUser();
-    if (!user) return;
-
+  function renderFoodSafetyDashboard() {
+    const user = auth.getUser() || {};
     const jurBadge = document.getElementById('foodJurisdictionBadge');
     if (jurBadge) {
       const state = user.jurisdictionState || 'Andhra Pradesh';
       const city = user.jurisdictionCity || 'Surampalem';
-      jurBadge.textContent = `${state} → ${city} (Food Safety Directorate)`;
+      jurBadge.textContent = `${state} → ${city} (City-Wide Food Safety Directorate)`;
     }
 
     const allIssues = db.getAllIssues();
     let foodIssues = allIssues.filter(i => i.department === 'food_safety');
     let vendors = db.getAllVendors();
-    let inspections = db.getAllInspections ? db.getAllInspections() : [];
-    let correctiveActions = db.getAllCorrectiveActions ? db.getAllCorrectiveActions() : [];
 
-    // Jurisdiction filtering
+    // 4-Tier Geospatial Jurisdiction Filter
     if (selectedState !== 'all') {
       foodIssues = foodIssues.filter(i => (i.state || 'Andhra Pradesh') === selectedState);
       vendors = vendors.filter(v => (v.state || 'Andhra Pradesh') === selectedState);
-      inspections = inspections.filter(i => (i.jurisdictionState || 'Andhra Pradesh') === selectedState);
     }
     if (selectedCity !== 'all') {
       foodIssues = foodIssues.filter(i => (i.city || 'Surampalem') === selectedCity);
       vendors = vendors.filter(v => (v.city || 'Surampalem') === selectedCity);
-      inspections = inspections.filter(i => (i.jurisdictionCity || 'Surampalem') === selectedCity);
-      correctiveActions = correctiveActions.filter(c => (c.jurisdictionCity || 'Surampalem') === selectedCity);
+    }
+    if (selectedWard !== 'all') {
+      foodIssues = foodIssues.filter(i => (i.ward || '') === selectedWard || (i.location && i.location.includes(selectedWard.split(' ')[0])));
+      vendors = vendors.filter(v => (v.ward || '') === selectedWard || (v.location && v.location.includes(selectedWard.split(' ')[0])) || (v.address && v.address.includes(selectedWard.split(' ')[0])));
+    }
+    if (selectedStreet !== 'all') {
+      foodIssues = foodIssues.filter(i => (i.street || '') === selectedStreet || (i.location && i.location.includes(selectedStreet)));
+      vendors = vendors.filter(v => (v.street || '') === selectedStreet || (v.location && v.location.includes(selectedStreet)) || (v.address && v.address.includes(selectedStreet)));
     }
 
     // Metric Summary Counters
     const activeAudits = foodIssues.filter(i => i.status !== 'resolved').length;
     const rectifiedOutlets = foodIssues.filter(i => i.status === 'resolved').length;
-    const pendingActionsCount = correctiveActions.filter(c => c.status !== 'verified').length;
-    const reinspectionsDueCount = inspections.filter(i => i.correctiveActionRequired === 1 || i.inspectionStatus === 'scheduled' || i.inspectionResult === 'further_inspection_required').length;
-    const highRiskVendorsCount = vendors.filter(v => v.isViolated || v.monitoringStatus === 'probation' || v.recurrenceTrend === 'deteriorating').length;
+    const certifiedVendors = vendors.filter(v => !v.isViolated).length;
+    const finesLevied = db.finesCollected || 2500;
+    const pendingNoticesCount = activeAudits;
 
-    // Update New Command Center KPI Metric Counters
-    const elUrgent = document.getElementById('foodMetricUrgentReviews');
-    const elActiveInsp = document.getElementById('foodMetricActiveInspections');
-    const elPendingActions = document.getElementById('foodMetricPendingActions');
-    const elReinspections = document.getElementById('foodMetricReinspectionsDue');
-    const elHighRisk = document.getElementById('foodMetricHighRiskVendors');
-    const elHotspots = document.getElementById('foodMetricHotspots');
-
-    if (elUrgent) elUrgent.textContent = activeAudits;
-    if (elActiveInsp) elActiveInsp.textContent = inspections.filter(i => i.inspectionStatus !== 'completed').length;
-    if (elPendingActions) elPendingActions.textContent = pendingActionsCount;
-    if (elReinspections) elReinspections.textContent = reinspectionsDueCount;
-    if (elHighRisk) elHighRisk.textContent = highRiskVendorsCount;
-    if (elHotspots) elHotspots.textContent = '3';
-
-    // Legacy Metric Counters (if present)
     const totalAuditsEl = document.getElementById('foodTotalAudits');
     const rectifiedEl = document.getElementById('foodRectifiedOutlets');
     const certifiedEl = document.getElementById('foodCertifiedCount');
     const finesEl = document.getElementById('foodFinesCollected');
     const pendingNoticesEl = document.getElementById('foodPendingNoticesCount');
+
     if (totalAuditsEl) totalAuditsEl.textContent = activeAudits;
     if (rectifiedEl) rectifiedEl.textContent = rectifiedOutlets;
-    if (certifiedEl) certifiedEl.textContent = vendors.filter(v => !v.isViolated).length;
-    if (finesEl) finesEl.textContent = `₹${(db.finesCollected || 2500).toLocaleString('en-IN')}`;
-    if (pendingNoticesEl) pendingNoticesEl.textContent = activeAudits;
+    if (certifiedEl) certifiedEl.textContent = certifiedVendors;
+    if (finesEl) finesEl.textContent = `₹${finesLevied.toLocaleString('en-IN')}`;
+    if (pendingNoticesEl) pendingNoticesEl.textContent = pendingNoticesCount;
 
-    // Filter Chips Dynamic Badge Counters
-    const chipAll = document.querySelector('.food-filter-chip[data-filter="all"]');
-    const chipPending = document.querySelector('.food-filter-chip[data-filter="pending"]');
-    const chipResolved = document.querySelector('.food-filter-chip[data-filter="resolved"]');
-    if (chipAll) chipAll.innerHTML = `All Food Reports <span style="background: rgba(255,255,255,0.18); color: white; padding: 2px 7px; border-radius: 10px; font-size: 0.72rem; margin-left: 4px; font-weight: 700;">${foodIssues.length}</span>`;
-    if (chipPending) chipPending.innerHTML = `⚠️ Pending / On Notice <span style="background: rgba(245,158,11,0.25); color: #f59e0b; padding: 2px 7px; border-radius: 10px; font-size: 0.72rem; margin-left: 4px; font-weight: 700;">${activeAudits}</span>`;
-    if (chipResolved) chipResolved.innerHTML = `✅ Rectified & Restored <span style="background: rgba(16,185,129,0.25); color: #10b981; padding: 2px 7px; border-radius: 10px; font-size: 0.72rem; margin-left: 4px; font-weight: 700;">${rectifiedOutlets}</span>`;
-
-    // 1. TAB: Urgent Reviews / Food Complaints Grid (#foodDeptIssuesGrid)
+    // 1. Food Complaints & Violations Grid
     const foodGrid = document.getElementById('foodDeptIssuesGrid');
     if (foodGrid) {
       let filteredIssues = foodIssues;
@@ -5131,171 +4555,41 @@ class DatabaseManager {
       else if (foodFilter === 'resolved') filteredIssues = filteredIssues.filter(i => i.status === 'resolved');
 
       if (filteredIssues.length === 0) {
-        foodGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-lg); color: var(--text-muted); border: 1px dashed var(--border);">No food safety violations found in this category.</p>';
+        foodGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 2rem; background: var(--bg-card); border-radius: var(--radius-lg); color: var(--text-muted); border: 1px dashed var(--border);">No food safety violations found in this category.</p>';
       } else {
         foodGrid.innerHTML = filteredIssues.map(issue => {
           const isResolved = issue.status === 'resolved';
-          const isCritical = (issue.severity || '').toLowerCase() === 'bulk' || (issue.severityLabel || '').includes('CRITICAL');
-          const isHigh = (issue.severity || '').toLowerCase() === 'high' || (issue.severityLabel || '').includes('HIGH');
-
-          let severityBadge = '';
-          if (isCritical) {
-            severityBadge = '<span class="badge" style="position: absolute; top: 8px; right: 8px; background: #dc2626; color: white; font-weight: 800; font-size: 0.7rem; box-shadow: 0 2px 8px rgba(220,38,38,0.5);">CRITICAL HAZARD</span>';
-          } else if (isHigh) {
-            severityBadge = '<span class="badge" style="position: absolute; top: 8px; right: 8px; background: #ea580c; color: white; font-weight: 800; font-size: 0.7rem;">HIGH RISK</span>';
-          } else {
-            severityBadge = '<span class="badge" style="position: absolute; top: 8px; right: 8px; background: #d97706; color: white; font-weight: 800; font-size: 0.7rem;">MEDIUM RISK</span>';
-          }
-
-          const statusBadge = isResolved 
-            ? '<span class="badge badge-resolved" style="font-weight: 800; font-size: 0.75rem;">✅ RECTIFIED & RESTORED</span>'
-            : '<span class="badge badge-pending" style="font-weight: 800; font-size: 0.75rem; background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid #f59e0b;">⚠️ PENDING FSO ACTION</span>';
-
-          const establishmentType = issue.establishmentType || (issue.categoryName || 'Food Establishment');
-          const vendorName = issue.vendorName || issue.title;
-          const visualConcern = issue.aiVisualConcern || (isResolved ? 'Visual compliance restored; no active hazards observed' : 'Uncovered food display observed near roadway');
-          const riskLevel = issue.aiRiskAssessment || (isCritical ? 'High Risk' : isHigh ? 'Moderate-High Risk' : 'Medium Risk');
-
           return `
-            <div class="card" style="border-top: 4px solid ${isResolved ? '#10b981' : isCritical ? '#ef4444' : '#f59e0b'}; display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
-                  ${statusBadge}
-                  <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #f59e0b; font-weight: 800; letter-spacing: 0.05em;">${issue.id}</span>
-                </div>
-
-                <div style="position: relative; height: 145px; border-radius: 8px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border);">
-                  <img src="${issue.imageBefore || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80'}" style="width: 100%; height: 100%; object-fit: cover;" alt="${issue.title}">
-                  <span style="position: absolute; top: 8px; left: 8px; background: rgba(15,23,42,0.88); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.18); color: #e2e8f0; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 700;">
-                    🏷️ ${establishmentType}
-                  </span>
-                  ${severityBadge}
-                </div>
-
-                <div style="font-size: 0.78rem; color: #38bdf8; font-weight: 800; text-transform: uppercase; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.35rem;">
-                  <span>🏪</span> ${vendorName}
-                </div>
-                <h4 style="color: white; font-size: 0.95rem; margin-bottom: 0.4rem; line-height: 1.35;">${issue.title}</h4>
-                <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.45; margin-bottom: 0.65rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${issue.description}</p>
-
-                <!-- AI-Assisted Food Safety Risk Assessment Pill -->
-                <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 6px; padding: 0.55rem 0.75rem; margin-bottom: 0.75rem; font-size: 0.75rem;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                    <span style="font-weight: 800; color: #fbbf24; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em;">🛡️ AI-Assisted Food Safety Risk Assessment</span>
-                    <span style="font-weight: 700; color: ${riskLevel.includes('High') ? '#f87171' : '#34d399'}; font-size: 0.72rem;">${riskLevel}</span>
-                  </div>
-                  <div style="color: #cbd5e1; font-size: 0.74rem;"><strong>Visual Concern:</strong> ${visualConcern}</div>
-                  ${issue.citizenResolutionFeedback ? `
-                    <div style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.1); color: ${issue.citizenResolutionFeedback === 'satisfied' ? '#34d399' : '#f87171'}; font-size: 0.72rem; font-weight: 700;">
-                      ${issue.citizenResolutionFeedback === 'satisfied' ? '✓ Citizen confirmed satisfactory resolution' : '⚠️ Citizen reported issue persists (Review requested)'}
-                    </div>
-                  ` : ''}
-                </div>
-
-                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 0.5rem 0.65rem; border-radius: 6px; font-size: 0.74rem; color: #94a3b8; margin-bottom: 0.75rem;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                    <span>📍 <strong>Location:</strong> ${issue.location}</span>
-                    <span>${issue.ward || 'Ward 12'}</span>
-                  </div>
-                  <div style="color: #38bdf8;">👮 <strong>Designated FSO:</strong> ${issue.assignedWorker || 'Dr. Lakshmi Prasad (FSO)'}</div>
-                </div>
+            <div class="card" style="border-top: 3px solid ${isResolved ? '#10b981' : '#f59e0b'};">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <span class="badge ${isResolved ? 'badge-resolved' : 'badge-pending'}">${isResolved ? '✅ RECTIFIED & CLEARED' : '⚠️ ACTIVE NOTICE'}</span>
+                <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #f59e0b; font-weight: 700;">${issue.id}</span>
+              </div>
+              <div style="height: 140px; border-radius: 6px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border);">
+                <img src="${issue.imageBefore}" style="width: 100%; height: 100%; object-fit: cover;" alt="${issue.title}">
+              </div>
+              <h3 style="color: white; font-size: 1.05rem; margin-bottom: 0.4rem;">${issue.title}</h3>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">${issue.description}</p>
+              
+              <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 0.6rem; border-radius: 6px; font-size: 0.78rem; margin-bottom: 0.85rem; color: #cbd5e1;">
+                <div>📍 <strong>Location:</strong> ${issue.location}</div>
+                <div>🥩 <strong>MQ-135 Gas:</strong> ${issue.mq135GasPpm ? issue.mq135GasPpm + ' PPM' : '340 PPM (Elevated)'}</div>
+                ${issue.fineLevied ? `<div style="color:#f87171;">⚖️ <strong>Fine Imposed:</strong> ₹${issue.fineLevied}</div>` : ''}
               </div>
 
-              <div class="food-action-row" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem;">
-                <div style="display: flex; gap: 0.4rem;">
-                  <button class="btn btn-sm btn-outline" style="flex: 1; padding: 0.45rem 0.5rem; font-size: 0.78rem;" onclick="window.viewIssueDetail('${issue.id}')">
-                    🔍 Inspect Report
-                  </button>
-                  <button class="btn btn-sm" style="flex: 1; padding: 0.45rem 0.5rem; font-size: 0.78rem; background: linear-gradient(135deg, #d97706, #f59e0b); border-color: #f59e0b; color: white; font-weight: 700;" onclick="window.openFoodInspectionModal('${issue.id}', '${issue.vendorId || ''}')">
-                    📋 Conduct Audit
-                  </button>
-                </div>
-                <div style="display: flex; gap: 0.4rem;">
-                  <button class="btn btn-sm btn-outline" style="flex: 1; padding: 0.4rem 0.5rem; font-size: 0.74rem; border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;" onclick="window.openNewCorrectiveActionModal('${issue.vendorId || ''}', '${issue.id}')">
-                    🛠️ Issue Corrective Directive
-                  </button>
-                  <button class="btn btn-sm btn-outline" style="flex: 1; padding: 0.4rem 0.5rem; font-size: 0.74rem; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;" onclick="window.promptFsoDecision('${issue.id}')">
-                    ⚖️ Record Decision
-                  </button>
-                </div>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-    }
-
-    // 2. TAB: Standardized 6-Section Inspections List (#foodInspectionsListGrid)
-    const inspGrid = document.getElementById('foodInspectionsListGrid');
-    if (inspGrid) {
-      if (inspections.length === 0) {
-        inspGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-lg); color: var(--text-muted); border: 1px dashed var(--border);">No inspection audits recorded yet. Schedule or conduct an on-site audit.</p>';
-      } else {
-        inspGrid.innerHTML = inspections.map(insp => {
-          const isDone = insp.inspectionStatus === 'completed';
-          const isSched = insp.inspectionStatus === 'scheduled';
-          const statusColor = isDone ? '#10b981' : isSched ? '#38bdf8' : '#f59e0b';
-          const statusText = isDone ? 'COMPLETED' : isSched ? 'SCHEDULED' : 'IN PROGRESS';
-
-          const chk = insp.checklistData || {};
-          const fHandling = chk.food_handling ? (chk.food_handling.safe_handling_observed && chk.food_handling.protected_from_exposure ? '🟢' : '🔴') : '⚪';
-          const fStorage = chk.food_storage ? (chk.food_storage.appropriate_storage && chk.food_storage.temp_controlled ? '🟢' : '🔴') : '⚪';
-          const fHygiene = chk.personal_hygiene ? (chk.personal_hygiene.hand_hygiene && chk.personal_hygiene.protective_clothing ? '🟢' : '🔴') : '⚪';
-          const fPremises = chk.premises_hygiene ? (chk.premises_hygiene.clean_surfaces && chk.premises_hygiene.waste_containment ? '🟢' : '🔴') : '⚪';
-          const fWater = chk.water_cleaning ? (chk.water_cleaning.potable_water && chk.water_cleaning.cleaning_routines ? '🟢' : '🔴') : '⚪';
-          const fDoc = chk.labelling_display ? (chk.labelling_display.display_board && chk.labelling_display.valid_certificates ? '🟢' : '🔴') : '⚪';
-
-          return `
-            <div class="card" style="border-left: 4px solid ${statusColor};">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
-                <span class="badge" style="background: ${statusColor}22; color: ${statusColor}; border: 1px solid ${statusColor}; font-weight: 800; font-size: 0.72rem;">
-                  ${statusText}
-                </span>
-                <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #38bdf8; font-weight: 700;">${insp.inspectionId}</span>
-              </div>
-
-              <h4 style="color: white; font-size: 1.05rem; margin-bottom: 0.25rem;">${insp.vendorName}</h4>
-              <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-                📍 ${insp.ward || 'Ward 12'} • Inspector: <strong style="color: #e2e8f0;">${insp.officerName || 'Dr. Lakshmi Prasad (FSO)'}</strong>
-              </p>
-
-              <!-- 6-Section Checklist Pill Bar -->
-              <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 0.6rem 0.75rem; margin-bottom: 0.75rem;">
-                <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 0.4rem;">
-                  Checklist Sections:
-                </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.73rem;">
-                  <span title="Food Handling">${fHandling} Handling</span>
-                  <span title="Storage">${fStorage} Storage</span>
-                  <span title="Personal Hygiene">${fHygiene} Hygiene</span>
-                  <span title="Premises">${fPremises} Premises</span>
-                  <span title="Water/Cleaning">${fWater} Water</span>
-                  <span title="Documentation">${fDoc} Display</span>
-                </div>
-              </div>
-
-              <div style="font-size: 0.78rem; color: #cbd5e1; margin-bottom: 0.75rem; line-height: 1.45; background: rgba(0,0,0,0.2); padding: 0.5rem 0.7rem; border-radius: 6px;">
-                <strong>Audit Notes:</strong> ${insp.inspectionNotes || 'Standard statutory routine inspection.'}
-              </div>
-
-              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.74rem; color: #94a3b8; margin-bottom: 0.85rem;">
-                <span>Compliance: <strong style="color: ${insp.inspectionResult === 'compliant' ? '#34d399' : '#fbbf24'};">${(insp.inspectionResult || 'monitoring').replace(/_/g, ' ')}</strong></span>
-                <span>Corrective Action: <strong>${insp.correctiveActionRequired ? 'Required ⚠️' : 'None'}</strong></span>
-              </div>
-
-              <div style="display: flex; gap: 0.5rem;">
-                ${isDone && (insp.correctiveActionRequired || insp.inspectionResult === 'compliant_with_corrective_action') ? `
-                  <button class="btn btn-sm btn-primary" style="flex: 1; font-size: 0.76rem; background: linear-gradient(135deg, #059669, #10b981); border-color: #10b981; font-weight: 700;" onclick="window.openReinspectionModal('${insp.inspectionId}')">
-                    🔄 Re-Inspect Premises
+              <div class="food-action-row">
+                <button class="btn btn-sm btn-outline" style="flex: 1;" onclick="window.viewIssueDetail('${issue.id}')">
+                  🔍 Review Details
+                </button>
+                ${!isResolved ? `
+                  <button class="btn btn-sm btn-rectify" style="flex: 1;" onclick="window.openFoodRectifyModal('${issue.id}')">
+                    🛠️ Rectify Problem
                   </button>
                 ` : `
-                  <button class="btn btn-sm btn-outline" style="flex: 1; font-size: 0.76rem;" onclick="window.openFoodInspectionModal('${insp.issueId || ''}', '${insp.vendorId || ''}')">
-                    📋 ${isDone ? 'View Audit Record' : 'Continue Audit'}
-                  </button>
+                  <span style="font-size: 0.8rem; color: #34d399; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: 1;">
+                    ✓ Grade A+ Cleared
+                  </span>
                 `}
-                <button class="btn btn-sm btn-outline" style="flex: 1; font-size: 0.76rem; border-color: rgba(245, 158, 11, 0.35); color: #fbbf24;" onclick="window.openNewCorrectiveActionModal('${insp.vendorId || ''}', '${insp.issueId || ''}')">
-                  🛠️ Issue Directive
-                </button>
               </div>
             </div>
           `;
@@ -5303,12 +4597,12 @@ class DatabaseManager {
       }
     }
 
-    // 3. TAB: High-Risk & All Establishments Grid (#foodDeptVendorsGrid)
+    // 2. Certified & Violated Establishments Grid
     const vendorGrid = document.getElementById('foodDeptVendorsGrid');
     if (vendorGrid) {
       let filteredVendors = vendors;
       if (vendorFilter === 'certified') filteredVendors = filteredVendors.filter(v => !v.isViolated);
-      else if (vendorFilter === 'violation') filteredVendors = filteredVendors.filter(v => v.isViolated || v.monitoringStatus === 'probation');
+      else if (vendorFilter === 'violation') filteredVendors = filteredVendors.filter(v => v.isViolated);
 
       if (filteredVendors.length === 0) {
         vendorGrid.innerHTML = `
@@ -5323,25 +4617,16 @@ class DatabaseManager {
         `;
       } else {
         vendorGrid.innerHTML = filteredVendors.map(vendor => {
-          const isViolated = vendor.isViolated || vendor.monitoringStatus === 'probation';
-          const trend = vendor.recurrenceTrend || 'stable';
-          const trendColor = trend === 'improving' ? '#34d399' : trend === 'deteriorating' ? '#f87171' : '#38bdf8';
-          const estType = vendor.establishmentType || 'Food Establishment';
-
+          const isViolated = vendor.isViolated;
           return `
             <div class="card" style="border: 1px solid ${isViolated ? '#ef4444' : '#10b981'}; background: ${isViolated ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-card)'};">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; gap: 0.5rem;">
                 <div>
-                  <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem;">
-                    <span class="badge ${isViolated ? 'badge-escalated' : 'badge-resolved'}">
-                      ${isViolated ? '🔴 HIGH RISK / PROBATION' : '🟢 VERIFIED & CERTIFIED'}
-                    </span>
-                    <span style="font-size: 0.72rem; color: #94a3b8; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">
-                      🏷️ ${estType}
-                    </span>
-                  </div>
-                  <h3 style="margin-top: 0.25rem; font-size: 1.15rem; color: white;">${vendor.name}</h3>
-                  <p style="font-size: 0.82rem; color: var(--text-muted);">Proprietor: ${vendor.owner} • 📍 ${vendor.location}</p>
+                  <span class="badge ${isViolated ? 'badge-escalated' : 'badge-resolved'}">
+                    ${isViolated ? '🔴 STATUTORY VIOLATION NOTICE' : '🟢 VERIFIED & CERTIFIED'}
+                  </span>
+                  <h3 style="margin-top: 0.5rem; font-size: 1.15rem; color: white;">${vendor.name}</h3>
+                  <p style="font-size: 0.85rem; color: var(--text-muted);">Proprietor: ${vendor.owner} • 📍 ${vendor.location}</p>
                 </div>
                 <div style="text-align: center; background: ${isViolated ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)'}; border: 2px solid ${isViolated ? '#ef4444' : '#10b981'}; border-radius: var(--radius-md); padding: 4px 10px; min-width: 60px;">
                   <div style="font-size: 1.25rem; font-weight: 900; color: ${isViolated ? '#f87171' : '#34d399'};">${vendor.hygieneGrade || 'A+'}</div>
@@ -5349,134 +4634,24 @@ class DatabaseManager {
                 </div>
               </div>
 
-              <!-- Compliance History Stats -->
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 0.5rem; border-radius: 6px; margin-bottom: 0.75rem; text-align: center;">
-                <div>
-                  <div style="font-size: 0.68rem; color: #94a3b8;">Complaints</div>
-                  <div style="font-size: 0.95rem; font-weight: 800; color: white;">${vendor.totalComplaints || (isViolated ? 1 : 0)}</div>
-                </div>
-                <div>
-                  <div style="font-size: 0.68rem; color: #94a3b8;">Audits Done</div>
-                  <div style="font-size: 0.95rem; font-weight: 800; color: #38bdf8;">${vendor.inspectionsCompleted || 1}</div>
-                </div>
-                <div>
-                  <div style="font-size: 0.68rem; color: #94a3b8;">Risk Trend</div>
-                  <div style="font-size: 0.8rem; font-weight: 800; color: ${trendColor}; text-transform: capitalize;">${trend}</div>
-                </div>
-              </div>
-
               ${isViolated ? `
-                <div style="background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.4); padding: 0.65rem 0.85rem; border-radius: 6px; font-size: 0.8rem; color: #fecdd3; margin-bottom: 0.85rem; line-height: 1.5;">
-                  <div>⚖️ <strong>Regulatory Clause:</strong> ${vendor.violationClause || 'Section 56: Hygiene Improvement Notice'}</div>
-                  <div>⏳ <strong>Rectification Window:</strong> <span style="font-weight: 700; color: white;">${vendor.rectificationDeadline || '48 Hours'}</span></div>
-                  <div>👁️ <strong>Directives Issued:</strong> ${vendor.officerDirectives || 'Mandatory on-site corrective actions underway.'}</div>
+                <div style="background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.4); padding: 0.65rem 0.85rem; border-radius: 6px; font-size: 0.82rem; color: #fecdd3; margin-bottom: 0.85rem; line-height: 1.5;">
+                  <div>⚖️ <strong>Clause:</strong> ${vendor.violationClause || 'Section 56: Stale Oil Violation'}</div>
+                  <div>💳 <strong>Penalty Imposed:</strong> <span style="font-family: var(--font-mono); font-weight: 800; color: #facc15;">${vendor.penaltyImposed || '₹2,000.00'}</span></div>
+                  <div>⏳ <strong>Rectification Deadline:</strong> <span style="font-weight: 700; color: white;">${vendor.rectificationDeadline || '48 Hours'}</span></div>
+                  <div>🥩 <strong>MQ-135 Gas Risk:</strong> ${vendor.mq135GasPpm || '370 PPM'}</div>
                 </div>
               ` : `
-                <div style="background: rgba(16, 185, 129, 0.08); border: 1px dashed rgba(16, 185, 129, 0.3); padding: 0.65rem 0.85rem; border-radius: 6px; font-size: 0.8rem; color: #a7f3d0; margin-bottom: 0.85rem; line-height: 1.5;">
+                <div style="background: rgba(16, 185, 129, 0.08); border: 1px dashed rgba(16, 185, 129, 0.3); padding: 0.65rem 0.85rem; border-radius: 6px; font-size: 0.82rem; color: #a7f3d0; margin-bottom: 0.85rem; line-height: 1.5;">
                   <div>🏆 <strong>Hygiene Audit Score:</strong> <strong style="color: #34d399;">${vendor.score || '94/100'}</strong></div>
                   <div>📅 <strong>Certificate Validity:</strong> ${vendor.validTill || '31 Dec 2026'}</div>
-                  <div>🛡️ <strong>Inspecting Officer:</strong> ${vendor.inspectedBy || 'Dr. Lakshmi Prasad (FSO)'}</div>
+                  <div>🛡️ <strong>Inspected By:</strong> ${vendor.inspectedBy || 'Dr. Lakshmi Prasad (FSO)'}</div>
                 </div>
               `}
 
-              <div style="display: flex; gap: 0.5rem;">
-                <button class="btn btn-sm btn-saffron" style="flex: 1; font-weight: 700;" onclick="window.openFoodInspectionModal('', '${vendor.id}')">
-                  📋 Schedule Audit
-                </button>
-                <button class="btn btn-sm btn-outline" style="flex: 1; border-color: ${isViolated ? '#ef4444' : '#10b981'}; color: ${isViolated ? '#fca5a5' : '#34d399'};" onclick="window.viewDigitalCertificate('${vendor.id}')">
-                  ${isViolated ? '⚠️ Notice' : '📜 Certificate'}
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-    }
-
-    // 4. TAB: Corrective Actions Grid (#foodCorrectiveActionsGrid)
-    const caGrid = document.getElementById('foodCorrectiveActionsGrid');
-    if (caGrid) {
-      if (correctiveActions.length === 0) {
-        caGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-lg); color: var(--text-muted); border: 1px dashed var(--border);">No formal corrective action directives currently pending.</p>';
-      } else {
-        caGrid.innerHTML = correctiveActions.map(ca => {
-          const isVerified = ca.status === 'verified';
-          const isImplemented = ca.status === 'implemented';
-          const statusColor = isVerified ? '#10b981' : isImplemented ? '#38bdf8' : '#f59e0b';
-          const statusText = isVerified ? 'VERIFIED & CLEARED' : isImplemented ? 'IMPLEMENTED - AWAITING VERIFICATION' : 'PENDING RECTIFICATION';
-
-          return `
-            <div class="card" style="border-left: 4px solid ${statusColor};">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
-                <span class="badge" style="background: ${statusColor}22; color: ${statusColor}; border: 1px solid ${statusColor}; font-weight: 800; font-size: 0.72rem;">
-                  ${statusText}
-                </span>
-                <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #fbbf24; font-weight: 700;">${ca.actionId}</span>
-              </div>
-
-              <h4 style="color: white; font-size: 1.05rem; margin-bottom: 0.25rem;">${ca.vendorName}</h4>
-              <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.65rem;">
-                Issued By: <strong style="color: #cbd5e1;">${ca.officerName || 'Dr. Lakshmi Prasad (FSO)'}</strong> • ⏱️ SLA: <span style="color: #f59e0b; font-weight: 700;">${ca.deadline || '48 Hours'}</span>
-              </div>
-
-              <div style="background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.8rem; color: #fef08a; line-height: 1.45; margin-bottom: 0.75rem;">
-                <strong>Mandated Directive:</strong> ${ca.description}
-              </div>
-
-              ${ca.verificationNotes ? `
-                <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 6px; padding: 0.5rem 0.7rem; font-size: 0.75rem; color: #a7f3d0; margin-bottom: 0.75rem;">
-                  ✓ <strong>FSO Clearance Note:</strong> ${ca.verificationNotes}
-                </div>
-              ` : ''}
-
-              <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-                ${!isVerified ? `
-                  <button class="btn btn-sm btn-primary" style="flex: 1; font-size: 0.78rem; background: linear-gradient(135deg, #059669, #10b981); border-color: #10b981; font-weight: 700;" onclick="window.verifyCorrectiveAction('${ca.actionId}')">
-                    ✅ Verify Compliance & Clear
-                  </button>
-                  <button class="btn btn-sm btn-outline" style="flex: 1; font-size: 0.78rem;" onclick="window.openReinspectionModal('${ca.inspectionId || ''}')">
-                    🔄 Field Re-Audit
-                  </button>
-                ` : `
-                  <div style="width: 100%; text-align: center; color: #34d399; font-size: 0.78rem; font-weight: 700; padding: 0.4rem; background: rgba(16,185,129,0.1); border-radius: 6px;">
-                    ✓ Satisfactorily Verified & Cleared by Designated FSO
-                  </div>
-                `}
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-    }
-
-    // 5. TAB: Re-Inspections Grid (#foodReinspectionsGrid)
-    const reinsGrid = document.getElementById('foodReinspectionsGrid');
-    if (reinsGrid) {
-      const followUpInspections = inspections.filter(i => i.correctiveActionRequired === 1 || i.nextInspectionAt || i.inspectionStatus === 'scheduled');
-      if (followUpInspections.length === 0) {
-        reinsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-lg); color: var(--text-muted); border: 1px dashed var(--border);">No re-inspections currently scheduled.</p>';
-      } else {
-        reinsGrid.innerHTML = followUpInspections.map(insp => {
-          const isDone = Boolean(insp.verifiedAt || (insp.inspectionStatus === 'completed' && insp.correctiveActionRequired === 0));
-          return `
-            <div class="card" style="border-left: 4px solid ${isDone ? '#10b981' : '#f59e0b'};">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
-                <span class="badge" style="background: ${isDone ? 'rgba(16,185,129,0.2)' : 'rgba(245,158,11,0.2)'}; color: ${isDone ? '#34d399' : '#f59e0b'}; border: 1px solid ${isDone ? '#10b981' : '#f59e0b'}; font-weight: 800; font-size: 0.72rem;">
-                  ${isDone ? 'RE-INSPECTION VERIFIED' : 'RE-INSPECTION DUE'}
-                </span>
-                <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #38bdf8;">${insp.inspectionId}</span>
-              </div>
-
-              <h4 style="color: white; font-size: 1.05rem; margin-bottom: 0.25rem;">${insp.vendorName}</h4>
-              <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.65rem;">
-                Target Ward: <strong>${insp.ward || 'Ward 12'}</strong> • Prior Audit Finding: <em>${insp.inspectionNotes || 'Corrective directive active'}</em>
-              </p>
-
-              <div style="display: flex; gap: 0.5rem;">
-                <button class="btn btn-sm btn-primary" style="flex: 1; font-size: 0.78rem; background: linear-gradient(135deg, #059669, #10b981); border-color: #10b981; font-weight: 700;" onclick="window.openReinspectionModal('${insp.inspectionId}')">
-                  🔄 Conduct Re-Inspection Verification
-                </button>
-              </div>
+              <button class="btn btn-sm ${isViolated ? 'btn-outline' : 'btn-saffron'}" style="width: 100%; border-color: ${isViolated ? '#ef4444' : 'transparent'}; color: ${isViolated ? '#fca5a5' : 'white'};" onclick="window.viewDigitalCertificate('${vendor.id}')">
+                ${isViolated ? '⚠️ View Official Statutory Violation Notice' : '📜 View National Hygiene Certificate'}
+              </button>
             </div>
           `;
         }).join('');
@@ -6529,41 +5704,6 @@ class DatabaseManager {
         if (streetInput && !streetInput.value) {
           streetInput.value = `Gandhi Statue Main Road (Geotagged #${Math.floor(100+Math.random()*900)})`;
         }
-
-        // Version 44: Update Location Captured card
-        const areaEl = document.getElementById('modalLocationCapturedArea');
-        const badgeEl = document.getElementById('modalLocationStatusBadge');
-        if (areaEl || badgeEl) {
-          fetch('/api/geo/verify-location', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ lat, lng, accuracy: acc, ward: 'Ward 12 (Market Zone)', city: 'Surampalem' })
-          }).then(res => res.json()).then(data => {
-            if (data.success && data.geoEvidence) {
-              const g = data.geoEvidence;
-              if (areaEl) areaEl.textContent = `${g.resolvedCity || 'Surampalem'} • ${g.resolvedWard || 'Ward 12'}`;
-              if (badgeEl) {
-                if (g.status === 'LOCATION_CONSISTENT') {
-                  badgeEl.textContent = '✓ Location consistent';
-                  badgeEl.style.background = 'rgba(16, 185, 129, 0.2)';
-                  badgeEl.style.color = '#34d399';
-                  badgeEl.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-                } else if (g.status === 'LOCATION_NEEDS_CONFIRMATION') {
-                  badgeEl.textContent = '⚠️ Location needs confirmation';
-                  badgeEl.style.background = 'rgba(245, 158, 11, 0.2)';
-                  badgeEl.style.color = '#fbbf24';
-                  badgeEl.style.borderColor = 'rgba(245, 158, 11, 0.4)';
-                } else {
-                  badgeEl.textContent = '! Location could not be fully verified';
-                  badgeEl.style.background = 'rgba(239, 68, 68, 0.2)';
-                  badgeEl.style.color = '#f87171';
-                  badgeEl.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-                }
-              }
-            }
-          }).catch(() => {});
-        }
-
         showToast(`📍 GPS Geotag Locked (${lat}° N, ${lng}° E)!`, 'reward', '📡');
       }, 700);
     }
@@ -6801,7 +5941,7 @@ class DatabaseManager {
       issue.imageOfficerOverrideReason = null;
       issue.verifiedByOfficer = officerName;
       issue.verifiedTimestamp = Date.now();
-      db.saveToStorage('clean_safe_issues_v13', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       showToast('✅ Visual evidence verified by Officer!', 'reward', '🛡️');
@@ -6846,7 +5986,7 @@ class DatabaseManager {
       issue.imageOfficerOverrideReason = reason.trim();
       issue.verifiedByOfficer = officerName;
       issue.verifiedTimestamp = Date.now();
-      db.saveToStorage('clean_safe_issues_v13', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       showToast('⚠️ Officer override registered with audit justification.', 'reward', '📝');
@@ -7585,439 +6725,12 @@ class DatabaseManager {
     } else if (descInput && descInput.value.trim().length >= 6) {
       window.triggerRealtimeTriage(descInput.value);
     }
-
-    // Auto-populate hidden citizen domicile & location from authenticated session
-    const currentUser = (window.auth && typeof window.auth.getCurrentUser === 'function') ? window.auth.getCurrentUser() : {};
-    const stateEl = document.getElementById('modalReportState');
-    const cityEl = document.getElementById('modalReportCity');
-    const wardEl = document.getElementById('modalReportWard');
-    const streetEl = document.getElementById('reportLocationInput');
-
-    const defState = currentUser.jurisdictionState || currentUser.state || 'Andhra Pradesh';
-    const defCity = currentUser.jurisdictionCity || currentUser.city || 'Surampalem';
-    const defWard = currentUser.jurisdictionWard || currentUser.ward || 'Ward 12 (Market Zone)';
-    const defStreet = currentUser.permanentAddress || `${defWard}, Geotagged Zone`;
-
-    if (stateEl) stateEl.value = defState;
-    if (cityEl) cityEl.value = defCity;
-    if (wardEl) wardEl.value = defWard;
-    if (streetEl) streetEl.value = defStreet;
-
     window.openModal('reportIssueModal');
   };
 
-  // =========================================================================
-  // ADVANCED FOOD SAFETY OPERATIONS & MODAL CONTROLLERS (v45)
-  // =========================================================================
-  window.onFoodVendorSelectChange = function(selectEl) {
-    const customDiv = document.getElementById('foodCustomVendorFields');
-    if (customDiv) {
-      customDiv.style.display = selectEl.value === 'custom' ? 'block' : 'none';
-    }
-  };
-
-  window.openFoodInspectionModal = function(issueId, vendorId) {
-    const vSelect = document.getElementById('foodInspVendorSelect');
-    const issueInput = document.getElementById('foodInspIssueIdInput');
-    const notesInput = document.getElementById('foodAuditNotesInput');
-    const customDiv = document.getElementById('foodCustomVendorFields');
-
-    if (customDiv) customDiv.style.display = 'none';
-    if (notesInput) notesInput.value = '';
-
-    if (vSelect && vendorId) {
-      for (let i = 0; i < vSelect.options.length; i++) {
-        if (vSelect.options[i].value === vendorId) {
-          vSelect.selectedIndex = i;
-          break;
-        }
-      }
-    }
-    if (issueInput) {
-      issueInput.value = issueId || '';
-    }
-
+  window.openFoodInspectionModal = function() {
     window.openModal('foodInspectionModal');
   };
-
-  window.handleFoodInspectionSubmit = async function(event) {
-    if (event) event.preventDefault();
-
-    const vSelect = document.getElementById('foodInspVendorSelect');
-    const issueInput = document.getElementById('foodInspIssueIdInput');
-    const notesInput = document.getElementById('foodAuditNotesInput');
-    const resSelect = document.getElementById('foodInspResultSelect');
-    const nextSlaSelect = document.getElementById('foodInspNextSlaSelect');
-
-    const vendorId = vSelect ? vSelect.value : 'FSSAI-AP-2026-V11';
-    let vendorName = vSelect && vSelect.options[vSelect.selectedIndex] ? vSelect.options[vSelect.selectedIndex].text.split('(')[0].trim() : 'Food Establishment';
-    if (vendorId === 'custom') {
-      const customNameInput = document.getElementById('foodCustomVendorName');
-      if (customNameInput && customNameInput.value.trim()) {
-        vendorName = customNameInput.value.trim();
-      }
-    }
-
-    const issueId = issueInput ? issueInput.value.trim() : '';
-    const notes = notesInput ? notesInput.value.trim() : 'Standard routine inspection.';
-    const result = resSelect ? resSelect.value : 'compliant';
-    const nextSla = nextSlaSelect ? nextSlaSelect.value : '48h';
-
-    const checklistData = {
-      food_handling: {
-        safe_handling_observed: Boolean(document.getElementById('chk_handling_safe')?.checked),
-        protected_from_exposure: Boolean(document.getElementById('chk_handling_protected')?.checked),
-        utensils_used: Boolean(document.getElementById('chk_handling_utensils')?.checked)
-      },
-      food_storage: {
-        appropriate_storage: Boolean(document.getElementById('chk_storage_appropriate')?.checked),
-        temp_controlled: Boolean(document.getElementById('chk_storage_temp')?.checked),
-        separation: Boolean(document.getElementById('chk_storage_separation')?.checked)
-      },
-      personal_hygiene: {
-        hand_hygiene: Boolean(document.getElementById('chk_hygiene_wash')?.checked),
-        protective_clothing: Boolean(document.getElementById('chk_hygiene_caps')?.checked),
-        medical_clearance: Boolean(document.getElementById('chk_hygiene_medical')?.checked)
-      },
-      premises_hygiene: {
-        clean_surfaces: Boolean(document.getElementById('chk_premises_surfaces')?.checked),
-        waste_containment: Boolean(document.getElementById('chk_premises_waste')?.checked),
-        pest_control: Boolean(document.getElementById('chk_premises_pests')?.checked)
-      },
-      water_cleaning: {
-        potable_water: Boolean(document.getElementById('chk_water_potable')?.checked),
-        grease_trap: Boolean(document.getElementById('chk_water_greasetrap')?.checked)
-      },
-      labelling_display: {
-        display_board: Boolean(document.getElementById('chk_doc_fssai')?.checked),
-        medical_certs: Boolean(document.getElementById('chk_doc_medical')?.checked)
-      }
-    };
-
-    const correctiveRequired = (result === 'compliant_with_corrective_action' || result === 'non_compliance_observed' || result === 'further_inspection_required') ? 1 : 0;
-    const nextInspectionTimestamp = nextSla === '48h' ? (Date.now() + 48 * 3600000) : nextSla === '7d' ? (Date.now() + 7 * 86400000) : (Date.now() + 30 * 86400000);
-
-    const inspPayload = {
-      inspectionId: 'INSP-' + Date.now().toString(36).toUpperCase(),
-      issueId: issueId || null,
-      vendorId: vendorId,
-      vendorName: vendorName,
-      officerId: 'user-103',
-      officerName: 'Dr. Lakshmi Prasad (FSO)',
-      jurisdictionState: 'Andhra Pradesh',
-      jurisdictionCity: 'Surampalem',
-      ward: 'Ward 12 (Market Zone)',
-      scheduledAt: Date.now(),
-      startedAt: Date.now() - 1800000,
-      completedAt: Date.now(),
-      inspectionStatus: 'completed',
-      inspectionResult: result,
-      inspectionNotes: notes,
-      checklistData: checklistData,
-      evidence: ['https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80'],
-      correctiveActionRequired: correctiveRequired,
-      nextInspectionAt: correctiveRequired ? nextInspectionTimestamp : null,
-      verifiedAt: correctiveRequired ? null : Date.now(),
-      verifiedBy: correctiveRequired ? null : 'Dr. Lakshmi Prasad (FSO)'
-    };
-
-    // Try backend call
-    try {
-      const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      await fetch('/api/food/inspect', {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(inspPayload)
-      });
-    } catch (e) {
-      console.log('[Food Backend] Saved locally');
-    }
-
-    // Save to local db
-    if (db.addInspection) db.addInspection(inspPayload);
-
-    // If corrective action required, create linked directive
-    if (correctiveRequired && db.addCorrectiveAction) {
-      const caPayload = {
-        actionId: 'CA-' + Date.now().toString(36).toUpperCase(),
-        inspectionId: inspPayload.inspectionId,
-        issueId: issueId || null,
-        vendorId: vendorId,
-        vendorName: vendorName,
-        description: `Implement required rectification for findings: ${notes}`,
-        status: 'pending',
-        assignedAt: Date.now(),
-        implementedAt: null,
-        verifiedAt: null,
-        verificationNotes: null,
-        officerId: 'user-103',
-        officerName: 'Dr. Lakshmi Prasad (FSO)',
-        jurisdictionCity: 'Surampalem',
-        deadline: nextSla === '48h' ? '48 Hours SLA' : nextSla === '7d' ? '7-Day Rectification' : '30-Day Rectification'
-      };
-      db.addCorrectiveAction(caPayload);
-    }
-
-    window.closeModal('foodInspectionModal');
-    if (typeof showToast === 'function') {
-      showToast('Official FSO Standardized Inspection Audit recorded successfully.', 'success', '⚖️');
-    }
-    renderFoodSafetyDashboard();
-  };
-
-  window.openNewCorrectiveActionModal = function(vendorId, issueId) {
-    const vSelect = document.getElementById('caVendorSelect');
-    const descInput = document.getElementById('caDescriptionInput');
-    if (descInput) descInput.value = '';
-
-    if (vSelect && vendorId) {
-      for (let i = 0; i < vSelect.options.length; i++) {
-        if (vSelect.options[i].value === vendorId) {
-          vSelect.selectedIndex = i;
-          break;
-        }
-      }
-    }
-    window.openModal('foodCorrectiveActionModal');
-  };
-
-  window.handleCreateCorrectiveActionSubmit = async function(event) {
-    if (event) event.preventDefault();
-
-    const vSelect = document.getElementById('caVendorSelect');
-    const descInput = document.getElementById('caDescriptionInput');
-    const slaSelect = document.getElementById('caSlaSelect');
-
-    const vendorId = vSelect ? vSelect.value : 'FSSAI-AP-2026-V11';
-    const vendorName = vSelect && vSelect.options[vSelect.selectedIndex] ? vSelect.options[vSelect.selectedIndex].text.split('(')[0].trim() : 'Food Establishment';
-    const desc = descInput ? descInput.value.trim() : 'Mandated hygiene corrective actions.';
-    const slaVal = slaSelect ? slaSelect.value : '48h';
-    const deadlineStr = slaVal === '48h' ? '48 Hours SLA' : slaVal === '7d' ? '7-Day Window' : '14-Day Upgrade';
-
-    const caPayload = {
-      actionId: 'CA-' + Date.now().toString(36).toUpperCase(),
-      vendorId: vendorId,
-      vendorName: vendorName,
-      description: desc,
-      status: 'pending',
-      assignedAt: Date.now(),
-      implementedAt: null,
-      verifiedAt: null,
-      verificationNotes: null,
-      officerId: 'user-103',
-      officerName: 'Dr. Lakshmi Prasad (FSO)',
-      jurisdictionCity: 'Surampalem',
-      deadline: deadlineStr
-    };
-
-    try {
-      const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      await fetch('/api/food/corrective-action', {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(caPayload)
-      });
-    } catch (e) {
-      console.log('[Food Backend] Saved CA locally');
-    }
-
-    if (db.addCorrectiveAction) db.addCorrectiveAction(caPayload);
-
-    window.closeModal('foodCorrectiveActionModal');
-    if (typeof showToast === 'function') {
-      showToast('Formal Corrective Action Directive issued to establishment.', 'success', '🛠️');
-    }
-    renderFoodSafetyDashboard();
-  };
-
-  window.openReinspectionModal = function(inspId) {
-    const hiddenInput = document.getElementById('reinspectionTargetInspId');
-    if (hiddenInput) hiddenInput.value = inspId || '';
-    const notesInput = document.getElementById('reinspectionNotesInput');
-    if (notesInput) notesInput.value = '';
-    window.openModal('foodReinspectionModal');
-  };
-
-  window.handleReinspectionSubmit = async function(event) {
-    if (event) event.preventDefault();
-
-    const hiddenInput = document.getElementById('reinspectionTargetInspId');
-    const notesInput = document.getElementById('reinspectionNotesInput');
-    const scoreInput = document.getElementById('reinspectionScoreInput');
-    const outcomeSelect = document.getElementById('reinspectionOutcomeSelect');
-
-    const inspId = hiddenInput ? hiddenInput.value : '';
-    const notes = notesInput ? notesInput.value.trim() : 'Re-inspection confirmed compliant.';
-    const score = scoreInput ? Number(scoreInput.value) : 94;
-    const outcome = outcomeSelect ? outcomeSelect.value : 'COMPLIANCE_CONFIRMED';
-    const isCompliant = outcome === 'COMPLIANCE_CONFIRMED';
-
-    const payload = {
-      inspectionId: inspId,
-      notes: notes,
-      hygieneScore: score,
-      outcome: outcome
-    };
-
-    try {
-      const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      await fetch('/api/food/reinspection', {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(payload)
-      });
-    } catch (e) {
-      console.log('[Food Backend] Saved reinspection locally');
-    }
-
-    if (db.updateInspection && inspId) {
-      db.updateInspection(inspId, {
-        verifiedAt: Date.now(),
-        verifiedBy: 'Dr. Lakshmi Prasad (FSO)',
-        inspectionNotes: `${notes} [Re-inspection score: ${score}/100]`,
-        correctiveActionRequired: isCompliant ? 0 : 1,
-        inspectionResult: isCompliant ? 'compliant' : 'further_inspection_required'
-      });
-    }
-
-    // Also mark matching corrective action verified if compliant
-    if (isCompliant && db.getAllCorrectiveActions) {
-      const allCAs = db.getAllCorrectiveActions();
-      const match = allCAs.find(c => c.inspectionId === inspId || (inspId && c.actionId === inspId));
-      if (match && db.updateCorrectiveAction) {
-        db.updateCorrectiveAction(match.actionId, {
-          status: 'verified',
-          verifiedAt: Date.now(),
-          verificationNotes: notes
-        });
-      }
-    }
-
-    window.closeModal('foodReinspectionModal');
-    if (typeof showToast === 'function') {
-      showToast('On-site re-inspection verification authorized and logged.', 'success', '✅');
-    }
-    renderFoodSafetyDashboard();
-  };
-
-  window.verifyCorrectiveAction = async function(actionId) {
-    try {
-      const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      await fetch('/api/food/corrective-action/verify', {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({ actionId: actionId, notes: 'FSO on-site physical audit verified compliant implementation.' })
-      });
-    } catch (e) {
-      console.log('[Food Backend] Verified CA locally');
-    }
-
-    if (db.updateCorrectiveAction) {
-      db.updateCorrectiveAction(actionId, {
-        status: 'verified',
-        verifiedAt: Date.now(),
-        verificationNotes: 'FSO on-site physical audit verified compliant implementation.'
-      });
-    }
-
-    if (typeof showToast === 'function') {
-      showToast('Corrective Action marked verified and cleared.', 'success', '✅');
-    }
-    renderFoodSafetyDashboard();
-  };
-
-  window.promptFsoDecision = async function(issueId) {
-    const decision = window.confirm('Food Safety Decision Support:\n\nClick OK to register "Field Audit Required & Enforcement Notice Issued"\nClick CANCEL to register "Routine Advisory Issued"');
-    const decisionType = decision ? 'confirmed_violation' : 'advisory_issued';
-    const notes = decision ? 'FSO determined photographic evidence requires formal on-site audit.' : 'Advisory guidance issued to establishment operator.';
-
-    try {
-      const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      await fetch('/api/food/review-decision', {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({ issueId: issueId, decision: decisionType, notes: notes })
-      });
-    } catch (e) {
-      console.log('[Food Backend] Saved decision locally');
-    }
-
-    if (db.updateIssue) {
-      db.updateIssue(issueId, {
-        fsoReviewStatus: decisionType,
-        workerStatus: decision ? 'Under Rectification Notice' : 'Advisory Guidance Issued'
-      });
-    }
-
-    if (typeof showToast === 'function') {
-      showToast(`FSO Decision recorded: ${decisionType.replace(/_/g, ' ').toUpperCase()}`, 'info', '⚖️');
-    }
-    renderFoodSafetyDashboard();
-  };
-
-  window.submitCitizenResolutionFeedback = async function(issueId, isSatisfied, feedbackNotes) {
-    const notes = feedbackNotes || (isSatisfied ? 'Citizen confirmed remediation is satisfactory.' : 'Citizen reported issue persists on site.');
-
-    try {
-      const token = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      await fetch(`/api/issues/${issueId}/citizen-verify`, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({ isSatisfied: isSatisfied, feedbackNotes: notes })
-      });
-    } catch (e) {
-      console.log('[Backend] Saved citizen feedback locally');
-    }
-
-    if (db.updateIssue) {
-      db.updateIssue(issueId, {
-        citizenResolutionFeedback: isSatisfied ? 'satisfied' : 'persists',
-        resolutionReviewRequested: !isSatisfied,
-        citizenFeedbackTimestamp: Date.now()
-      });
-    }
-
-    if (!isSatisfied && db.addComment) {
-      db.addComment(issueId, `⚠️ Citizen Feedback: Issue still persists after remediation. Escalation requested for officer review.`, 'Krish Varma (Citizen)', 'citizen');
-    }
-
-    if (typeof showToast === 'function') {
-      if (isSatisfied) {
-        showToast('Thank you! Resolution confirmed satisfactory. +15 Civic Credits rewarded!', 'reward', '🏅');
-      } else {
-        showToast('Feedback recorded: Issue persists. Grievance reopened for officer review.', 'info', '⚠️');
-      }
-    }
-
-    if (typeof window.viewIssueDetail === 'function') {
-      window.viewIssueDetail(issueId);
-    }
-    if (typeof renderCitizenDashboard === 'function') {
-      renderCitizenDashboard();
-    }
-    if (typeof renderFoodSafetyDashboard === 'function') {
-      renderFoodSafetyDashboard();
-    }
-  };
-
 
   window.openFoodRectifyModal = function(issueId) {
     activeIssueIdForModal = issueId;
@@ -8828,30 +7541,6 @@ class DatabaseManager {
         </div>
       `).join('');
 
-      // Version 44: Geo-Evidence Consistency Badges
-      const geoStatus = issue.geoConsistencyStatus || 'LOCATION_CONSISTENT';
-      let geoBadgeText = '✓ Location Consistent';
-      let geoBadgeBg = 'rgba(16, 185, 129, 0.15)';
-      let geoBadgeColor = '#34d399';
-      let geoBadgeBorder = '#10b981';
-
-      if (geoStatus === 'LOCATION_NEEDS_CONFIRMATION') {
-        geoBadgeText = '⚠️ Needs Confirmation';
-        geoBadgeBg = 'rgba(245, 158, 11, 0.15)';
-        geoBadgeColor = '#fbbf24';
-        geoBadgeBorder = '#f59e0b';
-      } else if (geoStatus === 'LOCATION_MISMATCH') {
-        geoBadgeText = '⚠️ Location Mismatch';
-        geoBadgeBg = 'rgba(239, 68, 68, 0.15)';
-        geoBadgeColor = '#f87171';
-        geoBadgeBorder = '#ef4444';
-      } else if (geoStatus === 'LOCATION_UNAVAILABLE') {
-        geoBadgeText = 'ℹ️ Location Unavailable';
-        geoBadgeBg = 'rgba(148, 163, 184, 0.15)';
-        geoBadgeColor = '#cbd5e1';
-        geoBadgeBorder = '#64748b';
-      }
-
       content.innerHTML = `
         <div>
           ${(isCitizen && isResolved) ? `
@@ -8870,22 +7559,14 @@ class DatabaseManager {
           <div class="tracker-header-card">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem;">
               <div>
-                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
                   <span class="cat-badge">${deptIcon} ${deptName}</span>
                   <span class="badge badge-${status}">${status.replace('_', ' ').toUpperCase()}</span>
                   <span class="badge sev-${(issue.severity || 'medium').toLowerCase()}">${severity}</span>
-                  ${!isCitizen ? `
-                    <button type="button" class="btn btn-sm btn-outline" onclick="window.changeIssuePriority('${issue.id}', '${(issue.severity || 'medium').toLowerCase()}')" style="font-size: 0.68rem; padding: 2px 7px; border-color: rgba(255,255,255,0.2); color: #38bdf8; cursor: pointer; background: rgba(56,189,248,0.08);" title="Change incident priority level">
-                      ⚡ Change Priority
-                    </button>
-                  ` : ''}
                 </div>
                 <h2 style="font-size: 1.35rem; color: white; margin: 0.2rem 0 0.4rem;">${issueTitle}</h2>
-                <div style="font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                  <span>📍 ${issueLocation}</span>
-                  <span class="badge" style="background: ${geoBadgeBg}; color: ${geoBadgeColor}; border: 1px solid ${geoBadgeBorder}; font-size: 0.68rem; font-weight: 800; padding: 2px 6px;">
-                    ${geoBadgeText}
-                  </span>
+                <div style="font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 0.4rem;">
+                  <span>📍</span> <span>${issueLocation}</span>
                 </div>
               </div>
               <div style="text-align: right;">
@@ -8962,46 +7643,6 @@ class DatabaseManager {
               <span>Ticket allocated to <strong>${deptName} (${incidentCity})</strong> based on incident GPS. Citizen verified at permanent residence in <strong>${reporterProfile.homeCity || 'Surampalem'}</strong>.</span>
             </div>
           </div>
-
-          <!-- Version 44: Geo-Evidence Consistency Record -->
-          <details style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.28); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.25rem;">
-            <summary style="cursor: pointer; font-size: 0.82rem; font-weight: 800; color: #38bdf8; display: flex; align-items: center; justify-content: space-between; user-select: none;">
-              <span style="display: flex; align-items: center; gap: 0.4rem;">
-                <span>🛰️</span> VIEW LOCATION EVIDENCE
-              </span>
-              <span class="badge" style="background: ${geoBadgeBg}; color: ${geoBadgeColor}; border: 1px solid ${geoBadgeBorder}; font-size: 0.7rem; font-weight: 800;">
-                ${geoBadgeText}
-              </span>
-            </summary>
-            <div style="margin-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.65rem;">
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem; font-size: 0.78rem;">
-                <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
-                  <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Evidence Source:</span>
-                  <strong style="color: white;">📱 Citizen Device GPS (Tamper-Resistant)</strong>
-                </div>
-                <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
-                  <span style="color: #94a3b8; font-size: 0.7rem; display: block;">GPS Coordinates &amp; Accuracy:</span>
-                  <strong style="color: #38bdf8; font-family: var(--font-mono);">${issue.latitude ? Number(issue.latitude).toFixed(5) + '° N, ' + Number(issue.longitude).toFixed(5) + '° E' : 'GPS Coordinates Unavailable'} ${issue.accuracy ? '(±' + Math.round(issue.accuracy) + 'm)' : ''}</strong>
-                </div>
-                <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
-                  <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Resolved Civic Jurisdiction:</span>
-                  <strong style="color: white;">${issue.geoResolvedWard || issue.ward || 'Ward 12'}, ${issue.geoResolvedCity || issue.city || 'Surampalem'}</strong>
-                </div>
-                <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
-                  <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Municipal Sector Proximity:</span>
-                  <strong style="color: ${issue.geoDistanceMeters !== null && issue.geoDistanceMeters !== undefined && issue.geoDistanceMeters > 900 ? '#f87171' : '#34d399'};">${issue.geoDistanceMeters !== null && issue.geoDistanceMeters !== undefined ? Math.round(issue.geoDistanceMeters) + 'm from civic sector center' : 'Within ward bounds'}</strong>
-                </div>
-              </div>
-              ${issue.geoCheckReasoning ? `
-                <div style="margin-top: 0.6rem; font-size: 0.75rem; color: #cbd5e1; background: rgba(56, 189, 248, 0.06); border-left: 3px solid #38bdf8; padding: 0.45rem 0.65rem; border-radius: 4px;">
-                  <strong>Geo-Consistency Reasoning:</strong> ${issue.geoCheckReasoning}
-                </div>
-              ` : ''}
-              <div style="margin-top: 0.5rem; font-size: 0.7rem; color: #64748b; font-style: italic;">
-                Transparent Notice: Location is captured directly from device GPS coordinates during citizen submission. Photo EXIF metadata is not simulated or fabricated.
-              </div>
-            </div>
-          </details>
 
           <!-- Field Resolution Evidence Record (Before & After) -->
           <div style="margin-bottom: 1.5rem;">
@@ -9305,67 +7946,6 @@ class DatabaseManager {
               ${timelineStepsHtml}
             </div>
           </div>
-
-          <!-- Citizen Post-Resolution Feedback & Verification Card -->
-          ${issue.status === 'resolved' ? `
-            <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 1rem 1.15rem; margin-top: 1.25rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">
-                <div style="font-weight: 800; font-size: 0.9rem; color: #34d399; display: flex; align-items: center; gap: 0.4rem;">
-                  <span>✅</span> CITIZEN RESOLUTION VERIFICATION
-                </div>
-                <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.7rem;">Post-Resolution Loop</span>
-              </div>
-              
-              ${issue.citizenResolutionFeedback ? `
-                <div style="font-size: 0.82rem; color: ${issue.citizenResolutionFeedback === 'satisfied' ? '#34d399' : '#f87171'}; font-weight: 700; padding: 0.5rem 0.75rem; background: rgba(0,0,0,0.25); border-radius: 6px; margin-top: 0.4rem;">
-                  ${issue.citizenResolutionFeedback === 'satisfied' 
-                    ? '✓ Citizen Feedback Recorded: Resolution confirmed satisfactory.' 
-                    : '⚠️ Citizen Feedback Recorded: Issue persists. Formal review requested.'}
-                </div>
-              ` : `
-                <p style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 0.75rem; line-height: 1.45;">
-                  Has this civic grievance been resolved to your satisfaction on site? Your response closes the operational verification loop.
-                </p>
-                <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
-                  <button type="button" class="btn btn-sm btn-primary" style="background: linear-gradient(135deg, #059669, #10b981); border-color: #10b981; font-weight: 700;" onclick="window.submitCitizenResolutionFeedback('${issue.id}', true)">
-                    <span>✅</span> Confirmed Satisfactory
-                  </button>
-                  <button type="button" class="btn btn-sm btn-outline" style="border-color: #ef4444; color: #f87171; font-weight: 700;" onclick="window.submitCitizenResolutionFeedback('${issue.id}', false)">
-                    <span>⚠️</span> Issue Still Persists (Request Review)
-                  </button>
-                </div>
-              `}
-            </div>
-          ` : ''}
-
-          <!-- Food Safety FSO Operational Actions Card (If department is Food Safety) -->
-          ${issue.department === 'food_safety' ? `
-            <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 1rem 1.15rem; margin-top: 1.25rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
-                <div style="font-weight: 800; font-size: 0.9rem; color: #fbbf24; display: flex; align-items: center; gap: 0.4rem;">
-                  <span>🍲</span> FOOD SAFETY INSPECTION & ACTION TRIAGE
-                </div>
-                <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; font-size: 0.7rem;">FSO Operations</span>
-              </div>
-              <div style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 0.75rem;">
-                <div><strong>Establishment:</strong> ${issue.vendorName || issue.title}</div>
-                <div><strong>Visual Hazard:</strong> ${issue.aiVisualConcern || 'Uncovered prepared food display observed near roadway'}</div>
-                <div><strong>Risk Level:</strong> <span style="color: #f87171; font-weight: 700;">${issue.aiRiskAssessment || 'High Risk'}</span></div>
-              </div>
-              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-sm btn-saffron" style="font-weight: 700;" onclick="window.openFoodInspectionModal('${issue.id}', '${issue.vendorId || ''}')">
-                  📋 Conduct On-Site Audit
-                </button>
-                <button type="button" class="btn btn-sm btn-outline" style="border-color: #f59e0b; color: #fbbf24; font-weight: 700;" onclick="window.openNewCorrectiveActionModal('${issue.vendorId || ''}', '${issue.id}')">
-                  🛠️ Issue Corrective Order
-                </button>
-                <button type="button" class="btn btn-sm btn-outline" style="border-color: #38bdf8; color: #38bdf8;" onclick="window.promptFsoDecision('${issue.id}')">
-                  ⚖️ Record FSO Decision
-                </button>
-              </div>
-            </div>
-          ` : ''}
-
 
           <!-- Community Comments & Live Citizen Discussion -->
           <div style="margin-top: 1.5rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.1rem;">
@@ -9711,7 +8291,7 @@ class DatabaseManager {
       if (idx !== -1) {
         db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
       }
-      db.saveToStorage('clean_safe_issues_v13', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       window.closeModal('assignSquadModal');
@@ -9832,7 +8412,7 @@ class DatabaseManager {
           text: `⚠️ Resolution Rejected & Returned to Worker: ${reason}`,
           time: 'Just now'
         });
-        db.saveToStorage('clean_safe_issues_v13', db.issues);
+        db.saveToStorage('clean_safe_issues_v10', db.issues);
         db.notify();
       }
 
@@ -10109,18 +8689,11 @@ class DatabaseManager {
         e.preventDefault();
         const title = document.getElementById('reportTitleInput').value;
         const desc = document.getElementById('reportDescInput').value;
+        const street = document.getElementById('reportLocationInput').value;
+        const state = document.getElementById('modalReportState').value;
+        const city = document.getElementById('modalReportCity').value;
+        const ward = document.getElementById('modalReportWard').value;
         const dept = document.getElementById('reportDeptSelect').value;
-
-        const currentUser = (window.auth && typeof window.auth.getCurrentUser === 'function') ? window.auth.getCurrentUser() : {};
-        const stateEl = document.getElementById('modalReportState');
-        const cityEl = document.getElementById('modalReportCity');
-        const wardEl = document.getElementById('modalReportWard');
-        const streetEl = document.getElementById('reportLocationInput');
-
-        const state = (stateEl && stateEl.value) ? stateEl.value : (currentUser.jurisdictionState || currentUser.state || 'Andhra Pradesh');
-        const city = (cityEl && cityEl.value) ? cityEl.value : (currentUser.jurisdictionCity || currentUser.city || 'Surampalem');
-        const ward = (wardEl && wardEl.value) ? wardEl.value : (currentUser.jurisdictionWard || currentUser.ward || 'Ward 12 (Market Zone)');
-        const street = (streetEl && streetEl.value) ? streetEl.value : (currentUser.permanentAddress || `${ward}, Geotagged Zone`);
 
         // Use user captured photo or default fallback
         const submittedImage = selectedReportImageBase64 || 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80';
@@ -10251,32 +8824,32 @@ class DatabaseManager {
       if (scoreEl) scoreEl.textContent = `Match Confidence: ${pct}%`;
 
       if (idData.identityType === 'POSSIBLE_DUPLICATE') {
-        if (iconEl) iconEl.textContent = '📍';
-        if (titleEl) titleEl.textContent = 'An active civic report may already exist at this location.';
-        if (subEl) subEl.textContent = 'This may be a follow-up to an existing issue rather than a new complaint.';
+        if (iconEl) iconEl.textContent = '⚠️';
+        if (titleEl) titleEl.textContent = 'Possible Duplicate Incident Detected';
+        if (subEl) subEl.textContent = 'A highly similar civic complaint was recently reported at this exact location.';
         if (badgeEl) {
-          badgeEl.textContent = 'ACTIVE REPORT AT THIS LOCATION';
+          badgeEl.textContent = 'POSSIBLE DUPLICATE';
           badgeEl.style.background = '#f59e0b';
         }
-        if (recActionEl) recActionEl.textContent = 'Recommended: Add Follow-up';
+        if (recActionEl) recActionEl.textContent = 'Action: Add Follow-up or Confirm New';
       } else if (idData.identityType === 'FOLLOW_UP') {
         if (iconEl) iconEl.textContent = '🔄';
-        if (titleEl) titleEl.textContent = 'An active civic report may already exist at this location.';
-        if (subEl) subEl.textContent = 'This may be a follow-up to an existing issue rather than a new complaint.';
+        if (titleEl) titleEl.textContent = 'Active Grievance In Progress at this Spot';
+        if (subEl) subEl.textContent = 'An existing complaint is currently active/unresolved on site. Submit a follow-up to escalate priority!';
         if (badgeEl) {
-          badgeEl.textContent = 'EXISTING ACTIVE REPORT';
+          badgeEl.textContent = 'FOLLOW UP';
           badgeEl.style.background = '#0284c7';
         }
-        if (recActionEl) recActionEl.textContent = 'Recommended: Add Follow-up';
+        if (recActionEl) recActionEl.textContent = 'Action: Attach Citizen Follow-up';
       } else {
         if (iconEl) iconEl.textContent = '🔗';
-        if (titleEl) titleEl.textContent = 'A related civic incident is active nearby.';
-        if (subEl) subEl.textContent = 'You can add a follow-up to the existing ticket or submit as a new incident.';
+        if (titleEl) titleEl.textContent = 'Related Incident in Immediate Area';
+        if (subEl) subEl.textContent = 'A related or adjacent civic condition exists nearby in this ward.';
         if (badgeEl) {
-          badgeEl.textContent = 'RELATED CIVIC INCIDENT';
+          badgeEl.textContent = 'RELATED INCIDENT';
           badgeEl.style.background = '#8b5cf6';
         }
-        if (recActionEl) recActionEl.textContent = 'Action: Add Follow-up or Report as New';
+        if (recActionEl) recActionEl.textContent = 'Action: Link or File New';
       }
 
       const exTitleEl = document.getElementById('identityExistingTitle');
@@ -10303,15 +8876,15 @@ class DatabaseManager {
       }
 
       const sigContainer = document.getElementById('identitySignalsContainer');
+      if (sigContainer) {
         sigContainer.innerHTML = (idData.signals || []).map(s => {
           let pillClass = 'identity-signal-pill';
-          const sigName = s.signal || s.type || '';
-          if (sigName.includes('EXACT') || sigName.includes('HASH')) pillClass += ' pill-warning';
-          else if (sigName.includes('SECTOR') || sigName.includes('WARD')) pillClass += ' pill-info';
+          if ((s.type && s.type.includes('EXACT')) || (s.type && s.type.includes('HASH'))) pillClass += ' pill-warning';
+          else if ((s.type && s.type.includes('SECTOR')) || (s.type && s.type.includes('WARD'))) pillClass += ' pill-info';
           else pillClass += ' pill-success';
-          const label = s.label || s.signal || s.type || s.description || 'Signal Match';
-          return `<span class="${pillClass}">• ${label}</span>`;
+          return `<span class="${pillClass}">• ${s.label || s.type}</span>`;
         }).join('');
+      }
 
       const rText = document.getElementById('identityReasoningText');
       if (rText) rText.textContent = idData.reasoning || 'Deterministic civic rule matching against active incidents.';
@@ -10460,46 +9033,6 @@ class DatabaseManager {
         }
       } catch (e) {
         showToast('Error reviewing incident identity.', 'error', '⚠️');
-      }
-    };
-
-    // Stage v44: Municipal Officer Severity / Priority Update
-    window.changeIssuePriority = async function(issueId, currentSeverity) {
-      const options = ['low', 'medium', 'high', 'critical'];
-      const promptVal = window.prompt(`Change incident priority for #${issueId} (Current: ${(currentSeverity || 'medium').toUpperCase()}):\nEnter low, medium, high, or critical:`, currentSeverity || 'medium');
-      if (!promptVal) return;
-      const cleanSev = promptVal.trim().toLowerCase();
-      if (!options.includes(cleanSev)) {
-        alert(`Invalid priority "${promptVal}". Allowed values are: low, medium, high, critical.`);
-        return;
-      }
-      try {
-        const authHeaders = { 'Content-Type': 'application/json' };
-        const token = auth.getToken();
-        if (token) authHeaders['Authorization'] = `Bearer ${token}`;
-
-        const res = await fetch(`/api/issues/${issueId}/change-priority`, {
-          method: 'POST',
-          headers: authHeaders,
-          body: JSON.stringify({ severity: cleanSev, reason: 'Municipal officer manual priority adjustment' })
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          showToast(`Priority changed to ${cleanSev.toUpperCase()}`, 'success', '⚡');
-          const issue = db.getIssueById ? db.getIssueById(issueId) : null;
-          if (issue) {
-            issue.severity = cleanSev;
-          }
-          if (window.viewIssueDetail) {
-            window.viewIssueDetail(issueId);
-          }
-          renderMunicipalDashboard();
-        } else {
-          showToast(data.error || 'Failed to update priority', 'error', '⚠️');
-        }
-      } catch (err) {
-        console.error('Error changing priority:', err);
-        showToast('Network error updating priority', 'error', '⚠️');
       }
     };
 
@@ -10675,7 +9208,7 @@ class DatabaseManager {
             if (data.issue && data.issue.workCompletedTimestamp) {
               issue.workCompletedTimestamp = data.issue.workCompletedTimestamp;
             }
-            db.saveToStorage('clean_safe_issues_v13', db.issues);
+            db.saveToStorage('clean_safe_issues_v10', db.issues);
             db.notify();
           }
 
@@ -11708,7 +10241,7 @@ class DatabaseManager {
       if (idx !== -1) {
         db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
       }
-      db.saveToStorage('clean_safe_issues_v13', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       showToast(`🚗 Squad is now en route to #${issueId}!`, 'info', '🚗');
@@ -11757,7 +10290,7 @@ class DatabaseManager {
       if (idx !== -1) {
         db.issues[idx] = { ...db.issues[idx], ...updatedIssue };
       }
-      db.saveToStorage('clean_safe_issues_v13', db.issues);
+      db.saveToStorage('clean_safe_issues_v11', db.issues);
       db.notify();
 
       showToast(`📍 Squad marked arrived on site for #${issueId}! Remediation underway.`, 'reward', '📍');

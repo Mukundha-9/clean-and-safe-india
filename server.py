@@ -1,4 +1,4 @@
-"""Clean & Safe India - Real-Time Backend Server v44.0.0 (Python 3.14)"""
+"""Clean & Safe India - Real-Time Backend Server (Python 3.14)"""
 import os
 import sys
 import re
@@ -16,7 +16,6 @@ import math
 import base64
 import predictive_engine
 import ai_engine
-import food_safety_engine
 
 # ------------------------------------------------------------------------------
 # INDUSTRY-STANDARD PASSWORD SECURITY (SCRYPT WITH PER-USER SALT)
@@ -367,218 +366,10 @@ def normalize_text_tokens(text):
     words = re.findall(r'[a-zA-Z0-9]+', str(text).lower())
     return {w for w in words if len(w) > 2 and w not in stopwords}
 
-# ------------------------------------------------------------------------------
-# VERSION 44: GPS-BASED GEO-EVIDENCE & CIVIC JURISDICTION ENGINE
-# ------------------------------------------------------------------------------
-CIVIC_GEOGRAPHY = {
-    'Andhra Pradesh': {
-        'Surampalem': {
-            'center': (17.0050, 81.8050),
-            'radiusMeters': 4500.0,
-            'wards': {
-                'Ward 12 (Market Zone)': {'center': (17.0015, 81.8042), 'radiusMeters': 900.0, 'zone': 'Commercial / Market Zone'},
-                'Ward 14 (Campus Zone)': {'center': (17.0090, 81.8020), 'radiusMeters': 1200.0, 'zone': 'Academic Campus Zone'},
-                'Ward 11 (Lake View Zone)': {'center': (17.0050, 81.8080), 'radiusMeters': 900.0, 'zone': 'Residential / Lake View Zone'}
-            }
-        },
-        'Kakinada': {
-            'center': (16.9890, 82.2474),
-            'radiusMeters': 8000.0,
-            'wards': {
-                'Ward 1 (Port Zone)': {'center': (16.9850, 82.2400), 'radiusMeters': 1500.0, 'zone': 'Port Corridor'},
-                'Ward 2 (City Central)': {'center': (16.9920, 82.2510), 'radiusMeters': 1500.0, 'zone': 'City Center'},
-                'Ward 5 (Collectorate)': {'center': (16.9780, 82.2350), 'radiusMeters': 1500.0, 'zone': 'Administrative Zone'}
-            }
-        },
-        'Visakhapatnam': {
-            'center': (17.6868, 83.2185),
-            'radiusMeters': 15000.0,
-            'wards': {
-                'Ward 10 (Beach Road)': {'center': (17.7200, 83.3000), 'radiusMeters': 2000.0, 'zone': 'Coastal Promenade'},
-                'Ward 15 (Siripuram)': {'center': (17.7100, 83.3100), 'radiusMeters': 2000.0, 'zone': 'Central Commercial'},
-                'Ward 20 (Gajuwaka)': {'center': (17.7000, 83.2900), 'radiusMeters': 2500.0, 'zone': 'Industrial Sector'}
-            }
-        }
-    }
-}
-
-def evaluate_geo_evidence(lat, lng, reported_ward=None, reported_city=None, reported_state=None, accuracy=None):
-    """
-    Evaluates citizen GPS coordinates against genuine civic administrative centers and radii.
-    Result States:
-      - LOCATION_CONSISTENT: High confidence match within authentic ward/city radius.
-      - LOCATION_NEEDS_CONFIRMATION: Within city limits but near boundary or divergent from reported ward.
-      - LOCATION_MISMATCH: Out of city/state jurisdiction bounds.
-      - LOCATION_UNAVAILABLE: Coordinates missing, zero, or invalid.
-    """
-    if lat is None or lng is None:
-        return {
-            'status': 'LOCATION_UNAVAILABLE',
-            'consistencyLevel': 'UNAVAILABLE',
-            'latitude': None,
-            'longitude': None,
-            'accuracy': accuracy,
-            'distanceMeters': None,
-            'resolvedState': reported_state or 'Andhra Pradesh',
-            'resolvedCity': reported_city or 'Surampalem',
-            'resolvedWard': reported_ward or 'Ward 12 (Market Zone)',
-            'resolvedZone': 'Municipal Administrative Area',
-            'resolvedStreet': None,
-            'jurisdictionMatch': False,
-            'wardMatch': False,
-            'zoneMatch': False,
-            'reasoning': 'Device GPS coordinates unavailable. Retaining current civic administrative context.',
-            'recommendedAction': 'PROCEED_WITH_WARNING'
-        }
-
-    try:
-        f_lat = float(lat)
-        f_lng = float(lng)
-    except (ValueError, TypeError):
-        return {
-            'status': 'LOCATION_UNAVAILABLE',
-            'consistencyLevel': 'UNAVAILABLE',
-            'latitude': lat,
-            'longitude': lng,
-            'accuracy': accuracy,
-            'distanceMeters': None,
-            'resolvedState': reported_state or 'Andhra Pradesh',
-            'resolvedCity': reported_city or 'Surampalem',
-            'resolvedWard': reported_ward or 'Ward 12 (Market Zone)',
-            'resolvedZone': 'Municipal Administrative Area',
-            'resolvedStreet': None,
-            'jurisdictionMatch': False,
-            'wardMatch': False,
-            'zoneMatch': False,
-            'reasoning': f'Invalid coordinate format received ({lat}, {lng}).',
-            'recommendedAction': 'PROCEED_WITH_WARNING'
-        }
-
-    # Range and zero-origin validation
-    if abs(f_lat) > 90.0 or abs(f_lng) > 180.0 or (abs(f_lat) < 0.0001 and abs(f_lng) < 0.0001):
-        return {
-            'status': 'LOCATION_UNAVAILABLE',
-            'consistencyLevel': 'UNAVAILABLE',
-            'latitude': f_lat,
-            'longitude': f_lng,
-            'accuracy': accuracy,
-            'distanceMeters': None,
-            'resolvedState': reported_state or 'Andhra Pradesh',
-            'resolvedCity': reported_city or 'Surampalem',
-            'resolvedWard': reported_ward or 'Ward 12 (Market Zone)',
-            'resolvedZone': 'Municipal Administrative Area',
-            'resolvedStreet': None,
-            'jurisdictionMatch': False,
-            'wardMatch': False,
-            'zoneMatch': False,
-            'reasoning': f'Coordinates ({f_lat:.4f}, {f_lng:.4f}) fall outside valid geographical ranges.',
-            'recommendedAction': 'PROCEED_WITH_WARNING'
-        }
-
-    # Match against CIVIC_GEOGRAPHY
-    target_state = reported_state or 'Andhra Pradesh'
-    state_data = CIVIC_GEOGRAPHY.get(target_state, CIVIC_GEOGRAPHY['Andhra Pradesh'])
-
-    nearest_city = None
-    min_city_dist = float('inf')
-    for city_name, city_info in state_data.items():
-        c_lat, c_lng = city_info['center']
-        d = calculate_haversine_distance(f_lat, f_lng, c_lat, c_lng)
-        if d < min_city_dist:
-            min_city_dist = d
-            nearest_city = city_name
-
-    city_info = state_data.get(nearest_city, state_data['Surampalem'])
-    nearest_ward = None
-    nearest_zone = None
-    min_ward_dist = float('inf')
-    ward_radius = 900.0
-
-    for ward_name, ward_meta in city_info['wards'].items():
-        w_lat, w_lng = ward_meta['center']
-        d = calculate_haversine_distance(f_lat, f_lng, w_lat, w_lng)
-        if d < min_ward_dist:
-            min_ward_dist = d
-            nearest_ward = ward_name
-            nearest_zone = ward_meta['zone']
-            ward_radius = ward_meta['radiusMeters']
-
-    # Compare with reported context
-    rep_city_clean = (reported_city or 'Surampalem').strip().lower()
-    nearest_city_clean = nearest_city.strip().lower()
-    city_match = (rep_city_clean in nearest_city_clean or nearest_city_clean in rep_city_clean)
-
-    rep_ward_clean = (reported_ward or '').split('(')[0].strip().lower()
-    nearest_ward_clean = nearest_ward.split('(')[0].strip().lower()
-    ward_match = bool(rep_ward_clean and (rep_ward_clean in nearest_ward_clean or nearest_ward_clean in rep_ward_clean))
-
-    # Check GPS accuracy uncertainty
-    f_acc = None
-    if accuracy is not None:
-        try:
-            f_acc = float(accuracy)
-        except (ValueError, TypeError):
-            f_acc = None
-
-    # Evaluate consistency
-    if city_match:
-        if f_acc is not None and f_acc > 100:
-            status = 'LOCATION_NEEDS_CONFIRMATION'
-            consistency = 'LOW'
-            reasoning = f'GPS coordinates ({f_lat:.4f}, {f_lng:.4f}) have high uncertainty (±{int(f_acc)}m). Approximate location flagged for field team confirmation.'
-            rec_action = 'CONFIRM_LOCATION'
-        elif min_ward_dist <= ward_radius:
-            if ward_match or not reported_ward:
-                status = 'LOCATION_CONSISTENT'
-                consistency = 'HIGH'
-                reasoning = f'Device GPS ({f_lat:.4f}, {f_lng:.4f}) is within {int(min_ward_dist)}m of {nearest_ward} civic boundary.'
-                rec_action = 'PROCEED'
-            else:
-                status = 'LOCATION_NEEDS_CONFIRMATION'
-                consistency = 'MEDIUM'
-                reasoning = f'GPS coordinates ({f_lat:.4f}, {f_lng:.4f}) lie in adjacent {nearest_ward} (~{int(min_ward_dist)}m from center) rather than reported {reported_ward}.'
-                rec_action = 'CONFIRM_LOCATION'
-        elif min_city_dist <= city_info['radiusMeters']:
-            status = 'LOCATION_NEEDS_CONFIRMATION'
-            consistency = 'MEDIUM'
-            reasoning = f'GPS location is within {nearest_city} civic limits (~{int(min_ward_dist)}m from {nearest_ward} center). Municipal officer review recommended.'
-            rec_action = 'CONFIRM_LOCATION'
-        else:
-            status = 'LOCATION_MISMATCH'
-            consistency = 'LOW'
-            reasoning = f'GPS coordinates ({f_lat:.4f}, {f_lng:.4f}) are {int(min_city_dist/1000)}km outside the {reported_city or nearest_city} municipal boundary.'
-            rec_action = 'REVIEW_LOCATION'
-    else:
-        # Cross-city mismatch
-        status = 'LOCATION_MISMATCH'
-        consistency = 'LOW'
-        reasoning = f'GPS coordinates ({f_lat:.4f}, {f_lng:.4f}) map to {nearest_city} ({int(min_city_dist/1000)}km away), conflicting with reported city {reported_city}.'
-        rec_action = 'REVIEW_LOCATION'
-
-    return {
-        'status': status,
-        'consistencyLevel': consistency,
-        'latitude': f_lat,
-        'longitude': f_lng,
-        'accuracy': accuracy,
-        'distanceMeters': round(min_ward_dist, 1),
-        'resolvedState': target_state,
-        'resolvedCity': nearest_city,
-        'resolvedWard': nearest_ward,
-        'resolvedZone': nearest_zone,
-        'resolvedStreet': None,
-        'jurisdictionMatch': city_match,
-        'wardMatch': ward_match,
-        'zoneMatch': True if ward_match else False,
-        'reasoning': reasoning,
-        'recommendedAction': rec_action
-    }
-
 def evaluate_incident_identity(report_data, candidate_issues, auth_user=None):
     """
     Deterministically evaluates an incoming citizen submission against existing
     active and recently resolved civic incidents within authorized jurisdiction.
-    Treats GPS proximity as the primary matching and separation signal.
     """
     now_ms = int(time.time() * 1000)
     rep_title = report_data.get('title', '')
@@ -587,8 +378,8 @@ def evaluate_incident_identity(report_data, candidate_issues, auth_user=None):
     rep_cat = str(report_data.get('category') or 'general').lower()
     rep_ward = str(report_data.get('ward') or '')
     rep_street = str(report_data.get('street') or report_data.get('location') or '')
-    rep_lat = report_data.get('lat') if report_data.get('lat') is not None else report_data.get('latitude')
-    rep_lng = report_data.get('lng') if report_data.get('lng') is not None else report_data.get('longitude')
+    rep_lat = report_data.get('lat')
+    rep_lng = report_data.get('lng')
     rep_img = report_data.get('image') or report_data.get('imageBefore') or ''
     rep_hash = compute_evidence_hash(rep_img) if rep_img else None
 
@@ -612,8 +403,8 @@ def evaluate_incident_identity(report_data, candidate_issues, auth_user=None):
         cand_cat = str(cand.get('category') or '').lower()
         cand_ward = str(cand.get('ward') or '')
         cand_street = str(cand.get('street') or cand.get('location') or '')
-        cand_lat = cand.get('lat') if cand.get('lat') is not None else cand.get('latitude')
-        cand_lng = cand.get('lng') if cand.get('lng') is not None else cand.get('longitude')
+        cand_lat = cand.get('lat')
+        cand_lng = cand.get('lng')
         cand_ts = cand.get('timestamp') or now_ms
         cand_status = str(cand.get('status') or 'pending').lower()
         cand_is_unresolved = cand_status not in ['resolved', 'verified', 'closed']
@@ -622,16 +413,12 @@ def evaluate_incident_identity(report_data, candidate_issues, auth_user=None):
 
         cand_tokens = normalize_text_tokens(f"{cand.get('title', '')} {cand.get('description', '')}")
 
-        # 1. Location Metrics (GPS is primary)
+        # 1. Location Metrics
         dist_m = calculate_haversine_distance(rep_lat, rep_lng, cand_lat, cand_lng)
         ward_clean_rep = rep_ward.lower().split('(')[0].strip()
         ward_clean_cand = cand_ward.lower().split('(')[0].strip()
         same_ward = bool(ward_clean_rep and ward_clean_cand and ward_clean_rep == ward_clean_cand)
         
-        # Spatial separation rule: distance > 250m indicates a distinct incident spot
-        if dist_m > 250:
-            continue
-
         # Street token overlap
         street_tokens_rep = normalize_text_tokens(rep_street)
         street_tokens_cand = normalize_text_tokens(cand_street)
@@ -658,9 +445,9 @@ def evaluate_incident_identity(report_data, candidate_issues, auth_user=None):
 
         # Collect signals
         signals = []
-        if dist_m < 50:
+        if dist_m < 150:
             signals.append({'type': 'LOCATION_EXACT', 'label': f'Same coordinates spot (~{int(dist_m)}m)'})
-        elif dist_m < 150:
+        elif dist_m < 350:
             signals.append({'type': 'LOCATION_PROXIMITY', 'label': f'Nearby spot (~{int(dist_m)}m)'})
         elif same_ward:
             signals.append({'type': 'WARD_MATCH', 'label': f'Same administrative ward ({cand_ward})'})
@@ -692,39 +479,39 @@ def evaluate_incident_identity(report_data, candidate_issues, auth_user=None):
         else:
             signals.append({'type': 'TIME_HISTORICAL', 'label': f'Reported {int(time_diff_hours / 24)} days ago'})
 
-        # RULE 1: POSSIBLE DUPLICATE (Same location + same category + very close time or matching evidence)
-        if same_dept and (dist_m < 100 or same_street):
-            if evidence_match and dist_m < 150:
+        # RULE 1: POSSIBLE DUPLICATE
+        if same_dept and (same_ward or dist_m < 150):
+            if evidence_match and (dist_m < 200 or same_street):
                 match_score = 0.96
-                reasoning = f"An active civic report may already exist at this location (#{cand_id}) matching uploaded evidence. This may be a follow-up to an existing issue rather than a new complaint."
+                reasoning = f"Existing report #{cand_id} matches uploaded evidence file and location coordinates in {cand_ward}."
                 evaluated_matches.append({
                     'type': 'POSSIBLE_DUPLICATE',
                     'score': match_score,
                     'cand': cand,
                     'signals': signals,
                     'reasoning': reasoning,
-                    'action': 'Add Follow-up to Existing Ticket'
+                    'action': 'Use Existing Incident or Confirm as New'
                 })
                 continue
-            elif cand_is_unresolved and dist_m < 80 and same_cat and time_diff_hours < 2.0:
-                match_score = 0.90
-                reasoning = f"An active civic report may already exist at this location (#{cand_id}), reported {int(time_diff_hours * 60)} mins ago. This may be a follow-up to an existing issue rather than a new complaint."
+            elif (dist_m < 100 or same_street) and text_sim >= 0.45 and time_diff_hours < 4.0:
+                match_score = 0.88
+                reasoning = f"Possible duplicate report detected. Incident #{cand_id} was submitted {int(time_diff_hours * 60)} mins ago with matching details at this location."
                 evaluated_matches.append({
                     'type': 'POSSIBLE_DUPLICATE',
                     'score': match_score,
                     'cand': cand,
                     'signals': signals,
                     'reasoning': reasoning,
-                    'action': 'Add Follow-up to Existing Ticket'
+                    'action': 'Use Existing Incident or Confirm as New'
                 })
                 continue
 
-        # RULE 2: FOLLOW_UP (Same location + same category + unresolved existing issue)
-        if cand_is_unresolved and same_dept and (dist_m < 150 or same_street):
-            if same_cat or dist_m < 60 or text_sim >= 0.2:
-                match_score = 0.88
+        # RULE 2: FOLLOW_UP
+        if cand_is_unresolved and same_dept and (same_ward or dist_m < 250):
+            if (dist_m < 250 or same_street or (same_cat and text_sim >= 0.25)):
+                match_score = 0.85
                 status_label = (cand.get('workerStatus') or cand_status).upper()
-                reasoning = f"An active civic report may already exist at this location (#{cand_id}, status: {status_label}). This may be a follow-up to an existing issue rather than a new complaint."
+                reasoning = f"An existing civic incident (#{cand_id}) is currently {status_label} at this location. This report provides an operational citizen follow-up."
                 evaluated_matches.append({
                     'type': 'FOLLOW_UP',
                     'score': match_score,
@@ -735,11 +522,11 @@ def evaluate_incident_identity(report_data, candidate_issues, auth_user=None):
                 })
                 continue
 
-        # RULE 3: RELATED_INCIDENT (Same location + different but connected civic category)
-        if dist_m < 200 or (same_ward and same_street):
+        # RULE 3: RELATED_INCIDENT
+        if (dist_m < 350 or (same_ward and (same_street or text_sim >= 0.25))):
             if same_dept and not same_cat:
                 match_score = 0.65
-                reasoning = f"Adjacent civic issue detected at this location (#{cand_id}: {cand.get('title')}). Can be linked for coordinated field handling."
+                reasoning = f"Adjacent civic issue detected in {cand_ward} (#{cand_id}: {cand.get('title')}). Can be linked for coordinated field handling."
                 evaluated_matches.append({
                     'type': 'RELATED_INCIDENT',
                     'score': match_score,
@@ -751,7 +538,19 @@ def evaluate_incident_identity(report_data, candidate_issues, auth_user=None):
                 continue
             elif is_cross_dept_related:
                 match_score = 0.60
-                reasoning = f"Cross-department civic relationship detected between {rep_dept} and {cand_dept} near this location (#{cand_id})."
+                reasoning = f"Cross-department civic impact detected between {rep_dept} and {cand_dept} near this location (#{cand_id})."
+                evaluated_matches.append({
+                    'type': 'RELATED_INCIDENT',
+                    'score': match_score,
+                    'cand': cand,
+                    'signals': signals,
+                    'reasoning': reasoning,
+                    'action': 'Link as Related Incident'
+                })
+                continue
+            elif not cand_is_unresolved and time_diff_hours < (14 * 24):
+                match_score = 0.55
+                reasoning = f"Recent incident (#{cand_id}) was resolved at this spot within the last 14 days. Suggests potential recurring civic condition."
                 evaluated_matches.append({
                     'type': 'RELATED_INCIDENT',
                     'score': match_score,
@@ -1024,25 +823,7 @@ def init_database():
         ('identityReviewedBy', 'TEXT'),
         ('identityReviewedTimestamp', 'INTEGER'),
         ('followUpCount', 'INTEGER DEFAULT 0'),
-        ('evidenceHash', 'TEXT'),
-        ('geoConsistencyStatus', 'TEXT DEFAULT "LOCATION_CONSISTENT"'),
-        ('geoConsistencyLevel', 'TEXT DEFAULT "HIGH"'),
-        ('geoDistanceMeters', 'REAL DEFAULT 0.0'),
-        ('geoResolvedState', 'TEXT'),
-        ('geoResolvedCity', 'TEXT'),
-        ('geoResolvedWard', 'TEXT'),
-        ('geoResolvedZone', 'TEXT'),
-        ('geoResolvedStreet', 'TEXT'),
-        ('geoCheckTimestamp', 'INTEGER'),
-        ('geoCheckReasoning', 'TEXT'),
-        ('citizenResolutionFeedback', 'TEXT'),
-        ('citizenFeedbackTimestamp', 'INTEGER'),
-        ('resolutionReviewRequested', 'INTEGER DEFAULT 0'),
-        ('fsoReviewStatus', "TEXT DEFAULT 'pending_review'"),
-        ('establishmentType', 'TEXT'),
-        ('aiVisualConcern', 'TEXT'),
-        ('aiRiskAssessment', 'TEXT'),
-        ('aiRiskReasons', 'TEXT')
+        ('evidenceHash', 'TEXT')
     ]
     for col_name, col_type in new_issue_cols:
         if col_name not in existing_issue_cols:
@@ -1050,75 +831,6 @@ def init_database():
                 cursor.execute(f"ALTER TABLE issues ADD COLUMN {col_name} {col_type}")
             except Exception as e:
                 print(f"[Database] Column {col_name} migration note: {e}")
-
-    # Safe column migrations for vendors table
-    cursor.execute("PRAGMA table_info(vendors)")
-    existing_vendor_cols = [row['name'] if isinstance(row, dict) or hasattr(row, 'keys') else row[1] for row in cursor.fetchall()]
-    new_vendor_cols = [
-        ('establishmentType', 'TEXT'),
-        ('monitoringStatus', "TEXT DEFAULT 'Standard'"),
-        ('totalComplaints', 'INTEGER DEFAULT 1'),
-        ('uniqueIncidents', 'INTEGER DEFAULT 1'),
-        ('followUpCount', 'INTEGER DEFAULT 0'),
-        ('inspectionsCompleted', 'INTEGER DEFAULT 0'),
-        ('correctiveActionsCount', 'INTEGER DEFAULT 0'),
-        ('reinspectionsCount', 'INTEGER DEFAULT 0'),
-        ('unresolvedCount', 'INTEGER DEFAULT 0'),
-        ('recurrenceTrend', "TEXT DEFAULT 'Stable'")
-    ]
-    for col_name, col_type in new_vendor_cols:
-        if col_name not in existing_vendor_cols:
-            try:
-                cursor.execute(f"ALTER TABLE vendors ADD COLUMN {col_name} {col_type}")
-            except Exception as e:
-                print(f"[Database] Vendor Column {col_name} migration note: {e}")
-
-    # Table: Food Inspections (Advanced Food Safety Operations v45)
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS food_inspections (
-            inspectionId TEXT PRIMARY KEY,
-            issueId TEXT,
-            vendorId TEXT,
-            vendorName TEXT,
-            officerId TEXT,
-            officerName TEXT,
-            jurisdictionState TEXT,
-            jurisdictionCity TEXT,
-            ward TEXT,
-            scheduledAt INTEGER,
-            startedAt INTEGER,
-            completedAt INTEGER,
-            inspectionStatus TEXT,
-            inspectionResult TEXT,
-            inspectionNotes TEXT,
-            checklistData TEXT,
-            evidence TEXT,
-            correctiveActionRequired INTEGER,
-            nextInspectionAt INTEGER,
-            verifiedAt INTEGER,
-            verifiedBy TEXT
-        )
-    ''')
-
-    # Table: Food Corrective Actions (Advanced Food Safety Operations v45)
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS food_corrective_actions (
-            actionId TEXT PRIMARY KEY,
-            inspectionId TEXT,
-            issueId TEXT,
-            vendorId TEXT,
-            vendorName TEXT,
-            description TEXT,
-            status TEXT,
-            assignedAt INTEGER,
-            implementedAt INTEGER,
-            verifiedAt INTEGER,
-            verificationNotes TEXT,
-            officerId TEXT,
-            officerName TEXT,
-            jurisdictionCity TEXT
-        )
-    ''')
 
     # Table: Incident Relationships (Civic Incident Identity Engine v43)
     cursor.execute('''
@@ -1140,27 +852,6 @@ def init_database():
     ''')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_inc_rel_target ON incident_relationships(targetIssueId)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_inc_rel_source ON incident_relationships(sourceIssueId)')
-
-    # Table: Geo-Evidence Checks (Civic Jurisdiction Engine v44)
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS geo_evidence_checks (
-            id TEXT PRIMARY KEY,
-            issueId TEXT,
-            latitude REAL,
-            longitude REAL,
-            status TEXT,
-            consistencyLevel TEXT,
-            distanceMeters REAL,
-            resolvedState TEXT,
-            resolvedCity TEXT,
-            resolvedWard TEXT,
-            resolvedZone TEXT,
-            timestamp INTEGER,
-            citizenConfirmed INTEGER DEFAULT 1,
-            reasoning TEXT
-        )
-    ''')
-    cursor.execute('CREATE INDEX IF NOT EXISTS idx_geo_issue ON geo_evidence_checks(issueId)')
 
     # Table: Sessions (Authoritative Cryptographic Session Store)
     cursor.execute('''
@@ -1732,10 +1423,6 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
         if predictive_engine.handle_predictive_get(self, path, query, auth_user=auth_user_pred):
             return
 
-        # Food Safety Inspection & Risk Operations Endpoints (GET)
-        if food_safety_engine.handle_food_safety_get(self, path, query, auth_user=auth_user_pred):
-            return
-
         # 2. REST API: GET /api/issues
         if path == '/api/issues':
             conn = get_db_connection()
@@ -2225,10 +1912,6 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
         if predictive_engine.handle_predictive_post(self, path, body, sse_hub, auth_user=auth_user_pred):
             return
 
-        # Food Safety Inspection & Risk Operations Endpoints (POST)
-        if food_safety_engine.handle_food_safety_post(self, path, body, sse_hub, auth_user=auth_user_pred):
-            return
-
         # 1. REST API: POST /api/issues
         if path == '/api/issues':
             user_id = body.get('reportedById', 'user-101')
@@ -2281,29 +1964,18 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 {'author': 'Consultant Officer K. Mukundha', 'text': 'Grievance verified. Squad allocated and dispatched.', 'time': 'Just now'}
             ]
 
-            auth_user_iss = get_authenticated_user(self, conn)
-            resolved_state = body.get('state') or (auth_user_iss and auth_user_iss.get('jurisdictionState')) or 'Andhra Pradesh'
-            resolved_city = body.get('city') or (auth_user_iss and auth_user_iss.get('jurisdictionCity')) or 'Surampalem'
-            resolved_ward = body.get('ward') or (auth_user_iss and auth_user_iss.get('jurisdictionWard')) or 'Ward 12 (Market Zone)'
-            resolved_street = body.get('street') or (auth_user_iss and auth_user_iss.get('permanentAddress')) or 'Geotagged Incident Location'
-
-            # Version 44: Evaluate Geo-Evidence Consistency
-            input_lat = body.get('lat')
-            input_lng = body.get('lng')
-            geo_eval = evaluate_geo_evidence(input_lat, input_lng, reported_ward=resolved_ward, reported_city=resolved_city, reported_state=resolved_state, accuracy=body.get('accuracy'))
-
             new_issue = {
                 'id': issue_id,
-                'state': resolved_state,
-                'city': resolved_city,
-                'ward': resolved_ward,
-                'street': resolved_street,
+                'state': body.get('state', 'Andhra Pradesh'),
+                'city': body.get('city', 'Surampalem'),
+                'ward': body.get('ward', 'Ward 12 (Market Zone)'),
+                'street': body.get('street', 'Main Road'),
                 'department': dept_key,
                 'deptName': dept_name,
                 'deptIcon': dept_icon,
                 'title': body.get('title', 'Civic Hazard'),
                 'description': body.get('description', ''),
-                'location': f"{resolved_city} • {resolved_ward}, {resolved_street}",
+                'location': f"{body.get('city', 'Surampalem')} • {body.get('ward', 'Ward 12')}, {body.get('street', '')}",
                 'category': body.get('category', 'general'),
                 'categoryName': body.get('categoryName', 'Civic Hazard'),
                 'categoryIcon': dept_icon,
@@ -2363,17 +2035,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'identityReviewedBy': body.get('identityReviewedBy'),
                 'identityReviewedTimestamp': body.get('identityReviewedTimestamp'),
                 'followUpCount': int(body.get('followUpCount', 0)),
-                'evidenceHash': compute_evidence_hash(body.get('imageBefore')),
-                'geoConsistencyStatus': geo_eval['status'],
-                'geoConsistencyLevel': geo_eval['consistencyLevel'],
-                'geoDistanceMeters': geo_eval['distanceMeters'] or 0.0,
-                'geoResolvedState': geo_eval['resolvedState'],
-                'geoResolvedCity': geo_eval['resolvedCity'],
-                'geoResolvedWard': geo_eval['resolvedWard'],
-                'geoResolvedZone': geo_eval['resolvedZone'],
-                'geoResolvedStreet': geo_eval.get('resolvedStreet') or resolved_street,
-                'geoCheckTimestamp': now,
-                'geoCheckReasoning': geo_eval['reasoning']
+                'evidenceHash': compute_evidence_hash(body.get('imageBefore'))
             }
 
             cols = ', '.join(new_issue.keys())
@@ -2412,59 +2074,6 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                     'ISSUE_RELATIONSHIP_CREATED',
                     None,
                     f"Linked to incident #{target_id} as {rel_type}",
-                    now
-                ))
-
-            # Record Geo-Evidence Check
-            check_id = f"GEC-{now}-{random.randint(100, 999)}"
-            cursor.execute('''
-                INSERT INTO geo_evidence_checks (
-                    id, issueId, latitude, longitude, status, consistencyLevel, distanceMeters,
-                    resolvedState, resolvedCity, resolvedWard, resolvedZone, timestamp, citizenConfirmed, reasoning
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                check_id, issue_id, geo_eval['latitude'], geo_eval['longitude'], geo_eval['status'],
-                geo_eval['consistencyLevel'], geo_eval['distanceMeters'] or 0.0, geo_eval['resolvedState'],
-                geo_eval['resolvedCity'], geo_eval['resolvedWard'], geo_eval['resolvedZone'], now, 1, geo_eval['reasoning']
-            ))
-
-            # Operational Audit Logging for Geo-Evidence
-            cursor.execute('''
-                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                f"AUDIT-GEO-{now}-{random.randint(100, 999)}",
-                issue_id,
-                reporter_actor,
-                'GEO_CHECK_PERFORMED',
-                None,
-                f"Geo-Evidence evaluated: status={geo_eval['status']}, consistency={geo_eval['consistencyLevel']}, distance={geo_eval['distanceMeters']}m to {geo_eval['resolvedWard']}. Action: {geo_eval['recommendedAction']}",
-                now
-            ))
-            if geo_eval['status'] == 'LOCATION_MISMATCH':
-                cursor.execute('''
-                    INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    f"AUDIT-GEO-MIS-{now}-{random.randint(100, 999)}",
-                    issue_id,
-                    'SYSTEM',
-                    'GEO_MISMATCH_DETECTED',
-                    None,
-                    f"Mismatch detected between reported area ({resolved_city}, {resolved_ward}) and GPS coordinates ({geo_eval['latitude']}, {geo_eval['longitude']}). Reasoning: {geo_eval['reasoning']}",
-                    now
-                ))
-            else:
-                cursor.execute('''
-                    INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    f"AUDIT-GEO-OK-{now}-{random.randint(100, 999)}",
-                    issue_id,
-                    'SYSTEM',
-                    'GEO_LOCATION_CONFIRMED',
-                    None,
-                    f"GPS location validated as {geo_eval['status']} within {geo_eval['resolvedWard']} ({geo_eval['resolvedCity']}).",
                     now
                 ))
 
@@ -2509,76 +2118,8 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             self.send_json_response({
                 'success': True,
                 'issue': broadcast_payload,
-                'geoEvidence': geo_eval,
                 'remainingToday': max(0, 2 - current_count)
             })
-            return
-
-        # Version 44: REST API: POST /api/geo/verify-location
-        if path == '/api/geo/verify-location':
-            lat = body.get('lat') or body.get('latitude')
-            lng = body.get('lng') or body.get('longitude')
-            accuracy = body.get('accuracy')
-            ward = body.get('ward')
-            city = body.get('city')
-            state = body.get('state')
-            geo_eval = evaluate_geo_evidence(lat, lng, reported_ward=ward, reported_city=city, reported_state=state, accuracy=accuracy)
-            self.send_json_response({'success': True, 'geoEvidence': geo_eval})
-            return
-
-        # Version 44: Municipal Officer Severity / Priority Update: POST /api/issues/:id/change-priority
-        if (path.startswith('/api/issues/') and path.endswith('/change-priority')) or path == '/api/issues/change-priority':
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            auth_user = get_authenticated_user(self, conn)
-            user_dept = auth_user.get('department') if auth_user else None
-
-            if user_dept != 'municipal':
-                conn.close()
-                self.send_json_response({'success': False, 'error': 'Unauthorized: Only authorized municipal officers can change incident priority.'}, status=403)
-                return
-
-            parts = path.strip('/').split('/')
-            issue_id = parts[2] if len(parts) >= 4 and parts[0] == 'api' and parts[1] == 'issues' and parts[3] == 'change-priority' else body.get('issueId')
-            new_severity = (body.get('severity') or body.get('priority') or 'medium').lower()
-            if new_severity not in ['low', 'medium', 'high', 'critical', 'bulk']:
-                new_severity = 'medium'
-
-            cursor.execute("SELECT id, city, ward, department, severity, title FROM issues WHERE id = ?", (issue_id,))
-            target_issue = cursor.fetchone()
-            if not target_issue:
-                conn.close()
-                self.send_json_response({'success': False, 'error': f'Issue #{issue_id} not found'}, status=404)
-                return
-
-            off_ward = auth_user.get('jurisdictionWard')
-            off_city = auth_user.get('jurisdictionCity')
-            if off_city and target_issue['city'] and off_city.lower() != target_issue['city'].lower():
-                conn.close()
-                self.send_json_response({'success': False, 'error': 'Forbidden: Officer cannot modify issues outside official city jurisdiction.'}, status=403)
-                return
-            if off_ward and off_ward != 'ALL' and target_issue['ward'] and off_ward.lower() != target_issue['ward'].lower():
-                conn.close()
-                self.send_json_response({'success': False, 'error': 'Forbidden: Officer cannot modify issues outside assigned ward.'}, status=403)
-                return
-
-            now_ts = int(time.time() * 1000)
-            cursor.execute("UPDATE issues SET severity = ? WHERE id = ?", (new_severity, issue_id))
-            cursor.execute('''
-                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                f"AUDIT-PRIO-{now_ts}-{random.randint(100, 999)}",
-                issue_id,
-                auth_user.get('name', 'Municipal Officer'),
-                'PRIORITY_CHANGED',
-                None,
-                f"Municipal officer modified severity from {target_issue['severity']} to {new_severity}. Reason: {body.get('reason', 'Administrative prioritization')}",
-                now_ts
-            ))
-            conn.commit()
-            conn.close()
-            self.send_json_response({'success': True, 'issueId': issue_id, 'newSeverity': new_severity})
             return
 
         # Stage v43: REST API: POST /api/issues/follow-up (Citizen Follow-up Linking)
@@ -4367,8 +3908,8 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                     where_clauses.append("city = ?")
                     prms.append(auth_user.get('jurisdictionCity'))
             else:
-                req_state = body.get('state') or (auth_user and auth_user.get('jurisdictionState'))
-                req_city = body.get('city') or (auth_user and auth_user.get('jurisdictionCity'))
+                req_state = body.get('state')
+                req_city = body.get('city')
                 if req_state:
                     where_clauses.append("state = ?")
                     prms.append(req_state)
@@ -4390,17 +3931,6 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
 
             evaluation = evaluate_incident_identity(body, candidates, auth_user=auth_user)
 
-            # Evaluate Geo-Evidence Consistency (v44)
-            input_lat = body.get('lat') or body.get('latitude')
-            input_lng = body.get('lng') or body.get('longitude')
-            geo_eval = evaluate_geo_evidence(
-                input_lat, input_lng,
-                reported_ward=body.get('ward'),
-                reported_city=body.get('city'),
-                reported_state=body.get('state'),
-                accuracy=body.get('accuracy')
-            )
-
             # Audit logging
             now_ms = int(time.time() * 1000)
             actor = (auth_user.get('name') if auth_user else body.get('reportedBy')) or 'Citizen'
@@ -4414,7 +3944,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 actor,
                 'ISSUE_IDENTITY_ANALYZED',
                 None,
-                f"Incident Identity Engine evaluated: type={evaluation.get('identityType')}, score={evaluation.get('matchScore')}. Matched: #{evaluation.get('matchedIssueId')}. Geo: {geo_eval['status']}",
+                f"Incident Identity Engine evaluated: type={evaluation.get('identityType')}, score={evaluation.get('matchScore')}. Matched: #{evaluation.get('matchedIssueId')}",
                 now_ms
             ))
             conn.commit()
@@ -4422,7 +3952,6 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
 
             self.send_json_response({
                 'success': True,
-                'geoEvidence': geo_eval,
                 **evaluation
             })
             return
