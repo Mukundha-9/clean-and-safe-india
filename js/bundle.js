@@ -4620,34 +4620,38 @@
           const isViolated = vendor.isViolated;
           return `
             <div class="card" style="border: 1px solid ${isViolated ? '#ef4444' : '#10b981'}; background: ${isViolated ? 'rgba(239, 68, 68, 0.05)' : 'var(--bg-card)'};">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; gap: 0.5rem;">
-                <div>
-                  <span class="badge ${isViolated ? 'badge-escalated' : 'badge-resolved'}">
-                    ${isViolated ? '🔴 STATUTORY VIOLATION NOTICE' : '🟢 VERIFIED & CERTIFIED'}
-                  </span>
-                  <h3 style="margin-top: 0.5rem; font-size: 1.15rem; color: white;">${vendor.name}</h3>
-                  <p style="font-size: 0.85rem; color: var(--text-muted);">Proprietor: ${vendor.owner} • 📍 ${vendor.location}</p>
+              <div style="display: flex; align-items: flex-start; gap: 0.85rem; margin-bottom: 0.75rem;">
+                <div style="background: white; padding: 6px; border-radius: 8px; flex-shrink: 0; width: 84px; height: 84px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.35);">
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=FSSAI-CERT-${encodeURIComponent(vendor.id || 'AP-V02')}" onerror="this.onerror=null;this.src='assets/app_qr_code.png'" alt="QR Code" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
-                <div style="text-align: center; background: ${isViolated ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)'}; border: 2px solid ${isViolated ? '#ef4444' : '#10b981'}; border-radius: var(--radius-md); padding: 4px 10px; min-width: 60px;">
-                  <div style="font-size: 1.25rem; font-weight: 900; color: ${isViolated ? '#f87171' : '#34d399'};">${vendor.hygieneGrade || 'A+'}</div>
-                  <div style="font-size: 0.65rem; font-weight: 700; color: ${isViolated ? '#ef4444' : '#10b981'};">${isViolated ? 'VIOLATION' : 'HYGIENE'}</div>
+                <div style="flex: 1; min-width: 0;">
+                  <h3 style="margin: 0 0 0.25rem 0; font-size: 1.15rem; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${vendor.name}</h3>
+                  <div style="margin-bottom: 0.4rem;">
+                    <span class="badge ${isViolated ? 'badge-escalated' : 'badge-resolved'}" style="font-size: 0.72rem; padding: 2px 8px;">
+                      ${isViolated ? '🔴 STATUTORY VIOLATION NOTICE' : '🟢 VERIFIED & CERTIFIED'}
+                    </span>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.45;">
+                    <div>👤 <strong>Proprietor:</strong> ${vendor.owner}</div>
+                    <div>📍 ${vendor.location}</div>
+                    <div>📅 <strong>Certificate Validity:</strong> ${vendor.validTill || '31 Dec 2026'}</div>
+                    <div>🏆 <strong>Hygiene Audit Score:</strong> <strong style="color: ${isViolated ? '#f87171' : '#34d399'};">${vendor.score || '89/100'}</strong></div>
+                  </div>
+                </div>
+                <div style="text-align: center; background: ${isViolated ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.15)'}; border: 2px solid ${isViolated ? '#ef4444' : '#10b981'}; border-radius: var(--radius-md); padding: 8px 14px; min-width: 84px; box-sizing: border-box; flex-shrink: 0; display: inline-flex; flex-direction: column; align-items: center; justify-content: center;">
+                  <div style="font-size: 1.35rem; font-weight: 900; line-height: 1.1; color: ${isViolated ? '#f87171' : '#34d399'};">${vendor.hygieneGrade || (isViolated ? 'F' : 'A+')}</div>
+                  <div style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; white-space: nowrap; color: ${isViolated ? '#ef4444' : '#10b981'}; margin-top: 3px;">${isViolated ? 'VIOLATION' : 'HYGIENE'}</div>
                 </div>
               </div>
 
-              ${isViolated ? `
+              ${isViolated && vendor.violationClause ? `
                 <div style="background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.4); padding: 0.65rem 0.85rem; border-radius: 6px; font-size: 0.82rem; color: #fecdd3; margin-bottom: 0.85rem; line-height: 1.5;">
-                  <div>⚖️ <strong>Clause:</strong> ${vendor.violationClause || 'Section 56: Stale Oil Violation'}</div>
+                  <div>⚖️ <strong>Clause:</strong> ${vendor.violationClause}</div>
                   <div>💳 <strong>Penalty Imposed:</strong> <span style="font-family: var(--font-mono); font-weight: 800; color: #facc15;">${vendor.penaltyImposed || '₹2,000.00'}</span></div>
                   <div>⏳ <strong>Rectification Deadline:</strong> <span style="font-weight: 700; color: white;">${vendor.rectificationDeadline || '48 Hours'}</span></div>
                   <div>🥩 <strong>MQ-135 Gas Risk:</strong> ${vendor.mq135GasPpm || '370 PPM'}</div>
                 </div>
-              ` : `
-                <div style="background: rgba(16, 185, 129, 0.08); border: 1px dashed rgba(16, 185, 129, 0.3); padding: 0.65rem 0.85rem; border-radius: 6px; font-size: 0.82rem; color: #a7f3d0; margin-bottom: 0.85rem; line-height: 1.5;">
-                  <div>🏆 <strong>Hygiene Audit Score:</strong> <strong style="color: #34d399;">${vendor.score || '94/100'}</strong></div>
-                  <div>📅 <strong>Certificate Validity:</strong> ${vendor.validTill || '31 Dec 2026'}</div>
-                  <div>🛡️ <strong>Inspected By:</strong> ${vendor.inspectedBy || 'Dr. Lakshmi Prasad (FSO)'}</div>
-                </div>
-              `}
+              ` : ''}
 
               <button class="btn btn-sm ${isViolated ? 'btn-outline' : 'btn-saffron'}" style="width: 100%; border-color: ${isViolated ? '#ef4444' : 'transparent'}; color: ${isViolated ? '#fca5a5' : 'white'};" onclick="window.viewDigitalCertificate('${vendor.id}')">
                 ${isViolated ? '⚠️ View Official Statutory Violation Notice' : '📜 View National Hygiene Certificate'}

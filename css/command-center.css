@@ -475,3 +475,128 @@
   margin-bottom: 1.25rem;
 }
 
+/* ==========================================================================
+   Food Safety FSO — Themed Filter Tabs & Badge Alignment
+   ========================================================================== */
+.filter-chips-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.food-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 1.15rem;
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(15, 23, 42, 0.75);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1.5px solid transparent;
+  outline: none;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.food-filter-chip[data-filter="all"] {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+}
+.food-filter-chip[data-filter="all"]:hover {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+}
+.food-filter-chip[data-filter="all"].active {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: #f59e0b;
+  color: #fbbf24;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
+}
+
+.food-filter-chip[data-filter="pending"] {
+  border-color: #eab308;
+  color: #facc15;
+  background: rgba(234, 179, 8, 0.08);
+}
+.food-filter-chip[data-filter="pending"]:hover {
+  background: rgba(234, 179, 8, 0.16);
+  color: #fef08a;
+  box-shadow: 0 0 12px rgba(234, 179, 8, 0.25);
+}
+.food-filter-chip[data-filter="pending"].active {
+  background: rgba(234, 179, 8, 0.22);
+  border-color: #eab308;
+  color: #fef08a;
+  box-shadow: 0 0 16px rgba(234, 179, 8, 0.4);
+}
+
+.food-filter-chip[data-filter="resolved"] {
+  border-color: #10b981;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.08);
+}
+.food-filter-chip[data-filter="resolved"]:hover {
+  background: rgba(16, 185, 129, 0.16);
+  color: #a7f3d0;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+}
+.food-filter-chip[data-filter="resolved"].active {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: #10b981;
+  color: #a7f3d0;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Vendor Directory F Violation Badge Containment */
+.vendor-hygiene-badge {
+  text-align: center;
+  border-radius: var(--radius-md, 8px);
+  padding: 8px 14px;
+  min-width: 84px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.vendor-hygiene-badge.badge-violation {
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid #ef4444;
+}
+.vendor-hygiene-badge.badge-hygiene {
+  background: rgba(16, 185, 129, 0.15);
+  border: 2px solid #10b981;
+}
+.vendor-hygiene-badge .grade-text {
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+.vendor-hygiene-badge.badge-violation .grade-text {
+  color: #f87171;
+}
+.vendor-hygiene-badge.badge-hygiene .grade-text {
+  color: #34d399;
+}
+.vendor-hygiene-badge .label-text {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  margin-top: 3px;
+}
+.vendor-hygiene-badge.badge-violation .label-text {
+  color: #ef4444;
+}
+.vendor-hygiene-badge.badge-hygiene .label-text {
+  color: #10b981;
+}
+
+

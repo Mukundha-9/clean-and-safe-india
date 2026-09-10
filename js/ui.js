@@ -337,9 +337,9 @@ class UIManager {
                 <h3 style="margin-top: 0.4rem; font-size: 1.15rem;">${vendor.name}</h3>
                 <p style="font-size: 0.85rem; color: var(--text-muted);">Proprietor: ${vendor.owner} • 📍 ${vendor.location}</p>
               </div>
-              <div style="text-align: center; background: #ecfdf5; border: 2px solid #10b981; border-radius: var(--radius-md); padding: 4px 10px;">
-                <div style="font-size: 1.25rem; font-weight: 900; color: #047857;">${vendor.hygieneGrade}</div>
-                <div style="font-size: 0.65rem; font-weight: 700; color: #065f46;">HYGIENE</div>
+              <div style="text-align: center; background: #ecfdf5; border: 2px solid #10b981; border-radius: var(--radius-md); padding: 8px 14px; min-width: 84px; box-sizing: border-box; flex-shrink: 0; display: inline-flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="font-size: 1.35rem; font-weight: 900; line-height: 1.1; color: #047857;">${vendor.hygieneGrade}</div>
+                <div style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; white-space: nowrap; color: #065f46; margin-top: 3px;">HYGIENE</div>
               </div>
             </div>
             <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">

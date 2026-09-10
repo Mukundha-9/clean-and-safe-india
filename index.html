@@ -1430,16 +1430,13 @@
             <h2 class="section-title"><span>🍲</span> Food Hygiene Violations & Enforcement Triage</h2>
             <p class="section-desc">Designated Food Safety Officer triage queue: conduct re-inspections, levy statutory fines, and rectify verified hazards.</p>
           </div>
-          <button class="btn btn-saffron btn-sm" onclick="window.openFoodInspectionModal()">
-            <span>➕</span> Log New Food Violation
-          </button>
         </div>
 
-        <!-- Filter Chips -->
+        <!-- Filter Chips (Theme-Aligned) -->
         <div class="filter-chips-container" style="margin-bottom: 1.25rem;">
-          <button class="filter-chip active food-filter-chip" data-filter="all" onclick="window.handleFoodFilter('all', this)">All Food Reports</button>
-          <button class="filter-chip food-filter-chip" data-filter="pending" onclick="window.handleFoodFilter('pending', this)">⚠️ Pending / On Notice</button>
-          <button class="filter-chip food-filter-chip" data-filter="resolved" onclick="window.handleFoodFilter('resolved', this)">✅ Rectified & Restored</button>
+          <button class="food-filter-chip active" data-filter="all" onclick="window.handleFoodFilter('all', this)"><span>📋</span> All Food Reports</button>
+          <button class="food-filter-chip" data-filter="pending" onclick="window.handleFoodFilter('pending', this)"><span>⚠️</span> Pending / On Notice</button>
+          <button class="food-filter-chip" data-filter="resolved" onclick="window.handleFoodFilter('resolved', this)"><span>✅</span> Rectified & Restored</button>
         </div>
 
         <div id="foodDeptIssuesGrid" class="grid-3"></div>
@@ -1449,8 +1446,8 @@
       <div id="foodTab_vendors" class="food-subview" style="display: none;">
         <div class="section-header">
           <div>
-            <h2 class="section-title"><span>📜</span> Food Establishments & Statutory Certificates Directory</h2>
-            <p class="section-desc">Official registry of certified clean vendors (Grade A+) and establishments issued official violation & rectification notices (Grade C).</p>
+            <h2 class="section-title"><span>📜</span> Certified Food Vendors & QR Codes</h2>
+            <p class="section-desc">Verified clean food establishments (Grade A+) with digital certificates and QR codes</p>
           </div>
         </div>
 
