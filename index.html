@@ -28,11 +28,11 @@
   <!-- Design System & Stylesheets with Cache-Busting -->
   <link rel="stylesheet" href="css/main.css?v=8.0">
   <link rel="stylesheet" href="css/components.css?v=29.0.0">
-  <link rel="stylesheet" href="css/command-center.css?v=43.0.0">
+  <link rel="stylesheet" href="css/command-center.css?v=45.0.0">
   <link rel="stylesheet" href="css/electricity.css?v=7.0">
   <link rel="stylesheet" href="css/iot-simulation.css?v=7.0">
   <link rel="stylesheet" href="css/auth.css?v=7.0">
-  <link rel="stylesheet" href="css/responsive.css?v=26.0.0">
+  <link rel="stylesheet" href="css/responsive.css?v=45.0.0">
 
   <style>
     /* Absolute Zero-Leakage View Isolation */
@@ -784,7 +784,7 @@
           </div>
 
           <div class="cmd-table-container">
-            <table class="cmd-table">
+            <table class="cmd-table civic-card-table">
               <thead>
                 <tr>
                   <th>Ticket ID</th>
@@ -1000,7 +1000,7 @@
         </div>
 
         <div class="cmd-table-container">
-          <table class="cmd-table">
+          <table class="cmd-table civic-card-table">
             <thead>
               <tr>
                 <th>Ticket ID</th>
@@ -2855,7 +2855,7 @@
       if ('caches' in window) {
         caches.keys().then(names => {
           names.forEach(name => {
-            if (name !== 'clean-safe-india-v44.0.0') {
+            if (name !== 'clean-safe-india-v45.0.0') {
               caches.delete(name);
             }
           });
@@ -2865,6 +2865,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=44.0.0"></script>
+  <script src="js/bundle.js?v=45.0.0"></script>
 </body>
 </html>

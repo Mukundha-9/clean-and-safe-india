@@ -4277,6 +4277,250 @@
     }
   }
 
+  function renderCivicReportRowHTML(issue) {
+    const isResolved = issue.status === 'resolved';
+    const isEscalated = issue.status === 'escalated' || Boolean(issue.isSlaBreached);
+    const reportedTimeStr = formatReportDateTime(issue.timestamp);
+    const deadlineTimestamp = issue.slaDeadline || (issue.timestamp + 48 * 3600 * 1000);
+    const deadlineTimeStr = formatReportDateTime(deadlineTimestamp);
+    const resolvedTs = isResolved ? (issue.resolvedTimestamp || (issue.timestamp + 3600000 * 28)) : null;
+    const resolvedTimeStr = isResolved ? formatReportDateTime(resolvedTs) : null;
+    const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, resolvedTs, issue) : null;
+
+    // Safe Fallbacks (Never show raw null or null null)
+    const safeId = issue.id || 'ISS-RECORD';
+    const safeTitle = issue.title || 'Civic Incident Grievance';
+    const safeCity = (issue.city && issue.city !== 'null') ? issue.city : 'Surampalem';
+    const safeWard = (issue.ward && issue.ward !== 'null') ? issue.ward : 'Ward 12 (Market Zone)';
+    const safeStreet = (issue.street && issue.street !== 'null') ? issue.street : (issue.location && !issue.location.includes('null') ? issue.location : 'Municipal Jurisdiction');
+    const safeState = (issue.state && issue.state !== 'null') ? issue.state : 'Andhra Pradesh';
+    const safeDept = issue.deptName || 'Sanitation & Waste Management';
+    const safeDeptIcon = issue.deptIcon || '🏢';
+    const safeSeverity = (issue.severity || 'medium').toUpperCase();
+    const safeRisk = issue.aiRiskScore || (issue.severity === 'critical' ? 88 : (issue.severity === 'bulk' || issue.severity === 'high' ? 74 : 52));
+    const safeReporter = (issue.reportedBy && issue.reportedBy !== 'null' && !issue.reportedBy.includes('null')) ? issue.reportedBy : 'Citizen Reporter';
+    const safeWorker = (issue.assignedWorker && issue.assignedWorker !== 'null' && issue.assignedWorker !== 'Unassigned' && !issue.assignedWorker.includes('null')) ? issue.assignedWorker : null;
+    const safeWorkerStatus = (issue.workerStatus && issue.workerStatus !== 'null' && !issue.workerStatus.includes('null')) ? issue.workerStatus : null;
+    const safeDesc = (issue.description && issue.description !== 'null') ? issue.description : '';
+
+    // Follow-up and Identity signals
+    const followUpBadge = Number(issue.followUpCount) > 0 ? `
+      <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 0.68rem; padding: 2px 6px;">
+        🔄 ${issue.followUpCount} Follow-up${Number(issue.followUpCount) > 1 ? 's' : ''}
+      </span>
+    ` : '';
+
+    const identityBadge = (issue.identityType && issue.identityType !== 'NEW_INCIDENT') ? `
+      <span class="badge" style="background: rgba(147, 51, 234, 0.2); color: #d8b4fe; border: 1px solid #a855f7; font-size: 0.68rem; padding: 2px 6px;">
+        ${issue.identityType.replace(/_/g, ' ')}
+      </span>
+    ` : '';
+
+    // SLA Display Configuration
+    let slaBadgeHtml = '';
+    const slaHoursLeft = Math.max(0, Number(issue.slaHoursLeft) || 0);
+
+    if (isResolved) {
+      slaBadgeHtml = `
+        <div class="report-sla-box sla-resolved">
+          <div class="report-sla-title" style="color: #34d399;">
+            <span>✓</span> <span>Resolved</span>
+          </div>
+          <div class="report-sla-due">
+            <span style="color: #cbd5e1; font-weight: 700;">${turnaroundStr || 'On Schedule'}</span>
+            ${resolvedTimeStr ? `• Closed: ${resolvedTimeStr}` : ''}
+          </div>
+        </div>
+      `;
+    } else if (isEscalated) {
+      slaBadgeHtml = `
+        <div class="report-sla-box sla-breached">
+          <div class="report-sla-title" style="color: #f87171;">
+            <span>⚠️</span> <span>48h SLA BREACHED</span>
+          </div>
+          <div class="report-sla-due" style="color: #fca5a5; font-weight: 700;">
+            <span>ESCALATED TO COMMISSIONER</span>
+          </div>
+          <div style="font-size: 0.7rem; color: #94a3b8;">Deadline: ${deadlineTimeStr}</div>
+        </div>
+      `;
+    } else {
+      const slaPercent = Math.min(100, Math.max(0, Math.round((slaHoursLeft / 48) * 100)));
+      const slaTextColor = slaHoursLeft <= 12 ? '#f87171' : slaHoursLeft <= 24 ? '#fbbf24' : '#38bdf8';
+      slaBadgeHtml = `
+        <div class="report-sla-box">
+          <div class="report-sla-title" style="color: ${slaTextColor};">
+            <span>⏱️</span> <span>${slaHoursLeft}h remaining</span>
+          </div>
+          <div class="report-sla-due">
+            <span>Due: ${deadlineTimeStr}</span>
+          </div>
+          <div class="sla-progress-bar" style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-top: 3px;">
+            <div style="height: 100%; width: ${slaPercent}%; background: ${slaTextColor}; border-radius: 4px;"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Compact Workflow Steps Indicator
+    const isAssigned = Boolean(safeWorker && issue.assignedTimestamp) || isResolved;
+    const isFieldWork = Boolean(issue.enRouteTimestamp || issue.arrivedTimestamp || (safeWorkerStatus && (safeWorkerStatus.includes('En Route') || safeWorkerStatus.includes('On Site') || safeWorkerStatus.includes('Work') || safeWorkerStatus.includes('Dispatched') || safeWorkerStatus.includes('Clearing') || safeWorkerStatus.includes('Jumper')))) || isResolved;
+    const isVerified = Boolean(issue.verifiedTimestamp || issue.imageOfficerVerified === 1 || issue.verifiedByOfficer) || isResolved;
+
+    const step1Done = true;
+    const step2Done = isAssigned;
+    const step3Done = isFieldWork;
+    const step4Done = isVerified;
+    const step5Done = isResolved;
+
+    const workflowHtml = `
+      <div class="workflow-steps-list" title="Workflow Stage Progression">
+        <span class="workflow-step ${step1Done ? 'step-done' : ''}">● Reported</span>
+        <span class="workflow-arrow">→</span>
+        <span class="workflow-step ${step2Done ? 'step-done' : (step1Done && !step2Done ? 'step-current' : '')}">
+          ${step2Done ? '●' : '○'} Assigned
+        </span>
+        <span class="workflow-arrow">→</span>
+        <span class="workflow-step ${step3Done ? 'step-done' : (step2Done && !step3Done ? 'step-current' : '')}">
+          ${step3Done ? '●' : '○'} Field Work
+        </span>
+        <span class="workflow-arrow">→</span>
+        <span class="workflow-step ${step4Done ? 'step-done' : (step3Done && !step4Done ? 'step-current' : '')}">
+          ${step4Done ? '●' : '○'} Verification
+        </span>
+        <span class="workflow-arrow">→</span>
+        <span class="workflow-step ${step5Done ? 'step-done' : (step4Done && !step5Done ? 'step-current' : '')}">
+          ${step5Done ? '●' : '○'} Resolved
+        </span>
+      </div>
+    `;
+
+    // Status Badge
+    const statusBadgeHtml = isResolved
+      ? `<span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); font-weight: 700; font-size: 0.72rem; padding: 0.2rem 0.55rem;">✓ RESOLVED</span>`
+      : isEscalated
+        ? `<span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); font-weight: 800; font-size: 0.72rem; padding: 0.2rem 0.55rem;">⚠️ SLA BREACHED</span>`
+        : issue.status === 'in_progress'
+          ? `<span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); font-weight: 700; font-size: 0.72rem; padding: 0.2rem 0.55rem;">🔄 IN PROGRESS</span>`
+          : `<span class="badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); font-weight: 700; font-size: 0.72rem; padding: 0.2rem 0.55rem;">⏱️ PENDING</span>`;
+
+    // Action Buttons
+    const actionsHtml = `
+      <div class="report-actions-bar">
+        <button class="btn btn-sm btn-outline" style="color: white; border-color: rgba(255,255,255,0.18); padding: 0.4rem 0.75rem; font-size: 0.78rem; font-weight: 600;" onclick="window.viewIssueDetail('${issue.id}')">
+          📦 Track
+        </button>
+        ${!isResolved ? `
+          ${(!safeWorker) ? `
+            <button class="btn btn-sm btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); border-color: #0284c7; font-weight: 700; padding: 0.4rem 0.85rem; font-size: 0.78rem;" onclick="window.openAssignSquadModal('${issue.id}')">
+              🚛 Assign Squad
+            </button>
+          ` : `
+            <button class="btn btn-sm btn-outline" style="border-color: #38bdf8; color: #38bdf8; padding: 0.4rem 0.75rem; font-size: 0.78rem; font-weight: 600;" onclick="window.openAssignSquadModal('${issue.id}')" title="Assigned to ${safeWorker}">
+              🔄 Reassign
+            </button>
+          `}
+          <button class="btn btn-sm btn-outline" style="border-color: #475569; color: #cbd5e1; padding: 0.4rem 0.75rem; font-size: 0.78rem;" onclick="window.openResolveModal('${issue.id}')">
+            Resolve
+          </button>
+        ` : `
+          <span style="display: inline-flex; align-items: center; gap: 0.35rem; color: #10b981; font-weight: 700; font-size: 0.82rem; padding: 0.35rem 0.6rem;">
+            <span>✓</span> <span>Done</span>
+          </span>
+        `}
+      </div>
+    `;
+
+    const statusClass = isResolved ? 'status-resolved' : isEscalated ? 'status-escalated' : (issue.status === 'in_progress' ? 'status-in_progress' : 'status-pending');
+
+    return `
+      <div class="civic-report-row ${statusClass}" data-issue-id="${safeId}">
+        <!-- 1. Header Grid: Ticket/Title | Location/Assignment | Department/SLA -->
+        <div class="report-row-header">
+          
+          <!-- Left: Ticket ID, Date & Prominent Title -->
+          <div class="report-zone-ticket">
+            <div class="report-ticket-meta">
+              <span class="report-ticket-id">${safeId}</span>
+              <span class="report-ticket-time">📅 ${reportedTimeStr}</span>
+              ${statusBadgeHtml}
+            </div>
+            <h4 class="report-title">
+              <span>${safeTitle}</span>
+              ${followUpBadge}
+              ${identityBadge}
+            </h4>
+            ${safeDesc ? `<p class="report-desc" style="color: var(--command-text-muted); font-size: 0.8rem; margin: 0.2rem 0 0; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${safeDesc}</p>` : ''}
+          </div>
+
+          <!-- Center: Clean Location & Assignment Grouping -->
+          <div class="report-zone-location">
+            <div>
+              <div class="report-loc-primary">
+                <span>📍</span> <span>${safeCity}</span>
+                <span style="color: #64748b; font-weight: 400;">•</span>
+                <span style="color: #38bdf8; font-size: 0.78rem;">${safeState}</span>
+              </div>
+              <div class="report-loc-secondary" style="margin-top: 2px;">
+                <span>${safeWard}</span>
+              </div>
+              <div class="report-loc-landmark" style="margin-top: 2px;">
+                <span>${safeStreet}</span>
+              </div>
+            </div>
+
+            <div class="report-assignment-block">
+              <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 700;">Assigned Worker / Squad</div>
+              <div style="margin-top: 2px;">
+                ${safeWorker ? `
+                  <span style="color: #38bdf8; font-weight: 600;">👷 ${safeWorker}</span>
+                  ${safeWorkerStatus ? `<div style="font-size: 0.72rem; color: #94a3b8; margin-top: 1px;">Status: ${safeWorkerStatus}</div>` : ''}
+                ` : `
+                  <span style="color: #94a3b8; font-style: italic;">👤 Not assigned</span>
+                `}
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Department Badge & Dedicated SLA Block -->
+          <div class="report-zone-sla">
+            <div style="display: flex; justify-content: flex-end;">
+              <span class="report-dept-badge">${safeDeptIcon} ${safeDept}</span>
+            </div>
+            ${slaBadgeHtml}
+          </div>
+
+        </div>
+
+        <!-- 2. Middle Row: Compact Horizontal Workflow Progress Indicator -->
+        <div class="report-row-workflow">
+          <div style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Workflow Progress:</div>
+          ${workflowHtml}
+        </div>
+
+        <!-- 3. Footer Bar: Compact Secondary Metadata & Action Buttons -->
+        <div class="report-row-footer">
+          <div class="report-meta-chips">
+            <span class="badge sev-${issue.severity || 'medium'}" style="font-size: 0.72rem; padding: 0.2rem 0.5rem;">
+              SEVERITY: ${safeSeverity}
+            </span>
+            <span style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8; font-size: 0.74rem; background: rgba(56, 189, 248, 0.08); padding: 0.2rem 0.5rem; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.2);">
+              🤖 Risk: ${safeRisk}/100
+            </span>
+            <span style="font-size: 0.74rem; color: #94a3b8;">
+              👤 Reported by: <strong style="color: #cbd5e1;">${safeReporter}</strong>
+            </span>
+          </div>
+
+          ${actionsHtml}
+        </div>
+      </div>
+    `;
+  }
+  if (typeof window !== 'undefined') {
+    window.renderCivicReportRowHTML = renderCivicReportRowHTML;
+  }
+
   function renderMunicipalDashboard() {
     const user = auth.getUser() || {};
     const jurBadge = document.getElementById('munJurisdictionBadge');
@@ -4360,79 +4604,26 @@
     const tableBody = document.getElementById('munIncidentTableBody');
     const tableBodyQueue = document.getElementById('munIncidentTableBody_queue');
     if (tableBody || tableBodyQueue) {
-      const htmlContent = issues.length === 0
-        ? `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">No civic incidents found in the selected jurisdiction (${selectedState} → ${selectedCity} → ${selectedWard}).</td></tr>`
-        : issues.map(issue => {
-          const isResolved = issue.status === 'resolved';
-          const isEscalated = issue.status === 'escalated' || issue.isSlaBreached;
-          const reportedTimeStr = formatReportDateTime(issue.timestamp);
-          const deadlineTimeStr = formatReportDateTime(issue.slaDeadline || (issue.timestamp + 48 * 3600 * 1000));
-          const resolvedTimeStr = isResolved ? formatReportDateTime(issue.resolvedTimestamp || (issue.timestamp + 3600000 * 28)) : null;
-          const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, issue.resolvedTimestamp || (issue.timestamp + 3600000 * 28)) : null;
+      const targets = [tableBody, tableBodyQueue].filter(Boolean);
+      targets.forEach(target => {
+        const isTableBody = target.tagName === 'TBODY';
+        if (issues.length === 0) {
+          target.innerHTML = isTableBody
+            ? `<tr><td colspan="7" class="civic-report-td" style="text-align: center; padding: 2.5rem; color: #94a3b8; font-size: 0.88rem; background: rgba(15, 23, 42, 0.6); border-radius: 12px; border: 1px dashed rgba(148, 163, 184, 0.2);">No civic incidents found in the selected jurisdiction (${selectedState} → ${selectedCity} → ${selectedWard}).</td></tr>`
+            : `<div style="text-align: center; padding: 2.5rem; color: #94a3b8; font-size: 0.88rem; background: rgba(15, 23, 42, 0.6); border-radius: 12px; border: 1px dashed rgba(148, 163, 184, 0.2);">No civic incidents found in the selected jurisdiction (${selectedState} → ${selectedCity} → ${selectedWard}).</div>`;
+          return;
+        }
 
-          return `
-            <tr>
-              <td>
-                <div style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8;">${issue.id}</div>
-                <div style="font-size: 0.72rem; color: var(--command-text-muted);">📅 ${reportedTimeStr}</div>
-              </td>
-              <td>
-                <div style="font-weight: 700; color: white; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
-                  <span>${issue.title}</span>
-                  ${Number(issue.followUpCount) > 0 ? `
-                    <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 0.65rem; padding: 2px 5px;">
-                      🔄 ${issue.followUpCount} Follow-up${Number(issue.followUpCount) > 1 ? 's' : ''}
-                    </span>
-                  ` : ''}
-                  ${issue.identityType && issue.identityType !== 'NEW_INCIDENT' ? `
-                    <span class="badge" style="background: rgba(147, 51, 234, 0.2); color: #d8b4fe; border: 1px solid #a855f7; font-size: 0.65rem; padding: 2px 5px;">
-                      ${issue.identityType.replace('_', ' ')}
-                    </span>
-                  ` : ''}
-                </div>
-                <div style="font-size: 0.75rem; color: var(--command-text-muted);">📍 ${issue.location}</div>
-                <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">👤 ${issue.reportedBy || 'Citizen'} • 👷 ${issue.assignedWorker || 'Squad'}</div>
-              </td>
-              <td>
-                <div style="font-size: 0.78rem; color: #38bdf8; font-weight: 700;">${issue.state || 'Andhra Pradesh'}</div>
-                <div style="font-size: 0.72rem; color: var(--command-text-muted);">${issue.city || 'Surampalem'} • ${issue.ward || 'Ward 12'}</div>
-              </td>
-              <td><span class="cat-badge">${issue.deptIcon} ${issue.deptName}</span></td>
-              <td style="min-width: 220px;">
-                ${renderCompactLifecycle(issue)}
-                <div style="font-size: 0.68rem; color: #94a3b8; margin-top: 2px;">
-                  Severity: <strong style="color: ${issue.severity === 'critical' ? '#f87171' : issue.severity === 'high' ? '#fbbf24' : '#34d399'};">${(issue.severity || 'medium').toUpperCase()}</strong> • Risk: ${issue.aiRiskScore || 50}/100
-                </div>
-              </td>
-              <td>
-                <div class="sla-progress-container">
-                  <span class="sla-text ${isResolved ? 'text-success' : isEscalated ? 'text-danger' : 'text-warning'}" style="font-weight: 800; font-size: 0.75rem;">
-                    ${isResolved ? `✅ Resolved (${turnaroundStr})` : isEscalated ? `🚨 SLA Breached (>48h) — Escalated` : `⏱️ ${issue.slaHoursLeft}h left (Due ${deadlineTimeStr})`}
-                  </span>
-                </div>
-              </td>
-              <td>
-                <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center;">
-                  <button class="btn btn-sm btn-outline" style="color: white; border-color: var(--command-border); padding: 0.35rem 0.6rem;" onclick="window.viewIssueDetail('${issue.id}')">📦 Track</button>
-                  ${!isResolved ? `
-                    ${(!issue.assignedWorker || issue.assignedWorker === 'Unassigned' || !issue.assignedTimestamp) ? `
-                      <button class="btn btn-sm btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: 700; white-space: nowrap; padding: 0.35rem 0.65rem;" onclick="window.openAssignSquadModal('${issue.id}')">
-                        🚛 Assign Squad
-                      </button>
-                    ` : `
-                      <button class="btn btn-sm btn-outline" style="border-color: #38bdf8; color: #38bdf8; font-size: 0.72rem; white-space: nowrap; padding: 0.35rem 0.55rem;" onclick="window.openAssignSquadModal('${issue.id}')" title="Assigned to ${issue.assignedWorker}">
-                        🔄 Reassign
-                      </button>
-                    `}
-                    <button class="btn btn-sm btn-outline" style="border-color: #475569; color: #cbd5e1; padding: 0.35rem 0.55rem;" onclick="window.openResolveModal('${issue.id}')">Resolve</button>
-                  ` : `<span style="font-size: 0.8rem; color: #10b981; font-weight: 700;">Done</span>`}
-                </div>
-              </td>
-            </tr>
-          `;
+        const itemsHtml = issues.map(issue => {
+          const cardHtml = renderCivicReportRowHTML(issue);
+          if (isTableBody) {
+            return `<tr class="civic-report-tr"><td colspan="7" class="civic-report-td">${cardHtml}</td></tr>`;
+          }
+          return cardHtml;
         }).join('');
-      if (tableBody) tableBody.innerHTML = htmlContent;
-      if (tableBodyQueue) tableBodyQueue.innerHTML = htmlContent;
+
+        target.innerHTML = itemsHtml;
+      });
     }
 
     const outageGrid = document.getElementById('munPowerOutageGrid');

@@ -767,6 +767,50 @@
     font-size: 0.85rem !important;
   }
 
+  /* Civic Report Stream Card-Row Responsive Overrides */
+  .civic-card-table tr,
+  tr.civic-report-tr {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .civic-card-table td,
+  td.civic-report-td {
+    padding: 0 0 1rem 0 !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .report-row-header {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  .report-zone-sla div:first-child {
+    justify-content: flex-start !important;
+  }
+
+  .report-row-footer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+
+  .report-actions-bar {
+    width: 100% !important;
+    display: flex !important;
+    gap: 0.4rem !important;
+  }
+
+  .report-actions-bar .btn {
+    flex: 1 !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
   /* Municipal Resource Allocation Matrix on Mobile */
   #munTab_incidents .grid-3 {
     grid-template-columns: 1fr !important;
