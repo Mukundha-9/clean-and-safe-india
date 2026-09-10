@@ -33,6 +33,21 @@
   <link rel="stylesheet" href="css/iot-simulation.css?v=7.0">
   <link rel="stylesheet" href="css/auth.css?v=7.0">
   <link rel="stylesheet" href="css/responsive.css?v=26.0.0">
+  <link rel="stylesheet" href="css/theme.css?v=44.1.0">
+
+  <script>
+    /* Immediate Theme Pre-loader: avoids theme flashing */
+    (function() {
+      try {
+        var savedTheme = localStorage.getItem('civic_theme');
+        var systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = savedTheme ? savedTheme : (systemPrefersDark ? 'dark' : 'dark');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch(e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
 
   <style>
     /* Absolute Zero-Leakage View Isolation */
@@ -105,11 +120,18 @@
        ENTRY GATEWAY: SECURE 3-DEPARTMENT LOGIN PORTAL (STANDALONE ISOLATED SCREEN)
        ========================================================================= -->
   <div id="authGatewayView" class="master-dashboard-view active auth-hero-wrapper" style="position: relative;">
-    <!-- Top Right App Download / Install Pill (Login Page Only) -->
-    <div class="pwa-install-element" id="pwaAuthTopInstallBtn" style="position: absolute; top: 1.25rem; right: 1.5rem; z-index: 100;">
-      <button type="button" class="btn btn-outline btn-sm btn-install-pwa" onclick="window.triggerPWAInstall()" style="border-color: #10b981; color: #34d399; background: rgba(6, 11, 20, 0.85); backdrop-filter: blur(10px); padding: 0.5rem 1.1rem; box-shadow: 0 0 20px rgba(16, 185, 129, 0.35); font-size: 0.85rem;" title="Download & Install Smart Civic App">
-        <span>📲</span> <strong>Download / Install App</strong>
+    <!-- Top Right App Download / Install Pill & Theme Toggle (Login Page Only) -->
+    <div style="position: absolute; top: 1.25rem; right: 1.5rem; z-index: 100; display: flex; align-items: center; gap: 0.65rem;">
+      <button type="button" class="theme-toggle-pill" onclick="window.toggleTheme()" title="Toggle Dark / Light Mode" aria-label="Toggle theme">
+        <span class="theme-icon sun-icon" aria-hidden="true">☀️</span>
+        <span class="theme-icon moon-icon" aria-hidden="true">🌙</span>
+        <span class="theme-label">Dark</span>
       </button>
+      <div class="pwa-install-element" id="pwaAuthTopInstallBtn">
+        <button type="button" class="btn btn-outline btn-sm btn-install-pwa" onclick="window.triggerPWAInstall()" style="border-color: #10b981; color: #34d399; background: rgba(6, 11, 20, 0.85); backdrop-filter: blur(10px); padding: 0.5rem 1.1rem; box-shadow: 0 0 20px rgba(16, 185, 129, 0.35); font-size: 0.85rem;" title="Download & Install Smart Civic App">
+          <span>📲</span> <strong>Download / Install App</strong>
+        </button>
+      </div>
     </div>
 
     <!-- Emblem & Official Project Logo Header -->
@@ -327,6 +349,11 @@
 
       <!-- User Actions & Logout -->
       <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <button type="button" class="theme-toggle-pill" onclick="window.toggleTheme()" title="Toggle Dark / Light Mode" aria-label="Toggle theme">
+          <span class="theme-icon sun-icon" aria-hidden="true">☀️</span>
+          <span class="theme-icon moon-icon" aria-hidden="true">🌙</span>
+          <span class="theme-label">Dark</span>
+        </button>
         <div class="daily-quota-topbar-pill" id="citizenDailyQuotaPill" title="Daily Limit: 3 reports/day across all departments">
           <span>⚡</span> <span id="citizenQuotaTopText">3/3 Left Today</span>
         </div>
@@ -665,6 +692,11 @@
 
       <!-- User Actions & Logout -->
       <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <button type="button" class="theme-toggle-pill" onclick="window.toggleTheme()" title="Toggle Dark / Light Mode" aria-label="Toggle theme">
+          <span class="theme-icon sun-icon" aria-hidden="true">☀️</span>
+          <span class="theme-icon moon-icon" aria-hidden="true">🌙</span>
+          <span class="theme-label">Dark</span>
+        </button>
         <button class="btn-switch-portal" onclick="window.handleLogout()">
           <span>🔒</span> Logout
         </button>
@@ -1337,6 +1369,11 @@
 
       <!-- User Actions & Logout -->
       <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <button type="button" class="theme-toggle-pill" onclick="window.toggleTheme()" title="Toggle Dark / Light Mode" aria-label="Toggle theme">
+          <span class="theme-icon sun-icon" aria-hidden="true">☀️</span>
+          <span class="theme-icon moon-icon" aria-hidden="true">🌙</span>
+          <span class="theme-label">Dark</span>
+        </button>
         <button class="btn btn-saffron btn-sm" id="foodTopLogNoticeBtn" onclick="window.openFoodInspectionModal()">
           <span>➕</span> Log Inspection Notice
         </button>
@@ -1516,6 +1553,11 @@
 
       <!-- User Actions & Logout -->
       <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <button type="button" class="theme-toggle-pill" onclick="window.toggleTheme()" title="Toggle Dark / Light Mode" aria-label="Toggle theme">
+          <span class="theme-icon sun-icon" aria-hidden="true">☀️</span>
+          <span class="theme-icon moon-icon" aria-hidden="true">🌙</span>
+          <span class="theme-label">Dark</span>
+        </button>
         <button class="btn-switch-portal" onclick="window.handleLogout()">
           <span>🔒</span> Logout
         </button>

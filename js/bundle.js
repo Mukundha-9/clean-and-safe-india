@@ -4863,6 +4863,10 @@
       if (el) el.classList.remove('active');
     });
 
+    if (window.setTheme) {
+      window.setTheme(document.documentElement.getAttribute('data-theme') || 'dark', false);
+    }
+
     const chatbotBtn = document.getElementById('chatbotTrigger');
 
     if (!isAuth) {
@@ -8558,6 +8562,7 @@
   // 11. SINGLE CLEAN INITIALIZATION & EVENT BINDINGS
   // =========================================================================
   document.addEventListener('DOMContentLoaded', () => {
+    if (window.initTheme) window.initTheme();
     checkAuthAndRoute();
 
     // WhatsApp Input Keydown (Enter to send)
@@ -10486,3 +10491,81 @@
       console.warn('SCADA grid fetch error:', e);
     }
   }
+
+  // =========================================================================
+  // Dual Theme Engine (Dark & Light Mode Universal Controller)
+  // =========================================================================
+  window.initTheme = function() {
+    try {
+      const savedTheme = localStorage.getItem('civic_theme');
+      const systemPrefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      const theme = savedTheme ? savedTheme : (systemPrefersLight ? 'light' : 'dark');
+      window.setTheme(theme, false);
+
+      // Auto-adapt if system theme changes and user hasn't set custom preference
+      if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+          if (!localStorage.getItem('civic_theme')) {
+            window.setTheme(e.matches ? 'light' : 'dark', false);
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('initTheme error:', err);
+    }
+  };
+
+  window.setTheme = function(themeName, persist = true) {
+    const theme = (themeName === 'light') ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+    if (document.body) {
+      document.body.setAttribute('data-theme', theme);
+    }
+
+    if (persist) {
+      try {
+        localStorage.setItem('civic_theme', theme);
+      } catch (e) {}
+    }
+
+    // Update Meta theme-color
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute('content', theme === 'light' ? '#f1f5f9' : '#060911');
+    }
+
+    // Update all theme toggle pills across all portal headers and auth screen
+    const toggleBtns = document.querySelectorAll('.theme-toggle-pill, .theme-toggle-btn');
+    toggleBtns.forEach(btn => {
+      const label = btn.querySelector('.theme-label');
+      if (label) {
+        label.textContent = (theme === 'light') ? 'Light' : 'Dark';
+      }
+      btn.setAttribute('aria-label', (theme === 'light') ? 'Switch to Dark Mode' : 'Switch to Light Mode');
+      btn.setAttribute('title', (theme === 'light') ? 'Switch to Dark Mode (Current: Light)' : 'Switch to Light Mode (Current: Dark)');
+      if (theme === 'light') {
+        btn.classList.add('is-light');
+        btn.classList.remove('is-dark');
+      } else {
+        btn.classList.add('is-dark');
+        btn.classList.remove('is-light');
+      }
+    });
+
+    // Notify any active components or Leaflet GIS maps
+    window.dispatchEvent(new CustomEvent('civic_theme_changed', { detail: { theme: theme } }));
+  };
+
+  window.toggleTheme = function() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = (currentTheme === 'light') ? 'dark' : 'light';
+    window.setTheme(newTheme, true);
+    if (typeof showToast === 'function') {
+      showToast(newTheme === 'light' ? 'Switched to Light Mode ☀️' : 'Switched to Dark Mode 🌙', 'info', newTheme === 'light' ? '☀️' : '🌙');
+    }
+  };
+
+  // Immediate execution of theme initialization
+  try {
+    window.initTheme();
+  } catch (e) {}
