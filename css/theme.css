@@ -329,6 +329,113 @@ html, body, .dashboard-topbar, .card, .modal-box, .mun-command-tier, .auth-card 
   border-color: #0284c7 !important;
 }
 
+/* Light Mode Executive Overview Priority Action Queue Table */
+[data-theme="light"] .cmd-overview-table th {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .cmd-overview-table td {
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+[data-theme="light"] .cmd-overview-row:hover td {
+  background: #f8fafc !important;
+}
+
+[data-theme="light"] .cmd-row-title {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .cmd-row-sub,
+[data-theme="light"] .cmd-sev-sub,
+[data-theme="light"] .cmd-due-sub {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .cmd-mono-id {
+  color: #0284c7 !important;
+}
+
+[data-theme="light"] .cmd-dept-pill {
+  background: #e0f2fe !important;
+  color: #0369a1 !important;
+  border-color: #bae6fd !important;
+}
+
+[data-theme="light"] .stage-pill-reported {
+  background: #e0f2fe !important;
+  color: #0284c7 !important;
+  border-color: #7dd3fc !important;
+}
+
+[data-theme="light"] .stage-pill-unassigned {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border-color: #fcd34d !important;
+}
+
+[data-theme="light"] .stage-pill-progress {
+  background: #ede9fe !important;
+  color: #5b21b6 !important;
+  border-color: #c4b5fd !important;
+}
+
+[data-theme="light"] .stage-pill-verify {
+  background: #fef9c3 !important;
+  color: #854d0e !important;
+  border-color: #fde047 !important;
+}
+
+[data-theme="light"] .stage-pill-escalated {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border-color: #fca5a5 !important;
+}
+
+[data-theme="light"] .stage-pill-resolved {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border-color: #86efac !important;
+}
+
+[data-theme="light"] .sla-pill-active {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #fcd34d !important;
+}
+
+[data-theme="light"] .sla-pill-breached {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border-color: #fca5a5 !important;
+}
+
+[data-theme="light"] .sla-pill-done {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border-color: #86efac !important;
+}
+
+[data-theme="light"] .btn-icon-track {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #475569 !important;
+}
+
+[data-theme="light"] .btn-icon-track:hover {
+  background: #f0f9ff !important;
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+}
+
+[data-theme="light"] .badge-followup-dot {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border-color: #f59e0b !important;
+}
+
 [data-theme="light"] .cmd-preventive-action-card {
   background: #f8fafc !important;
   border: 1px solid #cbd5e1 !important;

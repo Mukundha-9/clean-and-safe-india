@@ -132,32 +132,220 @@
   }
 }
 
-#munTab_overview .col-jurisdiction {
-  display: none !important;
+/* Executive Overview Priority Action Queue Table */
+.cmd-overview-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
 }
 
-#munTab_overview .compact-lifecycle-strip {
-  gap: 2px;
-  padding: 2px 5px;
-  margin: 2px 0;
-  max-width: 140px;
+.cmd-overview-table th {
+  padding: 0.65rem 0.75rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: #0f172a;
+  color: #94a3b8;
+  border-bottom: 1px solid #1e293b;
 }
 
-#munTab_overview .compact-lifecycle-step .step-name {
-  display: none;
+.cmd-overview-table td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
 }
 
-#munTab_overview .compact-lifecycle-step.step-current .step-name,
-#munTab_overview .compact-lifecycle-step.step-done:last-child .step-name {
-  display: inline;
-  font-size: 0.65rem;
+.cmd-overview-row:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cmd-dept-pill {
+  font-size: 0.68rem;
   font-weight: 700;
-  margin-left: 2px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-#munTab_overview .cmd-table th,
-#munTab_overview .cmd-table td {
-  padding: 0.65rem 0.65rem;
+.cmd-row-title {
+  color: var(--text-bright, #f8fafc);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmd-row-sub {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmd-mono-id {
+  font-family: var(--font-mono, monospace);
+  color: #38bdf8;
+  font-weight: 600;
+  font-size: 0.7rem;
+}
+
+/* Stage Pills */
+.cmd-stage-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+
+.stage-pill-reported {
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.stage-pill-unassigned {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.stage-pill-progress {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.stage-pill-verify {
+  background: rgba(234, 179, 8, 0.15);
+  color: #fde047;
+  border: 1px solid rgba(234, 179, 8, 0.35);
+}
+
+.stage-pill-escalated {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.stage-pill-resolved {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.cmd-sev-sub {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+/* SLA Pills */
+.cmd-sla-pill {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 12px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sla-pill-active {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.sla-pill-breached {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.sla-pill-done {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.cmd-due-sub {
+  font-size: 0.67rem;
+  color: #94a3b8;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+/* Compact Action Buttons */
+.btn-compact-action {
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  padding: 0.28rem 0.55rem !important;
+  border-radius: 5px !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+}
+
+.btn-action-verify {
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  padding: 0.28rem 0.55rem !important;
+  border-radius: 5px !important;
+  background: #10b981 !important;
+  border: 1px solid #10b981 !important;
+  color: #ffffff !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+}
+
+.btn-icon-track {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  border-radius: 5px;
+  padding: 0.28rem 0.45rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-icon-track:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.badge-followup-dot {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid #f59e0b;
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  border-radius: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.action-done-label {
+  font-size: 0.75rem;
+  color: #10b981;
+  font-weight: 700;
 }
 
 /* Preventive Action Cards */

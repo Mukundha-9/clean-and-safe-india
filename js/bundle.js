@@ -4367,79 +4367,185 @@
         return (b.timestamp || 0) - (a.timestamp || 0);
       });
 
-      const htmlContent = displayIssues.length === 0
-        ? `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">No civic incidents found in the selected jurisdiction (${selectedState} → ${selectedCity} → ${selectedWard}).</td></tr>`
-        : displayIssues.map(issue => {
-          const isResolved = issue.status === 'resolved';
-          const isEscalated = issue.status === 'escalated' || issue.isSlaBreached;
-          const reportedTimeStr = formatReportDateTime(issue.timestamp);
-          const deadlineTimeStr = formatReportDateTime(issue.slaDeadline || (issue.timestamp + 48 * 3600 * 1000));
-          const resolvedTimeStr = isResolved ? formatReportDateTime(issue.resolvedTimestamp || (issue.timestamp + 3600000 * 28)) : null;
-          const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, issue.resolvedTimestamp || (issue.timestamp + 3600000 * 28)) : null;
+      // 1. Executive 4-Column Layout for Overview Priority Action Queue (munIncidentTableBody)
+      if (tableBody) {
+        tableBody.innerHTML = displayIssues.length === 0
+          ? `<tr><td colspan="4" style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">No priority civic incidents in selected jurisdiction (${selectedWard}).</td></tr>`
+          : displayIssues.map(issue => {
+            const isResolved = issue.status === 'resolved';
+            const isEscalated = issue.status === 'escalated' || issue.isSlaBreached;
+            const shortDept = (issue.deptName || 'Sanitation').replace(' & Waste Management', '').replace(' Department', '');
+            const shortId = issue.id.length > 14 ? '...' + issue.id.slice(-6) : issue.id;
+            const cleanLoc = (issue.location || 'Ward 12')
+              .replace(/^Surampalem\s*•\s*/i, '')
+              .replace(/^Ward\s*\d+\s*\(.*?\),\s*/i, '');
+            const cleanTitle = (issue.title || 'Civic Grievance')
+              .replace(/Independent Ground Incident Reported/i, 'Ground Incident Reported');
 
-          return `
-            <tr>
-              <td>
-                <div style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8;">${issue.id}</div>
-                <div style="font-size: 0.72rem; color: var(--command-text-muted);">📅 ${reportedTimeStr}</div>
-              </td>
-              <td>
-                <div style="font-weight: 700; color: var(--command-text, var(--text-bright)); display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
-                  <span>${issue.title}</span>
-                  ${Number(issue.followUpCount) > 0 ? `
-                    <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 0.65rem; padding: 2px 5px;">
-                      🔄 ${issue.followUpCount} Follow-up${Number(issue.followUpCount) > 1 ? 's' : ''}
+            // Stage Label & Class
+            let stageLabel = 'Reported';
+            let stageBadgeClass = 'stage-pill-reported';
+            if (isResolved) {
+              stageLabel = 'Resolved';
+              stageBadgeClass = 'stage-pill-resolved';
+            } else if (issue.status === 'work_completed' || issue.workerStatus === 'Work Completed - Awaiting Verification') {
+              stageLabel = 'Awaiting Sign-off';
+              stageBadgeClass = 'stage-pill-verify';
+            } else if (isEscalated) {
+              stageLabel = 'SLA Escalated';
+              stageBadgeClass = 'stage-pill-escalated';
+            } else if (!issue.assignedWorker || issue.assignedWorker === 'Unassigned' || !issue.assignedTimestamp) {
+              stageLabel = 'Unassigned';
+              stageBadgeClass = 'stage-pill-unassigned';
+            } else if (issue.status === 'in_progress' || issue.status === 'assigned') {
+              const workerName = issue.assignedWorker.split(' ')[0] || 'Squad';
+              stageLabel = `In Progress (${workerName})`;
+              stageBadgeClass = 'stage-pill-progress';
+            }
+
+            // SLA Label & Class
+            let slaBadgeClass = 'sla-pill-active';
+            let slaLabel = `⏱️ ${issue.slaHoursLeft || 48}h left`;
+            if (isResolved) {
+              slaBadgeClass = 'sla-pill-done';
+              slaLabel = `✅ Resolved`;
+            } else if (isEscalated) {
+              slaBadgeClass = 'sla-pill-breached';
+              slaLabel = `🚨 Breached`;
+            }
+            const d = new Date(issue.slaDeadline || (issue.timestamp + 48 * 3600 * 1000));
+            const dueShort = d.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true });
+
+            // Action Button
+            let actionBtnHtml = '';
+            if (isResolved) {
+              actionBtnHtml = `<span class="action-done-label">✓ Done</span>`;
+            } else if (!issue.assignedWorker || issue.assignedWorker === 'Unassigned' || !issue.assignedTimestamp) {
+              actionBtnHtml = `<button type="button" class="btn btn-sm btn-primary btn-compact-action" onclick="window.openAssignSquadModal('${issue.id}')">⚡ Assign</button>`;
+            } else if (issue.status === 'work_completed' || issue.workerStatus === 'Work Completed - Awaiting Verification') {
+              actionBtnHtml = `<button type="button" class="btn btn-sm btn-action-verify" onclick="window.openResolveModal('${issue.id}')">✓ Verify</button>`;
+            } else {
+              actionBtnHtml = `<button type="button" class="btn btn-sm btn-outline btn-compact-action" onclick="window.viewIssueDetail('${issue.id}')">Track</button>`;
+            }
+
+            return `
+              <tr class="cmd-overview-row">
+                <td style="padding: 0.55rem 0.75rem; vertical-align: middle;">
+                  <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 3px;">
+                    <span class="cmd-dept-pill">${issue.deptIcon || '🏛️'} ${shortDept}</span>
+                    <strong class="cmd-row-title" title="${issue.title}">${cleanTitle}</strong>
+                    ${Number(issue.followUpCount) > 0 ? `
+                      <span class="badge-followup-dot" title="${issue.followUpCount} Citizen Follow-up(s)">🔄 ${issue.followUpCount}</span>
+                    ` : ''}
+                  </div>
+                  <div class="cmd-row-sub">
+                    <span class="cmd-mono-id" title="${issue.id}">#${shortId}</span>
+                    <span>•</span>
+                    <span title="${issue.location}">📍 ${cleanLoc || issue.ward || 'Ward 12'}</span>
+                    <span>•</span>
+                    <span>👤 ${issue.reportedBy || 'Citizen'}</span>
+                  </div>
+                </td>
+                <td style="padding: 0.55rem 0.75rem; vertical-align: middle;">
+                  <div style="display: flex; flex-direction: column; gap: 3px; align-items: flex-start;">
+                    <span class="cmd-stage-pill ${stageBadgeClass}">● ${stageLabel}</span>
+                    <span class="cmd-sev-sub">
+                      Severity: <strong style="color: ${issue.severity === 'critical' ? '#f87171' : issue.severity === 'high' ? '#fbbf24' : '#34d399'};">${(issue.severity || 'med').toUpperCase()}</strong>
                     </span>
-                  ` : ''}
-                  ${issue.identityType && issue.identityType !== 'NEW_INCIDENT' ? `
-                    <span class="badge" style="background: rgba(147, 51, 234, 0.2); color: #d8b4fe; border: 1px solid #a855f7; font-size: 0.65rem; padding: 2px 5px;">
-                      ${issue.identityType.replace('_', ' ')}
-                    </span>
-                  ` : ''}
-                </div>
-                <div style="font-size: 0.75rem; color: var(--command-text-muted);">📍 ${issue.location}</div>
-                <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">👤 ${issue.reportedBy || 'Citizen'} • 👷 ${issue.assignedWorker || 'Squad'}</div>
-              </td>
-              <td class="col-jurisdiction">
-                <div style="font-size: 0.78rem; color: #38bdf8; font-weight: 700;">${issue.state || 'Andhra Pradesh'}</div>
-                <div style="font-size: 0.72rem; color: var(--command-text-muted);">${issue.city || 'Surampalem'} • ${issue.ward || 'Ward 12'}</div>
-              </td>
-              <td><span class="cat-badge">${issue.deptIcon} ${issue.deptName}</span></td>
-              <td style="min-width: 175px;">
-                ${renderCompactLifecycle(issue)}
-                <div style="font-size: 0.68rem; color: #94a3b8; margin-top: 2px;">
-                  Severity: <strong style="color: ${issue.severity === 'critical' ? '#f87171' : issue.severity === 'high' ? '#fbbf24' : '#34d399'};">${(issue.severity || 'medium').toUpperCase()}</strong> • Risk: ${issue.aiRiskScore || 50}/100
-                </div>
-              </td>
-              <td>
-                <div class="sla-progress-container">
-                  <span class="sla-text ${isResolved ? 'text-success' : isEscalated ? 'text-danger' : 'text-warning'}" style="font-weight: 800; font-size: 0.75rem;">
-                    ${isResolved ? `✅ Resolved (${turnaroundStr})` : isEscalated ? `🚨 SLA Breached (>48h) — Escalated` : `⏱️ ${issue.slaHoursLeft}h left (Due ${deadlineTimeStr})`}
+                  </div>
+                </td>
+                <td style="padding: 0.55rem 0.75rem; vertical-align: middle;">
+                  <div style="display: flex; flex-direction: column; gap: 3px;">
+                    <span class="cmd-sla-pill ${slaBadgeClass}">${slaLabel}</span>
+                    <span class="cmd-due-sub">Due ${dueShort}</span>
+                  </div>
+                </td>
+                <td style="padding: 0.55rem 0.75rem; vertical-align: middle; text-align: right;">
+                  <div style="display: flex; gap: 0.35rem; justify-content: flex-end; align-items: center;">
+                    ${actionBtnHtml}
+                    <button type="button" class="btn-icon-track" title="Inspect Ticket Details" onclick="window.viewIssueDetail('${issue.id}')">
+                      🔍
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
+      }
+
+      // 2. Full 7-Column Layout for SLA Triage Queue Tab (munIncidentTableBody_queue)
+      if (tableBodyQueue) {
+        tableBodyQueue.innerHTML = displayIssues.length === 0
+          ? `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">No civic incidents found in the selected jurisdiction (${selectedState} → ${selectedCity} → ${selectedWard}).</td></tr>`
+          : displayIssues.map(issue => {
+            const isResolved = issue.status === 'resolved';
+            const isEscalated = issue.status === 'escalated' || issue.isSlaBreached;
+            const reportedTimeStr = formatReportDateTime(issue.timestamp);
+            const deadlineTimeStr = formatReportDateTime(issue.slaDeadline || (issue.timestamp + 48 * 3600 * 1000));
+            const turnaroundStr = isResolved ? calculateSlaTurnaround(issue.timestamp, issue.resolvedTimestamp || (issue.timestamp + 3600000 * 28)) : null;
+
+            return `
+              <tr>
+                <td>
+                  <div style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8;">${issue.id}</div>
+                  <div style="font-size: 0.72rem; color: var(--command-text-muted);">📅 ${reportedTimeStr}</div>
+                </td>
+                <td>
+                  <div style="font-weight: 700; color: var(--command-text, var(--text-bright)); display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                    <span>${issue.title}</span>
+                    ${Number(issue.followUpCount) > 0 ? `
+                      <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 0.65rem; padding: 2px 5px;">
+                        🔄 ${issue.followUpCount} Follow-up${Number(issue.followUpCount) > 1 ? 's' : ''}
+                      </span>
+                    ` : ''}
+                    ${issue.identityType && issue.identityType !== 'NEW_INCIDENT' ? `
+                      <span class="badge" style="background: rgba(147, 51, 234, 0.2); color: #d8b4fe; border: 1px solid #a855f7; font-size: 0.65rem; padding: 2px 5px;">
+                        ${issue.identityType.replace('_', ' ')}
+                      </span>
+                    ` : ''}
+                  </div>
+                  <div style="font-size: 0.75rem; color: var(--command-text-muted);">📍 ${issue.location}</div>
+                  <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">👤 ${issue.reportedBy || 'Citizen'} • 👷 ${issue.assignedWorker || 'Squad'}</div>
+                </td>
+                <td>
+                  <div style="font-size: 0.78rem; color: #38bdf8; font-weight: 700;">${issue.state || 'Andhra Pradesh'}</div>
+                  <div style="font-size: 0.72rem; color: var(--command-text-muted);">${issue.city || 'Surampalem'} • ${issue.ward || 'Ward 12'}</div>
+                </td>
+                <td><span class="cat-badge">${issue.deptIcon} ${issue.deptName}</span></td>
+                <td>
+                  <span class="badge" style="background: rgba(255,255,255,0.06); color: ${issue.severity === 'critical' ? '#f87171' : issue.severity === 'high' ? '#fbbf24' : '#34d399'}; font-weight: 700; border: 1px solid rgba(255,255,255,0.1);">
+                    ${(issue.severity || 'medium').toUpperCase()}
                   </span>
-                </div>
-              </td>
-              <td>
-                <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center;">
-                  <button class="btn btn-sm btn-outline" style="border-color: var(--command-border); padding: 0.35rem 0.6rem;" onclick="window.viewIssueDetail('${issue.id}')">📦 Track</button>
-                  ${!isResolved ? `
-                    ${(!issue.assignedWorker || issue.assignedWorker === 'Unassigned' || !issue.assignedTimestamp) ? `
-                      <button class="btn btn-sm btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: 700; white-space: nowrap; padding: 0.35rem 0.65rem;" onclick="window.openAssignSquadModal('${issue.id}')">
-                        🚛 Assign Squad
-                      </button>
-                    ` : `
-                      <button class="btn btn-sm btn-outline" style="border-color: #38bdf8; color: #38bdf8; font-size: 0.72rem; white-space: nowrap; padding: 0.35rem 0.55rem;" onclick="window.openAssignSquadModal('${issue.id}')" title="Assigned to ${issue.assignedWorker}">
-                        🔄 Reassign
-                      </button>
-                    `}
-                    <button class="btn btn-sm btn-outline" style="border-color: #475569; color: #cbd5e1; padding: 0.35rem 0.55rem;" onclick="window.openResolveModal('${issue.id}')">Resolve</button>
-                  ` : `<span style="font-size: 0.8rem; color: #10b981; font-weight: 700;">Done</span>`}
-                </div>
-              </td>
-            </tr>
-          `;
-        }).join('');
-      if (tableBody) tableBody.innerHTML = htmlContent;
-      if (tableBodyQueue) tableBodyQueue.innerHTML = htmlContent;
+                </td>
+                <td>
+                  <div class="sla-progress-container">
+                    <span class="sla-text ${isResolved ? 'text-success' : isEscalated ? 'text-danger' : 'text-warning'}" style="font-weight: 800; font-size: 0.75rem;">
+                      ${isResolved ? `✅ Resolved (${turnaroundStr})` : isEscalated ? `🚨 SLA Breached (>48h)` : `⏱️ ${issue.slaHoursLeft}h left`}
+                    </span>
+                    <div style="font-size: 0.68rem; color: var(--command-text-muted); margin-top: 2px;">Due: ${deadlineTimeStr}</div>
+                  </div>
+                </td>
+                <td>
+                  <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center;">
+                    <button class="btn btn-sm btn-outline" style="border-color: var(--command-border); padding: 0.35rem 0.6rem;" onclick="window.viewIssueDetail('${issue.id}')">📦 Track</button>
+                    ${!isResolved ? `
+                      ${(!issue.assignedWorker || issue.assignedWorker === 'Unassigned' || !issue.assignedTimestamp) ? `
+                        <button class="btn btn-sm btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: 700; white-space: nowrap; padding: 0.35rem 0.65rem;" onclick="window.openAssignSquadModal('${issue.id}')">
+                          🚛 Assign Squad
+                        </button>
+                      ` : `
+                        <button class="btn btn-sm btn-outline" style="border-color: #38bdf8; color: #38bdf8; font-size: 0.72rem; white-space: nowrap; padding: 0.35rem 0.55rem;" onclick="window.openAssignSquadModal('${issue.id}')" title="Assigned to ${issue.assignedWorker}">
+                          🔄 Reassign
+                        </button>
+                      `}
+                      <button class="btn btn-sm btn-outline" style="border-color: #475569; color: #cbd5e1; padding: 0.35rem 0.55rem;" onclick="window.openResolveModal('${issue.id}')">Resolve</button>
+                    ` : `<span style="font-size: 0.8rem; color: #10b981; font-weight: 700;">Done</span>`}
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('');
+      }
     }
 
     const outageGrid = document.getElementById('munPowerOutageGrid');
