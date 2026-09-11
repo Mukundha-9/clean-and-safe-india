@@ -2771,7 +2771,7 @@
       container.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:#38bdf8; text-align:center; padding:2rem;">
           <div style="font-size:3rem; margin-bottom:1rem;">🗺️</div>
-          <div style="font-weight:800; font-size:1.2rem; color:white;">GIS RED-ZONE HEATMAP READY</div>
+          <div style="font-weight:800; font-size:1.2rem; color:var(--text-bright);">GIS RED-ZONE HEATMAP READY</div>
           <p style="color:#94a3b8; font-size:0.9rem; max-width:400px; margin-top:0.5rem;">
             Ward 12 Central Market Junction: High-frequency littering & sparking transformer identified as Active Red Zone.
           </p>
@@ -4170,7 +4170,7 @@
         myReportsGrid.innerHTML = `
           <div style="grid-column: 1/-1; padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-lg); text-align: center; color: var(--text-muted); border: 1px dashed var(--border);">
             <div style="font-size: 2rem; margin-bottom: 0.5rem;">📋</div>
-            <div style="font-size: 1rem; font-weight: 700; color: white; margin-bottom: 0.25rem;">No reports found in this view</div>
+            <div style="font-size: 1rem; font-weight: 700; color: var(--text-bright); margin-bottom: 0.25rem;">No reports found in this view</div>
             <p style="font-size: 0.82rem; margin-bottom: 1rem;">${currentSub === 'resolved' ? 'No resolved reports yet.' : currentSub === 'active' ? 'You have no active pending grievances.' : 'You haven\'t submitted any civic complaints yet. Help keep your neighborhood clean & safe!'}</p>
             <button class="btn btn-primary btn-sm" onclick="window.openReportModal()">+ Report Issue</button>
           </div>`;
@@ -4236,7 +4236,7 @@
         : `
           <div style="grid-column: 1/-1; padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-lg); text-align: center; color: var(--text-muted); border: 1px dashed var(--border);">
             <div style="font-size: 2rem; margin-bottom: 0.5rem;">📋</div>
-            <div style="font-size: 1rem; font-weight: 700; color: white; margin-bottom: 0.25rem;">No grievances found in this view</div>
+            <div style="font-size: 1rem; font-weight: 700; color: var(--text-bright); margin-bottom: 0.25rem;">No grievances found in this view</div>
             <p style="font-size: 0.82rem; margin-bottom: 1rem;">No reports match your current filter. You can log a new grievance anytime!</p>
             <button class="btn btn-primary btn-sm" onclick="window.openReportModal()">+ Report New Issue</button>
           </div>`;
@@ -4260,7 +4260,7 @@
               <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <div style="width: 36px; height: 36px; border-radius: 50%; background: ${badgeBg}; color: ${color}; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">${icon}</div>
                 <div>
-                  <div style="font-weight: 700; font-size: 0.9rem; color: white;">${tx.title}</div>
+                  <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-bright);">${tx.title}</div>
                   <div style="font-size: 0.78rem; color: var(--text-muted);">${tx.date} • ${tx.status}</div>
                 </div>
               </div>
@@ -4376,7 +4376,7 @@
                 <div style="font-size: 0.72rem; color: var(--command-text-muted);">📅 ${reportedTimeStr}</div>
               </td>
               <td>
-                <div style="font-weight: 700; color: white; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                <div style="font-weight: 700; color: var(--command-text, var(--text-bright)); display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
                   <span>${issue.title}</span>
                   ${Number(issue.followUpCount) > 0 ? `
                     <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-size: 0.65rem; padding: 2px 5px;">
@@ -4412,7 +4412,7 @@
               </td>
               <td>
                 <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; align-items: center;">
-                  <button class="btn btn-sm btn-outline" style="color: white; border-color: var(--command-border); padding: 0.35rem 0.6rem;" onclick="window.viewIssueDetail('${issue.id}')">📦 Track</button>
+                  <button class="btn btn-sm btn-outline" style="border-color: var(--command-border); padding: 0.35rem 0.6rem;" onclick="window.viewIssueDetail('${issue.id}')">📦 Track</button>
                   ${!isResolved ? `
                     ${(!issue.assignedWorker || issue.assignedWorker === 'Unassigned' || !issue.assignedTimestamp) ? `
                       <button class="btn btn-sm btn-primary" style="background: linear-gradient(135deg, #0284c7, #0369a1); font-weight: 700; white-space: nowrap; padding: 0.35rem 0.65rem;" onclick="window.openAssignSquadModal('${issue.id}')">
@@ -4442,7 +4442,7 @@
             <span class="power-status-pill power-status-outage">⚡ OUTAGE ACTIVE</span>
             <span class="outage-eta">ETA: 45 Mins</span>
           </div>
-          <h3 style="font-size: 1.15rem; color: white; margin-bottom: 0.35rem;">Feeder #4 - Substation Transformer</h3>
+          <h3 style="font-size: 1.15rem; color: var(--text-bright); margin-bottom: 0.35rem;">Feeder #4 - Substation Transformer</h3>
           <p style="font-size: 0.85rem; color: var(--text-muted);"><strong>Area:</strong> ${selectedWard !== 'all' ? selectedWard : 'Ward 12 Gandhi Road'} • <strong>Affected:</strong> ~450 Homes</p>
           <div style="background: rgba(255, 255, 255, 0.04); padding: 0.75rem; border-radius: var(--radius-sm); font-size: 0.82rem; margin: 0.6rem 0; border: 1px dashed var(--border);">
             <div>⚠️ <strong>Cause:</strong> Sparking & Flashover</div>
@@ -4469,7 +4469,7 @@
                 </span>
                 <span style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8;">${task.id}</span>
               </div>
-              <h3 style="font-size: 1.1rem; color: white; margin: 0.4rem 0;">${task.title}</h3>
+              <h3 style="font-size: 1.1rem; color: var(--text-bright); margin: 0.4rem 0;">${task.title}</h3>
               <p style="font-size: 0.82rem; color: var(--text-muted);">${task.description}</p>
               <div style="font-size: 0.75rem; color: #94a3b8; margin: 0.4rem 0;">📍 ${task.location}</div>
               ${isAwaitingVerification ? `
@@ -4568,7 +4568,7 @@
               <div style="height: 140px; border-radius: 6px; overflow: hidden; margin-bottom: 0.75rem; border: 1px solid var(--border);">
                 <img src="${issue.imageBefore}" style="width: 100%; height: 100%; object-fit: cover;" alt="${issue.title}">
               </div>
-              <h3 style="color: white; font-size: 1.05rem; margin-bottom: 0.4rem;">${issue.title}</h3>
+              <h3 style="color: var(--text-bright); font-size: 1.05rem; margin-bottom: 0.4rem;">${issue.title}</h3>
               <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem;">${issue.description}</p>
               
               <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); padding: 0.6rem; border-radius: 6px; font-size: 0.78rem; margin-bottom: 0.85rem; color: #cbd5e1;">
@@ -4608,7 +4608,7 @@
         vendorGrid.innerHTML = `
           <div class="card" style="grid-column: 1/-1; text-align: center; padding: 2.5rem; color: #94a3b8; border: 1px dashed var(--border);">
             <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📜</div>
-            <h4 style="color: white; margin-bottom: 0.35rem; font-size: 1.1rem;">No Food Establishments Found</h4>
+            <h4 style="color: var(--text-bright); margin-bottom: 0.35rem; font-size: 1.1rem;">No Food Establishments Found</h4>
             <p style="font-size: 0.85rem; margin-bottom: 1.25rem;">No vendors currently match the selected ward or category filter.</p>
             <button class="btn btn-sm btn-outline" onclick="window.handleVendorFilter('all', document.querySelector('.vendor-filter-chip[data-filter=all]'))">
               Show All Establishments
@@ -4735,7 +4735,7 @@
         openGrid.innerHTML = `
           <div style="grid-column: 1/-1; padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-lg); text-align: center; color: var(--text-muted); border: 1px dashed var(--border);">
             <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎉</div>
-            <div style="font-size: 1rem; font-weight: 700; color: white;">All Assigned Work Orders Completed!</div>
+            <div style="font-size: 1rem; font-weight: 700; color: var(--text-bright);">All Assigned Work Orders Completed!</div>
             <p style="font-size: 0.82rem; margin-top: 0.25rem;">No pending dispatch tickets for Squad 4 at this moment.</p>
           </div>`;
       } else {
@@ -4750,7 +4750,7 @@
           const isEnRoute = (currentWorkerStatus === 'En Route to Site' || Boolean(issue.enRouteTimestamp && !issue.arrivedTimestamp)) && !isOnSite && !isCompletedAwaiting;
 
           return `
-            <div class="issue-card" style="border: 1px solid ${isCompletedAwaiting ? 'rgba(234, 179, 8, 0.45)' : 'rgba(56, 189, 248, 0.35)'}; background: #0c1322;">
+            <div class="issue-card" style="border: 1px solid ${isCompletedAwaiting ? 'rgba(234, 179, 8, 0.45)' : 'rgba(56, 189, 248, 0.35)'}; background: var(--bg-card);">
               <div class="issue-card-media">
                 <img src="${issue.imageBefore}" class="issue-card-img" alt="${issue.title}" loading="lazy">
                 <div class="issue-floating-badges">
@@ -4766,7 +4766,7 @@
                   <span class="badge sev-${issue.severity}">${(issue.severity || 'medium').toUpperCase()}</span>
                 </div>
                 <div style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8; font-size: 0.85rem; margin-bottom: 0.25rem;">${issue.id}</div>
-                <h3 class="issue-title" style="color: white; margin: 0 0 0.4rem 0;">${issue.title}</h3>
+                <h3 class="issue-title" style="color: var(--text-bright); margin: 0 0 0.4rem 0;">${issue.title}</h3>
                 <p class="issue-desc">${issue.description}</p>
                 <div class="issue-location-row" style="margin-bottom: 0.6rem;">
                   <span>📍</span>
@@ -4852,7 +4852,7 @@
           const turnaroundStr = calculateSlaTurnaround(issue.timestamp, resolvedTs, issue);
 
           return `
-            <div class="issue-card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #0c1322;">
+            <div class="issue-card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: var(--bg-card);">
               <div class="issue-card-media" style="position: relative;">
                 <img src="${issue.imageAfter || issue.imageBefore}" class="issue-card-img" alt="${issue.title}" loading="lazy">
                 <div class="issue-floating-badges">
@@ -4865,7 +4865,7 @@
                   <span class="cat-badge">${issue.deptIcon || '🏢'} ${issue.deptName || 'Sanitation'}</span>
                   <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981;">CLEARED</span>
                 </div>
-                <h3 class="issue-title" style="color: white;">${issue.title}</h3>
+                <h3 class="issue-title" style="color: var(--text-bright);">${issue.title}</h3>
                 <div class="issue-location-row" style="margin-bottom: 0.6rem;">
                   <span>📍</span>
                   <span>${issue.location}</span>
@@ -5262,7 +5262,7 @@
       return `
         <div style="border-left: 3px solid ${isResolved ? '#10b981' : isEscalated ? '#ef4444' : '#38bdf8'}; padding-left: 10px; line-height: 1.5;">
           <div style="font-size: 0.8rem; color: #38bdf8; font-weight: 800;">📦 ORDER-STYLE LIVE TRACKING: ${ticketMatch.id}</div>
-          <div style="font-weight: 800; color: white; margin: 2px 0;">${ticketMatch.title}</div>
+          <div style="font-weight: 800; color: var(--text-bright); margin: 2px 0;">${ticketMatch.title}</div>
           <div style="font-size: 0.8rem; color: #94a3b8;">📍 ${ticketMatch.location}</div>
           
           <div style="background: rgba(255,255,255,0.04); padding: 8px; border-radius: 6px; margin: 6px 0; font-size: 0.8rem;">
@@ -5909,7 +5909,7 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.55rem; font-size: 0.78rem; margin-bottom: 0.7rem;">
           <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
             <div style="color: #94a3b8; font-size: 0.7rem;">Detected Hazard:</div>
-            <div style="font-weight: 700; color: white;">${data.detectedHazard}</div>
+            <div style="font-weight: 700; color: var(--text-bright);">${data.detectedHazard}</div>
           </div>
           <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
             <div style="color: #94a3b8; font-size: 0.7rem;">Visual Confidence:</div>
@@ -7018,7 +7018,7 @@
             </div>
             <div style="flex: 1; min-width: 220px;">
               <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.2rem;">
-                <h3 style="margin: 0; color: white; font-size: 1.25rem; font-weight: 800;">${profile.fullName}</h3>
+                <h3 style="margin: 0; color: var(--text-bright); font-size: 1.25rem; font-weight: 800;">${profile.fullName}</h3>
                 <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 0.7rem; font-weight: 700;">
                   ✓ Aadhaar e-KYC Verified
                 </span>
@@ -7049,7 +7049,7 @@
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; font-size: 0.82rem;">
             <div style="background: rgba(255,255,255,0.03); padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
               <div style="color: #94a3b8; font-size: 0.7rem; margin-bottom: 3px;">📧 Verified Email Address:</div>
-              <div style="font-weight: 700; color: white; word-break: break-all;">${profile.email}</div>
+              <div style="font-weight: 700; color: var(--text-bright); word-break: break-all;">${profile.email}</div>
             </div>
 
             <div style="background: rgba(255,255,255,0.03); padding: 0.65rem 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
@@ -7062,7 +7062,7 @@
 
             <div style="grid-column: 1 / -1; background: rgba(255,255,255,0.03); padding: 0.75rem 0.85rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
               <div style="color: #94a3b8; font-size: 0.7rem; margin-bottom: 3px;">🏠 Permanent Residential Address (Citizen Domicile):</div>
-              <div style="font-weight: 700; color: #f1f5f9; line-height: 1.4;">${profile.permanentAddress}</div>
+              <div style="font-weight: 700; color: var(--text-bright); line-height: 1.4;">${profile.permanentAddress}</div>
               <div style="font-size: 0.72rem; color: #64748b; margin-top: 4px;">
                 🏛️ Home Ward / Jurisdiction: <strong style="color: #94a3b8;">${profile.homeWard}</strong> • Masked Aadhaar: <span style="font-family: var(--font-mono); color: #cbd5e1;">${profile.aadhaarMasked}</span>
               </div>
@@ -7089,7 +7089,7 @@
             <div class="gps-tag-header" style="color: #34d399;">
               <span>🏠</span> 1. CITIZEN HOME RESIDENCE (KYC)
             </div>
-            <div style="font-size: 0.82rem; font-weight: 700; color: white; margin-bottom: 0.3rem;">
+            <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-bright); margin-bottom: 0.3rem;">
               ${profile.homeCity}, ${profile.homeState}
             </div>
             <div class="gps-coords-badge">
@@ -7105,7 +7105,7 @@
             <div class="gps-tag-header" style="color: #38bdf8;">
               <span>📍</span> 2. INCIDENT SITE (TICKET ALLOCATION)
             </div>
-            <div style="font-size: 0.82rem; font-weight: 700; color: white; margin-bottom: 0.3rem;">
+            <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-bright); margin-bottom: 0.3rem;">
               ${issue.location || profile.permanentAddress}
             </div>
             <div class="gps-coords-badge">
@@ -7603,7 +7603,7 @@
                   <span class="badge badge-${status}">${status.replace('_', ' ').toUpperCase()}</span>
                   <span class="badge sev-${(issue.severity || 'medium').toLowerCase()}">${severity}</span>
                 </div>
-                <h2 style="font-size: 1.35rem; color: white; margin: 0.2rem 0 0.4rem;">${issueTitle}</h2>
+                <h2 style="font-size: 1.35rem; color: var(--text-bright); margin: 0.2rem 0 0.4rem;">${issueTitle}</h2>
                 <div style="font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 0.4rem;">
                   <span>📍</span> <span>${issueLocation}</span>
                 </div>
@@ -7668,7 +7668,7 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.6rem; font-size: 0.78rem;">
               <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
                 <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Permanent Residential Address:</span>
-                <strong style="color: white;">${reporterProfile.permanentAddress}</strong>
+                <strong style="color: var(--text-bright);">${reporterProfile.permanentAddress}</strong>
               </div>
               <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
                 <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Home GPS vs Incident GPS:</span>
@@ -7747,7 +7747,7 @@
               </div>
               <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
                 <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Parent / Corroborated Ticket:</span>
-                <strong style="color: white;">${issue.parentIssueId ? `<a href="javascript:void(0)" onclick="window.viewIssueDetail('${issue.parentIssueId}')" style="color: #38bdf8; text-decoration: underline;">#${issue.parentIssueId}</a>` : (issue.identityMatchedIssueId ? `<a href="javascript:void(0)" onclick="window.viewIssueDetail('${issue.identityMatchedIssueId}')" style="color: #38bdf8; text-decoration: underline;">#${issue.identityMatchedIssueId}</a>` : 'Root Ticket (Primary)')}</strong>
+                <strong style="color: var(--text-bright);">${issue.parentIssueId ? `<a href="javascript:void(0)" onclick="window.viewIssueDetail('${issue.parentIssueId}')" style="color: #38bdf8; text-decoration: underline;">#${issue.parentIssueId}</a>` : (issue.identityMatchedIssueId ? `<a href="javascript:void(0)" onclick="window.viewIssueDetail('${issue.identityMatchedIssueId}')" style="color: #38bdf8; text-decoration: underline;">#${issue.identityMatchedIssueId}</a>` : 'Root Ticket (Primary)')}</strong>
               </div>
               <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.65rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
                 <span style="color: #94a3b8; font-size: 0.7rem; display: block;">Evidence Fingerprint:</span>
@@ -7794,7 +7794,7 @@
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; font-size: 0.78rem; margin-bottom: 0.6rem;">
                 <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
                   <div style="color: #94a3b8; font-size: 0.7rem;">Historical Reports:</div>
-                  <div style="font-weight: 700; color: white;">${wardForecast.historicalIncidentCount || wardForecast.pastComplaints || 8} incidents</div>
+                  <div style="font-weight: 700; color: var(--text-bright);">${wardForecast.historicalIncidentCount || wardForecast.pastComplaints || 8} incidents</div>
                 </div>
                 <div style="background: rgba(255,255,255,0.03); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
                   <div style="color: #94a3b8; font-size: 0.7rem;">30-Day Window:</div>
@@ -7922,7 +7922,7 @@
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.65rem; font-size: 0.8rem; margin-bottom: 0.75rem;">
                 <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
                   <div style="color: #94a3b8; font-size: 0.7rem;">Suggested Department:</div>
-                  <div style="font-weight: 700; color: white;">${issue.aiSuggestedDepartment || deptName}</div>
+                  <div style="font-weight: 700; color: var(--text-bright);">${issue.aiSuggestedDepartment || deptName}</div>
                 </div>
                 <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
                   <div style="color: #94a3b8; font-size: 0.7rem;">Suggested SLA:</div>
@@ -7930,7 +7930,7 @@
                 </div>
                 <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
                   <div style="color: #94a3b8; font-size: 0.7rem;">Detected Hazard:</div>
-                  <div style="font-weight: 700; color: white;">${issue.imageAiHazard || issue.categoryName || 'General Concern'}</div>
+                  <div style="font-weight: 700; color: var(--text-bright);">${issue.imageAiHazard || issue.categoryName || 'General Concern'}</div>
                 </div>
                 <div style="background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
                   <div style="color: #94a3b8; font-size: 0.7rem;">Visual Consistency:</div>
@@ -7974,7 +7974,7 @@
 
           <!-- Civic Operations Lifecycle & Audit Timeline (12-Step Real Timeline) -->
           <div>
-            <div style="font-size: 0.95rem; font-weight: 800; color: white; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--text-bright); margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
               <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <span>🏛️</span> <span>Civic Operations Lifecycle & Audit Timeline</span>
               </div>
@@ -7989,7 +7989,7 @@
           <!-- Community Comments & Live Citizen Discussion -->
           <div style="margin-top: 1.5rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.1rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
-              <h4 style="color: white; font-size: 1.05rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+              <h4 style="color: var(--text-bright); font-size: 1.05rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                 <span>💬</span> Community Discussion & Officer Remarks (${(issue.comments || []).length})
               </h4>
             </div>
@@ -8156,7 +8156,7 @@
                 <span class="badge sev-${(issue.severity || 'medium').toLowerCase()}" style="font-size: 0.72rem;">${(issue.severity || 'medium').toUpperCase()}</span>
               </div>
             </div>
-            <h4 style="margin: 0 0 0.35rem 0; color: white; font-size: 1rem;">${issue.title}</h4>
+            <h4 style="margin: 0 0 0.35rem 0; color: var(--text-bright); font-size: 1rem;">${issue.title}</h4>
             <div style="font-size: 0.78rem; color: #94a3b8; display: flex; align-items: center; gap: 0.35rem;">
               <span>📍</span> <span>${issue.location || issue.ward || 'Surampalem'}</span>
             </div>
@@ -8183,7 +8183,7 @@
           <!-- 3. Registered Squads Selection Grid -->
           <div>
             <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-              <span style="font-weight: 700; color: white;">Select Field Response Squad:</span>
+              <span style="font-weight: 700; color: var(--text-bright);">Select Field Response Squad:</span>
               <span style="font-size: 0.72rem; color: #94a3b8;">${workers.length} registered municipal squads</span>
             </label>
             <div style="display: flex; flex-direction: column; gap: 0.5rem;" id="squadSelectionContainer">
@@ -8196,7 +8196,7 @@
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                       <input type="radio" name="assignedSquadRadio" value="${w.id}" data-name="${w.name}" ${isSelected ? 'checked' : ''} style="accent-color: #0284c7;">
                       <div>
-                        <div style="font-weight: 700; color: white; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
+                        <div style="font-weight: 700; color: var(--text-bright); font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
                           <span>${w.name}</span>
                           ${isRec ? `<span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.65rem; padding: 2px 6px;">Recommended</span>` : ''}
                           ${isCurrent ? `<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 0.65rem; padding: 2px 6px;">Current Squad</span>` : ''}
@@ -8219,7 +8219,7 @@
 
           <!-- 4. Optional Supervisor Dispatch Instructions -->
           <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label" style="color: white; font-size: 0.82rem; font-weight: 700;">
+            <label class="form-label" style="color: var(--text-bright); font-size: 0.82rem; font-weight: 700;">
               Supervisor Dispatch Instructions (Optional):
             </label>
             <textarea id="assignSupervisorNotes" class="form-input" rows="2" style="font-size: 0.82rem; resize: vertical;" placeholder="e.g. Clear bulk commercial wet waste from walkway and sanitize pavement with bleaching powder.">${issue.supervisorNotes || ''}</textarea>
@@ -8537,7 +8537,7 @@
             <div style="font-weight: 800; font-size: 0.95rem; color: #f87171; margin-bottom: 4px;">🚨 STATUTORY RECTIFICATION MANDATE (FSSAI ACT 2006)</div>
             <div><strong>Violation Clause:</strong> ${vendor.violationClause || 'Section 56: Stale & Burnt Cooking Oil'}</div>
             <div><strong>Penalty Imposed:</strong> <span style="font-family: var(--font-mono); font-weight: 800; color: #facc15;">${vendor.penaltyImposed || '₹2,000.00'}</span></div>
-            <div><strong>Mandatory Rectification Deadline:</strong> <span style="font-weight: 700; color: white;">${vendor.rectificationDeadline || '48 Hours'}</span></div>
+            <div><strong>Mandatory Rectification Deadline:</strong> <span style="font-weight: 700; color: var(--text-bright);">${vendor.rectificationDeadline || '48 Hours'}</span></div>
             <div><strong>MQ-135 Gas Risk:</strong> ${vendor.mq135GasPpm || '360 PPM'}</div>
             <div style="margin-top: 6px; font-size: 0.8rem; color: #fda4af;"><strong>Officer Directives:</strong> ${vendor.officerDirectives || 'Immediate corrective sanitation required. Re-audit mandatory.'}</div>
           </div>
@@ -8564,7 +8564,7 @@
             <div style="display: flex; align-items: center; gap: 0.75rem;">
               <div style="width: 50px; height: 50px; border-radius: 10px; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 0 16px rgba(16,185,129,0.5);">🍲</div>
               <div>
-                <h3 style="font-size: 1.3rem; color: white; margin-bottom: 2px;">${vendor.name}</h3>
+                <h3 style="font-size: 1.3rem; color: var(--text-bright); margin-bottom: 2px;">${vendor.name}</h3>
                 <p style="font-size: 0.85rem; color: #f59e0b; font-weight: 700;">DIGITAL FOOD HYGIENE & SAFETY CERTIFICATE</p>
               </div>
             </div>
@@ -9430,17 +9430,17 @@
             return `
               <tr>
                 <td>
-                  <div style="font-weight: 700; color: white;">${f.ward_name}</div>
+                  <div style="font-weight: 700; color: var(--text-bright);">${f.ward_name}</div>
                   <div style="font-size: 0.72rem; color: #38bdf8;">Zone: ${f.ward_name.includes('Market') ? 'Commercial' : f.ward_name.includes('7') ? 'Highway' : 'Urban Residential'}</div>
                 </td>
                 <td>
-                  <div style="font-weight: 600; color: #f1f5f9;">${f.civic_category}</div>
+                  <div style="font-weight: 600; color: var(--text-main);">${f.civic_category}</div>
                   <div style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase;">${f.department}</div>
                 </td>
                 <td>
                   <div style="display: flex; align-items: center; gap: 6px;">
                     <span class="badge" style="${riskBadgeStyle}">${riskBadgeText}</span>
-                    <span style="font-family: var(--font-mono); font-weight: 800; color: white; font-size: 0.85rem;">${f.predicted_risk_score}/100</span>
+                    <span style="font-family: var(--font-mono); font-weight: 800; color: var(--text-bright); font-size: 0.85rem;">${f.predicted_risk_score}/100</span>
                   </div>
                 </td>
                 <td>${recBadge}</td>
@@ -9480,11 +9480,11 @@
             return `
               <tr>
                 <td>
-                  <div style="font-weight: 700; color: white;">${f.ward_name}</div>
+                  <div style="font-weight: 700; color: var(--text-bright);">${f.ward_name}</div>
                   <div style="font-size: 0.72rem; color: #38bdf8;">Zone: ${f.ward_name.includes('Market') ? 'Commercial' : 'Urban Sector'}</div>
                 </td>
                 <td>
-                  <div style="font-weight: 600; color: #f1f5f9;">${f.civic_category}</div>
+                  <div style="font-weight: 600; color: var(--text-main);">${f.civic_category}</div>
                   <div style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase;">${f.department}</div>
                 </td>
                 <td>
@@ -9541,7 +9541,7 @@
                       Risk: ${f.predicted_risk_score}/100
                     </span>
                   </div>
-                  <h4 style="color: white; font-size: 0.92rem; margin: 0 0 0.35rem; font-weight: 700;">
+                  <h4 style="color: var(--text-bright); font-size: 0.92rem; margin: 0 0 0.35rem; font-weight: 700;">
                     ${f.recommended_preventive_action}
                   </h4>
                   <p style="font-size: 0.75rem; color: #94a3b8; line-height: 1.4; margin: 0 0 0.75rem;">
@@ -10422,7 +10422,7 @@
         return `
           <tr>
             <td>
-              <div style="font-size: 0.78rem; font-weight: 700; color: white;">${timeStr}</div>
+              <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-bright);">${timeStr}</div>
               <div style="font-size: 0.7rem; color: #94a3b8;">Authoritative Record</div>
             </td>
             <td>
@@ -10431,7 +10431,7 @@
               </span>
             </td>
             <td>
-              <div style="font-family: var(--font-mono); font-weight: 800; color: white; cursor: pointer;" onclick="window.viewIssueDetail('${log.issueId}')">
+              <div style="font-family: var(--font-mono); font-weight: 800; color: var(--text-bright); cursor: pointer;" onclick="window.viewIssueDetail('${log.issueId}')">
                 ${log.issueId}
               </div>
               <div style="font-size: 0.72rem; color: #94a3b8; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${log.issueTitle || ''}">
@@ -10479,11 +10479,11 @@
                 <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: #38bdf8;">${f.id}</span>
                 <span class="badge ${isOutage ? 'badge-escalated' : 'badge-resolved'}" style="font-size: 0.68rem;">${f.status}</span>
               </div>
-              <h4 style="color: white; font-size: 0.88rem; margin: 0 0 0.4rem 0; line-height: 1.3;">${f.name}</h4>
+              <h4 style="color: var(--text-bright); font-size: 0.88rem; margin: 0 0 0.4rem 0; line-height: 1.3;">${f.name}</h4>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; font-size: 0.75rem; color: #94a3b8; margin: 0.5rem 0; background: rgba(0,0,0,0.25); padding: 0.5rem; border-radius: 6px;">
-                <div>⚡ Volt: <strong style="color: white;">${f.voltage} kV</strong></div>
-                <div>📡 Freq: <strong style="color: white;">${f.frequency} Hz</strong></div>
-                <div>🔌 Load: <strong style="color: white;">${f.load} MW</strong></div>
+                <div>⚡ Volt: <strong style="color: var(--text-bright);">${f.voltage} kV</strong></div>
+                <div>📡 Freq: <strong style="color: var(--text-bright);">${f.frequency} Hz</strong></div>
+                <div>🔌 Load: <strong style="color: var(--text-bright);">${f.load} MW</strong></div>
                 <div>🛡️ Relay: <strong style="color: ${isOutage ? '#ef4444' : '#10b981'};">${f.breaker}</strong></div>
               </div>
               ${isOutage ? `
@@ -10511,7 +10511,7 @@
                 <span class="power-status-pill power-status-outage">⚡ OUTAGE ACTIVE</span>
                 <span class="outage-eta">ETA: ${f.etaMinutes || 35} Mins</span>
               </div>
-              <h3 style="font-size: 1.15rem; color: white; margin-bottom: 0.35rem;">${f.name}</h3>
+              <h3 style="font-size: 1.15rem; color: var(--text-bright); margin-bottom: 0.35rem;">${f.name}</h3>
               <p style="font-size: 0.85rem; color: var(--text-muted);"><strong>Area:</strong> Ward 12 Gandhi Statue Cross • <strong>Affected:</strong> ~450 Households</p>
               <div style="background: rgba(255, 255, 255, 0.04); padding: 0.75rem; border-radius: var(--radius-sm); font-size: 0.82rem; margin: 0.6rem 0; border: 1px dashed var(--border);">
                 <div>⚠️ <strong>Cause:</strong> ${f.cause || 'Sparking & flashover on 11KV low hanging line'}</div>
