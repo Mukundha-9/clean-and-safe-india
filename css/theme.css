@@ -1129,3 +1129,107 @@ html, body, .dashboard-topbar, .card, .modal-box, .mun-command-tier, .auth-card 
   color: #ffffff !important;
 }
 
+/* Food Safety Vendor Registry in Light Mode */
+[data-theme="light"] .vendor-registry-card {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06) !important;
+}
+[data-theme="light"] .vendor-registry-card.card-certified {
+  border-color: rgba(16, 185, 129, 0.45) !important;
+}
+[data-theme="light"] .vendor-registry-card.card-violation {
+  background: #fff8f8 !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+}
+[data-theme="light"] .vendor-name {
+  color: #0f172a !important;
+}
+[data-theme="light"] .vendor-status-pill.status-certified {
+  color: #047857 !important;
+  background: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+}
+[data-theme="light"] .vendor-status-pill.status-violation {
+  color: #b91c1c !important;
+  background: #fef2f2 !important;
+  border-color: #fecaca !important;
+}
+[data-theme="light"] .vendor-grade-badge.grade-certified {
+  background: #ecfdf5 !important;
+  border-color: #10b981 !important;
+}
+[data-theme="light"] .vendor-grade-badge.grade-certified .grade-letter,
+[data-theme="light"] .vendor-grade-badge.grade-certified .grade-sub {
+  color: #047857 !important;
+}
+[data-theme="light"] .vendor-grade-badge.grade-violation {
+  background: #fef2f2 !important;
+  border-color: #ef4444 !important;
+}
+[data-theme="light"] .vendor-grade-badge.grade-violation .grade-letter,
+[data-theme="light"] .vendor-grade-badge.grade-violation .grade-sub {
+  color: #b91c1c !important;
+}
+[data-theme="light"] .vendor-meta-list {
+  color: #334155 !important;
+}
+[data-theme="light"] .meta-label {
+  color: #475569 !important;
+}
+[data-theme="light"] .meta-val {
+  color: #0f172a !important;
+}
+[data-theme="light"] .meta-val.score-high {
+  color: #047857 !important;
+}
+[data-theme="light"] .meta-val.score-violation {
+  color: #b91c1c !important;
+}
+[data-theme="light"] .vendor-violation-compact {
+  background: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+[data-theme="light"] .v-clause-text {
+  color: #991b1b !important;
+}
+[data-theme="light"] .v-cell-label {
+  color: #64748b !important;
+}
+[data-theme="light"] .v-cell-val {
+  color: #0f172a !important;
+}
+[data-theme="light"] .v-cell-val.text-amber {
+  color: #b45309 !important;
+}
+[data-theme="light"] .btn-vendor-violation {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border-color: #fca5a5 !important;
+}
+[data-theme="light"] .vendor-filter-chip {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+[data-theme="light"] .vendor-filter-chip:hover {
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+[data-theme="light"] .vendor-filter-chip[data-filter="all"].active {
+  background: #fef3c7 !important;
+  border-color: #d97706 !important;
+  color: #92400e !important;
+}
+[data-theme="light"] .vendor-filter-chip[data-filter="certified"].active {
+  background: #ecfdf5 !important;
+  border-color: #10b981 !important;
+  color: #047857 !important;
+}
+[data-theme="light"] .vendor-filter-chip[data-filter="violation"].active {
+  background: #fee2e2 !important;
+  border-color: #ef4444 !important;
+  color: #991b1b !important;
+}
+
+
