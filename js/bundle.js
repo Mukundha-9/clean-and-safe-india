@@ -4359,9 +4359,17 @@
     const tableBody = document.getElementById('munIncidentTableBody');
     const tableBodyQueue = document.getElementById('munIncidentTableBody_queue');
     if (tableBody || tableBodyQueue) {
-      const htmlContent = issues.length === 0
+      // Prioritize incidents requiring urgent officer attention (unassigned, escalated, awaiting verification, follow-ups)
+      const displayIssues = [...issues].sort((a, b) => {
+        const aAttn = (a.status !== 'resolved' && (a.status === 'escalated' || a.isSlaBreached || !a.assignedWorker || a.assignedWorker === 'Unassigned' || a.status === 'work_completed' || a.workerStatus === 'Work Completed - Awaiting Verification' || Number(a.followUpCount) > 0)) ? 1 : 0;
+        const bAttn = (b.status !== 'resolved' && (b.status === 'escalated' || b.isSlaBreached || !b.assignedWorker || b.assignedWorker === 'Unassigned' || b.status === 'work_completed' || b.workerStatus === 'Work Completed - Awaiting Verification' || Number(b.followUpCount) > 0)) ? 1 : 0;
+        if (aAttn !== bAttn) return bAttn - aAttn;
+        return (b.timestamp || 0) - (a.timestamp || 0);
+      });
+
+      const htmlContent = displayIssues.length === 0
         ? `<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #94a3b8; font-size: 0.85rem;">No civic incidents found in the selected jurisdiction (${selectedState} → ${selectedCity} → ${selectedWard}).</td></tr>`
-        : issues.map(issue => {
+        : displayIssues.map(issue => {
           const isResolved = issue.status === 'resolved';
           const isEscalated = issue.status === 'escalated' || issue.isSlaBreached;
           const reportedTimeStr = formatReportDateTime(issue.timestamp);
@@ -4392,12 +4400,12 @@
                 <div style="font-size: 0.75rem; color: var(--command-text-muted);">📍 ${issue.location}</div>
                 <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">👤 ${issue.reportedBy || 'Citizen'} • 👷 ${issue.assignedWorker || 'Squad'}</div>
               </td>
-              <td>
+              <td class="col-jurisdiction">
                 <div style="font-size: 0.78rem; color: #38bdf8; font-weight: 700;">${issue.state || 'Andhra Pradesh'}</div>
                 <div style="font-size: 0.72rem; color: var(--command-text-muted);">${issue.city || 'Surampalem'} • ${issue.ward || 'Ward 12'}</div>
               </td>
               <td><span class="cat-badge">${issue.deptIcon} ${issue.deptName}</span></td>
-              <td style="min-width: 220px;">
+              <td style="min-width: 175px;">
                 ${renderCompactLifecycle(issue)}
                 <div style="font-size: 0.68rem; color: #94a3b8; margin-top: 2px;">
                   Severity: <strong style="color: ${issue.severity === 'critical' ? '#f87171' : issue.severity === 'high' ? '#fbbf24' : '#34d399'};">${(issue.severity || 'medium').toUpperCase()}</strong> • Risk: ${issue.aiRiskScore || 50}/100
@@ -9531,33 +9539,33 @@
             const status = action ? action.status : 'pending_review';
             const isApproved = status === 'approved' || status === 'assigned' || status === 'implemented';
             return `
-              <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+              <div class="cmd-preventive-action-card">
                 <div>
                   <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.45rem;">
-                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; font-size: 0.7rem;">
+                    <span class="badge badge-preventive-category">
                       ${f.civic_category} • ${f.ward_name}
                     </span>
-                    <span class="badge" style="background: rgba(255, 255, 255, 0.05); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); font-size: 0.68rem;">
+                    <span class="badge badge-preventive-risk">
                       Risk: ${f.predicted_risk_score}/100
                     </span>
                   </div>
-                  <h4 style="color: var(--text-bright); font-size: 0.92rem; margin: 0 0 0.35rem; font-weight: 700;">
+                  <h4 class="cmd-preventive-action-title">
                     ${f.recommended_preventive_action}
                   </h4>
-                  <p style="font-size: 0.75rem; color: #94a3b8; line-height: 1.4; margin: 0 0 0.75rem;">
+                  <p class="cmd-preventive-action-desc">
                     Forecast: ${f.forecast_horizon || 'Next 7 Days'} • Recurrence: ${f.recurrence_pattern}
                   </p>
                 </div>
-                <div style="display: flex; gap: 0.45rem; margin-top: auto; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.6rem;">
-                  <button type="button" class="btn btn-sm btn-outline" style="flex: 1; font-size: 0.74rem; border-color: #38bdf8; color: #38bdf8; padding: 0.35rem; cursor: pointer;" onclick="window.openPredictiveDetailModal('${f.id}')">
+                <div class="cmd-preventive-action-footer">
+                  <button type="button" class="btn btn-sm btn-outline btn-inspect-action" onclick="window.openPredictiveDetailModal('${f.id}')">
                     Inspect Detail
                   </button>
                   ${!isApproved ? `
-                    <button type="button" class="btn btn-sm btn-primary" style="flex: 1; font-size: 0.74rem; background: #10b981; border-color: #10b981; font-weight: 700; padding: 0.35rem; cursor: pointer;" onclick="window.openPredictiveDetailModal('${f.id}')">
+                    <button type="button" class="btn btn-sm btn-primary btn-approve-action" onclick="window.openPredictiveDetailModal('${f.id}')">
                       Approve Action
                     </button>
                   ` : `
-                    <span style="flex: 1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #34d399; font-weight: 700;">
+                    <span class="badge-approved-action">
                       ✓ ${status.toUpperCase()}
                     </span>
                   `}

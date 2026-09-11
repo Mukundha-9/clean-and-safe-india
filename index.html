@@ -720,289 +720,338 @@
         </div>
       </div>
 
-      <!-- Subview 1: Municipal Overview -->
+      <!-- Subview 1: Municipal Overview (Executive Command Cockpit) -->
       <div id="munTab_overview" class="municipal-subview">
-        <div class="grid-4" style="margin-bottom: 1.5rem;">
+        
+        <!-- 1. Executive Vital Signs (KPI Cards) -->
+        <div class="cmd-overview-kpi-grid">
           <div class="cmd-metric-card">
-            <span class="stat-label">Total City Reports</span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+              <span class="stat-label">Total City Reports</span>
+              <span style="font-size: 1.25rem;">📋</span>
+            </div>
             <div class="cmd-metric-num" id="munTotalReports">6</div>
             <span class="cmd-metric-sub">Across All 4 Wards</span>
           </div>
+
           <div class="cmd-metric-card">
-            <span class="stat-label">Resolution Rate</span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+              <span class="stat-label">Resolution Rate</span>
+              <span style="font-size: 1.25rem;">⏱️</span>
+            </div>
             <div class="cmd-metric-num" id="munResolutionRate" style="color: #10b981;">67%</div>
             <span class="cmd-metric-sub">Within 48h SLA</span>
           </div>
+
           <div class="cmd-metric-card">
-            <span class="stat-label">Citizen Credits Awarded</span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+              <span class="stat-label">Citizen Credits Awarded</span>
+              <span style="font-size: 1.25rem;">🏆</span>
+            </div>
             <div class="cmd-metric-num" id="munRewardsPaid" style="color: #facc15;">250 Pts</div>
-            <span class="cmd-metric-sub">Recognition & Streak Pool</span>
+            <span class="cmd-metric-sub">Recognition &amp; Streak Pool</span>
           </div>
+
           <div class="cmd-metric-card">
-            <span class="stat-label">Active Hotspots Monitored</span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
+              <span class="stat-label">Active Hotspots Monitored</span>
+              <span style="font-size: 1.25rem;">🔮</span>
+            </div>
             <div class="cmd-metric-num" id="munActiveHotspotsCount" style="color: #38bdf8;">6</div>
             <span class="cmd-metric-sub">Under Preventive Oversight</span>
           </div>
         </div>
 
-        <!-- Command Quick Hub: Instant Jumps -->
-        <div class="grid-3" style="margin-bottom: 1.75rem; gap: 1rem;">
-          <div class="cmd-metric-card" onclick="window.switchMunicipalSubTab('heatmap')" style="cursor: pointer; border-color: rgba(56, 189, 248, 0.4); background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(56, 189, 248, 0.08)); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-              <span style="font-size: 1.4rem;">🗺️</span>
-              <span class="badge badge-resolved" style="font-size: 0.68rem;">LIVE TRACKING</span>
-            </div>
-            <div style="font-weight: 800; color: white; font-size: 1rem;">Geospatial GIS Map</div>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 3px;">Ward 12 Red-Zone, hazard pins &amp; moving vehicle fleet.</div>
-            <div style="margin-top: 0.6rem; color: #38bdf8; font-size: 0.78rem; font-weight: 700;">Open Live Map &rarr;</div>
-          </div>
-
-          <div class="cmd-metric-card" onclick="window.switchMunicipalSubTab('electricity')" style="cursor: pointer; border-color: rgba(250, 204, 21, 0.4); background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(250, 204, 21, 0.08)); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-              <span style="font-size: 1.4rem;">⚡</span>
-              <span class="badge badge-assigned" style="font-size: 0.68rem;">AUDIT &amp; SCADA</span>
-            </div>
-            <div style="font-weight: 800; color: white; font-size: 1rem;">Audit &amp; Power Grid</div>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 3px;">Immutable squad audit ledger &amp; 33/11 KV feeder grid.</div>
-            <div style="margin-top: 0.6rem; color: #facc15; font-size: 0.78rem; font-weight: 700;">View Audit Ledger &rarr;</div>
-          </div>
-
-          <div class="cmd-metric-card" onclick="window.switchMunicipalSubTab('hotspots')" style="cursor: pointer; border-color: rgba(244, 63, 94, 0.4); background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(244, 63, 94, 0.08)); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-              <span style="font-size: 1.4rem;">🔮</span>
-              <span class="badge badge-escalated" style="font-size: 0.68rem;">AI FORECAST</span>
-            </div>
-            <div style="font-weight: 800; color: white; font-size: 1rem;">Predictive Hotspots</div>
-            <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 3px;">Automated recurrence forecasts &amp; preventive actions.</div>
-            <div style="margin-top: 0.6rem; color: #fda4af; font-size: 0.78rem; font-weight: 700;">Inspect Hotspots &rarr;</div>
-          </div>
-        </div>
-
-        <!-- =====================================================================
-             TIER 1: WHAT NEEDS ATTENTION NOW
-             ===================================================================== -->
-        <div class="mun-command-tier mun-tier-attention" style="margin-bottom: 2rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 14px; padding: 1.25rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
-            <div style="display: flex; align-items: center; gap: 0.65rem;">
-              <span style="background: #ef4444; color: white; font-weight: 900; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">1</span>
-              <div>
-                <h3 style="color: white; font-size: 1.2rem; margin: 0; font-weight: 800; letter-spacing: -0.01em;">
-                  WHAT NEEDS ATTENTION NOW
-                </h3>
-                <p style="color: #cbd5e1; font-size: 0.78rem; margin: 2px 0 0;">
-                  Priority grievances, unassigned incidents, SLA breach escalations, and works awaiting officer verification
-                </p>
-              </div>
-            </div>
-            <span class="badge badge-escalated" id="munAttentionCountBadge" style="font-size: 0.75rem;">PRIORITY QUEUE</span>
-          </div>
-
-          <!-- Stage v43 Citizen Follow-ups Needing Attention Alert Strip -->
-          <div id="munFollowUpAttentionBanner" class="followup-attention-banner" style="display: none; margin-bottom: 1rem; background: linear-gradient(90deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15)); border: 1px solid #f59e0b; border-radius: 10px; padding: 0.75rem 1rem; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <span style="font-size: 1.4rem;">🔔</span>
-              <div>
-                <div style="font-weight: 800; color: #fbbf24; font-size: 0.95rem;">
-                  <span id="munFollowUpUnresolvedCount">0</span> Unresolved Incidents have received Citizen Follow-ups
+        <!-- 2. Main 2-Column Command Cockpit -->
+        <div class="cmd-overview-main-grid">
+          
+          <!-- LEFT COLUMN: Priority Action Queue & Civic Intelligence -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem; min-width: 0;">
+            
+            <!-- A. PRIORITY ACTION QUEUE (Action Required Now) -->
+            <div class="cmd-overview-panel">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <span style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; font-weight: 900; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);">⚡</span>
+                  <div>
+                    <h3 style="color: var(--text-bright); font-size: 1.15rem; margin: 0; font-weight: 800; letter-spacing: -0.01em;">
+                      Priority Action Queue
+                    </h3>
+                    <p style="color: var(--text-muted); font-size: 0.76rem; margin: 2px 0 0;">
+                      Active grievances requiring squad dispatch, SLA intervention, or officer verification
+                    </p>
+                  </div>
                 </div>
-                <div style="font-size: 0.75rem; color: #cbd5e1;">
-                  Citizens report persistent ground issues on active tickets. Prioritize workforce dispatch and supervisor re-inspection.
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                  <span class="badge badge-escalated" id="munAttentionCountBadge" style="font-size: 0.72rem; padding: 4px 8px;">PRIORITY QUEUE</span>
+                  <button type="button" class="btn btn-sm btn-outline" onclick="window.switchMunicipalSubTab('incidents')" style="font-size: 0.75rem; padding: 0.3rem 0.65rem; border-color: var(--command-border); color: #38bdf8;">
+                    View All in Queue &rarr;
+                  </button>
                 </div>
               </div>
-            </div>
-            <button type="button" class="btn btn-sm btn-outline" id="btnFilterFollowUps" onclick="window.filterIncidentsWithFollowUps()" style="border-color: #f59e0b; color: #f59e0b; font-weight: 700; font-size: 0.75rem;">
-              Filter Follow-ups Only
-            </button>
-          </div>
 
-          <div class="cmd-table-container">
-            <table class="cmd-table">
-              <thead>
-                <tr>
-                  <th>Ticket ID</th>
-                  <th>Incident Details</th>
-                  <th>State &amp; Jurisdiction</th>
-                  <th>Department</th>
-                  <th>Lifecycle Status</th>
-                  <th>48h SLA Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="munIncidentTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- =====================================================================
-             TIER 2: FIELD OPERATIONS
-             ===================================================================== -->
-        <div class="mun-command-tier mun-tier-fieldops" style="margin-bottom: 2rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 14px; padding: 1.25rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
-            <div style="display: flex; align-items: center; gap: 0.65rem;">
-              <span style="background: #0284c7; color: white; font-weight: 900; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">2</span>
-              <div>
-                <h3 style="color: white; font-size: 1.2rem; margin: 0; font-weight: 800;">
-                  FIELD OPERATIONS &amp; RESOURCE DISPATCH
-                </h3>
-                <p style="color: #cbd5e1; font-size: 0.78rem; margin: 2px 0 0;">
-                  Active field workforce squads, operational vehicle fleet, and SCADA electricity grid status
-                </p>
-              </div>
-            </div>
-            <button type="button" class="btn btn-sm btn-outline" onclick="window.switchMunicipalSubTab('heatmap')" style="border-color: #38bdf8; color: #38bdf8; font-size: 0.78rem;">
-              <span>🗺️</span> View Live Fleet on Map &rarr;
-            </button>
-          </div>
-
-          <!-- Dynamic Resource Allocation Matrix -->
-          <div class="grid-3" style="margin-bottom: 1rem;">
-            <div class="resource-alloc-box">
-              <div class="resource-icon-badge">🛒</div>
-              <div class="resource-info">
-                <h4>Low Severity → Pushcart</h4>
-                <p>Roadside litter & spot sweep (1 Worker)</p>
-              </div>
-            </div>
-            <div class="resource-alloc-box">
-              <div class="resource-icon-badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b;">🚛</div>
-              <div class="resource-info">
-                <h4>Medium Severity → Collection Truck</h4>
-                <p>Community bin overflow (Vehicle #AP-05-TX)</p>
-              </div>
-            </div>
-            <div class="resource-alloc-box">
-              <div class="resource-icon-badge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">🚜</div>
-              <div class="resource-info">
-                <h4>Bulk Severity → Tractor / Compactor</h4>
-                <p>Construction debris, road tarring, heavy dump</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Live Fleet Pill Strip in Overview -->
-          <div class="fleet-badge-strip" style="margin-bottom: 0;">
-            <div class="fleet-pill">
-              <span>🚛</span> <strong>Truck AP-05-TX:</strong> <span style="color: #10b981;">Moving (24 km/h) • Ward 12</span>
-            </div>
-            <div class="fleet-pill">
-              <span>⚡</span> <strong>Lineman Van AP-05-EB:</strong> <span style="color: #38bdf8;">En Route • Feeder 4</span>
-            </div>
-            <div class="fleet-pill">
-              <span>🚜</span> <strong>Compactor AP-05-CT:</strong> <span style="color: #facc15;">Active • Market Dump Site</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- =====================================================================
-             TIER 3: RECURRING HOTSPOTS & CIVIC INTELLIGENCE
-             ===================================================================== -->
-        <div class="mun-command-tier mun-tier-intelligence" style="margin-bottom: 2rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 14px; padding: 1.25rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
-            <div style="display: flex; align-items: center; gap: 0.65rem;">
-              <span style="background: #f59e0b; color: #060911; font-weight: 900; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">3</span>
-              <div>
-                <h3 style="color: white; font-size: 1.2rem; margin: 0; font-weight: 800;">
-                  RECURRING HOTSPOTS &amp; CIVIC INTELLIGENCE
-                </h3>
-                <p style="color: #cbd5e1; font-size: 0.78rem; margin: 2px 0 0;">
-                  Predictive recurrence signals synthesized from multi-incident clusters and historical patterns
-                </p>
-              </div>
-            </div>
-            <button type="button" class="btn btn-sm btn-outline" onclick="window.switchMunicipalSubTab('hotspots')" style="border-color: #f59e0b; color: #f59e0b; font-size: 0.78rem;">
-              <span>📍</span> Detailed Hotspots List &rarr;
-            </button>
-          </div>
-
-          <!-- THE 3 CIVIC INTELLIGENCE QUESTIONS (MANDATORY REQUIREMENT) -->
-          <div class="grid-3" style="margin-bottom: 1.25rem; gap: 1rem;">
-            <!-- Question 1: WHAT IS HAPPENING? -->
-            <div style="background: rgba(56, 189, 248, 0.07); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.5rem;">
-                  <span style="font-size: 1.1rem;">🧐</span>
-                  <span style="font-size: 0.78rem; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px;">WHAT IS HAPPENING?</span>
+              <!-- Follow-Up Alert Banner (v43) -->
+              <div id="munFollowUpAttentionBanner" class="followup-attention-banner" style="display: none; margin-bottom: 0.9rem; background: linear-gradient(90deg, rgba(245, 158, 11, 0.12), rgba(239, 68, 68, 0.12)); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 8px; padding: 0.65rem 0.9rem; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                  <span style="font-size: 1.2rem;">🔔</span>
+                  <div>
+                    <div style="font-weight: 800; color: #fbbf24; font-size: 0.85rem;">
+                      <span id="munFollowUpUnresolvedCount">0</span> Unresolved Incidents have Citizen Follow-ups
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted);">
+                      Prioritize workforce re-dispatch and supervisor verification.
+                    </div>
+                  </div>
                 </div>
-                <div id="civicIntelWhat" style="font-size: 0.82rem; color: #e2e8f0; line-height: 1.5;">
-                  <strong>Recurring waste overflow & feeder sparks</strong> detected at Ward 12 Market Junction. 3 related incidents reported in the last 14 days.
+                <button type="button" class="btn btn-sm btn-outline" id="btnFilterFollowUps" onclick="window.filterIncidentsWithFollowUps()" style="border-color: #f59e0b; color: #f59e0b; font-weight: 700; font-size: 0.72rem; padding: 0.25rem 0.55rem;">
+                  Filter Follow-ups Only
+                </button>
+              </div>
+
+              <!-- Fast Streamlined Action Table -->
+              <div class="cmd-table-container" style="max-height: 480px; overflow-y: auto;">
+                <table class="cmd-table" style="margin: 0; font-size: 0.82rem;">
+                  <thead>
+                    <tr>
+                      <th style="width: 105px;">Ticket ID</th>
+                      <th>Incident Details</th>
+                      <th class="col-jurisdiction" style="width: 130px;">Jurisdiction</th>
+                      <th style="width: 125px;">Department</th>
+                      <th style="width: 180px;">Lifecycle Status</th>
+                      <th style="width: 155px;">48h SLA Status</th>
+                      <th style="width: 145px; text-align: right;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="munIncidentTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- B. CIVIC INTELLIGENCE & PREDICTIVE RADAR -->
+            <div class="cmd-overview-panel">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.9rem; flex-wrap: wrap; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <span style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; font-weight: 900; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);">🔮</span>
+                  <div>
+                    <h3 style="color: var(--text-bright); font-size: 1.1rem; margin: 0; font-weight: 800;">
+                      Civic Intelligence &amp; Recurrence Radar
+                    </h3>
+                    <p style="color: var(--text-muted); font-size: 0.74rem; margin: 2px 0 0;">
+                      Multi-incident cluster analysis, root cause diagnosis, and predictive recurrence forecasts
+                    </p>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline" onclick="window.switchMunicipalSubTab('hotspots')" style="font-size: 0.75rem; padding: 0.3rem 0.65rem; border-color: #f59e0b; color: #f59e0b;">
+                  Inspect All Hotspots &rarr;
+                </button>
+              </div>
+
+              <!-- 3 Civic Intelligence Questions -->
+              <div class="grid-3" style="gap: 0.85rem; margin-bottom: 0.9rem;">
+                <div style="background: rgba(56, 189, 248, 0.06); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 0.85rem; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem;">
+                      <span style="font-size: 1rem;">🚨</span>
+                      <span style="font-size: 0.72rem; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.5px;">WHAT IS OCCURRING?</span>
+                    </div>
+                    <div id="civicIntelWhat" style="font-size: 0.78rem; color: var(--text-main); line-height: 1.45;">
+                      <strong>Recurring waste overflow &amp; feeder sparks</strong> detected at Ward 12 Market Junction. 3 related incidents reported in the last 14 days.
+                    </div>
+                  </div>
+                  <div style="margin-top: 0.6rem; font-size: 0.68rem; color: var(--text-muted); border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.35rem;">
+                    Cluster: <strong>CLU-WARD12-MKT</strong> • Frequency: High
+                  </div>
+                </div>
+
+                <div style="background: rgba(245, 158, 11, 0.06); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 10px; padding: 0.85rem; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem;">
+                      <span style="font-size: 1rem;">🔍</span>
+                      <span style="font-size: 0.72rem; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px;">WHY IS IT RECURRING?</span>
+                    </div>
+                    <div id="civicIntelWhy" style="font-size: 0.78rem; color: var(--text-main); line-height: 1.45;">
+                      <strong>Commercial stall disposal</strong> peak at 06:00–11:00 AM exceeds bin volume; feeder line 4 experiences peak thermal load.
+                    </div>
+                  </div>
+                  <div style="margin-top: 0.6rem; font-size: 0.68rem; color: var(--text-muted); border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.35rem;">
+                    Signal: <strong>Every 4–6 Days</strong> (Commercial cycle)
+                  </div>
+                </div>
+
+                <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 10px; padding: 0.85rem; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.35rem;">
+                      <span style="font-size: 1rem;">💡</span>
+                      <span style="font-size: 0.72rem; font-weight: 800; color: #34d399; text-transform: uppercase; letter-spacing: 0.5px;">RECOMMENDED ACTION</span>
+                    </div>
+                    <div id="civicIntelAction" style="font-size: 0.78rem; color: var(--text-main); line-height: 1.45;">
+                      <strong>Dispatch early 07:00 AM secondary collection truck</strong>, rebalance feeder load, place 2 high-capacity wheelie bins at Market Gate.
+                    </div>
+                  </div>
+                  <div style="margin-top: 0.6rem; font-size: 0.68rem; color: var(--text-muted); border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.35rem;">
+                    Strategy: <strong>OPERATIONS &amp; INFRASTRUCTURE</strong>
+                  </div>
                 </div>
               </div>
-              <div style="margin-top: 0.75rem; font-size: 0.72rem; color: #94a3b8; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.4rem;">
-                Cluster ID: <strong>CLU-WARD12-MKT</strong> • Frequency: High
+
+              <!-- Compact Hotspots Quick List -->
+              <div class="cmd-table-container" style="max-height: 240px; overflow-y: auto;">
+                <table class="cmd-table" style="margin: 0; font-size: 0.78rem;">
+                  <thead>
+                    <tr>
+                      <th>Ward / Zone</th>
+                      <th>Category &amp; Dept</th>
+                      <th>Risk Score</th>
+                      <th>Recurrence Pattern</th>
+                      <th>Forecast Horizon</th>
+                      <th style="text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="overviewHotspotsTableBody"></tbody>
+                </table>
               </div>
             </div>
 
-            <!-- Question 2: WHY IS IT RECURRING? -->
-            <div style="background: rgba(245, 158, 11, 0.07); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.5rem;">
-                  <span style="font-size: 1.1rem;">🔍</span>
-                  <span style="font-size: 0.78rem; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px;">WHY IS IT RECURRING?</span>
-                </div>
-                <div id="civicIntelWhy" style="font-size: 0.82rem; color: #e2e8f0; line-height: 1.5;">
-                  <strong>Peak footfall & commercial stall disposal</strong> between 06:00–11:00 AM exceeds standard bin capacity; transformer feeder line 4 experiences peak morning thermal load.
-                </div>
-              </div>
-              <div style="margin-top: 0.75rem; font-size: 0.72rem; color: #94a3b8; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.4rem;">
-                Recurrence Signal: <strong>Every 4–6 Days</strong> (Commercial schedule correlation)
-              </div>
-            </div>
-
-            <!-- Question 3: WHAT SHOULD WE DO? -->
-            <div style="background: rgba(16, 185, 129, 0.07); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.5rem;">
-                  <span style="font-size: 1.1rem;">💡</span>
-                  <span style="font-size: 0.78rem; font-weight: 800; color: #34d399; text-transform: uppercase; letter-spacing: 0.5px;">WHAT SHOULD WE DO?</span>
-                </div>
-                <div id="civicIntelAction" style="font-size: 0.82rem; color: #e2e8f0; line-height: 1.5;">
-                  <strong>Dispatch early morning 07:00 AM secondary collection truck</strong>, rebalance feeder 4 phase load, and place 2 additional high-capacity wheelie bins at Market Gate Cross.
-                </div>
-              </div>
-              <div style="margin-top: 0.75rem; font-size: 0.72rem; color: #94a3b8; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 0.4rem;">
-                Recommendation Type: <strong>OPERATIONS &amp; INFRASTRUCTURE</strong>
-              </div>
-            </div>
           </div>
 
-          <!-- Recurring Hotspots Table Snapshot -->
-          <div class="cmd-table-container">
-            <table class="cmd-table">
-              <thead>
-                <tr>
-                  <th>Ward / Zone</th>
-                  <th>Category</th>
-                  <th>Risk Score</th>
-                  <th>Recurrence Pattern</th>
-                  <th>Forecast Horizon</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="overviewHotspotsTableBody"></tbody>
-            </table>
-          </div>
-        </div>
+          <!-- RIGHT COLUMN: Operations Deck (Fleet, Resource Matrix, SCADA, Preventive Sign-offs) -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem; min-width: 0;">
+            
+            <!-- 1. LIVE FIELD FLEET & RAPID DISPATCH -->
+            <div class="cmd-overview-panel">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.2rem;">🚛</span>
+                  <div>
+                    <h4 style="color: var(--text-bright); font-size: 0.95rem; margin: 0; font-weight: 800;">
+                      Live Rapid Squad Fleet
+                    </h4>
+                    <span style="font-size: 0.7rem; color: var(--text-muted);">Real-time GPS telemetry</span>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline" onclick="window.switchMunicipalSubTab('heatmap')" style="font-size: 0.72rem; padding: 0.25rem 0.6rem; border-color: #38bdf8; color: #38bdf8;">
+                  GIS Map &rarr;
+                </button>
+              </div>
 
-        <!-- =====================================================================
-             TIER 4: PREVENTIVE CIVIC ACTIONS
-             ===================================================================== -->
-        <div class="mun-command-tier mun-tier-preventive" style="margin-bottom: 2rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 14px; padding: 1.25rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
-            <div style="display: flex; align-items: center; gap: 0.65rem;">
-              <span style="background: #10b981; color: #060911; font-weight: 900; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">4</span>
-              <div>
-                <h3 style="color: white; font-size: 1.2rem; margin: 0; font-weight: 800;">
-                  PREVENTIVE CIVIC ACTIONS
-                </h3>
-                <p style="color: #cbd5e1; font-size: 0.78rem; margin: 2px 0 0;">
-                  Proactive municipal decisions requiring officer sign-off before issues recur
-                </p>
+              <!-- Fleet Cards -->
+              <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.85rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.75rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.1rem;">🚛</span>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-bright);">Truck AP-05-TX</div>
+                      <div style="font-size: 0.7rem; color: var(--text-muted);">Waste Collection • Ward 12</div>
+                    </div>
+                  </div>
+                  <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; font-size: 0.68rem;">
+                    24 km/h • Moving
+                  </span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.75rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.1rem;">⚡</span>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-bright);">Lineman Van AP-05-EB</div>
+                      <div style="font-size: 0.7rem; color: var(--text-muted);">Electrical Emergency • Feeder 4</div>
+                    </div>
+                  </div>
+                  <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #38bdf8; font-size: 0.68rem;">
+                    En Route (8 mins)
+                  </span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0.75rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="font-size: 1.1rem;">🚜</span>
+                    <div>
+                      <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-bright);">Compactor AP-05-CT</div>
+                      <div style="font-size: 0.7rem; color: var(--text-muted);">Heavy Debris • Market Dump Site</div>
+                    </div>
+                  </div>
+                  <span class="badge" style="background: rgba(250, 204, 21, 0.15); color: #facc15; border: 1px solid #facc15; font-size: 0.68rem;">
+                    Active on Site
+                  </span>
+                </div>
+              </div>
+
+              <!-- Dispatch Protocol Quick Matrix -->
+              <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.4rem; letter-spacing: 0.04em;">
+                Dynamic Dispatch Rule
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem;">
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 6px; padding: 0.45rem; text-align: center;">
+                  <div style="font-size: 1.1rem;">🛒</div>
+                  <div style="font-weight: 800; font-size: 0.72rem; color: var(--text-bright); margin-top: 2px;">Pushcart</div>
+                  <div style="font-size: 0.65rem; color: var(--text-muted);">Low / Spot Litter</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 6px; padding: 0.45rem; text-align: center;">
+                  <div style="font-size: 1.1rem;">🚛</div>
+                  <div style="font-weight: 800; font-size: 0.72rem; color: var(--text-bright); margin-top: 2px;">Truck</div>
+                  <div style="font-size: 0.65rem; color: var(--text-muted);">Medium / Bins</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 6px; padding: 0.45rem; text-align: center;">
+                  <div style="font-size: 1.1rem;">🚜</div>
+                  <div style="font-weight: 800; font-size: 0.72rem; color: var(--text-bright); margin-top: 2px;">Compactor</div>
+                  <div style="font-size: 0.65rem; color: var(--text-muted);">Bulk / Debris</div>
+                </div>
               </div>
             </div>
-            <span class="badge badge-resolved" style="font-size: 0.75rem;">HUMAN DECISION ENFORCED</span>
-          </div>
 
-          <div id="overviewPreventiveActionsContainer" class="grid-3" style="gap: 1rem;"></div>
+            <!-- 2. SCADA POWER GRID & FEEDER TELEMETRY -->
+            <div class="cmd-overview-panel">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.2rem;">⚡</span>
+                  <div>
+                    <h4 style="color: var(--text-bright); font-size: 0.95rem; margin: 0; font-weight: 800;">
+                      SCADA Power Grid Status
+                    </h4>
+                    <span style="font-size: 0.7rem; color: var(--text-muted);">33/11 KV Substation Feeder Monitor</span>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline" onclick="window.switchMunicipalSubTab('electricity')" style="font-size: 0.72rem; padding: 0.25rem 0.6rem; border-color: #facc15; color: #facc15;">
+                  Audit Ledger &rarr;
+                </button>
+              </div>
+
+              <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                  <span style="font-weight: 800; font-size: 0.82rem; color: #fbbf24;">⚡ Feeder #4 - Substation Transformer</span>
+                  <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; font-size: 0.65rem;">
+                    ACTIVE OUTAGE
+                  </span>
+                </div>
+                <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 0.4rem;">
+                  Area: <strong>Ward 12 Gandhi Road</strong> • Affected: <strong>~450 Homes</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 0.35rem;">
+                  <span>ETA to Restore: <strong style="color: #34d399;">45 Mins</strong></span>
+                  <span>Lineman: <strong style="color: #38bdf8;">Suresh Kumar</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. PREVENTIVE CIVIC ACTIONS (Officer Approvals) -->
+            <div class="cmd-overview-panel">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.2rem;">🛡️</span>
+                  <div>
+                    <h4 style="color: var(--text-bright); font-size: 0.95rem; margin: 0; font-weight: 800;">
+                      Preventive Civic Actions
+                    </h4>
+                    <span style="font-size: 0.7rem; color: var(--text-muted);">Proactive decisions requiring officer sign-off</span>
+                  </div>
+                </div>
+                <span class="badge badge-resolved" style="font-size: 0.68rem;">HUMAN VERIFIED</span>
+              </div>
+
+              <div id="overviewPreventiveActionsContainer" style="display: flex; flex-direction: column; gap: 0.6rem;"></div>
+            </div>
+
+          </div>
         </div>
 
       </div>

@@ -318,9 +318,49 @@ html, body, .dashboard-topbar, .card, .modal-box, .mun-command-tier, .auth-card 
 /* --------------------------------------------------------------------------
    6. Light Mode Municipal Command Center (v44 Tiers, Matrices & Stats)
    -------------------------------------------------------------------------- */
-[data-theme="light"] .mun-command-tier {
+[data-theme="light"] .mun-command-tier,
+[data-theme="light"] .cmd-overview-panel {
   background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06) !important;
+}
+
+[data-theme="light"] .cmd-overview-panel:hover {
+  border-color: #0284c7 !important;
+}
+
+[data-theme="light"] .cmd-preventive-action-card {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+}
+
+[data-theme="light"] .cmd-preventive-action-card:hover {
+  border-color: #10b981 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12) !important;
+}
+
+[data-theme="light"] .cmd-preventive-action-card .badge-preventive-risk {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .cmd-preventive-action-card .cmd-preventive-action-title {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .cmd-preventive-action-card .cmd-preventive-action-desc {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .cmd-preventive-action-footer {
+  border-top-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .cmd-preventive-action-footer .btn-inspect-action {
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
 }
 
 [data-theme="light"] .cmd-metric-card {
