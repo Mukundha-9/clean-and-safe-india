@@ -111,6 +111,35 @@ CATEGORY_SYNONYMS = {
     'spoilage': 'food_hygiene'
 }
 
+# Urgency Synonyms Mapping (Maps arbitrary LLM generated tokens to canonical enums)
+URGENCY_SYNONYMS = {
+    'low': 'low',
+    'minor': 'low',
+    'trivial': 'low',
+    'slight': 'low',
+    'minimal': 'low',
+    'medium': 'medium',
+    'moderate': 'medium',
+    'normal': 'medium',
+    'standard': 'medium',
+    'regular': 'medium',
+    'average': 'medium',
+    'high': 'high',
+    'urgent': 'high',
+    'severe': 'high',
+    'elevated': 'high',
+    'important': 'high',
+    'high_priority': 'high',
+    'critical': 'critical',
+    'emergency': 'critical',
+    'fatal': 'critical',
+    'immediate': 'critical',
+    'danger': 'critical',
+    'dangerous': 'critical',
+    'life-threatening': 'critical',
+    'life_threatening': 'critical'
+}
+
 # ------------------------------------------------------------------------------
 # SECURITY & PII SANITIZATION
 # ------------------------------------------------------------------------------
@@ -591,13 +620,18 @@ class OpenSourceLLMProvider(LLMProviderInterface):
             fallback_res['fallback_reason'] = f"Category '{cat}' belongs to '{expected_dept}', not '{dept}'"
             return fallback_res, 'FALLBACK_CATEGORY_DEPARTMENT_MISMATCH'
 
-        # 4. Urgency Validation (Strict: Unsupported -> Deterministic Fallback)
-        raw_urg = str(data.get('urgency', '')).lower().strip()
-        if not raw_urg or raw_urg not in VALID_URGENCIES:
+        # 4. Urgency Validation (Maps synonyms to canonical enums, strict fallback on invalid)
+        raw_urg = str(data.get('urgency', '')).lower().strip().replace(' ', '_').replace('-', '_')
+        urgency = URGENCY_SYNONYMS.get(raw_urg)
+        if not urgency:
+            for k, v in URGENCY_SYNONYMS.items():
+                if k in raw_urg:
+                    urgency = v
+                    break
+        if not urgency or urgency not in VALID_URGENCIES:
             fallback_res = self.fallback_engine.understand_civic_complaint(original_text, location_hint)
             fallback_res['fallback_reason'] = f"Unsupported LLM urgency '{raw_urg}'"
             return fallback_res, 'FALLBACK_UNSUPPORTED_URGENCY'
-        urgency = raw_urg
 
         # 5. Required Summary Validation
         summary = str(data.get('normalized_summary') or '').strip()
@@ -643,10 +677,10 @@ def get_llm_adapter() -> LLMProviderInterface:
     """
     Returns the configured LLM provider instance based on environment variables:
     - LLM_ENABLED: 'true' / 'false' (Default: 'false' unless LLM_BASE_URL is provided)
-    - LLM_BASE_URL: Open-source server URL (e.g. http://localhost:11434)
-    - LLM_MODEL: Model tag (e.g. llama3.2, qwen2.5, mistral)
+    - LLM_BASE_URL: Open-source server URL (Default: http://127.0.0.1:11434)
+    - LLM_MODEL: Model tag (Default: qwen2.5:3b)
     - LLM_API_KEY: Optional token (e.g. for vLLM proxy)
-    - LLM_TIMEOUT_SECONDS: Timeout in seconds (Default: 8.0)
+    - LLM_TIMEOUT_SECONDS: Timeout in seconds (Default: 30.0)
     """
     global _GLOBAL_ADAPTER
     if _GLOBAL_ADAPTER is not None:
@@ -654,15 +688,15 @@ def get_llm_adapter() -> LLMProviderInterface:
 
     enabled_str = os.environ.get('LLM_ENABLED', '').strip().lower()
     base_url = os.environ.get('LLM_BASE_URL', '').strip()
-    model = os.environ.get('LLM_MODEL', 'llama3.2').strip()
+    model = os.environ.get('LLM_MODEL', 'qwen2.5:3b').strip()
     api_key = os.environ.get('LLM_API_KEY', '').strip()
     try:
-        timeout = float(os.environ.get('LLM_TIMEOUT_SECONDS', '8.0'))
+        timeout = float(os.environ.get('LLM_TIMEOUT_SECONDS', '30.0'))
     except ValueError:
-        timeout = 8.0
+        timeout = 30.0
 
     if enabled_str in ('true', '1', 'yes') or (base_url and enabled_str != 'false'):
-        active_url = base_url or 'http://localhost:11434'
+        active_url = base_url or 'http://127.0.0.1:11434'
         _GLOBAL_ADAPTER = OpenSourceLLMProvider(
             base_url=active_url,
             model=model,

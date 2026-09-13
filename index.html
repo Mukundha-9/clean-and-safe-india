@@ -1761,6 +1761,17 @@
             <!-- Voice Status Feedback Indicator -->
             <div id="voiceStatusText" class="voice-transcribe-status"></div>
 
+            <!-- AI Action & Live Analysis Status Bar -->
+            <div class="ai-action-bar">
+              <button type="button" id="btnAnalyzeComplaintAi" class="btn-ai-analyze" onclick="window.analyzeComplaintWithAi()" title="Analyze complaint with local Open-Source AI (Qwen2.5)">
+                <span>✨</span> <span id="aiAnalyzeBtnText">Analyze with Open-Source AI</span>
+              </button>
+              <div id="aiAnalyzingIndicator" class="ai-analyzing-spinner" style="display: none;">
+                <span style="display: inline-block; animation: spin 1.5s linear infinite;">🧠</span>
+                <span id="aiAnalyzingStatusText">Analyzing grievance with Open-Source AI... please wait</span>
+              </div>
+            </div>
+
             <!-- Real-Time Smart Auto-Triage Indicator (Appears seamlessly as user types/speaks) -->
             <div id="smartTriagePill" class="smart-triage-pill" style="display: none;">
               <span class="smart-triage-sparkle">⚡</span>
@@ -1811,13 +1822,11 @@
             </div>
 
             <!-- Hidden compatibility elements for existing JS references -->
-            <div id="aiAnalyzingIndicator" style="display: none;"></div>
             <div id="aiAnalysisResultCard" style="display: none;">
               <span id="aiResDept"></span><span id="aiResCategory"></span><span id="aiResSeverity"></span>
               <span id="aiResUrgency"></span><span id="aiResSla"></span><span id="aiResSensitivity"></span>
               <span id="aiResRiskScore"></span><span id="aiResRiskBadge"></span><span id="aiResReasoning"></span>
               <span id="aiAnalysisConfidenceBadge"></span>
-              <button type="button" id="btnAnalyzeComplaintAi" style="display: none;"><span id="aiAnalyzeBtnText">Analyze</span></button>
             </div>
           </div>
 

@@ -47,6 +47,7 @@ def verify_password(password: str, stored: str) -> bool:
     return hmac.compare_digest(stored, password)
 
 import smtplib
+import urllib.request
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from urllib.parse import urlparse, parse_qs
@@ -4508,6 +4509,29 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
 # 4. ENTRY POINT
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
+    # Auto-detect local open-source LLM if available and not explicitly disabled
+    llm_env = os.environ.get('LLM_ENABLED', '').strip().lower()
+    llm_status_line = "Advisory Fallback Active (Deterministic Engine)"
+    if llm_env not in ('false', '0', 'no'):
+        try:
+            req = urllib.request.Request('http://127.0.0.1:11434/api/tags', headers={'User-Agent': 'SmartCivicConnect/44.0'})
+            with urllib.request.urlopen(req, timeout=1.5) as resp:
+                if resp.status == 200:
+                    tags = json.loads(resp.read().decode('utf-8'))
+                    models = [m.get('name', '') for m in tags.get('models', [])]
+                    target_model = 'qwen2.5:3b' if any('qwen2.5' in m for m in models) else (models[0] if models else 'qwen2.5:3b')
+                    os.environ['LLM_ENABLED'] = 'true'
+                    if not os.environ.get('LLM_MODEL'):
+                        os.environ['LLM_MODEL'] = target_model
+                    if not os.environ.get('LLM_BASE_URL'):
+                        os.environ['LLM_BASE_URL'] = 'http://127.0.0.1:11434'
+                    if not os.environ.get('LLM_TIMEOUT_SECONDS'):
+                        os.environ['LLM_TIMEOUT_SECONDS'] = '30'
+                    llm_status_line = f"Active ({os.environ['LLM_MODEL']} via Ollama @ {os.environ['LLM_BASE_URL']})"
+                    llm_adapter.reset_llm_adapter(None)
+        except Exception as err:
+            print(f"[Auto-detect Exception]: {err}")
+
     init_database()
 
     telemetry_thread = threading.Thread(target=background_telemetry_loop, daemon=True)
@@ -4517,6 +4541,7 @@ if __name__ == '__main__':
     print(f'===========================================================')
     print(f'  Clean & Safe India - Real-Time Backend Server Online!')
     print(f'  Local URL:    http://localhost:{PORT}')
+    print(f'  Civic LLM:    {llm_status_line}')
     print(f'  Database:     SQLite ({DB_FILE})')
     print(f'  SSE Stream:   http://localhost:{PORT}/api/stream')
     print(f'===========================================================')

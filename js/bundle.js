@@ -1224,6 +1224,22 @@
         basisEl.textContent = llmAdvisory.interpretation_basis || 'Open-source LLM inference';
       }
 
+      // Update provider badge dynamically
+      const providerBadge = document.getElementById('aiCardProviderBadge');
+      if (providerBadge) {
+        if (llmAdvisory.model && llmAdvisory.provider && String(llmAdvisory.provider).startsWith('open_source') && !llmAdvisory.fallback_triggered) {
+          providerBadge.textContent = `LIVE LLM: ${llmAdvisory.model}`;
+          providerBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+          providerBadge.style.color = '#34d399';
+          providerBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        } else {
+          providerBadge.textContent = 'Advisory Only';
+          providerBadge.style.background = 'rgba(56, 189, 248, 0.15)';
+          providerBadge.style.color = '#38bdf8';
+          providerBadge.style.borderColor = 'rgba(56, 189, 248, 0.3)';
+        }
+      }
+
       // Populate Authoritative Civic Decision Section
       if (detDecision) {
         const authDeptEl = document.getElementById('authDecisionDept');
@@ -1247,6 +1263,8 @@
     }
   };
 
+  let isAiAnalysisInProgress = false;
+
   window.triggerRealtimeTriage = function(text, immediate = false) {
     clearTimeout(reportTriageDebounceTimer);
     const aiTextInput = document.getElementById('aiComplaintTextInput');
@@ -1257,10 +1275,25 @@
       if (pill) pill.style.display = 'none';
       const card = document.getElementById('civicAiUnderstandingCard');
       if (card) card.style.display = 'none';
+      const indicator = document.getElementById('aiAnalyzingIndicator');
+      if (indicator) indicator.style.display = 'none';
       return Promise.resolve(null);
     }
 
     const runTriage = async () => {
+      if (isAiAnalysisInProgress) return null;
+      isAiAnalysisInProgress = true;
+
+      const indicator = document.getElementById('aiAnalyzingIndicator');
+      const analyzeBtn = document.getElementById('btnAnalyzeComplaintAi');
+      const analyzeBtnText = document.getElementById('aiAnalyzeBtnText');
+      const statusText = document.getElementById('aiAnalyzingStatusText');
+
+      if (indicator) indicator.style.display = 'flex';
+      if (statusText) statusText.textContent = 'Analyzing grievance with Open-Source AI (Qwen2.5)... please wait';
+      if (analyzeBtnText) analyzeBtnText.textContent = 'Analyzing...';
+      if (analyzeBtn) analyzeBtn.disabled = true;
+
       try {
         const data = await CivicAiEngine.ComplaintIntelligence.parseComplaint(text.trim());
         if (!data || data.error) return null;
@@ -1331,6 +1364,11 @@
       } catch (err) {
         console.warn('[Realtime Triage Notice]:', err);
         return null;
+      } finally {
+        isAiAnalysisInProgress = false;
+        if (indicator) indicator.style.display = 'none';
+        if (analyzeBtnText) analyzeBtnText.textContent = 'Analyze with Open-Source AI';
+        if (analyzeBtn) analyzeBtn.disabled = false;
       }
     };
 
@@ -1341,7 +1379,7 @@
         reportTriageDebounceTimer = setTimeout(async () => {
           const res = await runTriage();
           resolve(res);
-        }, 300);
+        }, 1200);
       });
     }
   };
@@ -1357,109 +1395,14 @@
       return;
     }
 
-    const indicator = document.getElementById('aiAnalyzingIndicator');
-    const resultCard = document.getElementById('aiAnalysisResultCard');
-    const btnText = document.getElementById('aiAnalyzeBtnText');
-
-    if (indicator) indicator.style.display = 'flex';
-    if (resultCard) resultCard.style.display = 'none';
-    if (btnText) btnText.textContent = 'Analyzing...';
-
-    try {
-      const data = await CivicAiEngine.ComplaintIntelligence.parseComplaint(text.trim());
-      if (data.error) throw new Error(data.error);
-
-      window.currentAiAnalysisData = data;
-
-      // Render Civic AI Understanding Card
-      window.renderCivicAiUnderstandingCard(data);
-
-      const detDecision = data.deterministic_decision || {};
-
-      // Populate UI Card (Backward Compatibility)
-      const resDept = document.getElementById('aiResDept');
-      const resCategory = document.getElementById('aiResCategory');
-      const resSeverity = document.getElementById('aiResSeverity');
-      const resUrgency = document.getElementById('aiResUrgency');
-      const resSla = document.getElementById('aiResSla');
-      const resSens = document.getElementById('aiResSensitivity');
-      const resRisk = document.getElementById('aiResRiskScore');
-      const resBadge = document.getElementById('aiResRiskBadge');
-      const resReasoning = document.getElementById('aiResReasoning');
-      const confBadge = document.getElementById('aiAnalysisConfidenceBadge');
-
-      if (resDept) resDept.textContent = detDecision.deptName || data.aiDeptName || data.aiDepartment;
-      if (resCategory) resCategory.textContent = detDecision.categoryName || data.aiCategoryName || data.aiCategory;
-      if (resSeverity) {
-        const sev = detDecision.severity || data.aiSeverity;
-        resSeverity.textContent = sev;
-        resSeverity.style.color = sev === 'Critical' ? '#f87171' : (sev === 'High' ? '#fb923c' : '#34d399');
+    const data = await window.triggerRealtimeTriage(text, true);
+    if (data && !data.error) {
+      const provider = (data.llm_advisory && data.llm_advisory.provider) || '';
+      if (String(provider).startsWith('open_source:')) {
+        showToast(`AI Advisory generated by ${data.llm_advisory.model || 'Open-Source LLM'}!`, 'success', '🧠');
+      } else {
+        showToast('Civic analysis complete (Advisory active)!', 'info', '⚡');
       }
-      if (resUrgency) resUrgency.textContent = `${detDecision.urgencyScore || data.aiUrgencyScore} / 100`;
-      if (resSla) resSla.textContent = `${detDecision.suggestedSLA || data.aiSuggestedSLA} hours`;
-      if (resSens) resSens.textContent = detDecision.locationSensitivity || data.aiLocationSensitivity;
-      if (resRisk) resRisk.textContent = `${detDecision.riskScore || data.aiRiskScore} / 100`;
-      if (resBadge) {
-        const rScore = detDecision.riskScore || data.aiRiskScore || 50;
-        const isCrit = rScore >= 81;
-        const isHigh = rScore >= 61;
-        resBadge.textContent = isCrit ? '🔴 Critical Risk' : (isHigh ? '🟠 High Risk' : (rScore >= 31 ? '🟡 Medium Risk' : '🟢 Low Risk'));
-        resBadge.style.color = isCrit ? '#f87171' : (isHigh ? '#fb923c' : (rScore >= 31 ? '#facc15' : '#34d399'));
-        resBadge.style.borderColor = resBadge.style.color;
-        resBadge.style.background = isCrit ? 'rgba(248, 113, 113, 0.15)' : 'rgba(251, 146, 60, 0.15)';
-      }
-      if (confBadge) {
-        if (detDecision.interpretation_basis) {
-          confBadge.textContent = `Basis: ${detDecision.interpretation_basis}`;
-        } else if (llmAdvisory && llmAdvisory.interpretation_basis) {
-          confBadge.textContent = `Basis: ${llmAdvisory.interpretation_basis}`;
-        } else {
-          confBadge.textContent = 'Basis: Deterministic civic rules/pattern matching';
-        }
-      }
-
-      // Pre-fill form dropdowns and inputs (Advisory Prefill - Citizen Can Change)
-      const deptSelect = document.getElementById('reportDeptSelect');
-      const titleInput = document.getElementById('reportTitleInput');
-      const severitySelect = document.getElementById('reportSeveritySelect');
-
-      const targetDept = detDecision.department || data.aiDepartment;
-      if (deptSelect && targetDept) {
-        deptSelect.value = targetDept;
-      }
-      const targetTitle = detDecision.suggestedTitle || data.suggestedTitle;
-      if (titleInput && (!titleInput.value || titleInput.value.length < 5)) {
-        titleInput.value = targetTitle || (text.slice(0, 45) + (text.length > 45 ? '...' : ''));
-        titleInput.dataset.autofilled = 'true';
-      }
-      const targetSeverity = detDecision.formSeverity || data.formSeverity;
-      if (severitySelect && targetSeverity) {
-        severitySelect.value = targetSeverity;
-      }
-      if (descInput) {
-        descInput.value = text;
-      }
-
-      // Update sleek smart pill
-      const pill = document.getElementById('smartTriagePill');
-      const summaryText = document.getElementById('triageSummaryText');
-      if (pill && summaryText) {
-        const deptName = detDecision.deptName || data.aiDeptName || (deptSelect ? deptSelect.options[deptSelect.selectedIndex].text : 'Sanitation');
-        const slaHours = detDecision.suggestedSLA || data.aiSuggestedSLA || 24;
-        const sevLabel = detDecision.severity || data.aiSeverity || 'Medium';
-        summaryText.innerHTML = `Operations Target: <strong style="color: #38bdf8;">${deptName}</strong> • SLA: <strong style="color: #34d399;">${slaHours}h (${sevLabel})</strong>`;
-        pill.style.display = 'flex';
-      }
-
-      if (resultCard) resultCard.style.display = 'block';
-      playNotificationSound('chime');
-      showToast('Civic intelligence recommendations applied!', 'info', '⚡');
-    } catch (err) {
-      console.error('[AI Analysis Error]:', err);
-      showToast('Smart analysis temporarily unavailable. You can proceed manually.', 'warning', 'ℹ️');
-    } finally {
-      if (indicator) indicator.style.display = 'none';
-      if (btnText) btnText.textContent = 'Analyze';
     }
   };
 
