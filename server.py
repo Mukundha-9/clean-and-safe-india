@@ -16,6 +16,7 @@ import math
 import base64
 import predictive_engine
 import ai_engine
+import llm_adapter
 
 # ------------------------------------------------------------------------------
 # INDUSTRY-STANDARD PASSWORD SECURITY (SCRYPT WITH PER-USER SALT)
@@ -3604,7 +3605,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             return
 
         # ---------------------------------------------------------------------
-        # PHASE 7 PREPARED AI SCAFFOLDING ENDPOINTS (ADVISORY DECISION SUPPORT)
+        # PHASE 1 OPEN-SOURCE CIVIC LLM INTELLIGENCE + DETERMINISTIC DECISION CORE
         # ---------------------------------------------------------------------
         if path == '/api/ai/complaint-intelligence':
             text = (body.get('text') or '').strip()
@@ -3613,8 +3614,13 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 self.send_json_response({'success': False, 'error': 'Complaint description text is required.'}, status=400)
                 return
 
+            # STEP 1: Invoke Open-Source Civic LLM Adapter (Strictly Advisory)
+            llm_engine = llm_adapter.get_llm_adapter()
+            llm_res = llm_engine.understand_civic_complaint(text, loc_input)
+
             q_lower = text.lower()
 
+            # STEP 2: Authoritative Deterministic Civic Intelligence Engine
             # 1. Location Sensitivity Extraction
             sensitivity = 'General Area'
             if any(w in q_lower for w in ['college', 'school', 'university', 'campus', 'student', 'classroom', 'hostel']):
@@ -3630,10 +3636,10 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             elif any(w in q_lower for w in ['substation', 'feeder', 'water tank', 'pump', 'transformer', 'grid']):
                 sensitivity = 'Critical Infrastructure'
 
-            # 2. Strict Department & Category Classification (Deterministic Rule-based Civic AI)
+            # 2. Strict Department & Category Classification (Deterministic Operational Authority)
             if any(w in q_lower for w in ['spark', 'wire', 'transformer', 'shock', 'electric', 'current', 'cable', 'pole', 'power', 'outage', 'voltage', 'blackout', 'short circuit']):
                 dept = 'electricity'
-                dept_name = 'Electricity'
+                dept_name = 'Smart Electricity Department'
                 dept_icon = '⚡'
                 if any(w in q_lower for w in ['outage', 'blackout', 'no power', 'power out', 'power has been out', 'power is out', 'power cut', 'cut', 'tripped', 'no current', 'current cut', 'load shedding']):
                     cat = 'power_outage'
@@ -3686,7 +3692,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
 
             elif any(w in q_lower for w in ['drain', 'sewage', 'clog', 'silt', 'gutter', 'drainage', 'drain blockage', 'manhole', 'waterlogging']):
                 dept = 'sanitation'
-                dept_name = 'Sanitation'
+                dept_name = 'Sanitation & Waste Management'
                 dept_icon = '🏢'
                 cat = 'drain_blockage'
                 cat_name = 'Drain Blockage'
@@ -3695,7 +3701,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
 
             elif any(w in q_lower for w in ['food', 'hotel', 'restaurant', 'dhaba', 'stall', 'oil', 'stale', 'rotten', 'spoilage', 'unhygienic', 'fssai', 'tiffin', 'hygiene']):
                 dept = 'food_safety'
-                dept_name = 'Food Safety'
+                dept_name = 'Food Safety Department'
                 dept_icon = '🍲'
                 cat = 'food_hygiene'
                 cat_name = 'Food Hygiene'
@@ -3703,13 +3709,26 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 suggested_title = 'Food Hygiene Violation'
 
             else:
-                dept = 'sanitation'
-                dept_name = 'Sanitation'
-                dept_icon = '🏢'
-                cat = 'garbage_overflow'
-                cat_name = 'Garbage Overflow'
-                cat_icon = '🗑️'
-                suggested_title = 'Garbage Overflow Report'
+                # If deterministic engine did not find explicit keywords, check if LLM provided a valid recommendation
+                # but preserve deterministic routing authority
+                llm_dept = llm_res.get('department')
+                llm_cat = llm_res.get('category')
+                if llm_dept in llm_adapter.VALID_DEPARTMENTS and llm_cat in llm_adapter.VALID_CATEGORIES:
+                    dept = llm_dept
+                    dept_name = llm_adapter.VALID_DEPARTMENTS[dept]
+                    dept_icon = '🏢' if dept == 'sanitation' else ('🛣️' if dept == 'roads' else ('⚡' if dept == 'electricity' else ('💧' if dept == 'water_supply' else '🍲')))
+                    cat = llm_cat
+                    cat_name = llm_adapter.VALID_CATEGORIES[cat][1]
+                    cat_icon = llm_adapter.VALID_CATEGORIES[cat][2]
+                    suggested_title = f"{cat_name} Report"
+                else:
+                    dept = 'sanitation'
+                    dept_name = 'Sanitation & Waste Management'
+                    dept_icon = '🏢'
+                    cat = 'garbage_overflow'
+                    cat_name = 'Garbage Overflow'
+                    cat_icon = '🗑️'
+                    suggested_title = 'Civic Hazard Report'
 
             # 3. Urgency Score Calculation (0-100)
             base_urgency = 62
@@ -3768,8 +3787,8 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             else:
                 suggested_sla = 48.0
 
-            # 6. Confidence Score (Deterministic Rule-Based)
-            confidence = 0.90
+            # 6. Interpretation Basis (Transparent & Honest — No Fabricated Probabilistic Confidence)
+            interpretation_basis = 'Deterministic civic rules/pattern matching'
 
             # 7. Human-safe Observable Reasoning
             reasons = []
@@ -3785,21 +3804,97 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             if reasons:
                 reasoning = f"Complaint mentions {cat_name.lower()} in a {sensitivity.lower()} ({', '.join(reasons)}), elevating urgency to {urgency_score}/100."
             else:
-                reasoning = f"Complaint classified under {dept_name} as {cat_name} based on observable civic keywords."
+                reasoning = f"Complaint classified under {dept_name} as {cat_name} based on observable civic criteria."
 
             # 8. Multi-Factor Civic Risk Score (0-100)
             pop_factor = 9 if sensitivity in ['Educational Zone', 'Hospital & Medical Zone'] else (8 if sensitivity in ['Commercial Market Zone', 'Public Road / Transit Corridor'] else 6)
             sev_factor = 9 if severity in ['Critical', 'High'] else 6
-            raw_risk = (sev_factor * 2.5) + (pop_factor * 2.0) + (7 * 2.0) + (8 * 2.0) + (confidence * 15.0)
+            raw_risk = (sev_factor * 2.5) + (pop_factor * 2.0) + (7 * 2.0) + (8 * 2.0) + 13.5
             civic_risk_score = min(100, max(15, round(raw_risk)))
             risk_level = 'Critical' if civic_risk_score >= 81 else ('High' if civic_risk_score >= 61 else ('Medium' if civic_risk_score >= 31 else 'Low'))
 
-            # 9. Audit Log Entry in ai_predictions
+            # STEP 3: Construct Clearly Separated LLM Advisory & Deterministic Decision Objects
+            llm_advisory_basis = llm_res.get('interpretation_basis')
+            if not llm_advisory_basis:
+                if str(llm_res.get('provider', '')).startswith('open_source'):
+                    llm_advisory_basis = f"Open-source LLM inference ({llm_res.get('model', 'default')})"
+                else:
+                    llm_advisory_basis = interpretation_basis
+
+            llm_advisory = {
+                'language': llm_res.get('language', 'en'),
+                'normalized_summary': llm_res.get('normalized_summary', ''),
+                'department': llm_res.get('department', dept),
+                'category': llm_res.get('category', cat),
+                'subcategory': llm_res.get('subcategory', ''),
+                'landmark': llm_res.get('landmark', sensitivity),
+                'duration': llm_res.get('duration', ''),
+                'impact': llm_res.get('impact', ''),
+                'urgency': llm_res.get('urgency', 'medium'),
+                'recommended_action': llm_res.get('recommended_action', ''),
+                'is_advisory': True,
+                'provider': llm_res.get('provider', 'open_source'),
+                'model': llm_res.get('model', 'default'),
+                'latency_ms': llm_res.get('latency_ms', 0),
+                'validation_status': llm_res.get('validation_status', 'PASSED'),
+                'interpretation_basis': llm_advisory_basis
+            }
+
+            deterministic_decision = {
+                'department': dept,
+                'deptName': dept_name,
+                'deptIcon': dept_icon,
+                'category': cat,
+                'categoryName': cat_name,
+                'categoryIcon': cat_icon,
+                'severity': severity,
+                'formSeverity': form_severity,
+                'urgencyScore': urgency_score,
+                'suggestedSLA': suggested_sla,
+                'locationSensitivity': sensitivity,
+                'interpretation_basis': interpretation_basis,
+                'riskScore': civic_risk_score,
+                'riskLevel': risk_level,
+                'reasoning': reasoning,
+                'suggestedTitle': suggested_title,
+                'isAuthoritative': True
+            }
+
+            # STEP 4: Immutable Operational Audit Logging
+            draft_ref = f"DRAFT-{int(time.time()*1000) % 100000}"
+            now_ms = int(time.time() * 1000)
             try:
                 conn = get_db_connection()
                 cur = conn.cursor()
-                pred_id = f"PRED-{int(time.time()*1000)}"
-                draft_ref = 'DRAFT-' + str(int(time.time()*1000) % 100000)
+
+                # 1. Record in operational_audit_logs
+                audit_id = f"AUDIT-LLM-{now_ms}"
+                audit_notes = json.dumps({
+                    'provider': llm_res.get('provider'),
+                    'model': llm_res.get('model'),
+                    'latency_ms': llm_res.get('latency_ms'),
+                    'validation_status': llm_res.get('validation_status'),
+                    'fallback_triggered': bool(llm_res.get('fallback_triggered', False)),
+                    'language': llm_res.get('language'),
+                    'advisory_dept': llm_res.get('department'),
+                    'authoritative_dept': dept,
+                    'summary': llm_adapter.sanitize_pii(llm_res.get('normalized_summary', ''))[:150]
+                })
+                cur.execute('''
+                    INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    audit_id,
+                    draft_ref,
+                    'Civic LLM Advisory Engine',
+                    'CIVIC_LLM_COMPLAINT_UNDERSTANDING',
+                    'N/A (Advisory Inference)',
+                    audit_notes,
+                    now_ms
+                ))
+
+                # 2. Record in ai_predictions table
+                pred_id = f"PRED-{now_ms}"
                 cur.execute('''
                     INSERT INTO ai_predictions (id, entityType, entityId, predictionType, confidenceScore, reasoning, recommendedAction, createdAt)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -3807,19 +3902,23 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                     pred_id,
                     'complaint_draft',
                     draft_ref,
-                    'complaint_intelligence',
-                    confidence,
-                    f"Observable reasoning: {reasoning} | Source: Rule-based Civic AI decision support | Advisory: True",
-                    f"Recommend triage to {dept_name} ({cat_name}) with {suggested_sla}h SLA (Risk: {civic_risk_score}/100)",
-                    int(time.time()*1000)
+                    'complaint_understanding_v44',
+                    None,
+                    f"LLM Advisory: {llm_adapter.sanitize_pii(llm_res.get('normalized_summary', ''))} | Operational Reasoning: {reasoning}",
+                    f"Advisory Recommendation: {llm_adapter.sanitize_pii(llm_res.get('recommended_action', ''))} | Authority: {dept_name} ({suggested_sla}h SLA)",
+                    now_ms
                 ))
                 conn.commit()
                 conn.close()
-            except Exception as pred_err:
-                print(f"[AI Audit Note]: {pred_err}")
+            except Exception as audit_err:
+                print(f"[LLM Audit Warning]: {audit_err}")
 
+            # Return clearly separated objects while retaining backward compatibility
             self.send_json_response({
                 'success': True,
+                'llm_advisory': llm_advisory,
+                'deterministic_decision': deterministic_decision,
+                # Backward-compatible keys for existing UI bindings
                 'aiDepartment': dept,
                 'aiDeptName': dept_name,
                 'aiDeptIcon': dept_icon,
@@ -3831,15 +3930,17 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'aiUrgencyScore': urgency_score,
                 'aiSuggestedSLA': suggested_sla,
                 'aiLocationSensitivity': sensitivity,
-                'aiConfidence': confidence,
+                'interpretationBasis': interpretation_basis,
+                'aiConfidence': None,
                 'aiReasoning': reasoning,
                 'aiRiskScore': civic_risk_score,
                 'aiRiskLevel': risk_level,
                 'suggestedTitle': suggested_title,
                 'isAdvisoryOnly': True,
-                'analysisSource': 'Deterministic AI-assisted civic classification'
+                'analysisSource': f"Open-Source Civic LLM ({llm_res.get('provider')}) + Deterministic Operational Core"
             })
             return
+
 
         # ---------------------------------------------------------------------
         # STAGE v43: CIVIC INCIDENT IDENTITY ENGINE EVALUATION

@@ -1182,10 +1182,70 @@
   window.CivicAiEngine = CivicAiEngine;
 
   // =========================================================================
-  // PHASE 2: REAL-TIME SMART CIVIC TRIAGE CONTROLLER
+  // PHASE 2: REAL-TIME SMART CIVIC TRIAGE CONTROLLER (v44 OPEN-SOURCE CIVIC LLM)
   // =========================================================================
   window.currentAiAnalysisData = null;
   let reportTriageDebounceTimer = null;
+
+  window.renderCivicAiUnderstandingCard = function(data) {
+    const card = document.getElementById('civicAiUnderstandingCard');
+    if (!card) return;
+    if (!data) {
+      card.style.display = 'none';
+      return;
+    }
+
+    const llmAdvisory = data.llm_advisory;
+    const detDecision = data.deterministic_decision;
+
+    if (llmAdvisory) {
+      const langMap = { en: 'English', te: 'Telugu (తెలుగు)', hi: 'Hindi (हिन्दी)', other: 'Vernacular' };
+      const langBadge = document.getElementById('aiCardLangBadge');
+      const summaryEl = document.getElementById('aiCardSummaryText');
+      const deptEl = document.getElementById('aiCardDeptText');
+      const landmarkEl = document.getElementById('aiCardLandmarkText');
+      const urgencyEl = document.getElementById('aiCardUrgencyText');
+      const actionEl = document.getElementById('aiCardActionText');
+      const basisEl = document.getElementById('aiCardBasisText');
+
+      if (langBadge) langBadge.textContent = `Language: ${langMap[llmAdvisory.language] || llmAdvisory.language || 'English'}`;
+      if (summaryEl) summaryEl.textContent = llmAdvisory.normalized_summary || 'Civic grievance reported';
+      if (deptEl) {
+        deptEl.textContent = `${llmAdvisory.department || (detDecision && detDecision.deptName) || 'Sanitation'} (Suggested)`;
+      }
+      if (landmarkEl) landmarkEl.textContent = llmAdvisory.landmark || (detDecision && detDecision.locationSensitivity) || 'None stated';
+      if (urgencyEl) {
+        const urg = (llmAdvisory.urgency || 'medium').toUpperCase();
+        urgencyEl.textContent = urg;
+        urgencyEl.style.color = urg === 'CRITICAL' ? '#f87171' : (urg === 'HIGH' ? '#fb923c' : '#34d399');
+      }
+      if (actionEl) actionEl.textContent = llmAdvisory.recommended_action || 'Field squad inspection';
+      if (basisEl) {
+        basisEl.textContent = llmAdvisory.interpretation_basis || 'Open-source LLM inference';
+      }
+
+      // Populate Authoritative Civic Decision Section
+      if (detDecision) {
+        const authDeptEl = document.getElementById('authDecisionDept');
+        const authDetailsEl = document.getElementById('authDecisionDetails');
+        const authBasisEl = document.getElementById('authDecisionBasisText');
+
+        if (authDeptEl) {
+          authDeptEl.textContent = `${detDecision.deptName} • ${detDecision.suggestedSLA}h SLA`;
+        }
+        if (authDetailsEl) {
+          authDetailsEl.innerHTML = `Classification: <strong>${detDecision.categoryName}</strong> • Severity: <strong>${detDecision.severity}</strong> (Risk: ${detDecision.riskScore}/100)`;
+        }
+        if (authBasisEl) {
+          authBasisEl.textContent = detDecision.interpretation_basis || 'Deterministic civic rules/pattern matching';
+        }
+      }
+
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  };
 
   window.triggerRealtimeTriage = function(text, immediate = false) {
     clearTimeout(reportTriageDebounceTimer);
@@ -1195,6 +1255,8 @@
     if (!text || text.trim().length < 6) {
       const pill = document.getElementById('smartTriagePill');
       if (pill) pill.style.display = 'none';
+      const card = document.getElementById('civicAiUnderstandingCard');
+      if (card) card.style.display = 'none';
       return Promise.resolve(null);
     }
 
@@ -1205,31 +1267,41 @@
 
         window.currentAiAnalysisData = data;
 
-        // Auto-select Department
+        // Render Civic AI Understanding Card
+        window.renderCivicAiUnderstandingCard(data);
+
+        const detDecision = data.deterministic_decision || {};
+
+        // Auto-select Department (Authoritative Operational Decision)
+        const targetDept = detDecision.department || data.aiDepartment;
         const deptSelect = document.getElementById('reportDeptSelect');
-        if (deptSelect && data.aiDepartment) {
-          deptSelect.value = data.aiDepartment;
+        if (deptSelect && targetDept) {
+          deptSelect.value = targetDept;
         }
 
         // Auto-fill Title if empty or was previously auto-filled
+        const targetTitle = detDecision.suggestedTitle || data.suggestedTitle;
         const titleInput = document.getElementById('reportTitleInput');
         if (titleInput && (!titleInput.value || titleInput.dataset.autofilled === 'true' || titleInput.value.length < 5)) {
-          titleInput.value = data.suggestedTitle || (text.slice(0, 45) + (text.length > 45 ? '...' : ''));
+          titleInput.value = targetTitle || (text.slice(0, 45) + (text.length > 45 ? '...' : ''));
           titleInput.dataset.autofilled = 'true';
         }
 
-        // Auto-select Severity
+        // Auto-select Severity (Authoritative Decision)
+        const targetSeverity = detDecision.formSeverity || data.formSeverity;
         const severitySelect = document.getElementById('reportSeveritySelect');
-        if (severitySelect && data.formSeverity) {
-          severitySelect.value = data.formSeverity;
+        if (severitySelect && targetSeverity) {
+          severitySelect.value = targetSeverity;
         }
 
         // Display Sleek Real-Time Smart Triage Badge
         const livePill = document.getElementById('smartTriagePill');
         const liveSummary = document.getElementById('triageSummaryText');
         if (livePill && liveSummary) {
-          const deptName = data.aiDeptName || (deptSelect ? deptSelect.options[deptSelect.selectedIndex].text : 'Sanitation');
-          liveSummary.innerHTML = `Auto-detected: <strong style="color: #38bdf8;">${deptName}</strong> • SLA: <strong style="color: #34d399;">${data.aiSuggestedSLA || 24}h (${data.aiSeverity || 'Medium'})</strong>`;
+          const deptName = detDecision.deptName || data.aiDeptName || (deptSelect ? deptSelect.options[deptSelect.selectedIndex].text : 'Sanitation');
+          const slaHours = detDecision.suggestedSLA || data.aiSuggestedSLA || 24;
+          const sevLabel = detDecision.severity || data.aiSeverity || 'Medium';
+          liveSummary.innerHTML = `Operations Target: <strong style="color: #38bdf8;">${deptName}</strong> • SLA: <strong style="color: #34d399;">${slaHours}h (${sevLabel})</strong>`;
           livePill.style.display = 'flex';
         }
 
@@ -1299,7 +1371,12 @@
 
       window.currentAiAnalysisData = data;
 
-      // Populate UI Card
+      // Render Civic AI Understanding Card
+      window.renderCivicAiUnderstandingCard(data);
+
+      const detDecision = data.deterministic_decision || {};
+
+      // Populate UI Card (Backward Compatibility)
       const resDept = document.getElementById('aiResDept');
       const resCategory = document.getElementById('aiResCategory');
       const resSeverity = document.getElementById('aiResSeverity');
@@ -1311,41 +1388,53 @@
       const resReasoning = document.getElementById('aiResReasoning');
       const confBadge = document.getElementById('aiAnalysisConfidenceBadge');
 
-      if (resDept) resDept.textContent = data.aiDeptName || data.aiDepartment;
-      if (resCategory) resCategory.textContent = data.aiCategoryName || data.aiCategory;
+      if (resDept) resDept.textContent = detDecision.deptName || data.aiDeptName || data.aiDepartment;
+      if (resCategory) resCategory.textContent = detDecision.categoryName || data.aiCategoryName || data.aiCategory;
       if (resSeverity) {
-        resSeverity.textContent = data.aiSeverity;
-        resSeverity.style.color = data.aiSeverity === 'Critical' ? '#f87171' : (data.aiSeverity === 'High' ? '#fb923c' : '#34d399');
+        const sev = detDecision.severity || data.aiSeverity;
+        resSeverity.textContent = sev;
+        resSeverity.style.color = sev === 'Critical' ? '#f87171' : (sev === 'High' ? '#fb923c' : '#34d399');
       }
-      if (resUrgency) resUrgency.textContent = `${data.aiUrgencyScore} / 100`;
-      if (resSla) resSla.textContent = `${data.aiSuggestedSLA} hours`;
-      if (resSens) resSens.textContent = data.aiLocationSensitivity;
-      if (resRisk) resRisk.textContent = `${data.aiRiskScore} / 100`;
+      if (resUrgency) resUrgency.textContent = `${detDecision.urgencyScore || data.aiUrgencyScore} / 100`;
+      if (resSla) resSla.textContent = `${detDecision.suggestedSLA || data.aiSuggestedSLA} hours`;
+      if (resSens) resSens.textContent = detDecision.locationSensitivity || data.aiLocationSensitivity;
+      if (resRisk) resRisk.textContent = `${detDecision.riskScore || data.aiRiskScore} / 100`;
       if (resBadge) {
-        const isCrit = data.aiRiskScore >= 81;
-        const isHigh = data.aiRiskScore >= 61;
-        resBadge.textContent = isCrit ? '🔴 Critical Risk' : (isHigh ? '🟠 High Risk' : (data.aiRiskScore >= 31 ? '🟡 Medium Risk' : '🟢 Low Risk'));
-        resBadge.style.color = isCrit ? '#f87171' : (isHigh ? '#fb923c' : (data.aiRiskScore >= 31 ? '#facc15' : '#34d399'));
+        const rScore = detDecision.riskScore || data.aiRiskScore || 50;
+        const isCrit = rScore >= 81;
+        const isHigh = rScore >= 61;
+        resBadge.textContent = isCrit ? '🔴 Critical Risk' : (isHigh ? '🟠 High Risk' : (rScore >= 31 ? '🟡 Medium Risk' : '🟢 Low Risk'));
+        resBadge.style.color = isCrit ? '#f87171' : (isHigh ? '#fb923c' : (rScore >= 31 ? '#facc15' : '#34d399'));
         resBadge.style.borderColor = resBadge.style.color;
         resBadge.style.background = isCrit ? 'rgba(248, 113, 113, 0.15)' : 'rgba(251, 146, 60, 0.15)';
       }
-      if (resReasoning) resReasoning.textContent = data.aiReasoning;
-      if (confBadge) confBadge.textContent = `Confidence: ${Math.round(data.aiConfidence * 100)}% (${data.analysisSource || 'Deterministic Rules'})`;
+      if (confBadge) {
+        if (detDecision.interpretation_basis) {
+          confBadge.textContent = `Basis: ${detDecision.interpretation_basis}`;
+        } else if (llmAdvisory && llmAdvisory.interpretation_basis) {
+          confBadge.textContent = `Basis: ${llmAdvisory.interpretation_basis}`;
+        } else {
+          confBadge.textContent = 'Basis: Deterministic civic rules/pattern matching';
+        }
+      }
 
-      // Pre-fill form dropdowns and inputs
+      // Pre-fill form dropdowns and inputs (Advisory Prefill - Citizen Can Change)
       const deptSelect = document.getElementById('reportDeptSelect');
       const titleInput = document.getElementById('reportTitleInput');
       const severitySelect = document.getElementById('reportSeveritySelect');
 
-      if (deptSelect && data.aiDepartment) {
-        deptSelect.value = data.aiDepartment;
+      const targetDept = detDecision.department || data.aiDepartment;
+      if (deptSelect && targetDept) {
+        deptSelect.value = targetDept;
       }
+      const targetTitle = detDecision.suggestedTitle || data.suggestedTitle;
       if (titleInput && (!titleInput.value || titleInput.value.length < 5)) {
-        titleInput.value = data.suggestedTitle || (text.slice(0, 45) + (text.length > 45 ? '...' : ''));
+        titleInput.value = targetTitle || (text.slice(0, 45) + (text.length > 45 ? '...' : ''));
         titleInput.dataset.autofilled = 'true';
       }
-      if (severitySelect && data.formSeverity) {
-        severitySelect.value = data.formSeverity;
+      const targetSeverity = detDecision.formSeverity || data.formSeverity;
+      if (severitySelect && targetSeverity) {
+        severitySelect.value = targetSeverity;
       }
       if (descInput) {
         descInput.value = text;
@@ -1355,14 +1444,16 @@
       const pill = document.getElementById('smartTriagePill');
       const summaryText = document.getElementById('triageSummaryText');
       if (pill && summaryText) {
-        const deptName = data.aiDeptName || (deptSelect ? deptSelect.options[deptSelect.selectedIndex].text : 'Sanitation');
-        summaryText.innerHTML = `Auto-detected: <strong style="color: #38bdf8;">${deptName}</strong> • SLA: <strong style="color: #34d399;">${data.aiSuggestedSLA || 24}h (${data.aiSeverity})</strong>`;
+        const deptName = detDecision.deptName || data.aiDeptName || (deptSelect ? deptSelect.options[deptSelect.selectedIndex].text : 'Sanitation');
+        const slaHours = detDecision.suggestedSLA || data.aiSuggestedSLA || 24;
+        const sevLabel = detDecision.severity || data.aiSeverity || 'Medium';
+        summaryText.innerHTML = `Operations Target: <strong style="color: #38bdf8;">${deptName}</strong> • SLA: <strong style="color: #34d399;">${slaHours}h (${sevLabel})</strong>`;
         pill.style.display = 'flex';
       }
 
       if (resultCard) resultCard.style.display = 'block';
       playNotificationSound('chime');
-      showToast('Smart suggestions applied!', 'info', '⚡');
+      showToast('Civic intelligence recommendations applied!', 'info', '⚡');
     } catch (err) {
       console.error('[AI Analysis Error]:', err);
       showToast('Smart analysis temporarily unavailable. You can proceed manually.', 'warning', 'ℹ️');
