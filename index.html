@@ -32,8 +32,8 @@
   <link rel="stylesheet" href="css/electricity.css?v=7.0">
   <link rel="stylesheet" href="css/iot-simulation.css?v=7.0">
   <link rel="stylesheet" href="css/auth.css?v=7.0">
-  <link rel="stylesheet" href="css/responsive.css?v=26.0.0">
-  <link rel="stylesheet" href="css/theme.css?v=44.1.0">
+  <link rel="stylesheet" href="css/responsive.css?v=27.0.0">
+  <link rel="stylesheet" href="css/theme.css?v=44.2.0">
 
   <script>
     /* Immediate Theme Pre-loader: avoids theme flashing */
@@ -1728,13 +1728,25 @@
             </div>
           </div>
 
-          <!-- PRIMARY SECTION: SINGLE UNIFIED COMPLAINT DESCRIPTION WITH INLINE VOICE -->
+          <!-- SECTION: 🧠 CIVIC AI UNDERSTANDING -->
+          <div class="civic-ai-section-header" style="margin-bottom: 0.6rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(255,255,255,0.08);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.3rem;">
+              <h4 style="margin: 0; font-size: 0.92rem; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 0.4rem;">
+                <span>🧠</span> Civic AI Understanding
+              </h4>
+              <span style="font-size: 0.72rem; color: #94a3b8;">🇮🇳 English • తెలుగు • हिंदी</span>
+            </div>
+            <p style="margin: 0.25rem 0 0 0; font-size: 0.75rem; color: #94a3b8; line-height: 1.4;">
+              Describe your civic problem in your own words. An open-source local LLM helps understand and structure your complaint before submission.
+            </p>
+          </div>
+
           <div class="form-group" style="margin-bottom: 0;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
-              <label class="form-label" style="margin: 0; font-size: 0.84rem; font-weight: 700; color: var(--text-bright);">
+              <label class="form-label" style="margin: 0; font-size: 0.82rem; font-weight: 700; color: var(--text-bright);">
                 Describe the Civic Hazard / Issue: <span style="color: #f87171;">*</span>
               </label>
-              <span style="font-size: 0.72rem; color: #94a3b8;">Type or tap mic to speak in 🇮🇳 English / తెలుగు / हिंदी</span>
+              <span style="font-size: 0.70rem; color: #94a3b8;">Type or tap mic to speak</span>
             </div>
 
             <div class="modern-desc-container">
@@ -1751,24 +1763,27 @@
                   <div class="wave-bar" style="height: 8px;"></div>
                   <div class="wave-bar" style="height: 14px;"></div>
                 </div>
-                <button type="button" class="modern-voice-mic-btn" id="voiceAiBtn" onclick="window.toggleVoiceRecording()" title="Click to speak your complaint (Telugu / Hindi / English)">
+                <button type="button" class="modern-voice-mic-btn" id="voiceAiBtn" onclick="window.toggleVoiceRecording()" title="Click to speak your complaint (Web Speech API)">
                   <span>🎤</span>
                   <span id="voiceBtnLabel" class="voice-sr-only">Record Voice</span>
                 </button>
               </div>
             </div>
 
-            <!-- Voice Status Feedback Indicator -->
+            <!-- Voice Status Feedback Indicator & Honest Disclaimer -->
             <div id="voiceStatusText" class="voice-transcribe-status"></div>
+            <div style="font-size: 0.69rem; color: #64748b; margin-top: 3px; margin-bottom: 0.5rem; line-height: 1.3;">
+              🎙️ <em>Voice transcription uses the browser's Web Speech API (optional / experimental). Typed text is the authoritative path.</em>
+            </div>
 
             <!-- AI Action & Live Analysis Status Bar -->
             <div class="ai-action-bar">
-              <button type="button" id="btnAnalyzeComplaintAi" class="btn-ai-analyze" onclick="window.analyzeComplaintWithAi()" title="Analyze complaint with local Open-Source AI (Qwen2.5)">
-                <span>✨</span> <span id="aiAnalyzeBtnText">Analyze with Open-Source AI</span>
+              <button type="button" id="btnAnalyzeComplaintAi" class="btn-ai-analyze" onclick="window.analyzeComplaintWithAi()" title="Understand complaint with local Open-Source AI (Qwen2.5:3B)">
+                <span>✨</span> <span id="aiAnalyzeBtnText">Understand My Complaint with AI</span>
               </button>
               <div id="aiAnalyzingIndicator" class="ai-analyzing-spinner" style="display: none;">
                 <span style="display: inline-block; animation: spin 1.5s linear infinite;">🧠</span>
-                <span id="aiAnalyzingStatusText">Analyzing grievance with Open-Source AI... please wait</span>
+                <span id="aiAnalyzingStatusText">Analyzing grievance with Open-Source AI (Qwen2.5:3B)... please wait</span>
               </div>
             </div>
 
@@ -1780,44 +1795,81 @@
             </div>
 
             <!-- Civic AI Understanding Card (Compact, Professional Advisory Section) -->
-            <div id="civicAiUnderstandingCard" style="display: none; margin-top: 0.65rem; background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 0.75rem 0.9rem; font-size: 0.8rem; color: var(--text-bright, #e2e8f0);">
-              <!-- 1. Open-Source LLM Advisory Section -->
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.45rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.35rem;">
-                <div style="display: flex; align-items: center; gap: 0.45rem; font-weight: 700; color: #38bdf8; font-size: 0.82rem;">
-                  <span>🧠</span> Open-Source LLM Advisory
-                  <span id="aiCardProviderBadge" style="font-size: 0.65rem; text-transform: uppercase; background: rgba(56, 189, 248, 0.15); color: #38bdf8; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.3); font-weight: 600;">Advisory Only</span>
-                </div>
-                <div id="aiCardLangBadge" style="font-size: 0.7rem; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px;">Language: English</div>
+            <div id="civicAiUnderstandingCard" style="display: none; margin-top: 0.75rem; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 0.85rem 1rem; font-size: 0.8rem; color: var(--text-bright, #e2e8f0);">
+              
+              <!-- Data Flow Visual Architecture -->
+              <div class="civic-ai-flow-diagram" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; padding: 6px 10px; margin-bottom: 0.75rem; font-size: 0.69rem; line-height: 1.3;">
+                <span style="font-weight: 600; color: #e2e8f0;">Citizen's words</span>
+                <span style="color: #64748b;">→</span>
+                <span style="font-weight: 600; color: #38bdf8;">Qwen2.5:3B (Open-source LLM via Ollama)</span>
+                <span style="color: #64748b;">→</span>
+                <span style="font-weight: 600; color: #a5b4fc;">Civic AI Advisory</span>
+                <span style="color: #64748b;">→</span>
+                <span style="font-weight: 600; color: #34d399;">Authoritative Civic Decision</span>
+                <span style="color: #64748b;">→</span>
+                <span style="font-weight: 600; color: #f59e0b;">Civic Workflow</span>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr; gap: 0.35rem; margin-bottom: 0.45rem;">
-                <div><span style="color: #94a3b8;">Interpretation:</span> <strong id="aiCardSummaryText" style="color: #f1f5f9;">—</strong></div>
-                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
-                  <div><span style="color: #94a3b8;">Suggested Dept:</span> <strong id="aiCardDeptText" style="color: #38bdf8;">—</strong></div>
-                  <div><span style="color: #94a3b8;">Location Context:</span> <strong id="aiCardLandmarkText" style="color: #cbd5e1;">—</strong></div>
-                  <div><span style="color: #94a3b8;">Urgency:</span> <strong id="aiCardUrgencyText" style="color: #fb923c;">—</strong></div>
+              <!-- 1. OPEN-SOURCE LLM ADVISORY Section -->
+              <div style="margin-bottom: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.5rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.4rem;">
+                  <div style="display: flex; align-items: center; gap: 0.45rem; font-weight: 700; color: #38bdf8; font-size: 0.82rem; letter-spacing: 0.03em;">
+                    <span>🧠</span> OPEN-SOURCE LLM ADVISORY
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+                    <span id="aiCardModelBadge" style="font-size: 0.68rem; background: rgba(56, 189, 248, 0.12); color: #38bdf8; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.3);">Model: Qwen2.5:3B</span>
+                    <span id="aiCardRuntimeBadge" style="font-size: 0.68rem; background: rgba(99, 102, 241, 0.15); color: #a5b4fc; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(99, 102, 241, 0.3);">Runtime: Local Ollama</span>
+                    <span id="aiCardLangBadge" style="font-size: 0.68rem; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px;">Language: English</span>
+                  </div>
                 </div>
-                <div><span style="color: #94a3b8;">Suggested Action:</span> <span id="aiCardActionText" style="color: #cbd5e1;">—</span></div>
-                <div id="aiCardBasisRow" style="font-size: 0.72rem; color: #94a3b8;"><span style="color: #64748b;">Advisory Basis:</span> <span id="aiCardBasisText" style="color: #a5b4fc;">—</span></div>
+
+                <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.45rem; font-size: 0.72rem;">
+                  <span style="color: #94a3b8;">Provider:</span>
+                  <span id="aiCardProviderBadge" style="font-size: 0.68rem; background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600;">Open-source LLM inference</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr; gap: 0.35rem; font-size: 0.78rem;">
+                  <div><span style="color: #94a3b8;">Interpretation:</span> <strong id="aiCardSummaryText" style="color: #f1f5f9;">—</strong></div>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.4rem;">
+                    <div><span style="color: #94a3b8;">Suggested Dept:</span> <strong id="aiCardDeptText" style="color: #38bdf8;">—</strong></div>
+                    <div><span style="color: #94a3b8;">Suggested Category:</span> <strong id="aiCardCategoryText" style="color: #38bdf8;">—</strong></div>
+                    <div><span style="color: #94a3b8;">Duration:</span> <strong id="aiCardDurationText" style="color: #cbd5e1;">—</strong></div>
+                    <div><span style="color: #94a3b8;">Urgency:</span> <strong id="aiCardUrgencyText" style="color: #fb923c;">—</strong></div>
+                  </div>
+                  <div><span style="color: #94a3b8;">Suggested Action:</span> <span id="aiCardActionText" style="color: #cbd5e1;">—</span></div>
+                  <div id="aiCardBasisRow" style="font-size: 0.72rem; color: #94a3b8;"><span style="color: #64748b;">Advisory Basis:</span> <span id="aiCardBasisText" style="color: #a5b4fc;">—</span></div>
+                </div>
               </div>
 
-              <!-- 2. Authoritative Civic Decision Section -->
-              <div id="authDecisionBox" style="margin-top: 0.45rem; padding: 0.45rem 0.6rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 6px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;">
-                  <div style="display: flex; align-items: center; gap: 0.35rem; font-weight: 700; color: #34d399; font-size: 0.76rem;">
+              <!-- 2. AUTHORITATIVE CIVIC DECISION Section -->
+              <div id="authDecisionBox" style="margin-top: 0.5rem; padding: 0.6rem 0.75rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 6px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.25rem;">
+                  <div style="display: flex; align-items: center; gap: 0.35rem; font-weight: 700; color: #34d399; font-size: 0.8rem;">
                     <span>🏛️</span> Authoritative Civic Decision
                   </div>
-                  <span id="authDecisionDept" style="font-size: 0.72rem; color: #6ee7b7; font-weight: 600;">—</span>
+                  <span id="authDecisionDept" style="font-size: 0.75rem; color: #6ee7b7; font-weight: 700;">—</span>
                 </div>
-                <div id="authDecisionDetails" style="font-size: 0.72rem; color: #cbd5e1; line-height: 1.35;">—</div>
-                <div id="authDecisionBasisRow" style="font-size: 0.70rem; color: #94a3b8; margin-top: 0.25rem;">
-                  <span style="color: #6ee7b7;">Operational Basis:</span> <span id="authDecisionBasisText" style="color: #cbd5e1;">Deterministic civic rules/pattern matching</span>
+                
+                <div style="font-size: 0.70rem; color: #94a3b8; margin-bottom: 0.45rem; line-height: 1.35; font-style: italic;">
+                  The LLM provides an advisory interpretation. Final operational classification is determined by the platform's authoritative civic rules and workflow.
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.4rem; font-size: 0.74rem; margin-bottom: 0.35rem;">
+                  <div><span style="color: #94a3b8;">Category:</span> <strong id="authDecisionCategory" style="color: #cbd5e1;">—</strong></div>
+                  <div><span style="color: #94a3b8;">Severity:</span> <strong id="authDecisionSeverity" style="color: #fca5a5;">—</strong></div>
+                  <div><span style="color: #94a3b8;">SLA Target:</span> <strong id="authDecisionSLA" style="color: #34d399;">—</strong></div>
+                  <div><span style="color: #94a3b8;">Operational Risk:</span> <strong id="authDecisionRisk" style="color: #fb923c;">—</strong></div>
+                </div>
+
+                <div id="authDecisionBasisRow" style="font-size: 0.70rem; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.3rem; margin-top: 0.3rem;">
+                  <span style="color: #6ee7b7; font-weight: 600;">Operational Basis:</span> <span id="authDecisionBasisText" style="color: #cbd5e1;">Deterministic civic rules/pattern matching</span>
                 </div>
               </div>
 
-              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: #94a3b8; background: rgba(255, 255, 255, 0.03); padding: 0.35rem 0.5rem; border-radius: 4px; border-left: 2px solid #38bdf8; margin-top: 0.45rem;">
+              <!-- Advisory / Authority Separation Disclaimer -->
+              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; color: #94a3b8; background: rgba(255, 255, 255, 0.03); padding: 0.35rem 0.6rem; border-radius: 4px; border-left: 2px solid #38bdf8; margin-top: 0.55rem;">
                 <span>ℹ️ <em>Open-source advisory only — citizen can adjust form fields before submission.</em></span>
-                <span style="font-size: 0.68rem; color: #64748b;">AI recommends. Government decides.</span>
+                <span style="font-size: 0.68rem; color: #64748b; font-weight: 600;">AI recommends. Government decides.</span>
               </div>
             </div>
 
@@ -3003,6 +3055,6 @@
   </script>
 
   <!-- Universal Engine (Runs in all modes) -->
-  <script src="js/bundle.js?v=44.0.0"></script>
+  <script src="js/bundle.js?v=44.2.0"></script>
 </body>
 </html>

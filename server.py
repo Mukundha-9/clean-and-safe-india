@@ -3836,6 +3836,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'is_advisory': True,
                 'provider': llm_res.get('provider', 'open_source'),
                 'model': llm_res.get('model', 'default'),
+                'fallback_triggered': bool(llm_res.get('fallback_triggered', False)),
                 'latency_ms': llm_res.get('latency_ms', 0),
                 'validation_status': llm_res.get('validation_status', 'PASSED'),
                 'interpretation_basis': llm_advisory_basis
@@ -4526,7 +4527,7 @@ if __name__ == '__main__':
                     if not os.environ.get('LLM_BASE_URL'):
                         os.environ['LLM_BASE_URL'] = 'http://127.0.0.1:11434'
                     if not os.environ.get('LLM_TIMEOUT_SECONDS'):
-                        os.environ['LLM_TIMEOUT_SECONDS'] = '30'
+                        os.environ['LLM_TIMEOUT_SECONDS'] = '60'
                     llm_status_line = f"Active ({os.environ['LLM_MODEL']} via Ollama @ {os.environ['LLM_BASE_URL']})"
                     llm_adapter.reset_llm_adapter(None)
         except Exception as err:

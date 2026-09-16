@@ -44,7 +44,7 @@
   /* Safe Area & Bottom Nav Padding */
   body {
     padding-bottom: calc(72px + env(safe-area-inset-bottom));
-    background-color: #060911 !important;
+    background-color: var(--bg-page) !important;
   }
 
   .app-container {
@@ -70,7 +70,8 @@
   .cmd-metric-card {
     padding: 0.85rem 0.75rem !important;
     border-radius: 12px !important;
-    background: #090e1a !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
   }
 
   .cmd-metric-num {
@@ -87,7 +88,7 @@
   }
 
   /* ------------------------------------------------------------------------
-     MOBILE STICKY TOP APP BAR (SEAMLESS DARK THEME)
+     MOBILE STICKY TOP APP BAR (SEAMLESS THEMED)
      ------------------------------------------------------------------------ */
   .dashboard-topbar {
     position: sticky;
@@ -95,8 +96,8 @@
     z-index: 990;
     height: 56px !important;
     padding: 0.4rem 0.75rem !important;
-    background: #060911 !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-surface) !important;
+    border-bottom: 1px solid var(--border) !important;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -182,9 +183,6 @@
     padding: 0.35rem 0.65rem !important;
     font-size: 0.75rem !important;
     font-weight: 800 !important;
-    background: rgba(239, 68, 68, 0.2) !important;
-    border: 1px solid rgba(239, 68, 68, 0.45) !important;
-    color: #fca5a5 !important;
     border-radius: 8px !important;
     flex-shrink: 0 !important;
     cursor: pointer;
@@ -237,14 +235,14 @@
     left: 0;
     right: 0;
     height: 64px;
-    background: rgba(9, 14, 26, 0.96);
+    background: var(--glass-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid var(--border);
     z-index: 1000;
     justify-content: space-around;
     align-items: center;
-    box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.15);
     padding: 0 0.5rem;
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -412,8 +410,8 @@
   .issue-card {
     border-radius: 16px;
     overflow: hidden;
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     margin-bottom: 0.5rem;
   }
 
@@ -476,13 +474,13 @@
     max-height: 90vh !important;
     border-radius: 24px 24px 0 0 !important;
     margin: 0 !important;
-    background: #090e1a !important;
-    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
     border-bottom: none !important;
     display: flex;
     flex-direction: column;
     animation: slideUpSheet 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8) !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25) !important;
   }
 
   @keyframes slideUpSheet {
@@ -492,10 +490,10 @@
 
   .modal-header {
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
-    background: #090e1a;
+    background: var(--bg-surface);
     z-index: 10;
   }
 
@@ -509,8 +507,8 @@
   .modal-footer {
     position: sticky;
     bottom: 0;
-    background: #090e1a;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border);
     padding: 0.85rem 1.15rem;
     z-index: 10;
     display: flex;
@@ -735,13 +733,13 @@
   }
 
   .cmd-table tr {
-    background: #090e1a !important;
-    border: 1px solid rgba(56, 189, 248, 0.25) !important;
-    border-left: 4px solid #38bdf8 !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-left: 4px solid var(--accent, #38bdf8) !important;
     border-radius: 16px !important;
     padding: 1rem !important;
     margin-bottom: 1rem !important;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: var(--shadow-sm) !important;
   }
 
   .cmd-table td {
@@ -755,7 +753,7 @@
   .cmd-table td:last-child {
     margin-top: 0.75rem !important;
     padding-top: 0.75rem !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-top: 1px solid var(--border) !important;
     display: flex !important;
     gap: 0.5rem !important;
   }
@@ -779,7 +777,8 @@
     display: flex !important;
     align-items: center !important;
     gap: 0.75rem !important;
-    background: #090e1a !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
   }
 
   .resource-icon-badge {

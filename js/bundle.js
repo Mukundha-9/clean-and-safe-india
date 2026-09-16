@@ -1199,62 +1199,101 @@
     const detDecision = data.deterministic_decision;
 
     if (llmAdvisory) {
+      const notIdentified = 'Not identified';
       const langMap = { en: 'English', te: 'Telugu (తెలుగు)', hi: 'Hindi (हिन्दी)', other: 'Vernacular' };
       const langBadge = document.getElementById('aiCardLangBadge');
+      const modelBadge = document.getElementById('aiCardModelBadge');
+      const runtimeBadge = document.getElementById('aiCardRuntimeBadge');
+      const providerBadge = document.getElementById('aiCardProviderBadge');
+
       const summaryEl = document.getElementById('aiCardSummaryText');
       const deptEl = document.getElementById('aiCardDeptText');
-      const landmarkEl = document.getElementById('aiCardLandmarkText');
+      const catEl = document.getElementById('aiCardCategoryText');
+      const durationEl = document.getElementById('aiCardDurationText');
       const urgencyEl = document.getElementById('aiCardUrgencyText');
       const actionEl = document.getElementById('aiCardActionText');
       const basisEl = document.getElementById('aiCardBasisText');
 
-      if (langBadge) langBadge.textContent = `Language: ${langMap[llmAdvisory.language] || llmAdvisory.language || 'English'}`;
-      if (summaryEl) summaryEl.textContent = llmAdvisory.normalized_summary || 'Civic grievance reported';
-      if (deptEl) {
-        deptEl.textContent = `${llmAdvisory.department || (detDecision && detDecision.deptName) || 'Sanitation'} (Suggested)`;
+      // 1. Metadata Badges
+      if (langBadge) {
+        const lKey = (llmAdvisory.language || '').toLowerCase();
+        langBadge.textContent = `Language: ${langMap[lKey] || llmAdvisory.language || notIdentified}`;
       }
-      if (landmarkEl) landmarkEl.textContent = llmAdvisory.landmark || (detDecision && detDecision.locationSensitivity) || 'None stated';
-      if (urgencyEl) {
-        const urg = (llmAdvisory.urgency || 'medium').toUpperCase();
-        urgencyEl.textContent = urg;
-        urgencyEl.style.color = urg === 'CRITICAL' ? '#f87171' : (urg === 'HIGH' ? '#fb923c' : '#34d399');
+      if (modelBadge) {
+        const rawModel = llmAdvisory.model || 'qwen2.5:3b';
+        modelBadge.textContent = `Model: ${rawModel.toLowerCase().includes('qwen') ? 'Qwen2.5:3B' : rawModel}`;
       }
-      if (actionEl) actionEl.textContent = llmAdvisory.recommended_action || 'Field squad inspection';
-      if (basisEl) {
-        basisEl.textContent = llmAdvisory.interpretation_basis || 'Open-source LLM inference';
+      if (runtimeBadge) {
+        runtimeBadge.textContent = 'Runtime: Local Ollama';
       }
 
-      // Update provider badge dynamically
-      const providerBadge = document.getElementById('aiCardProviderBadge');
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const isFallback = Boolean(llmAdvisory.fallback_triggered || (llmAdvisory.provider && String(llmAdvisory.provider).includes('fallback')));
       if (providerBadge) {
-        if (llmAdvisory.model && llmAdvisory.provider && String(llmAdvisory.provider).startsWith('open_source') && !llmAdvisory.fallback_triggered) {
-          providerBadge.textContent = `LIVE LLM: ${llmAdvisory.model}`;
-          providerBadge.style.background = 'rgba(16, 185, 129, 0.2)';
-          providerBadge.style.color = '#34d399';
-          providerBadge.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        if (!isFallback) {
+          providerBadge.textContent = 'Open-source LLM inference';
+          providerBadge.style.background = isLight ? '#ecfdf5' : 'rgba(16, 185, 129, 0.15)';
+          providerBadge.style.color = isLight ? '#047857' : '#34d399';
+          providerBadge.style.borderColor = isLight ? '#a7f3d0' : 'rgba(16, 185, 129, 0.3)';
         } else {
-          providerBadge.textContent = 'Advisory Only';
-          providerBadge.style.background = 'rgba(56, 189, 248, 0.15)';
-          providerBadge.style.color = '#38bdf8';
-          providerBadge.style.borderColor = 'rgba(56, 189, 248, 0.3)';
+          providerBadge.textContent = 'Deterministic civic rules/pattern matching (Fallback)';
+          providerBadge.style.background = isLight ? '#fffbeb' : 'rgba(245, 158, 11, 0.15)';
+          providerBadge.style.color = isLight ? '#b45309' : '#fbbf24';
+          providerBadge.style.borderColor = isLight ? '#fde68a' : 'rgba(245, 158, 11, 0.3)';
         }
       }
 
-      // Populate Authoritative Civic Decision Section
+      // 2. Structured Advisory Fields (Strictly no fake data: missing fields display "Not identified")
+      if (summaryEl) {
+        summaryEl.textContent = (llmAdvisory.normalized_summary && llmAdvisory.normalized_summary.trim()) ? llmAdvisory.normalized_summary.trim() : notIdentified;
+      }
+      if (deptEl) {
+        const dVal = (llmAdvisory.department && llmAdvisory.department.trim()) ? llmAdvisory.department.trim() : '';
+        deptEl.textContent = dVal ? `${dVal.charAt(0).toUpperCase() + dVal.slice(1)} (Suggested)` : notIdentified;
+      }
+      if (catEl) {
+        const cVal = (llmAdvisory.category && llmAdvisory.category.trim()) ? llmAdvisory.category.trim() : '';
+        catEl.textContent = cVal ? `${cVal.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} (Suggested)` : notIdentified;
+      }
+      if (durationEl) {
+        durationEl.textContent = (llmAdvisory.duration && llmAdvisory.duration.trim()) ? llmAdvisory.duration.trim() : notIdentified;
+      }
+      if (urgencyEl) {
+        const urg = (llmAdvisory.urgency || '').trim().toUpperCase();
+        if (urg) {
+          urgencyEl.textContent = urg;
+          if (isLight) {
+            urgencyEl.style.color = urg === 'CRITICAL' ? '#b91c1c' : (urg === 'HIGH' ? '#c2410c' : '#047857');
+          } else {
+            urgencyEl.style.color = urg === 'CRITICAL' ? '#f87171' : (urg === 'HIGH' ? '#fb923c' : '#34d399');
+          }
+        } else {
+          urgencyEl.textContent = notIdentified;
+          urgencyEl.style.color = isLight ? '#64748b' : '#94a3b8';
+        }
+      }
+      if (actionEl) {
+        actionEl.textContent = (llmAdvisory.recommended_action && llmAdvisory.recommended_action.trim()) ? llmAdvisory.recommended_action.trim() : notIdentified;
+      }
+      if (basisEl) {
+        basisEl.textContent = !isFallback ? (llmAdvisory.interpretation_basis || 'Open-source LLM inference (Qwen2.5:3B via Ollama)') : 'Deterministic civic rules/pattern matching (fallback triggered)';
+      }
+
+      // 3. Authoritative Civic Decision (Deterministic Operational Authority)
       if (detDecision) {
         const authDeptEl = document.getElementById('authDecisionDept');
-        const authDetailsEl = document.getElementById('authDecisionDetails');
+        const authCatEl = document.getElementById('authDecisionCategory');
+        const authSevEl = document.getElementById('authDecisionSeverity');
+        const authSlaEl = document.getElementById('authDecisionSLA');
+        const authRiskEl = document.getElementById('authDecisionRisk');
         const authBasisEl = document.getElementById('authDecisionBasisText');
 
-        if (authDeptEl) {
-          authDeptEl.textContent = `${detDecision.deptName} • ${detDecision.suggestedSLA}h SLA`;
-        }
-        if (authDetailsEl) {
-          authDetailsEl.innerHTML = `Classification: <strong>${detDecision.categoryName}</strong> • Severity: <strong>${detDecision.severity}</strong> (Risk: ${detDecision.riskScore}/100)`;
-        }
-        if (authBasisEl) {
-          authBasisEl.textContent = detDecision.interpretation_basis || 'Deterministic civic rules/pattern matching';
-        }
+        if (authDeptEl) authDeptEl.textContent = detDecision.deptName || detDecision.department || notIdentified;
+        if (authCatEl) authCatEl.textContent = detDecision.categoryName || detDecision.category || notIdentified;
+        if (authSevEl) authSevEl.textContent = detDecision.severity || notIdentified;
+        if (authSlaEl) authSlaEl.textContent = detDecision.suggestedSLA ? `${detDecision.suggestedSLA} Hours` : notIdentified;
+        if (authRiskEl) authRiskEl.textContent = (detDecision.riskScore !== undefined && detDecision.riskScore !== null) ? `${detDecision.riskScore}/100 (${detDecision.riskLevel || 'Standard'})` : notIdentified;
+        if (authBasisEl) authBasisEl.textContent = detDecision.interpretation_basis || 'Deterministic civic rules/pattern matching';
       }
 
       card.style.display = 'block';
@@ -1290,7 +1329,7 @@
       const statusText = document.getElementById('aiAnalyzingStatusText');
 
       if (indicator) indicator.style.display = 'flex';
-      if (statusText) statusText.textContent = 'Analyzing grievance with Open-Source AI (Qwen2.5)... please wait';
+      if (statusText) statusText.textContent = 'Analyzing grievance with Open-Source AI (Qwen2.5:3B)... please wait';
       if (analyzeBtnText) analyzeBtnText.textContent = 'Analyzing...';
       if (analyzeBtn) analyzeBtn.disabled = true;
 
@@ -1367,7 +1406,7 @@
       } finally {
         isAiAnalysisInProgress = false;
         if (indicator) indicator.style.display = 'none';
-        if (analyzeBtnText) analyzeBtnText.textContent = 'Analyze with Open-Source AI';
+        if (analyzeBtnText) analyzeBtnText.textContent = 'Understand My Complaint with AI';
         if (analyzeBtn) analyzeBtn.disabled = false;
       }
     };
@@ -10737,6 +10776,13 @@
 
     // Notify any active components or Leaflet GIS maps
     window.dispatchEvent(new CustomEvent('civic_theme_changed', { detail: { theme: theme } }));
+
+    // Re-render Civic AI Understanding Card if data is actively shown
+    if (window.currentAiAnalysisData && typeof window.renderCivicAiUnderstandingCard === 'function') {
+      try {
+        window.renderCivicAiUnderstandingCard(window.currentAiAnalysisData);
+      } catch (e) {}
+    }
   };
 
   window.toggleTheme = function() {
