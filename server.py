@@ -1507,6 +1507,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
             issues = []
             for r in rows:
                 item = dict(r)
+                item['userId'] = item.get('reportedById') or 'user-101'
                 item['upvotedBy'] = json.loads(item['upvotedBy'] or '[]')
                 item['comments'] = json.loads(item['comments'] or '[]')
 
@@ -1916,11 +1917,12 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
 
         # 1. REST API: POST /api/issues
         if path == '/api/issues':
-            user_id = body.get('reportedById', 'user-101')
-            today_str = datetime.date.today().isoformat()
-
             conn = get_db_connection()
             cursor = conn.cursor()
+            auth_user = get_authenticated_user(self, conn)
+            user_id = (auth_user.get('userId') or auth_user.get('id')) if auth_user else (body.get('reportedById') or body.get('userId') or 'user-101')
+            reporter_actor = auth_user.get('name') if auth_user else (body.get('reportedBy') or 'Citizen').strip()
+            today_str = datetime.date.today().isoformat()
 
             cursor.execute('SELECT report_count FROM citizen_quotas WHERE user_id = ? AND date_str = ?', (user_id, today_str))
             q_row = cursor.fetchone()
@@ -1935,19 +1937,16 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 }, status=429)
                 return
 
-            cursor.execute('''
-                INSERT INTO citizen_quotas (user_id, date_str, report_count)
-                VALUES (?, ?, 1)
-                ON CONFLICT(user_id, date_str) DO UPDATE SET report_count = report_count + 1
-            ''', (user_id, today_str))
-
-            cursor.execute('SELECT COUNT(*) FROM issues')
-            total_issues = cursor.fetchone()[0]
-            issue_id = (body.get('id') or '').strip() or f'ISS-2026-{str(total_issues + 124).zfill(5)}'
+            issue_id = (body.get('id') or '').strip()
+            if not issue_id or cursor.execute('SELECT 1 FROM issues WHERE id = ?', (issue_id,)).fetchone():
+                while True:
+                    candidate = f'ISS-2026-{random.randint(10000, 99999)}'
+                    if not cursor.execute('SELECT 1 FROM issues WHERE id = ?', (candidate,)).fetchone():
+                        issue_id = candidate
+                        break
 
             now = int(time.time() * 1000)
             deadline = now + (48 * 3600 * 1000)
-            reporter_actor = (body.get('reportedBy') or 'Citizen').strip()
 
             dept_key = body.get('department', 'sanitation')
             dept_map = {
@@ -1991,7 +1990,7 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'isSlaBreached': 0,
                 'imageBefore': body.get('imageBefore', 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80'),
                 'imageAfter': None,
-                'reportedBy': body.get('reportedBy', 'KRISH'),
+                'reportedBy': reporter_actor,
                 'reportedById': user_id,
                 'verifiedByOfficer': None,
                 'verifiedTimestamp': None,
@@ -2040,79 +2039,96 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
                 'evidenceHash': compute_evidence_hash(body.get('imageBefore'))
             }
 
-            cols = ', '.join(new_issue.keys())
-            placeholders = ', '.join([f":{k}" for k in new_issue.keys()])
-            cursor.execute(f"INSERT INTO issues ({cols}) VALUES ({placeholders})", new_issue)
-
-            # Record in incident_relationships if linked or related
-            if body.get('identityMatchedIssueId') or body.get('parentIssueId'):
-                target_id = body.get('parentIssueId') or body.get('identityMatchedIssueId')
-                rel_type = body.get('identityType') or 'RELATED_INCIDENT'
+            try:
                 cursor.execute('''
-                    INSERT INTO incident_relationships (
-                        id, sourceIssueId, targetIssueId, relationshipType, matchReason,
-                        matchScore, signals, createdAt, createdBy, createdById, status
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    f"REL-{now}-{random.randint(100, 999)}",
-                    new_issue['id'],
-                    target_id,
-                    rel_type,
-                    body.get('identityReasoning') or 'Citizen corroborated relationship',
-                    float(body.get('identityMatchScore', 0.0)),
-                    json.dumps(body.get('signals') or []),
-                    now,
-                    reporter_actor,
-                    user_id,
-                    'ACTIVE'
-                ))
+                    INSERT INTO citizen_quotas (user_id, date_str, report_count)
+                    VALUES (?, ?, 1)
+                    ON CONFLICT(user_id, date_str) DO UPDATE SET report_count = report_count + 1
+                ''', (user_id, today_str))
+
+                cols = ', '.join(new_issue.keys())
+                placeholders = ', '.join([f":{k}" for k in new_issue.keys()])
+                cursor.execute(f"INSERT INTO issues ({cols}) VALUES ({placeholders})", new_issue)
+
+                # Record in incident_relationships if linked or related
+                if body.get('identityMatchedIssueId') or body.get('parentIssueId'):
+                    target_id = body.get('parentIssueId') or body.get('identityMatchedIssueId')
+                    rel_type = body.get('identityType') or 'RELATED_INCIDENT'
+                    cursor.execute('''
+                        INSERT INTO incident_relationships (
+                            id, sourceIssueId, targetIssueId, relationshipType, matchReason,
+                            matchScore, signals, createdAt, createdBy, createdById, status
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (
+                        f"REL-{now}-{random.randint(100, 999)}",
+                        new_issue['id'],
+                        target_id,
+                        rel_type,
+                        body.get('identityReasoning') or 'Citizen corroborated relationship',
+                        float(body.get('identityMatchScore', 0.0)),
+                        json.dumps(body.get('signals') or []),
+                        now,
+                        reporter_actor,
+                        user_id,
+                        'ACTIVE'
+                    ))
+                    cursor.execute('''
+                        INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ''', (
+                        f"AUDIT-REL-{now}-{random.randint(100, 999)}",
+                        new_issue['id'],
+                        reporter_actor,
+                        'ISSUE_RELATIONSHIP_CREATED',
+                        None,
+                        f"Linked to incident #{target_id} as {rel_type}",
+                        now
+                    ))
+
+                # Operational Audit Trail Logging (Phase D Requirement 8)
+                audit_id_rep = f"AUDIT-REP-{now}-{random.randint(100, 999)}"
                 cursor.execute('''
                     INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 ''', (
-                    f"AUDIT-REL-{now}-{random.randint(100, 999)}",
+                    audit_id_rep,
                     new_issue['id'],
                     reporter_actor,
-                    'ISSUE_RELATIONSHIP_CREATED',
+                    'ISSUE_REPORTED',
                     None,
-                    f"Linked to incident #{target_id} as {rel_type}",
+                    f"Citizen grievance registered: {new_issue.get('title')}",
                     now
                 ))
 
-            # Operational Audit Trail Logging (Phase D Requirement 8)
-            audit_id_rep = f"AUDIT-REP-{now}-{random.randint(100, 999)}"
-            reporter_actor = (new_issue.get('reportedBy') or 'Citizen').strip()
-            cursor.execute('''
-                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                audit_id_rep,
-                new_issue['id'],
-                reporter_actor,
-                'ISSUE_REPORTED',
-                None,
-                f"Citizen grievance registered: {new_issue.get('title')}",
-                now
-            ))
+                audit_id_tri = f"AUDIT-TRI-{now}-{random.randint(100, 999)}"
+                cursor.execute('''
+                    INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    audit_id_tri,
+                    new_issue['id'],
+                    'Smart Triage Engine',
+                    'ISSUE_TRIAGED',
+                    None,
+                    f"Categorized as {new_issue.get('categoryName')} with severity {new_issue.get('severity')} ({new_issue.get('aiSuggestedSLA', 48)}h SLA)",
+                    now
+                ))
 
-            audit_id_tri = f"AUDIT-TRI-{now}-{random.randint(100, 999)}"
-            cursor.execute('''
-                INSERT INTO operational_audit_logs (id, issueId, officer, actionType, assignedWorker, supervisorNotes, timestamp)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                audit_id_tri,
-                new_issue['id'],
-                'Smart Triage Engine',
-                'ISSUE_TRIAGED',
-                None,
-                f"Categorized as {new_issue.get('categoryName')} with severity {new_issue.get('severity')} ({new_issue.get('aiSuggestedSLA', 48)}h SLA)",
-                now
-            ))
+                conn.commit()
+            except Exception as db_err:
+                conn.rollback()
+                conn.close()
+                print(f"[ERROR POST /api/issues] {db_err}")
+                self.send_json_response({
+                    'success': False,
+                    'error': f'Database error registering grievance: {str(db_err)}'
+                }, status=500)
+                return
 
-            conn.commit()
             conn.close()
 
             broadcast_payload = dict(new_issue)
+            broadcast_payload['userId'] = user_id
             broadcast_payload['upvotedBy'] = [user_id]
             broadcast_payload['comments'] = comments
             sse_hub.broadcast('ISSUE_CREATED', broadcast_payload)

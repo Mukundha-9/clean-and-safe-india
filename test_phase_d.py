@@ -11,7 +11,7 @@ import sqlite3
 import urllib.request
 import urllib.error
 
-PORT = 8005
+PORT = int(os.environ.get("TEST_PORT", 8000))
 BASE_URL = f"http://127.0.0.1:{PORT}"
 
 def http_request(method, path, body=None, token=None):

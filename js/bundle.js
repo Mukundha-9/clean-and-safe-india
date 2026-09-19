@@ -2433,7 +2433,10 @@
         if (res.ok) {
           const data = await res.json();
           if (data.issues && data.issues.length > 0) {
-            this.issues = data.issues;
+            this.issues = data.issues.map(i => {
+              if (!i.userId && i.reportedById) i.userId = i.reportedById;
+              return i;
+            });
             this.saveToStorage('clean_safe_issues_v11', this.issues);
             this.notify();
           }
@@ -2471,7 +2474,23 @@
       try {
         localStorage.setItem(key, JSON.stringify(data));
       } catch (e) {
-        console.warn('Storage save error:', e);
+        console.warn('Storage save error (pruning old caches):', e);
+        try {
+          ['clean_safe_issues_v9', 'clean_safe_issues_v10', 'clean_safe_issues_v8', 'clean_safe_issues_v7', 'clean_safe_vendors_v9'].forEach(k => localStorage.removeItem(k));
+          localStorage.setItem(key, JSON.stringify(data));
+        } catch (e2) {
+          try {
+            const trimmed = (data || []).map((item, idx) => {
+              if (idx > 4 && item.imageBefore && item.imageBefore.startsWith('data:image')) {
+                return { ...item, imageBefore: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=800&auto=format&fit=crop&q=80' };
+              }
+              return item;
+            });
+            localStorage.setItem(key, JSON.stringify(trimmed));
+          } catch (e3) {
+            console.warn('LocalStorage quota limit reached:', e3);
+          }
+        }
       }
     }
 
@@ -2497,7 +2516,7 @@
 
       // Count reports submitted today by this citizen across all departments (Food, Electricity, Sanitation/Waste)
       const todayReports = this.issues.filter(issue => {
-        const isReporter = (issue.userId === userId) || (issue.reportedBy === userName);
+        const isReporter = (issue.reportedById === userId) || (issue.userId === userId) || (issue.reportedBy && userName && issue.reportedBy.toLowerCase() === userName.toLowerCase());
         if (!isReporter) return false;
 
         const issueDate = new Date(issue.timestamp);
@@ -2542,6 +2561,8 @@
 
       const currentUser = auth.getUser() || SYSTEM_ACCOUNTS.citizen;
       const reporterProfile = buildCitizenProfileObject(currentUser);
+      const currentUserId = currentUser.id || 'user-101';
+      const currentUserName = currentUser.name || 'KRISH';
 
       const newIssue = {
         id: id,
@@ -2551,9 +2572,10 @@
         status: 'pending',
         slaHoursLeft: 48,
         upvotes: 1,
-        upvotedBy: [auth.getUser() ? auth.getUser().id : 'user-101'],
-        reportedBy: currentUser.name || 'KRISH',
-        userId: auth.getUser() ? auth.getUser().id : 'user-101',
+        upvotedBy: [currentUserId],
+        reportedBy: currentUserName,
+        userId: currentUserId,
+        reportedById: currentUserId,
         reporterProfile: reporterProfile,
         verifiedByOfficer: 'K. Mukundha (Zonal Administrator)',
         verifiedTimestamp: now + (15 * 60 * 1000),
@@ -2583,11 +2605,31 @@
       broadcastRealtimeEvent('ISSUE_CREATED', newIssue);
 
       // Async persist to SQLite Backend
+      const authHeaders = { 'Content-Type': 'application/json' };
+      const authToken = (typeof auth !== 'undefined' && auth.getToken) ? auth.getToken() : null;
+      if (authToken) authHeaders['Authorization'] = `Bearer ${authToken}`;
+
       fetch('/api/issues', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify(newIssue)
-      }).catch(e => console.log('Backend sync offline:', e));
+      })
+      .then(async (res) => {
+        if (res.ok) {
+          const resData = await res.json();
+          if (resData && resData.issue) {
+            const idx = this.issues.findIndex(i => i.id === newIssue.id || i.id === resData.issue.id);
+            if (idx !== -1) {
+              this.issues[idx] = { ...this.issues[idx], ...resData.issue, userId: resData.issue.reportedById || this.issues[idx].userId };
+              this.saveToStorage('clean_safe_issues_v11', this.issues);
+              this.notify();
+            }
+          }
+        } else {
+          console.warn('[Backend Sync] Non-200 response:', res.status);
+        }
+      })
+      .catch(e => console.log('Backend sync offline:', e));
 
       return newIssue;
     }
@@ -4167,7 +4209,10 @@
     // Synchronize Civic Passport Stats
     const isKrishUser = user.email === 'citizen@civictech.in' || (user.name && user.name.toLowerCase().includes('krish'));
     const myAllIssues = issues.filter(i => 
-      (isKrishUser && i.reportedBy?.toLowerCase().includes('krish')) || (i.userId && i.userId === user.id) || (i.reportedBy && i.reportedBy === user.name)
+      (isKrishUser && i.reportedBy?.toLowerCase().includes('krish')) || 
+      (i.reportedById && user.id && i.reportedById === user.id) || 
+      (i.userId && user.id && i.userId === user.id) || 
+      (i.reportedBy && user.name && i.reportedBy.toLowerCase() === user.name.toLowerCase())
     );
     const myActiveCount = myAllIssues.filter(i => i.status !== 'resolved').length;
     const myResolvedCount = myAllIssues.filter(i => i.status === 'resolved').length;
@@ -4186,8 +4231,8 @@
     // Segment Controller Count Badges
     const segCountMy = document.getElementById('segCountMyReports');
     const segCountComm = document.getElementById('segCountCommunity');
-    if (segCountMy) segCountMy.textContent = `${Math.min(4, myAllIssues.length)}`;
-    if (segCountComm) segCountComm.textContent = `Top 3`;
+    if (segCountMy) segCountMy.textContent = `${myAllIssues.length}`;
+    if (segCountComm) segCountComm.textContent = `${Math.max(0, issues.length - myAllIssues.length)}`;
 
     // 1. My Active Reports Grid (Kept for compatibility if element exists)
     const activeGrid = document.getElementById('citizenActiveReportsGrid');
@@ -4250,13 +4295,12 @@
       }
     }
 
-    // 3. Streamlined Citizen Home Feed Grid (Strictly 3-4 Reports Focus)
+    // 3. Streamlined Citizen Home Feed Grid
     const feedGrid = document.getElementById('citizenIssuesFeedGrid');
     if (feedGrid) {
       let displayItems = [];
 
       if (citizenFeedSegment === 'my_reports') {
-        // STRICTLY Krish's 3-4 reports!
         let myReports = [...myAllIssues];
         // Sort: Active/Escalated first, then newest timestamp descending
         myReports.sort((a, b) => {
@@ -4272,14 +4316,17 @@
           myReports = myReports.filter(i => i.title.toLowerCase().includes(q) || i.location.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
         }
 
-        // Cap strictly at 3-4 reports to prevent clumsy cluttered view
-        displayItems = myReports.slice(0, 4);
+        displayItems = myReports.slice(0, 50);
 
       } else {
-        // Ward Community Feed (Top 3 curated ward reports)
-        let commReports = issues.filter(i => 
-          !(i.reportedBy?.toLowerCase().includes('krish') || i.userId === user.id || i.reportedBy === user.name)
-        );
+        // Ward Community Feed
+        let commReports = issues.filter(i => {
+          const isMine = (isKrishUser && i.reportedBy?.toLowerCase().includes('krish')) || 
+                         (i.reportedById && user.id && i.reportedById === user.id) || 
+                         (i.userId && user.id && i.userId === user.id) || 
+                         (i.reportedBy && user.name && i.reportedBy.toLowerCase() === user.name.toLowerCase());
+          return !isMine;
+        });
 
         // 4-Tier Geospatial Filter
         if (selectedState !== 'all') commReports = commReports.filter(i => (i.state || 'Andhra Pradesh') === selectedState);
@@ -4300,8 +4347,7 @@
           commReports = commReports.filter(i => i.title.toLowerCase().includes(q) || i.location.toLowerCase().includes(q) || i.id.toLowerCase().includes(q));
         }
 
-        // Cap strictly at top 3 reports
-        displayItems = commReports.slice(0, 3);
+        displayItems = commReports.slice(0, 50);
       }
 
       feedGrid.innerHTML = displayItems.length 
@@ -5940,23 +5986,77 @@
   window.currentImageAiData = null;
   window.currentImageAiAccepted = false;
 
-  // Image Upload / Camera File Selection Handler
-  window.handleImageUpload = function(inputEl) {
+  // Canvas-based image compression for camera / photo uploads (resizes high-res phone photos to lightweight ~60-90KB JPEG)
+  window.compressImageFile = function(file, maxWidth = 1024, maxHeight = 1024, quality = 0.78) {
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type || !file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth || height > maxHeight) {
+            if (width > height) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressed);
+        };
+        img.onerror = function() {
+          resolve(e.target.result);
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Image Upload / Camera File Selection Handler with Auto-Compression
+  window.handleImageUpload = async function(inputEl) {
     if (!inputEl || !inputEl.files || !inputEl.files[0]) return;
     const file = inputEl.files[0];
 
     window.currentSelectedPhotoPreset = null;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      selectedReportImageBase64 = e.target.result;
+    try {
+      showToast('⚡ Optimizing and geotagging photo...', 'info', '📸');
+      const compressedBase64 = await window.compressImageFile(file, 1024, 1024, 0.78);
+      selectedReportImageBase64 = compressedBase64;
       displaySelectedImage(selectedReportImageBase64, file.name);
       showToast(`📸 Photo "${file.name}" attached & geotagged!`, 'reward', '📸');
 
       const zone = document.getElementById('imageAiAdvisoryZone');
       if (zone) zone.style.display = 'block';
       window.runImageVerification();
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.warn('Image compression fallback:', err);
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        selectedReportImageBase64 = e.target.result;
+        displaySelectedImage(selectedReportImageBase64, file.name);
+        const zone = document.getElementById('imageAiAdvisoryZone');
+        if (zone) zone.style.display = 'block';
+        window.runImageVerification();
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // Clickable Verified Sample Photo Presets
@@ -6378,8 +6478,10 @@
           • <strong>Ward Jurisdiction:</strong> Ward 12 Market Zone, Surampalem (Andhra Pradesh)<br>
           • <strong>Nearest Municipal Squad:</strong> Collection Truck AP-05-TX (400m away).
         `;
-      } else if (q.includes('status') || q.includes('track') || q.includes('check')) {
-        const userIssues = db.getAllIssues().filter(i => i.reportedBy === (auth.getUser() ? auth.getUser().name : 'KRISH') || i.userId === (auth.getUser() ? auth.getUser().id : 'user-101')).slice(0, 3);
+        const curUser = auth.getUser();
+        const curUid = curUser ? curUser.id : 'user-101';
+        const curUname = curUser ? curUser.name : 'KRISH';
+        const userIssues = db.getAllIssues().filter(i => i.reportedById === curUid || i.userId === curUid || (i.reportedBy && i.reportedBy.toLowerCase() === curUname.toLowerCase())).slice(0, 5);
         replyContent = `
           📦 <strong>Your Live Grievance Tracking (Order-Style):</strong><br><br>
           ${userIssues.map(i => {
@@ -8638,7 +8740,7 @@
           text: `⚠️ Resolution Rejected & Returned to Worker: ${reason}`,
           time: 'Just now'
         });
-        db.saveToStorage('clean_safe_issues_v10', db.issues);
+        db.saveToStorage('clean_safe_issues_v11', db.issues);
         db.notify();
       }
 
@@ -9435,7 +9537,7 @@
             if (data.issue && data.issue.workCompletedTimestamp) {
               issue.workCompletedTimestamp = data.issue.workCompletedTimestamp;
             }
-            db.saveToStorage('clean_safe_issues_v10', db.issues);
+            db.saveToStorage('clean_safe_issues_v11', db.issues);
             db.notify();
           }
 
