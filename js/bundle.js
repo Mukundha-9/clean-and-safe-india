@@ -3055,7 +3055,7 @@
       }
       if (gisIssueMarkersGroup && !gisMapInstance.hasLayer(gisIssueMarkersGroup)) gisMapInstance.addLayer(gisIssueMarkersGroup);
       if (gisPredictiveLayerGroup && !gisMapInstance.hasLayer(gisPredictiveLayerGroup)) gisMapInstance.addLayer(gisPredictiveLayerGroup);
-      showToast('Displaying All GIS Layers (Tickets, Hotspots & Fleet)', 'info', '🗺️');
+      showToast('Displaying All GIS Layers (Tickets, High Priority Zones & Fleet)', 'info', '🗺️');
     } else if (mode === 'tickets') {
       if (btnTickets) {
         btnTickets.style.background = 'rgba(16, 185, 129, 0.2)';
@@ -3073,7 +3073,7 @@
       }
       if (gisIssueMarkersGroup && gisMapInstance.hasLayer(gisIssueMarkersGroup)) gisMapInstance.removeLayer(gisIssueMarkersGroup);
       if (gisPredictiveLayerGroup && !gisMapInstance.hasLayer(gisPredictiveLayerGroup)) gisMapInstance.addLayer(gisPredictiveLayerGroup);
-      showToast('Filtered: Predictive Recurring Hotspots Only', 'info', '🔥');
+      showToast('Filtered: High Priority Zones Only', 'info', '🔥');
     }
   };
 
@@ -3297,7 +3297,7 @@
       }
     } else if (packet.type === 'PREDICTIVE_HOTSPOTS_REFRESHED') {
       renderPredictiveHotspotsUI();
-      showToast('🔮 Predictive Civic Hotspots updated with latest telemetry', 'info', '🔮');
+      showToast('🔮 High Priority Zones updated with latest telemetry', 'info', '🔮');
     } else if (packet.type === 'PREVENTIVE_ACTION_CREATED' || packet.type === 'PREVENTIVE_ACTION_UPDATED') {
       renderPredictiveHotspotsUI();
     }
@@ -5285,11 +5285,11 @@
         { label: '🚨 48h Escalation Watch', prompt: 'Which civic tickets are at risk of 48h SLA breach?' },
         { label: '🚛 Fleet Dispatch Status', prompt: 'Explain the auto-resource allocation rules for collection vehicles' },
         { label: '⚡ SCADA Feeder #4 Outage', prompt: 'Show SCADA electrical grid telemetry and Feeder 4 outage status' },
-        { label: '🗺️ GIS Red-Zone Analysis', prompt: 'Give me the GIS Red-Zone hotspot density breakdown for Ward 12' },
+        { label: '🗺️ GIS Priority Zone Analysis', prompt: 'Give me the GIS high priority zone density breakdown for Ward 12' },
         { label: '💳 e-Challan Fund (₹2,500)', prompt: 'Show e-Challan penalty revenue and citizen reward distribution ledger' },
         { label: '👷 Lineman Workload', prompt: 'List active electrical lineman work-orders and substation teams' }
       ],
-      greeting: `🛡️ Welcome, <strong>Administrator K. Mukundha</strong>. I am your <strong>Municipal & SCADA Command AI Copilot</strong>.<br>I provide live operational intelligence on 48h SLA escalation countdowns, automated fleet dispatch, GIS Red-Zone hotspot density, and SCADA 33/11KV electrical feeder telemetry.`
+      greeting: `🛡️ Welcome, <strong>Administrator K. Mukundha</strong>. I am your <strong>Municipal & SCADA Command AI Copilot</strong>.<br>I provide live operational intelligence on 48h SLA escalation countdowns, automated fleet dispatch, GIS high priority zone density, and SCADA 33/11KV electrical feeder telemetry.`
     },
     food: {
       deptClass: 'dept-food',
@@ -5673,10 +5673,10 @@
         `;
       }
 
-      if (q.includes('red zone') || q.includes('gis') || q.includes('map') || q.includes('hotspot') || q.includes('density')) {
+      if (q.includes('red zone') || q.includes('gis') || q.includes('map') || q.includes('hotspot') || q.includes('priority zone') || q.includes('density')) {
         return `
-          🗺️ <strong>GIS Red-Zone Spatial Cluster Analysis:</strong><br><br>
-          • <strong>Active Hotspot #12:</strong> <em>Ward 12 Market Junction, Surampalem</em> (Pulsing Red Perimeter on GIS Map).<br>
+          🗺️ <strong>GIS High Priority Zone Spatial Cluster Analysis:</strong><br><br>
+          • <strong>Active High Priority Zone #12:</strong> <em>Ward 12 Market Junction, Surampalem</em> (Pulsing Red Perimeter on GIS Map).<br>
           • <strong>Incident Density:</strong> 3 overlapping complaints (Commercial dumping + Transformer sparking + Street market waste).<br>
           • <strong>Recommendation:</strong> Station a permanent 3-in-1 CCTV pole with ANPR and deploy a dedicated night tipper squad.
         `;
@@ -7653,7 +7653,7 @@
         },
         {
           stepNum: 4,
-          title: 'Ward Corroboration & Recurring Hotspot Check',
+          title: 'Ward Corroboration & High Priority Zone Check',
           icon: '🔍',
           state: 'completed',
           timeStr: 'Ward Jurisdiction Scan',
@@ -7662,7 +7662,7 @@
             : `Ward jurisdiction check completed for ${issue.ward || 'this ward'}. Isolated single report.`,
           subMeta: [
             `📋 Related Reports in Ward: ${relatedIssues.length}`,
-            `🔮 Hotspot Status: ${wardForecast ? wardForecast.riskLevel + ' Risk' : 'Standard'}`
+            `🔮 Priority Zone Status: ${wardForecast ? wardForecast.riskLevel + ' Risk' : 'Standard'}`
           ]
         },
         {
@@ -9751,7 +9751,7 @@
       const overviewHotspotsTable = document.getElementById('overviewHotspotsTableBody');
       if (overviewHotspotsTable) {
         if (cachedPredictiveForecasts.length === 0) {
-          overviewHotspotsTable.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 1.25rem; color: #94a3b8; font-size: 0.8rem;">No active hotspots detected.</td></tr>`;
+          overviewHotspotsTable.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 1.25rem; color: #94a3b8; font-size: 0.8rem;">No active high priority zones detected.</td></tr>`;
         } else {
           overviewHotspotsTable.innerHTML = cachedPredictiveForecasts.slice(0, 4).map(f => {
             let riskBadgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981;';
@@ -9931,17 +9931,17 @@
       gisPredictiveLayerVisible = false;
       if (btn) {
         btn.style.opacity = '0.5';
-        btn.textContent = '🔮 Show Predictive Hotspots';
+        btn.textContent = '🔮 Show High Priority Zones';
       }
-      showToast('Predictive Hotspot layer hidden on GIS map', 'info', '🗺️');
+      showToast('High Priority Zone layer hidden on GIS map', 'info', '🗺️');
     } else {
       gisMapInstance.addLayer(gisPredictiveLayerGroup);
       gisPredictiveLayerVisible = true;
       if (btn) {
         btn.style.opacity = '1';
-        btn.textContent = '🔮 Hide Predictive Hotspots';
+        btn.textContent = '🔮 Hide High Priority Zones';
       }
-      showToast('Predictive Hotspot layer visible on GIS map', 'info', '🔮');
+      showToast('High Priority Zone layer visible on GIS map', 'info', '🔮');
     }
   }
 

@@ -680,7 +680,7 @@
           <span>🛡️</span> Issues Queue
         </li>
         <li class="dash-nav-pill municipal-nav-btn" data-tab="hotspots" onclick="window.switchMunicipalSubTab('hotspots')">
-          <span>📍</span> Hotspots
+          <span>📍</span> High Priority Zones
         </li>
         <li class="dash-nav-pill municipal-nav-btn" data-tab="heatmap" onclick="window.switchMunicipalSubTab('heatmap')">
           <span>🗺️</span> GIS Map
@@ -754,7 +754,7 @@
 
           <div class="cmd-metric-card">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
-              <span class="stat-label">Active Hotspots Monitored</span>
+              <span class="stat-label">High Priority Zones Monitored</span>
               <span style="font-size: 1.25rem;">🔮</span>
             </div>
             <div class="cmd-metric-num" id="munActiveHotspotsCount" style="color: #38bdf8;">6</div>
@@ -839,7 +839,7 @@
                   </div>
                 </div>
                 <button type="button" class="btn btn-sm btn-outline" onclick="window.switchMunicipalSubTab('hotspots')" style="font-size: 0.75rem; padding: 0.3rem 0.65rem; border-color: #f59e0b; color: #f59e0b;">
-                  Inspect All Hotspots &rarr;
+                  Inspect High Priority Zones &rarr;
                 </button>
               </div>
 
@@ -1080,7 +1080,7 @@
         </div>
       </div>
 
-      <!-- Subview 3: Predictive Civic Intelligence Hotspots -->
+      <!-- Subview 3: Predictive Civic Intelligence High Priority Zones -->
       <div id="munTab_hotspots" class="municipal-subview" style="display: none;">
         <div class="predictive-civic-intelligence-section" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.7)); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 14px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
@@ -1095,7 +1095,7 @@
                 </span>
               </div>
               <p style="color: #94a3b8; font-size: 0.84rem; margin-top: 0.35rem; max-width: 650px;">
-                Forecasting emerging civic hotspots over the <strong>Next 7 Days</strong> from historical incident frequency, recurrence signals, severity profiles, and SLA patterns.
+                Forecasting emerging high priority zones over the <strong>Next 7 Days</strong> from historical incident frequency, recurrence signals, severity profiles, and SLA patterns.
               </p>
               <div style="display: inline-block; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; color: #7dd3fc; margin-top: 4px; font-weight: 600;">
                 AI-Assisted Predictive Demo — Transparent Rule-Based Forecast (No ML Model Configured)
@@ -1106,7 +1106,7 @@
                 <span>🔄</span> Refresh Forecasts
               </button>
               <button type="button" class="btn btn-sm btn-primary" onclick="window.switchMunicipalSubTab('heatmap')" style="font-size: 0.8rem; cursor: pointer;">
-                <span>🗺️</span> View GIS Hotspots
+                <span>🗺️</span> View GIS Priority Zones
               </button>
             </div>
           </div>
@@ -1114,7 +1114,7 @@
           <!-- 4 KPI Cards -->
           <div class="grid-4" style="margin-bottom: 1.5rem;">
             <div class="cmd-metric-card" style="border-left: 3px solid #38bdf8;">
-              <span class="stat-label">Active Predictive Hotspots</span>
+              <span class="stat-label">Active High Priority Zones</span>
               <div class="cmd-metric-num" id="kpiActivePredictiveHotspots">6</div>
               <span class="cmd-metric-sub">Across 5 Monitored Wards</span>
             </div>
@@ -1142,7 +1142,7 @@
               <div style="font-size: 0.8rem; color: white; margin-top: 2px;">Active grievance tickets in progress</div>
             </div>
             <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 0.6rem 1rem; flex: 1; min-width: 180px;">
-              <div style="font-size: 0.7rem; color: #38bdf8; text-transform: uppercase; font-weight: 700;">2. RECURRING CIVIC HOTSPOTS</div>
+              <div style="font-size: 0.7rem; color: #38bdf8; text-transform: uppercase; font-weight: 700;">2. RECURRING HIGH PRIORITY ZONES</div>
               <div style="font-size: 0.8rem; color: white; margin-top: 2px;">Multi-incident recurring zones</div>
             </div>
             <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 0.6rem 1rem; flex: 1; min-width: 180px;">
@@ -1151,9 +1151,9 @@
             </div>
           </div>
 
-          <!-- Predictive Hotspots Table / Cards Container -->
+          <!-- High Priority Zones Table / Cards Container -->
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-            <h4 style="color: white; font-size: 1.05rem; margin: 0;">Forecasted Emerging Civic Hotspots (Next 7 Days)</h4>
+            <h4 style="color: white; font-size: 1.05rem; margin: 0;">Forecasted High Priority Zones (Next 7 Days)</h4>
             <span style="font-size: 0.74rem; color: #94a3b8;">Source: Historical Incident Dataset • Human Authorization Enforced</span>
           </div>
           <div class="cmd-table-container" style="margin-bottom: 1.25rem;">
@@ -1325,7 +1325,7 @@
             </div>
             <div class="gis-legend-row">
               <span class="gis-legend-dot" style="background: #ef4444; box-shadow: 0 0 6px #ef4444;"></span>
-              <span>🔥 Recurring Hotspots (Risk Halos)</span>
+              <span>🔥 High Priority Zones (Risk Halos)</span>
             </div>
             <div class="gis-legend-row">
               <span class="gis-legend-dot" style="background: #38bdf8; box-shadow: 0 0 6px #38bdf8;"></span>
@@ -1334,7 +1334,7 @@
             <div class="gis-legend-row" style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px; display: flex; gap: 4px;">
               <button type="button" id="btnGisFilterAll" onclick="window.filterGisMap('all')" style="flex: 1; background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #38bdf8; padding: 4px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">All</button>
               <button type="button" id="btnGisFilterTickets" onclick="window.filterGisMap('tickets')" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #cbd5e1; padding: 4px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">Tickets</button>
-              <button type="button" id="btnGisFilterHotspots" onclick="window.filterGisMap('hotspots')" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #cbd5e1; padding: 4px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">Hotspots</button>
+              <button type="button" id="btnGisFilterHotspots" onclick="window.filterGisMap('hotspots')" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #cbd5e1; padding: 4px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">Priority Zones</button>
             </div>
           </div>
         </div>
@@ -1371,8 +1371,8 @@
         <span class="mobile-nav-label">Issues</span>
       </button>
       <button class="mobile-nav-tab" data-tab="hotspots" onclick="window.switchMunicipalSubTab('hotspots')">
-        <span class="mobile-nav-icon">🔮</span>
-        <span class="mobile-nav-label">Hotspots</span>
+        <span class="mobile-nav-icon">📍</span>
+        <span class="mobile-nav-label">Priority Zones</span>
       </button>
       <button class="mobile-nav-tab" data-tab="heatmap" onclick="window.switchMunicipalSubTab('heatmap')">
         <span class="mobile-nav-icon">🗺️</span>
