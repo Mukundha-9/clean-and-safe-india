@@ -4481,14 +4481,19 @@ class CivicAppRequestHandler(BaseHTTPRequestHandler):
         self.send_json_response({'error': 'Not Found'}, status=404)
 
     def send_json_response(self, data, status=200):
-        body = json.dumps(data).encode('utf-8')
-        self.send_response(status)
-        self.send_header('Content-Type', 'application/json; charset=utf-8')
-        self.send_header('Content-Length', str(len(body)))
-        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
-        self.send_cors_headers()
-        self.end_headers()
-        self.wfile.write(body)
+        try:
+            body = json.dumps(data).encode('utf-8')
+            self.send_response(status)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Content-Length', str(len(body)))
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(body)
+        except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
+            pass
+        except Exception as e:
+            print(f"[send_json_response Error]: {e}")
 
     def serve_static_file(self, req_path):
         if req_path == '/' or req_path == '':
