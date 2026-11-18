@@ -442,18 +442,20 @@
   const CivicAiEngine = {
     // 1. Complaint Intelligence: NLP parsing of unstructured citizen text
     ComplaintIntelligence: {
-      parseComplaint: async function(text) {
+      parseComplaint: async function(text, signal) {
         if (!text || typeof text !== 'string') {
           return { error: 'Empty text input' };
         }
 
         // 1. Try Backend REST API Endpoint first
         try {
-          const resp = await fetch('/api/ai/complaint-intelligence', {
+          const fetchOpts = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text: text })
-          });
+          };
+          if (signal) fetchOpts.signal = signal;
+          const resp = await fetch('/api/ai/complaint-intelligence', fetchOpts);
           if (resp.ok) {
             const data = await resp.json();
             if (data.success) {
@@ -461,6 +463,9 @@
             }
           }
         } catch (netErr) {
+          if (netErr && (netErr.name === 'AbortError' || netErr.message === 'The user aborted a request.')) {
+            return { error: 'aborted' };
+          }
           console.warn('[Civic AI] Backend AI unreachable, executing deterministic local intelligence fallback:', netErr);
         }
 
@@ -1303,6 +1308,8 @@
   };
 
   let isAiAnalysisInProgress = false;
+  let reportTriageDebounceTimer = null;
+  let currentTriageAbortController = null;
 
   window.triggerRealtimeTriage = function(text, immediate = false) {
     clearTimeout(reportTriageDebounceTimer);
@@ -1319,8 +1326,38 @@
       return Promise.resolve(null);
     }
 
-    const runTriage = async () => {
-      if (isAiAnalysisInProgress) return null;
+    // Instant local feedback on smart triage pill while typing
+    if (!immediate) {
+      const q = text.toLowerCase();
+      const livePill = document.getElementById('smartTriagePill');
+      const liveSummary = document.getElementById('triageSummaryText');
+      if (livePill && liveSummary) {
+        let estDept = 'Sanitation';
+        let estSla = '24h (Medium)';
+        if (q.includes('wire') || q.includes('spark') || q.includes('shock') || q.includes('transformer') || q.includes('power') || q.includes('outage')) {
+          estDept = 'Electricity';
+          estSla = '6h (High)';
+        } else if (q.includes('pothole') || q.includes('road') || q.includes('footpath')) {
+          estDept = 'Roads / Infrastructure';
+          estSla = '12h (High)';
+        } else if (q.includes('food') || q.includes('hotel') || q.includes('restaurant') || q.includes('stale')) {
+          estDept = 'Food Safety';
+          estSla = '24h (Standard)';
+        } else if (q.includes('water') && (q.includes('leak') || q.includes('pipe'))) {
+          estDept = 'Water Supply';
+          estSla = '12h (High)';
+        }
+        liveSummary.innerHTML = `Auto-detect: <strong style="color: #38bdf8;">${estDept}</strong> • Est. SLA: <strong style="color: #34d399;">${estSla}</strong>`;
+        livePill.style.display = 'flex';
+      }
+    }
+
+    const runTriage = async (isManualClick = false) => {
+      if (isAiAnalysisInProgress && !isManualClick) return null;
+      if (isManualClick && currentTriageAbortController) {
+        try { currentTriageAbortController.abort(); } catch (e) {}
+      }
+      currentTriageAbortController = new AbortController();
       isAiAnalysisInProgress = true;
 
       const indicator = document.getElementById('aiAnalyzingIndicator');
@@ -1329,12 +1366,12 @@
       const statusText = document.getElementById('aiAnalyzingStatusText');
 
       if (indicator) indicator.style.display = 'flex';
-      if (statusText) statusText.textContent = 'Analyzing grievance with Open-Source AI (Qwen2.5:3B)... please wait';
+      if (statusText) statusText.textContent = 'Qwen2.5:3B is analyzing grievance (Ollama)... please wait';
       if (analyzeBtnText) analyzeBtnText.textContent = 'Analyzing...';
       if (analyzeBtn) analyzeBtn.disabled = true;
 
       try {
-        const data = await CivicAiEngine.ComplaintIntelligence.parseComplaint(text.trim());
+        const data = await CivicAiEngine.ComplaintIntelligence.parseComplaint(text.trim(), currentTriageAbortController.signal);
         if (!data || data.error) return null;
 
         window.currentAiAnalysisData = data;
@@ -1401,7 +1438,9 @@
 
         return data;
       } catch (err) {
-        console.warn('[Realtime Triage Notice]:', err);
+        if (err && err.name !== 'AbortError') {
+          console.warn('[Realtime Triage Notice]:', err);
+        }
         return null;
       } finally {
         isAiAnalysisInProgress = false;
@@ -1412,13 +1451,13 @@
     };
 
     if (immediate) {
-      return runTriage();
+      return runTriage(true);
     } else {
       return new Promise((resolve) => {
         reportTriageDebounceTimer = setTimeout(async () => {
-          const res = await runTriage();
+          const res = await runTriage(false);
           resolve(res);
-        }, 1200);
+        }, 2500);
       });
     }
   };

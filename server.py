@@ -4532,7 +4532,7 @@ if __name__ == '__main__':
     if llm_env not in ('false', '0', 'no'):
         try:
             req = urllib.request.Request('http://127.0.0.1:11434/api/tags', headers={'User-Agent': 'SmartCivicConnect/44.0'})
-            with urllib.request.urlopen(req, timeout=1.5) as resp:
+            with urllib.request.urlopen(req, timeout=3.5) as resp:
                 if resp.status == 200:
                     tags = json.loads(resp.read().decode('utf-8'))
                     models = [m.get('name', '') for m in tags.get('models', [])]
@@ -4548,6 +4548,11 @@ if __name__ == '__main__':
                     llm_adapter.reset_llm_adapter(None)
         except Exception as err:
             print(f"[Auto-detect Exception]: {err}")
+
+    # Ensure adapter is synced with environment
+    adapter = llm_adapter.get_llm_adapter()
+    if isinstance(adapter, llm_adapter.OpenSourceLLMProvider):
+        llm_status_line = f"Active ({adapter.model} via Ollama @ {adapter.base_url})"
 
     init_database()
 

@@ -387,9 +387,9 @@ class OpenSourceLLMProvider(LLMProviderInterface):
     - Fallback: Automatically delegates to DeterministicFallbackProvider upon error.
     """
 
-    def __init__(self, base_url: str, model: str, api_key: str = '', timeout: float = 8.0):
-        self.base_url = base_url.rstrip('/')
-        self.model = model
+    def __init__(self, base_url: str = 'http://127.0.0.1:11434', model: str = 'qwen2.5:3b', api_key: str = '', timeout: float = 60.0):
+        self.base_url = (base_url or 'http://127.0.0.1:11434').rstrip('/')
+        self.model = model or 'qwen2.5:3b'
         self.api_key = api_key.strip()
         self.timeout = timeout
         self.fallback_engine = DeterministicFallbackProvider()
@@ -488,7 +488,8 @@ class OpenSourceLLMProvider(LLMProviderInterface):
                 "stream": False,
                 "format": "json",
                 "options": {
-                    "temperature": 0.1
+                    "temperature": 0.1,
+                    "num_predict": 256
                 }
             }
             try:
@@ -515,7 +516,7 @@ class OpenSourceLLMProvider(LLMProviderInterface):
                     {"role": "user", "content": user_content}
                 ],
                 "temperature": 0.1,
-                "max_tokens": 512,
+                "max_tokens": 256,
                 "response_format": {"type": "json_object"}
             }
             try:
@@ -675,34 +676,44 @@ _GLOBAL_ADAPTER: Optional[LLMProviderInterface] = None
 
 def get_llm_adapter() -> LLMProviderInterface:
     """
-    Returns the configured LLM provider instance based on environment variables:
-    - LLM_ENABLED: 'true' / 'false' (Default: 'false' unless LLM_BASE_URL is provided)
-    - LLM_BASE_URL: Open-source server URL (Default: http://127.0.0.1:11434)
-    - LLM_MODEL: Model tag (Default: qwen2.5:3b)
-    - LLM_API_KEY: Optional token (e.g. for vLLM proxy)
-    - LLM_TIMEOUT_SECONDS: Timeout in seconds (Default: 30.0)
+    Returns the configured LLM provider instance:
+    - If OpenSourceLLMProvider is active, returns it.
+    - If disabled via LLM_ENABLED='false', returns DeterministicFallbackProvider.
+    - Auto-detects local Ollama (http://127.0.0.1:11434 with qwen2.5:3b).
+    - Falls back safely to DeterministicFallbackProvider if Ollama is unreachable.
     """
     global _GLOBAL_ADAPTER
-    if _GLOBAL_ADAPTER is not None:
+    if _GLOBAL_ADAPTER is not None and isinstance(_GLOBAL_ADAPTER, OpenSourceLLMProvider):
         return _GLOBAL_ADAPTER
 
     enabled_str = os.environ.get('LLM_ENABLED', '').strip().lower()
-    base_url = os.environ.get('LLM_BASE_URL', '').strip()
+    base_url = os.environ.get('LLM_BASE_URL', 'http://127.0.0.1:11434').strip()
     model = os.environ.get('LLM_MODEL', 'qwen2.5:3b').strip()
     api_key = os.environ.get('LLM_API_KEY', '').strip()
     try:
-        timeout = float(os.environ.get('LLM_TIMEOUT_SECONDS', '30.0'))
+        timeout = float(os.environ.get('LLM_TIMEOUT_SECONDS', '60.0'))
     except ValueError:
-        timeout = 30.0
+        timeout = 60.0
 
-    if enabled_str in ('true', '1', 'yes') or (base_url and enabled_str != 'false'):
-        active_url = base_url or 'http://127.0.0.1:11434'
-        _GLOBAL_ADAPTER = OpenSourceLLMProvider(
-            base_url=active_url,
-            model=model,
-            api_key=api_key,
-            timeout=timeout
-        )
+    if enabled_str in ('false', '0', 'no'):
+        _GLOBAL_ADAPTER = DeterministicFallbackProvider()
+        return _GLOBAL_ADAPTER
+
+    active_url = base_url or 'http://127.0.0.1:11434'
+    candidate = OpenSourceLLMProvider(
+        base_url=active_url,
+        model=model,
+        api_key=api_key,
+        timeout=timeout
+    )
+    is_healthy, _ = candidate.health_check()
+    if is_healthy:
+        _GLOBAL_ADAPTER = candidate
+        os.environ['LLM_ENABLED'] = 'true'
+        return _GLOBAL_ADAPTER
+
+    if enabled_str in ('true', '1', 'yes'):
+        _GLOBAL_ADAPTER = candidate
     else:
         _GLOBAL_ADAPTER = DeterministicFallbackProvider()
 

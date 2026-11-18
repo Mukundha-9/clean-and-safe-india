@@ -344,7 +344,7 @@ class TestLiveServerIntegration(unittest.TestCase):
         body = json.dumps(data).encode('utf-8')
         req = urllib.request.Request(url, data=body, headers=req_headers, method='POST')
         try:
-            with urllib.request.urlopen(req, timeout=5) as resp:
+            with urllib.request.urlopen(req, timeout=35) as resp:
                 return resp.status, json.loads(resp.read().decode('utf-8'))
         except urllib.error.HTTPError as e:
             return e.code, json.loads(e.read().decode('utf-8'))
@@ -369,7 +369,10 @@ class TestLiveServerIntegration(unittest.TestCase):
         self.assertEqual(advisory['category'], 'garbage_overflow')
         self.assertTrue(advisory['is_advisory'])
         self.assertIn('interpretation_basis', advisory)
-        self.assertEqual(advisory['interpretation_basis'], 'Deterministic civic rules/pattern matching')
+        self.assertTrue(
+            'Open-source LLM inference' in advisory['interpretation_basis'] or 
+            'Deterministic civic rules' in advisory['interpretation_basis']
+        )
         self.assertNotIn('confidence', advisory)
 
         self.assertEqual(decision['department'], 'sanitation')
