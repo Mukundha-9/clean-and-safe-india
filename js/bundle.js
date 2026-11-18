@@ -1308,7 +1308,6 @@
   };
 
   let isAiAnalysisInProgress = false;
-  let reportTriageDebounceTimer = null;
   let currentTriageAbortController = null;
 
   window.triggerRealtimeTriage = function(text, immediate = false) {
